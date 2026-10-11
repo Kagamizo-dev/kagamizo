@@ -1,0 +1,51 @@
+name: checks
+
+on:
+  push:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  flake:
+    name: flake check (format, lint, tmux VM test)
+    runs-on: ubuntu-latest # x86_64 with KVM, needed for the NixOS VM test
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      - name: nix flake check
+        run: nix flake check --print-build-logs
+
+      - name: Upload VM test screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: vm-test-screenshots
+          path: result*/*.png
+          if-no-files-found: ignore
+
+  workflows:
+    name: lint workflows (actionlint, zizmor)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
+
+      - run: nix run nixpkgs#actionlint
+      - run: nix run nixpkgs#zizmor -- --offline .github/workflows

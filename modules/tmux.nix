@@ -4,7 +4,11 @@ let
   # (all of tmux's defaults have notes, and so do ours). Opened with `prefix ?`.
   keysFinder = pkgs.writeShellApplication {
     name = "tmux-keys";
-    runtimeInputs = [ pkgs.tmux pkgs.fzf pkgs.gnused ];
+    runtimeInputs = [
+      pkgs.tmux
+      pkgs.fzf
+      pkgs.gnused
+    ];
     text = ''
       {
         tmux list-keys -N -T prefix
@@ -101,5 +105,8 @@ in
     '';
   };
 
-  environment.systemPackages = [ keysFinder pkgs.fzf ];
+  environment.systemPackages = [
+    keysFinder
+    pkgs.fzf
+  ];
 }

@@ -6,25 +6,26 @@ on:
     paths-ignore: ["README.md"]
   workflow_dispatch:
 
-permissions:
-  contents: write # publish the release asset
+permissions: {}
 
 jobs:
   image:
     runs-on: ubuntu-24.04-arm # native aarch64, no emulation
     timeout-minutes: 120
+    permissions:
+      contents: write # publish the release asset
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
-      - uses: cachix/install-nix-action@v31
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
         with:
           extra_nix_config: |
             accept-flake-config = true
-            extra-substituters = https://nixos-raspberrypi.cachix.org
-            extra-trusted-public-keys = nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI=
 
       - name: Build SD image
-        run: nix build --print-build-logs --out-link result .#nixosConfigurations.rpi5.config.system.build.sdImage
+        run: nix build --print-build-logs --out-link result .#image
 
       - name: Package as .zip (Android can unzip it; EtchDroid needs a raw .img)
         run: |
@@ -39,11 +40,12 @@ jobs:
       - name: Publish release asset
         env:
           GH_TOKEN: ${{ github.token }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          tag="rpi5-${GITHUB_REF_NAME//\//-}"
+          tag="rpi5-${REF_NAME//\//-}"
           notes="Unzip, then flash rpi5-nixos.img (EtchDroid / dd / Pi Imager). Built from $GITHUB_SHA."
           gh release view "$tag" >/dev/null 2>&1 || \
-            gh release create "$tag" --target "$GITHUB_SHA" --title "Pi 5 image ($GITHUB_REF_NAME)" --notes "$notes"
+            gh release create "$tag" --target "$GITHUB_SHA" --title "Pi 5 image ($REF_NAME)" --notes "$notes"
           gh release upload "$tag" out/rpi5-nixos.img.zip --clobber
           gh release edit "$tag" --notes "$notes"

@@ -1,10 +1,11 @@
 {
   description = "Custom NixOS SD card image for Raspberry Pi 5";
 
-  inputs.nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
+  # Pinned by flake.lock. Upstream follows the stable nixos-26.05 channel, so
+  # the base only moves when `nix flake update` is run on purpose.
+  inputs.nixos-raspberrypi.url = "git+https://github.com/nvmd/nixos-raspberrypi?ref=main";
 
   # Prebuilt kernel/firmware; avoids compiling the Pi kernel yourself.
-  # Build with: nix build --accept-flake-config .#image
   nixConfig = {
     extra-substituters = [ "https://nixos-raspberrypi.cachix.org" ];
     extra-trusted-public-keys = [
@@ -12,23 +13,51 @@
     ];
   };
 
-  outputs = { self, nixos-raspberrypi, ... }@inputs: {
-    nixosConfigurations.rpi5 = nixos-raspberrypi.lib.nixosSystem {
-      specialArgs = inputs;
-      modules = [
-        ({ nixos-raspberrypi, ... }: {
-          imports = with nixos-raspberrypi.nixosModules; [
-            sd-image
-            raspberry-pi-5.base
-          ];
-        })
-        ./modules/base.nix
-        ./modules/tmux.nix
-      ];
-    };
+  outputs =
+    { self, nixos-raspberrypi, ... }@inputs:
+    let
+      # Same nixpkgs the image is built from.
+      pkgs = import nixos-raspberrypi.inputs.nixpkgs { system = "x86_64-linux"; };
+    in
+    {
+      nixosConfigurations.rpi5 = nixos-raspberrypi.lib.nixosSystem {
+        specialArgs = inputs;
+        modules = [
+          (
+            { nixos-raspberrypi, ... }:
+            {
+              imports = with nixos-raspberrypi.nixosModules; [
+                sd-image
+                raspberry-pi-5.base
+              ];
+            }
+          )
+          ./modules/base.nix
+          ./modules/tmux.nix
+        ];
+      };
 
-    # nix build .#image  ->  result/sd-image/*.img.zst
-    packages.aarch64-linux.image = self.nixosConfigurations.rpi5.config.system.build.sdImage;
-    packages.x86_64-linux.image = self.nixosConfigurations.rpi5.config.system.build.sdImage;
-  };
+      # nix build .#image  ->  result/sd-image/*.img.zst
+      packages.aarch64-linux.image = self.nixosConfigurations.rpi5.config.system.build.sdImage;
+
+      formatter.x86_64-linux = pkgs.nixfmt;
+
+      # `nix flake check` runs these (CI does the same).
+      checks.x86_64-linux = {
+        formatting = pkgs.runCommand "nixfmt-check" { nativeBuildInputs = [ pkgs.nixfmt ]; } ''
+          nixfmt --check ${self}/flake.nix ${self}/modules/*.nix ${self}/tests/*.nix
+          touch $out
+        '';
+        statix = pkgs.runCommand "statix-check" { nativeBuildInputs = [ pkgs.statix ]; } ''
+          statix check ${self}
+          touch $out
+        '';
+        deadnix = pkgs.runCommand "deadnix-check" { nativeBuildInputs = [ pkgs.deadnix ]; } ''
+          deadnix --fail ${self}
+          touch $out
+        '';
+        # Boots a VM with the tmux module and drives it like a user would.
+        tmux = pkgs.testers.runNixOSTest ./tests/tmux.nix;
+      };
+    };
 }
