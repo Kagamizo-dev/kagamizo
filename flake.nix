@@ -20,25 +20,41 @@
       pkgs = import nixos-raspberrypi.inputs.nixpkgs { system = "x86_64-linux"; };
     in
     {
-      nixosConfigurations.rpi5 = nixos-raspberrypi.lib.nixosSystem {
-        specialArgs = inputs;
-        modules = [
-          (
-            { nixos-raspberrypi, ... }:
-            {
-              imports = with nixos-raspberrypi.nixosModules; [
-                sd-image
-                raspberry-pi-5.base
-              ];
-            }
-          )
-          ./modules/base.nix
-          ./modules/tmux.nix
-        ];
-      };
+      nixosConfigurations =
+        let
+          mkPi =
+            extraModules:
+            nixos-raspberrypi.lib.nixosSystem {
+              specialArgs = inputs;
+              modules = [
+                (
+                  { nixos-raspberrypi, ... }:
+                  {
+                    imports = with nixos-raspberrypi.nixosModules; [
+                      sd-image
+                      raspberry-pi-5.base
+                    ];
+                  }
+                )
+                ./modules/base.nix
+                ./modules/tmux.nix
+              ]
+              ++ extraModules;
+            };
+        in
+        {
+          # Default: amnesic, RAM-only root.
+          rpi5 = mkPi [ ./modules/ephemeral.nix ];
+          # Fallback with a normal writable SD root, in case the ephemeral
+          # layout misbehaves on real hardware.
+          rpi5-persistent = mkPi [ ];
+        };
 
       # nix build .#image  ->  result/sd-image/*.img.zst
-      packages.aarch64-linux.image = self.nixosConfigurations.rpi5.config.system.build.sdImage;
+      packages.aarch64-linux = {
+        image = self.nixosConfigurations.rpi5.config.system.build.sdImage;
+        image-persistent = self.nixosConfigurations.rpi5-persistent.config.system.build.sdImage;
+      };
 
       formatter.x86_64-linux = pkgs.nixfmt;
 
@@ -56,6 +72,14 @@
           deadnix --fail ${self}
           touch $out
         '';
+        # Guards the amnesic layout: RAM root, read-only store source.
+        ephemeral-root =
+          let
+            fs = self.nixosConfigurations.rpi5.config.fileSystems;
+          in
+          assert fs."/".fsType == "tmpfs";
+          assert builtins.elem "ro" fs."/nix/.ro-root".options;
+          pkgs.runCommand "ephemeral-root-check" { } "touch $out";
         # Boots a VM with the tmux module and drives it like a user would.
         tmux = pkgs.testers.runNixOSTest ./tests/tmux.nix;
       };
