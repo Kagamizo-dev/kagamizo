@@ -1,0 +1,49 @@
+name: build-image
+
+on:
+  push:
+    branches: [master, claude/rpi5-nixos-image]
+    paths-ignore: ["README.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: write # publish the release asset
+
+jobs:
+  image:
+    runs-on: ubuntu-24.04-arm # native aarch64, no emulation
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+            extra-substituters = https://nixos-raspberrypi.cachix.org
+            extra-trusted-public-keys = nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI=
+
+      - name: Build SD image
+        run: nix build --print-build-logs --out-link result .#nixosConfigurations.rpi5.config.system.build.sdImage
+
+      - name: Package as .zip (Android can unzip it; EtchDroid needs a raw .img)
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          zstd -d --stdout result/sd-image/*.img.zst > out/rpi5-nixos.img
+          ls -lh out
+          (cd out && zip -1 rpi5-nixos.img.zip rpi5-nixos.img)
+          rm out/rpi5-nixos.img
+          ls -lh out
+
+      - name: Publish release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="rpi5-${GITHUB_REF_NAME//\//-}"
+          notes="Unzip, then flash rpi5-nixos.img (EtchDroid / dd / Pi Imager). Built from $GITHUB_SHA."
+          gh release view "$tag" >/dev/null 2>&1 || \
+            gh release create "$tag" --target "$GITHUB_SHA" --title "Pi 5 image ($GITHUB_REF_NAME)" --notes "$notes"
+          gh release upload "$tag" out/rpi5-nixos.img.zip --clobber
+          gh release edit "$tag" --notes "$notes"
