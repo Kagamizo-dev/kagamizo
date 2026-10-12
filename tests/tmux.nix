@@ -16,17 +16,23 @@
     machine.wait_for_unit("multi-user.target")
 
     with subtest("config is loaded with a Ctrl-a prefix and documented keys"):
-        machine.succeed("su - alice -c 'tmux new-session -d -s probe'")
-        assert "C-a" in machine.succeed("su - alice -c 'tmux show -g prefix'")
-        keys = machine.succeed("su - alice -c 'tmux list-keys -N -T prefix'")
+        # One shell, one long-lived session: no window for the server to exit
+        # between separate `su` invocations.
+        out = machine.succeed(
+            "su - alice -c '"
+            "tmux new-session -d -s probe \"sleep 600\" && "
+            "tmux show -g prefix && "
+            "tmux list-keys -N -T prefix; "
+            "tmux kill-server'"
+        )
+        assert "prefix C-a" in out, f"prefix is not C-a: {out[:200]}"
         for wanted in [
             "Search all key bindings",
             "Quick menu",
             "Split side-by-side",
             "Reload tmux config",
         ]:
-            assert wanted in keys, f"missing binding: {wanted}"
-        machine.succeed("su - alice -c 'tmux kill-server'")
+            assert wanted in out, f"missing binding: {wanted}"
 
     with subtest("prefix + ? opens the fuzzy key finder"):
         machine.wait_until_tty_matches("1", "alice@machine")
