@@ -3,7 +3,7 @@ name: build-iso
 on:
   push:
     branches: [master, claude/rpi5-nixos-image]
-    paths-ignore: ["README.md"]
+    paths-ignore: ["README.md", "tests/**"]
   workflow_dispatch:
 
 permissions: {}
