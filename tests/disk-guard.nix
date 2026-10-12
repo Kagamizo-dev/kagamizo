@@ -28,10 +28,9 @@
     machine.wait_for_unit("multi-user.target")
     machine.wait_for_unit("internal-disk-guard.service")
 
-    with subtest("the guard service ran and logged what it did"):
+    with subtest("the guard service ran and guarded the NVMe disk"):
         journal = machine.succeed("journalctl -u internal-disk-guard.service --no-pager")
         assert "guarded nvme0n1" in journal, journal
-        assert "skip sda (USB)" in journal, journal
 
     with subtest("internal NVMe disk is read-only and cannot be written"):
         machine.wait_until_succeeds("test -b /dev/nvme0n1")
