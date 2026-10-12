@@ -57,8 +57,14 @@ let
 in
 {
   # As each disk (or partition) appears, including ones that show up late.
+  # Note: a negated parent match (SUBSYSTEMS!="usb") is true as soon as ANY
+  # parent is not USB, e.g. the SCSI parent every USB stick has, so USB devices
+  # are skipped with a positive match and a GOTO instead.
   services.udev.extraRules = ''
-    ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="nvme[0-9]*|sd[a-z]*|mmcblk[0-9]*|hd[a-z]*", SUBSYSTEMS!="usb", RUN+="${pkgs.util-linux}/bin/blockdev --setro $devnode"
+    SUBSYSTEM!="block", GOTO="internal_disk_guard_end"
+    SUBSYSTEMS=="usb", GOTO="internal_disk_guard_end"
+    ACTION=="add|change", KERNEL=="nvme[0-9]*|sd[a-z]*|mmcblk[0-9]*|hd[a-z]*", RUN+="${pkgs.util-linux}/bin/blockdev --setro $devnode"
+    LABEL="internal_disk_guard_end"
   '';
 
   # Early sweep, before anything could mount local filesystems; also logs the result.
