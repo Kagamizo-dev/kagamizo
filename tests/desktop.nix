@@ -31,12 +31,14 @@
 
     with subtest("niri started a terminal running the tmux session"):
         machine.wait_until_succeeds("pgrep -u user -x foot", timeout=120)
-        machine.wait_until_succeeds("su - user -c 'tmux has-session -t main'", timeout=120)
         windows = machine.wait_until_succeeds(
             "su - user -c 'NIRI_SOCKET=$(ls /run/user/$(id -u)/niri*.sock | head -1) niri msg windows'",
             timeout=60,
         )
         assert "foot" in windows.lower(), f"no foot window in niri: {windows}"
+        # Look for the server process: its socket directory differs between the
+        # desktop session and a `su` shell, so `tmux has-session` is unreliable here.
+        machine.wait_until_succeeds("pgrep -u user -f 'tmux: server'", timeout=60)
         # Informational only: the VM's virtual display does not show niri's output.
         machine.screenshot("niri-desktop")
   '';
