@@ -1,10 +1,35 @@
 # nix-images
 
-Headless NixOS SD card image for the Raspberry Pi 5, built by GitHub Actions
-and flashed from a phone. Built on [`nvmd/nixos-raspberrypi`](https://github.com/nvmd/nixos-raspberrypi)
-(stable `nixos-26.05`); no desktop environment, just a lean base plus tmux.
+Ephemeral NixOS images built by GitHub Actions and flashed from a phone, on
+stable `nixos-26.05`:
 
-## Get the image onto an SD card (Android + EtchDroid)
+- **Yoga C940 live USB** (x86_64, niri desktop): see below.
+- **Raspberry Pi 5 SD card** (aarch64, headless): see further down. Built on
+  [`nvmd/nixos-raspberrypi`](https://github.com/nvmd/nixos-raspberrypi).
+
+## Lenovo Yoga C940 live USB
+
+A hybrid UEFI ISO. Root lives in RAM and the stick is only read from, so nothing
+touches the laptop's internal disk (Windows stays as it is) and a reboot is a
+clean slate.
+
+1. Download `yoga-c940-ephemeral.iso` from the **Releases** page (tag `yoga-...`).
+   If the ISO is over GitHub's 2 GB asset limit it is a workflow **artifact**
+   on the `build-iso` run instead.
+2. Flash the `.iso` as-is to a USB stick with EtchDroid (no unzip).
+3. On the laptop: turn **Secure Boot off** in the BIOS, then boot the stick from
+   the boot menu (F12).
+4. You land in **niri** (Super is `Mod`): `Mod+Return` terminal + tmux, `Mod+D`
+   launcher, `Mod+B` Firefox, `Mod+H/L` columns, `Mod+J/K` windows,
+   `Mod+U/I` workspaces, `Mod+Shift+/` shows all keys. `nmtui` joins Wi-Fi,
+   `pass-cli login` signs in to Proton Pass. No password, no SSH.
+
+Notes: Intel graphics only (the Nvidia GPU is left off). Expect the front
+speakers only; the bottom pair needs an init sequence mainline Linux lacks.
+
+## Raspberry Pi 5 SD card
+
+### Get the image onto an SD card (Android + EtchDroid)
 
 1. Open the repo's **Releases** page and download `rpi5-nixos-ephemeral.img.zip`
    (`rpi5-nixos-persistent.img.zip` is a fallback with a normal writable card).

@@ -48,6 +48,12 @@
           # Fallback with a normal writable SD root, in case the ephemeral
           # layout misbehaves on real hardware.
           rpi5-persistent = mkPi [ ];
+        }
+        // {
+          # Lenovo Yoga C940 live USB (x86_64), same nixpkgs as the Pi images.
+          yoga = nixos-raspberrypi.inputs.nixpkgs.lib.nixosSystem {
+            modules = [ ./hosts/yoga-c940.nix ];
+          };
         };
 
       # nix build .#image  ->  result/sd-image/*.img.zst
@@ -56,12 +62,15 @@
         image-persistent = self.nixosConfigurations.rpi5-persistent.config.system.build.sdImage;
       };
 
+      # nix build .#yoga-iso  ->  result/iso/*.iso
+      packages.x86_64-linux.yoga-iso = self.nixosConfigurations.yoga.config.system.build.isoImage;
+
       formatter.x86_64-linux = pkgs.nixfmt;
 
       # `nix flake check` runs these (CI does the same).
       checks.x86_64-linux = {
         formatting = pkgs.runCommand "nixfmt-check" { nativeBuildInputs = [ pkgs.nixfmt ]; } ''
-          nixfmt --check ${self}/flake.nix ${self}/modules/*.nix ${self}/tests/*.nix
+          nixfmt --check ${self}/flake.nix ${self}/hosts/*.nix ${self}/modules/*.nix ${self}/tests/*.nix
           touch $out
         '';
         statix = pkgs.runCommand "statix-check" { nativeBuildInputs = [ pkgs.statix ]; } ''
@@ -80,8 +89,13 @@
           assert fs."/".fsType == "tmpfs";
           assert builtins.elem "ro" fs."/nix/.ro-root".options;
           pkgs.runCommand "ephemeral-root-check" { } "touch $out";
+        niri-config = pkgs.runCommand "niri-config-check" { nativeBuildInputs = [ pkgs.niri ]; } ''
+          niri validate --config ${./modules/niri/config.kdl}
+          touch $out
+        '';
         # Boots a VM with the tmux module and drives it like a user would.
         tmux = pkgs.testers.runNixOSTest ./tests/tmux.nix;
+        desktop = pkgs.testers.runNixOSTest ./tests/desktop.nix;
       };
     };
 }
