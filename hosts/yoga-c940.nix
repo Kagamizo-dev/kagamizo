@@ -12,6 +12,7 @@
     ../modules/tools.nix
     ../modules/tmux.nix
     ../modules/desktop-niri.nix
+    ../modules/disk-guard.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

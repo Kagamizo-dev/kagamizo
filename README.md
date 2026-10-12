@@ -24,6 +24,13 @@ clean slate.
    `Mod+U/I` workspaces, `Mod+Shift+/` shows all keys. `nmtui` joins Wi-Fi,
    `pass-cli login` signs in to Proton Pass. No password, no SSH.
 
+**Internal-disk guard:** every non-USB disk (NVMe/SATA/internal SD) and its
+partitions is marked read-only at boot (udev rule + `internal-disk-guard.service`),
+so nothing in the session can modify the laptop's own drive. USB sticks, including
+the one you booted from, are left alone. It stops accidents, not a root user
+deliberately running `blockdev --setrw`. Check with `systemctl status
+internal-disk-guard` or `lsblk -o NAME,RO`.
+
 Notes: Intel graphics only (the Nvidia GPU is left off). Expect the front
 speakers only; the bottom pair needs an init sequence mainline Linux lacks.
 

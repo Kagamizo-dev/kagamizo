@@ -93,6 +93,15 @@
           niri validate --config ${./modules/niri/config.kdl}
           touch $out
         '';
+        # The Yoga image must carry the internal-disk guard.
+        yoga-disk-guard =
+          let
+            cfg = self.nixosConfigurations.yoga.config;
+          in
+          assert cfg.systemd.services ? internal-disk-guard;
+          assert pkgs.lib.hasInfix "--setro" cfg.services.udev.extraRules;
+          pkgs.runCommand "yoga-disk-guard-check" { } "touch $out";
+        disk-guard = pkgs.testers.runNixOSTest ./tests/disk-guard.nix;
         # Boots a VM with the tmux module and drives it like a user would.
         tmux = pkgs.testers.runNixOSTest ./tests/tmux.nix;
         desktop = pkgs.testers.runNixOSTest ./tests/desktop.nix;
