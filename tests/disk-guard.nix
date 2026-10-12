@@ -10,7 +10,7 @@
       disk = pkgs.runCommand "fake-disk.img" { } "truncate -s 32M $out";
     in
     {
-      imports = [ ../modules/disk-guard.nix ];
+      imports = [ ../profiles/disk-guard.nix ];
       environment.systemPackages = [
         pkgs.e2fsprogs
         pkgs.util-linux

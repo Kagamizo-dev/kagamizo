@@ -7,9 +7,9 @@
 
   nodes.machine = {
     imports = [
-      ../modules/desktop-niri.nix
-      ../modules/tmux.nix
-      ../modules/tools.nix
+      ../profiles/desktop-niri.nix
+      ../profiles/tmux.nix
+      ../profiles/tools.nix
     ];
     users.users.user.isNormalUser = true;
     virtualisation.memorySize = 3072;

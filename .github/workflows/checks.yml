@@ -2,7 +2,9 @@ name: checks
 
 on:
   push:
+    branches-ignore: [beta, stable] # those run via the yoga-c940 pipeline
   pull_request:
+  workflow_call:
 
 permissions: {}
 
