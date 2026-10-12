@@ -35,7 +35,7 @@
             "su - user -c 'NIRI_SOCKET=$(ls /run/user/$(id -u)/niri*.sock | head -1) niri msg version'",
             timeout=120,
         )
-        assert "niri" in out.lower(), f"unexpected niri msg output: {out}"
+        assert "Compositor version" in out, f"unexpected niri msg output: {out}"
         machine.wait_until_succeeds("pgrep -u user -x foot", timeout=120)
         # Window mapping and the tmux session inside it cannot be checked here:
         # niri refuses software rendering ("software EGL renderers are skipped"),
