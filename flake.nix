@@ -94,6 +94,13 @@
           niri validate --config ${./profiles/niri/config.kdl}
           touch $out
         '';
+        # The wallpaper must be a real PNG and small enough not to threaten the ISO size.
+        wallpaper = pkgs.runCommand "wallpaper-check" { nativeBuildInputs = [ pkgs.file ]; } ''
+          f=${./profiles/wallpaper/cherry-blossom-night.png}
+          file "$f" | grep -q "PNG image data"
+          test "$(stat -c %s "$f")" -lt 8000000
+          touch $out
+        '';
         # The Yoga image must carry the internal-disk guard.
         yoga-disk-guard =
           let

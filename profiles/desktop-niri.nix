@@ -6,7 +6,6 @@
     enable = true;
     useNautilus = false; # keeps the image smaller
   };
-  environment.etc."niri/config.kdl".source = ./niri/config.kdl;
 
   # No password prompt: this is a live USB and nothing persists.
   services.greetd = {
@@ -34,13 +33,18 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [
-    foot # terminal
-    fuzzel # launcher
-    waybar # status bar
-    wl-clipboard
-    brightnessctl
-  ];
+  environment = {
+    etc."niri/config.kdl".source = ./niri/config.kdl;
+    etc."wallpaper.png".source = ./wallpaper/cherry-blossom-night.png;
+    systemPackages = with pkgs; [
+      foot # terminal
+      fuzzel # launcher
+      waybar # status bar
+      swaybg # wallpaper
+      wl-clipboard
+      brightnessctl
+    ];
+  };
 
   fonts.packages = with pkgs; [
     dejavu_fonts

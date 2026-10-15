@@ -52,6 +52,10 @@ USB sticks, including the one you booted from, are left alone. It stops accident
 not a root user deliberately running `blockdev --setrw`. Verify with
 `lsblk -o NAME,RO` (internal disk `1`, stick `0`).
 
+Wallpaper: `profiles/wallpaper/cherry-blossom-night.png`, set at startup by `swaybg`
+(niri draws no wallpaper itself). To change it, replace that file (keep it a PNG under
+~8 MB; the build checks) and push to `beta`.
+
 Hardware notes: Intel graphics only. The image carries only the firmware this
 laptop needs (Intel AX201 Wi-Fi/Bluetooth, i915, Sound Open Firmware), which keeps
 the ISO under GitHub's 2 GB release-asset limit. Expect the front speakers only;
