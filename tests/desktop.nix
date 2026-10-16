@@ -28,7 +28,6 @@
         machine.succeed("firefox --version")
         machine.succeed("tmux -V")
         machine.succeed("command -v setup")
-        machine.succeed("su - user -c 'pi --version'")
 
     with subtest("greetd logs in and niri is running"):
         machine.wait_until_succeeds("pgrep -u user -x niri", timeout=180)
@@ -47,11 +46,13 @@
         # tmux config itself by tests/tmux.nix; boot by scripts/boot-iso.sh.
         machine.screenshot("niri-desktop")
 
-    # Run last: opening a second login session before the desktop session is up races with greetd.
+    # Run last: any `su - user` before the desktop session is up races with greetd
+    # (the user runtime directory gets torn down and the terminal never starts).
     with subtest("welcome screen runs and shows the keys"):
         shown = machine.succeed("su - user -c welcome")
         assert "System check" in shown, shown
         assert "Quick keys" in shown, shown
         assert "Mod+D" in shown, shown
+        machine.succeed("su - user -c 'pi --version'")
   '';
 }
