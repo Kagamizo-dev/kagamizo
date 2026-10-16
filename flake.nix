@@ -101,7 +101,7 @@
         '';
         # The wallpaper must be a real PNG and small enough not to threaten the ISO size.
         wallpaper = pkgs.runCommand "wallpaper-check" { nativeBuildInputs = [ pkgs.file ]; } ''
-          f=${./profiles/wallpaper/cherry-blossom-night.png}
+          f=${./profiles/wallpaper/japan-countryside-4k.png}
           file "$f" | grep -q "PNG image data"
           test "$(stat -c %s "$f")" -lt 8000000
           touch $out

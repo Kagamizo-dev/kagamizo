@@ -51,6 +51,7 @@ in
     ../../profiles/tmux.nix
     ../../profiles/desktop-niri.nix
     ../../profiles/welcome.nix
+    ../../profiles/setup.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

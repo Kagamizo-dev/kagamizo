@@ -48,7 +48,7 @@
   environment = {
     etc = {
       "niri/config.kdl".source = ./niri/config.kdl;
-      "wallpaper.png".source = ./wallpaper/cherry-blossom-night.png;
+      "wallpaper.png".source = ./wallpaper/japan-countryside-4k.png;
       "waybar/config.json".source = ./waybar/config.json;
       "waybar/style.css".source = ./waybar/style.css;
     };

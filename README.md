@@ -48,10 +48,26 @@ is a clean slate and nothing is written to the laptop.
    `Mod+Return` terminal, `Mod+H/L` columns, `Mod+Shift+/` every niri key.
    `nmtui` joins Wi-Fi, `pass-cli login` signs in to Proton Pass. No password, no SSH.
 
+### First-run setup (runs by itself in the first terminal; `setup` re-runs it)
+
+1. **Internet**: plug the phone in with a USB cable and turn on USB tethering
+   (Pixel: Settings > Network & internet > Hotspot & tethering > USB tethering).
+   No Wi-Fi password is baked into the image.
+2. **Proton Pass**: `pass-cli login` prints a link, open it on the phone.
+3. **Wi-Fi**: every Login item titled `Wi-Fi: <network name>` in the vault `yoga`
+   (password = the Wi-Fi password) is saved as a known network. Unplug the phone
+   once Wi-Fi is up.
+4. **AI agents**: the Login item `OpenRouter` in the vault `yoga` (password = the
+   API key) is loaded into memory and two [Pi](https://github.com/badlogic/pi-mono)
+   coding agents start in tmux windows `agent-1` and `agent-2`, using
+   `openrouter` / `deepseek/deepseek-v4-flash`.
+
+Secrets only ever live in memory; nothing is written to the USB stick.
+
 The session never mounts the laptop's internal disk automatically, so Windows is left
 alone as long as you don't mount or write to it yourself.
 
-Wallpaper: `profiles/wallpaper/cherry-blossom-night.png`, set at startup by `swaybg`
+Wallpaper: `profiles/wallpaper/japan-countryside-4k.png` (drawn by `scripts/make-wallpaper.py`), set at startup by `swaybg`
 (niri draws no wallpaper itself). To change it, replace that file (keep it a PNG under
 ~8 MB; the build checks) and push to `beta`.
 

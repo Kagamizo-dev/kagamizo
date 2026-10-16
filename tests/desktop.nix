@@ -11,6 +11,7 @@
       ../profiles/tmux.nix
       ../profiles/tools.nix
       ../profiles/welcome.nix
+      ../profiles/setup.nix
     ];
     users.users.user.isNormalUser = true;
     virtualisation.memorySize = 3072;
@@ -26,6 +27,8 @@
         machine.succeed("pass-cli --version")
         machine.succeed("firefox --version")
         machine.succeed("tmux -V")
+        machine.succeed("command -v setup")
+        machine.succeed("su - user -c 'pi --version'")
 
     with subtest("greetd logs in and niri is running"):
         machine.wait_until_succeeds("pgrep -u user -x niri", timeout=180)

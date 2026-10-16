@@ -38,7 +38,7 @@ prefer-no-csd
 // Wallpaper (niri does not draw one itself); /etc/wallpaper.png comes from the desktop profile.
 spawn-at-startup "swaybg" "-i" "/etc/wallpaper.png" "-m" "fill"
 spawn-at-startup "waybar" "-c" "/etc/waybar/config.json" "-s" "/etc/waybar/style.css"
-spawn-at-startup "foot" "-e" "tmux" "new-session" "-A" "-s" "main" "welcome; exec bash"
+spawn-at-startup "foot" "-e" "tmux" "new-session" "-A" "-s" "main" "welcome; setup; exec bash"
 
 binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
