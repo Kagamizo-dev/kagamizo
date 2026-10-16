@@ -7,6 +7,18 @@
     useNautilus = false; # keeps the image smaller
   };
 
+  # niri panics with "couldn't find a GPU" if the graphics device shows up after login,
+  # so wait (up to 30 s) for it before greetd starts the session. Instant on real hardware.
+  systemd.services.greetd = {
+    path = [ pkgs.coreutils ];
+    preStart = ''
+      for _ in $(seq 30); do
+        if ls /dev/dri/card* > /dev/null 2>&1; then exit 0; fi
+        sleep 1
+      done
+    '';
+  };
+
   # No password prompt: this is a live USB and nothing persists.
   services.greetd = {
     enable = true;

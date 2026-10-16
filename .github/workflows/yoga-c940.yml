@@ -10,7 +10,7 @@ name: yoga-c940
 on:
   push:
     branches: [beta]
-    paths-ignore: ["README.md", "tests/**"]
+    paths-ignore: ["README.md"]
   workflow_dispatch:
 
 permissions: {}
