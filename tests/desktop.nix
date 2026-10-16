@@ -10,6 +10,7 @@
       ../profiles/desktop-niri.nix
       ../profiles/tmux.nix
       ../profiles/tools.nix
+      ../profiles/welcome.nix
     ];
     users.users.user.isNormalUser = true;
     virtualisation.memorySize = 3072;
@@ -25,6 +26,12 @@
         machine.succeed("pass-cli --version")
         machine.succeed("firefox --version")
         machine.succeed("tmux -V")
+
+    with subtest("welcome screen runs and shows the keys"):
+        shown = machine.succeed("su - user -c welcome")
+        assert "System check" in shown, shown
+        assert "Quick keys" in shown, shown
+        assert "Mod+D" in shown, shown
 
     with subtest("greetd logs in and niri is running"):
         machine.wait_until_succeeds("pgrep -u user -x niri", timeout=180)

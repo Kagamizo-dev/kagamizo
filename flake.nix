@@ -94,6 +94,11 @@
           niri validate --config ${./profiles/niri/config.kdl}
           touch $out
         '';
+        # The top bar config must be valid JSON (waybar only finds out at runtime).
+        waybar-config = pkgs.runCommand "waybar-config-check" { nativeBuildInputs = [ pkgs.jq ]; } ''
+          jq -e . ${./profiles/waybar/config.json} > /dev/null
+          touch $out
+        '';
         # The wallpaper must be a real PNG and small enough not to threaten the ISO size.
         wallpaper = pkgs.runCommand "wallpaper-check" { nativeBuildInputs = [ pkgs.file ]; } ''
           f=${./profiles/wallpaper/cherry-blossom-night.png}
@@ -101,15 +106,6 @@
           test "$(stat -c %s "$f")" -lt 8000000
           touch $out
         '';
-        # The Yoga image must carry the internal-disk guard.
-        yoga-disk-guard =
-          let
-            cfg = self.nixosConfigurations.yoga-c940.config;
-          in
-          assert cfg.systemd.services ? internal-disk-guard;
-          assert pkgs.lib.hasInfix "--setro" cfg.services.udev.extraRules;
-          pkgs.runCommand "yoga-disk-guard-check" { } "touch $out";
-        disk-guard = pkgs.testers.runNixOSTest ./tests/disk-guard.nix;
         # Boots a VM with the tmux module and drives it like a user would.
         tmux = pkgs.testers.runNixOSTest ./tests/tmux.nix;
         desktop = pkgs.testers.runNixOSTest ./tests/desktop.nix;

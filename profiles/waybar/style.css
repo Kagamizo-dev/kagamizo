@@ -1,0 +1,32 @@
+* {
+  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", "DejaVu Sans", sans-serif;
+  font-size: 14px;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+}
+
+window#waybar {
+  background: rgba(20, 22, 43, 0.88);
+  color: #e8e6f5;
+}
+
+/* Buttons: they light up pink under the mouse so it is obvious they are clickable. */
+#custom-apps, #custom-terminal, #custom-browser, #custom-help, #custom-quit,
+#pulseaudio, #network, #battery {
+  padding: 0 14px;
+  margin: 5px 3px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+#custom-apps:hover, #custom-terminal:hover, #custom-browser:hover,
+#custom-help:hover, #custom-quit:hover, #pulseaudio:hover, #network:hover {
+  background: #f4a6cd;
+  color: #14162b;
+}
+
+#clock { font-weight: bold; padding: 0 16px; }
+#network.disconnected { color: #f4c95d; }
+#battery.warning { color: #f4c95d; }
+#battery.critical { color: #ff6b81; }

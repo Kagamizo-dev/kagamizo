@@ -11,7 +11,7 @@ from a phone. Stable `nixos-26.05` base, pinned in `flake.lock`.
 | Raspberry Pi 5 | `devices/rpi5` | aarch64 | SD card image, headless | paused (beta only) |
 
 Shared building blocks live in `profiles/` (tmux, Proton Pass CLI, niri desktop,
-internal-disk guard). A device is a directory under `devices/` that pulls in the
+a welcome screen). A device is a directory under `devices/` that pulls in the
 profiles it wants and adds its own hardware settings (firmware, kernel params).
 To add a device: copy a directory under `devices/`, register it in
 `nixosConfigurations` in `flake.nix`, and add a pipeline like
@@ -40,17 +40,16 @@ is a clean slate and nothing is written to the laptop.
    [EtchDroid](https://f-droid.org/packages/eu.depau.etchdroid/) (no unzip).
 3. On the laptop: turn **Secure Boot off** in the BIOS and put USB first in the
    boot order (or use the boot menu, F12).
-4. You land in **niri** (Super is `Mod`): `Mod+Return` terminal + tmux, `Mod+D`
-   launcher, `Mod+B` Firefox, `Mod+H/L` columns, `Mod+J/K` windows,
-   `Mod+U/I` workspaces, `Mod+Shift+/` shows all keys. `nmtui` joins Wi-Fi,
-   `pass-cli login` signs in to Proton Pass. No password, no SSH.
+4. You land in **niri** with a clickable bar at the top (Apps, Terminal, Firefox, Help,
+   volume, Wi-Fi, battery, Quit) and niri's own list of important keys on screen
+   (press Escape to close it). The first terminal opens on a **welcome screen**
+   (fastfetch summary, a soft system check, the keys). Run `welcome` any time to see it
+   again. `Mod` is the Super (Windows) key: `Mod+D` launcher, `Mod+B` Firefox,
+   `Mod+Return` terminal, `Mod+H/L` columns, `Mod+Shift+/` every niri key.
+   `nmtui` joins Wi-Fi, `pass-cli login` signs in to Proton Pass. No password, no SSH.
 
-**Internal-disk guard:** every non-USB disk (NVMe/SATA/internal SD) and its
-partitions is marked read-only at boot (udev rule + `internal-disk-guard.service`),
-so nothing in the session can modify the laptop's own drive, Windows included.
-USB sticks, including the one you booted from, are left alone. It stops accidents,
-not a root user deliberately running `blockdev --setrw`. Verify with
-`lsblk -o NAME,RO` (internal disk `1`, stick `0`).
+The session never mounts the laptop's internal disk automatically, so Windows is left
+alone as long as you don't mount or write to it yourself.
 
 Wallpaper: `profiles/wallpaper/cherry-blossom-night.png`, set at startup by `swaybg`
 (niri draws no wallpaper itself). To change it, replace that file (keep it a PNG under
@@ -82,7 +81,7 @@ CLI (Pass Plus/Family/Professional or a bundle). If keyring errors appear:
 ## Checks
 
 `nix flake check` runs nixfmt, statix, deadnix, a niri config validation, and NixOS
-VM tests (tmux key finder, niri desktop, internal-disk guard). CI also runs
+a waybar config check, and VM tests (tmux key finder, niri desktop + welcome screen). CI also runs
 actionlint and zizmor on the workflows, and the Yoga pipeline boots the finished
 ISO under UEFI as a USB stick. Format locally with `nix fmt`.
 

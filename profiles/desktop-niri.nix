@@ -34,8 +34,12 @@
   };
 
   environment = {
-    etc."niri/config.kdl".source = ./niri/config.kdl;
-    etc."wallpaper.png".source = ./wallpaper/cherry-blossom-night.png;
+    etc = {
+      "niri/config.kdl".source = ./niri/config.kdl;
+      "wallpaper.png".source = ./wallpaper/cherry-blossom-night.png;
+      "waybar/config.json".source = ./waybar/config.json;
+      "waybar/style.css".source = ./waybar/style.css;
+    };
     systemPackages = with pkgs; [
       foot # terminal
       fuzzel # launcher
@@ -49,6 +53,7 @@
   fonts.packages = with pkgs; [
     dejavu_fonts
     font-awesome # waybar icons
+    nerd-fonts.symbols-only # icons in the welcome screen
   ];
 
   services.pipewire = {

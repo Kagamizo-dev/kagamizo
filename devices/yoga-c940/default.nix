@@ -50,7 +50,7 @@ in
     ../../profiles/tools.nix
     ../../profiles/tmux.nix
     ../../profiles/desktop-niri.nix
-    ../../profiles/disk-guard.nix
+    ../../profiles/welcome.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
