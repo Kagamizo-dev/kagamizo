@@ -18,6 +18,7 @@
     let
       # Same nixpkgs the image is built from.
       pkgs = import nixos-raspberrypi.inputs.nixpkgs { system = "x86_64-linux"; };
+      infra = import ./infra { inherit pkgs; };
     in
     {
       nixosConfigurations =
@@ -63,14 +64,18 @@
       };
 
       # nix build .#yoga-iso  ->  result/iso/*.iso
-      packages.x86_64-linux.yoga-iso = self.nixosConfigurations.yoga.config.system.build.isoImage;
+      packages.x86_64-linux = {
+        yoga-iso = self.nixosConfigurations.yoga.config.system.build.isoImage;
+        # nix run .#infra -- cloudflare plan  (see infra/README.md)
+        infra = infra.app;
+      };
 
       formatter.x86_64-linux = pkgs.nixfmt;
 
       # `nix flake check` runs these (CI does the same).
       checks.x86_64-linux = {
         formatting = pkgs.runCommand "nixfmt-check" { nativeBuildInputs = [ pkgs.nixfmt ]; } ''
-          nixfmt --check ${self}/flake.nix ${self}/hosts/*.nix ${self}/modules/*.nix ${self}/tests/*.nix
+          nixfmt --check ${self}/flake.nix ${self}/hosts/*.nix ${self}/modules/*.nix ${self}/tests/*.nix ${self}/infra/*.nix
           touch $out
         '';
         statix = pkgs.runCommand "statix-check" { nativeBuildInputs = [ pkgs.statix ]; } ''
@@ -101,6 +106,8 @@
           assert cfg.systemd.services ? internal-disk-guard;
           assert pkgs.lib.hasInfix "--setro" cfg.services.udev.extraRules;
           pkgs.runCommand "yoga-disk-guard-check" { } "touch $out";
+        # Both infra layers against the pinned Cloudflare provider schema.
+        infra = infra.check;
         disk-guard = pkgs.testers.runNixOSTest ./tests/disk-guard.nix;
         # Boots a VM with the tmux module and drives it like a user would.
         tmux = pkgs.testers.runNixOSTest ./tests/tmux.nix;

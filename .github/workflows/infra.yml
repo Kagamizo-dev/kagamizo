@@ -1,0 +1,107 @@
+name: infra
+
+# PRs get a plan made with the read-only agent view; merging to master applies
+# it with the ci view. The only GitHub secrets are two Proton Pass agent
+# tokens; everything else is resolved from Proton Pass by secretspec.
+on:
+  pull_request:
+    paths:
+      - infra/**
+      - secretspec.toml
+      - flake.nix
+      - flake.lock
+      - .github/workflows/infra.yml
+  push:
+    branches: [master]
+    paths:
+      - infra/**
+      - secretspec.toml
+      - flake.nix
+      - flake.lock
+      - .github/workflows/infra.yml
+
+permissions: {}
+
+env:
+  # Runners are throwaway, so a file-backed pass-cli session is fine.
+  PROTON_PASS_KEY_PROVIDER: fs
+
+jobs:
+  plan:
+    name: plan (agent view, read only)
+    # Off until setup is done (infra/README.md, step 7). Fork PRs get no
+    # secrets, so only branches of this repo are planned.
+    if: >-
+      vars.INFRA_ENABLED == 'true' && github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      - uses: protonpass/install-cli-action@9a5ae5819440dc2cb1c154823193ea30f18926e3 # v1.1.0
+        with:
+          version: "2.4.2"
+
+      - name: Log in to Proton Pass (agents vault only)
+        run: pass-cli login
+        env:
+          PROTON_PASS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PROTON_PASS_AGENT_TOKEN }}
+
+      - uses: cachix/secretspec-action@9a02088c2a41efaf75c0e10e574f0275964bbe7f # main
+        with:
+          profile: agent
+          version: "0.21.1"
+        env:
+          SECRETSPEC_REASON: infra plan for a pull request
+
+      - run: nix run .#infra -- cloudflare plan -input=false -no-color
+
+  apply:
+    name: apply (ci view)
+    if: vars.INFRA_ENABLED == 'true' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Holds PROTON_PASS_CI_TOKEN; restrict it to master in the repo settings.
+    environment: cloudflare
+    concurrency:
+      group: infra-apply
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      - uses: protonpass/install-cli-action@9a5ae5819440dc2cb1c154823193ea30f18926e3 # v1.1.0
+        with:
+          version: "2.4.2"
+
+      - name: Log in to Proton Pass (ci vault only)
+        run: pass-cli login
+        env:
+          PROTON_PASS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PROTON_PASS_CI_TOKEN }}
+
+      - uses: cachix/secretspec-action@9a02088c2a41efaf75c0e10e574f0275964bbe7f # main
+        with:
+          profile: ci
+          version: "0.21.1"
+        env:
+          SECRETSPEC_REASON: infra apply from master
+
+      - run: nix run .#infra -- cloudflare apply -input=false -auto-approve -no-color

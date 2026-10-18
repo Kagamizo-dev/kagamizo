@@ -71,6 +71,12 @@ and downloads are limited by RAM, and secrets sit in RAM until power-off.
 Prefix is `Ctrl-a`. `prefix ?` opens a fuzzy-searchable list of every key
 binding; `prefix Space` opens a grouped quick menu. Edit `modules/tmux.nix`.
 
+## Cloudflare (infra/)
+
+The Cloudflare account is declared in Nix and applied by OpenTofu: PRs get a
+read-only plan, merging to `master` applies it. Secrets live in Proton Pass and
+are named in `secretspec.toml`. Setup and the token model: [infra/README.md](infra/README.md).
+
 ## Checks
 
 `nix flake check` runs nixfmt, statix, deadnix and a NixOS VM test that boots a
