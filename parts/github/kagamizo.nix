@@ -4,7 +4,7 @@
     account = "github-kagamizo";
     org = "kagamizo-dev";
     approvalsIssue = 2;
-    verifiedDomains."kagamizo.com" = null;
+    verifiedDomains."kagamizo.com" = "b80fee20e0";
 
     repos.nix-images = {
       from = "presentatou";
