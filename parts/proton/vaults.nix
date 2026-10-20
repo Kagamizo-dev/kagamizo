@@ -168,17 +168,21 @@ in
                     fi
                     unset token
                     echo "created agent $name (token stored in ${top.proton.infraVaults.root})"
+                    # Granted once, with the agent: pass-cli cannot list an
+                    # agent's access, and Proton refuses a repeated grant
+                    # (NotAllowed). Changing an existing agent's access means
+                    # deleting it and applying again, which mints a new token.
+                    jq -c --arg n "$name" '.[$n].access[]' <<<"$agents" | while read -r grant; do
+                      ${
+                        cli.passCli "agent access grant" {
+                          name.shell = "$name";
+                          vault-name.shell = "$(jq -r .vault <<<\"$grant\")";
+                          role.shell = "$(jq -r .role <<<\"$grant\")";
+                        }
+                      } >/dev/null
+                      echo "agent $name: $(jq -r '"\(.vault) as \(.role)"' <<<"$grant")"
+                    done
                   fi
-                  jq -c --arg n "$name" '.[$n].access[]' <<<"$agents" | while read -r grant; do
-                    ${
-                      cli.passCli "agent access grant" {
-                        name.shell = "$name";
-                        vault-name.shell = "$(jq -r .vault <<<\"$grant\")";
-                        role.shell = "$(jq -r .role <<<\"$grant\")";
-                      }
-                    } >/dev/null
-                    echo "agent $name: $(jq -r '"\(.vault) as \(.role)"' <<<"$grant")"
-                  done
                 done
                 ;;
               *)
