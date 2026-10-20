@@ -3,6 +3,7 @@
   github = {
     account = "github-kagamizo";
     org = "kagamizo-dev";
+    approvalsIssue = 2;
     verifiedDomains."kagamizo.com" = null;
 
     repos.nix-images = {

@@ -63,6 +63,10 @@ in
       description = "The held account the organization is.";
     };
     org = mkOption { type = types.strMatching "[A-Za-z0-9][A-Za-z0-9-]*"; };
+    approvalsIssue = mkOption {
+      type = types.ints.positive;
+      description = "Issue where `github-bootstrap` posts the approvals it waits for.";
+    };
     verifiedDomains = mkOption {
       type = types.attrsOf (types.nullOr (types.strMatching "[a-z0-9]+"));
       default = { };

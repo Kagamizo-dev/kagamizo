@@ -69,11 +69,43 @@ in
           trap cleanup EXIT
           step() { printf '\n==> %s\n' "$*"; }
 
-          step "Proton Pass: approve this link"
-          ${cli.passCli "login" { }}
+          # Job logs are only readable once a job ends, so each approval is
+          # also posted on the approvals issue, where a session can relay it,
+          # and deleted once it is approved or has expired.
+          issues="https://api.github.com/repos/$GITHUB_REPOSITORY/issues"
+          relay() { # message -> comment id
+            curl -fsS -X POST -H "Authorization: Bearer $RELAY_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "$issues/${toString cfg.approvalsIssue}/comments" -d "$(jq -n --arg b "$1" '{body: $b}')" | jq -r .id
+          }
+          unrelay() {
+            curl -fsS -X DELETE -H "Authorization: Bearer $RELAY_TOKEN" "$issues/comments/$1" >/dev/null || true
+          }
+          # Runs a login in the background, relays the first match of a
+          # pattern in its output, and waits for it to finish.
+          approve() { # label pattern command...
+            local label=$1 pattern=$2 out pid found="" id="" status=0
+            shift 2
+            out=$(mktemp)
+            "$@" </dev/null >"$out" 2>&1 &
+            pid=$!
+            while kill -0 "$pid" 2>/dev/null && [ -z "$found" ]; do
+              found=$(grep -oE "$pattern" "$out" | head -1 || true)
+              sleep 1
+            done
+            [ -n "$found" ] || found=$(grep -oE "$pattern" "$out" | head -1 || true)
+            if [ -n "$found" ]; then id=$(relay "$label: $found"); fi
+            wait "$pid" || status=$?
+            [ -z "$id" ] || unrelay "$id"
+            cat "$out"
+            rm -f "$out"
+            return "$status"
+          }
 
-          step "GitHub: approve this code at the URL shown"
-          ${
+          step "Proton Pass: approve the link"
+          approve "Proton Pass login, approve" 'https://account\.proton\.me/[^[:space:]]+' ${cli.passCli "login" { }}
+
+          step "GitHub: approve the code at https://github.com/login/device"
+          approve "GitHub device code, enter at https://github.com/login/device" '[A-Z0-9]{4}-[A-Z0-9]{4}' ${
             cli.gh "auth login" {
               hostname = "github.com";
               git-protocol = "https";
@@ -84,7 +116,7 @@ in
                 "workflow"
               ];
             }
-          } </dev/null
+          }
 
           step "Storing gh's token as Kagamizo-LLC/github-token"
           ${cli.gh "auth token" { }} | secretspec set GITHUB_TOKEN --file "$spec" --profile github \
@@ -119,12 +151,14 @@ in
             host=$(jq -r .dnsHostName <<<"$d")
             token=$(jq -r .verificationToken <<<"$d")
             echo "  declare in parts/github/kagamizo.nix and apply: github.verifiedDomains.\"$domain\" = \"$token\";"
+            tokenNote=$(relay "Declare and apply: \`github.verifiedDomains.\"$domain\" = \"$token\";\` (TXT $host)")
             echo "  waiting for TXT $host"
             for _ in $(seq 80); do
               if curl -fsS -H 'accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=$host&type=TXT" |
                 jq -e --arg t "$token" 'any(.Answer[]?; .data | contains($t))' >/dev/null; then
                 graphql 'mutation($i: ID!) { verifyVerifiableDomain(input: {id: $i}) { domain { isVerified } } }' \
                   "$(jq -n --arg i "$(jq -r .id <<<"$d")" '{i: $i}')" | jq -r '"  verified: \(.data.verifyVerifiableDomain.domain.isVerified)"'
+                unrelay "$tokenNote"
                 continue 2
               fi
               sleep 30
