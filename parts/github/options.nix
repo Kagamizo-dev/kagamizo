@@ -27,6 +27,19 @@ let
         description = "The owner the repo is transferred from, if it lives elsewhere first.";
       };
       visibility = mkOption { type = types.enum (cli.ghChoices "repo edit" "visibility"); };
+      seed = mkOption {
+        type = types.bool;
+        default = false;
+        description = ''
+          Created by `github-bootstrap` if missing, with the commit it runs
+          from pushed as its default branch `main`.
+        '';
+      };
+      archived = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Read-only: archived last, after every other repo is configured.";
+      };
       secrets = mkOption {
         type = types.attrsOf Secret;
         default = { };
@@ -63,10 +76,6 @@ in
       description = "The held account the organization is.";
     };
     org = mkOption { type = types.strMatching "[A-Za-z0-9][A-Za-z0-9-]*"; };
-    approvalsIssue = mkOption {
-      type = types.ints.positive;
-      description = "Issue where `github-bootstrap` posts the approvals it waits for.";
-    };
     verifiedDomains = mkOption {
       type = types.attrsOf (types.nullOr (types.strMatching "[a-z0-9]+"));
       default = { };

@@ -7,10 +7,12 @@
 #   2. gh's token is stored as Kagamizo-LLC/github-token (profile github)
 #   3. each verified domain: added to the org; its TXT token is printed for
 #      github.verifiedDomains, and once the record resolves it is verified
-#   4. each repo: transferred in if declared elsewhere, its visibility,
-#      environments (with their branch rules), Actions secrets (piped from
-#      the proton-agents profile) and variables. Last, because a session
-#      bound to the old location cannot push after the transfer.
+#   4. each repo: transferred in if declared elsewhere, or created and
+#      seeded with the commit this job runs from as `main`; then its
+#      visibility, environments (with their branch rules), Actions secrets
+#      (piped from the proton-agents profile) and variables. Last, because a
+#      session bound to the old location cannot push after the transfer.
+#   5. repos declared archived: archived, after everything else.
 #
 # Every step is idempotent, so a rerun picks up where the last one stopped.
 {
@@ -49,6 +51,7 @@ in
           config.packages.secretspec
           pkgs.jq
           pkgs.curl
+          pkgs.git
         ];
         # GraphQL and jq variables ($o, $i) live in single-quoted queries.
         excludeShellChecks = [ "SC2016" ];
@@ -70,15 +73,24 @@ in
           step() { printf '\n==> %s\n' "$*"; }
 
           # Job logs are only readable once a job ends, so each approval is
-          # also posted on the approvals issue, where a session can relay it,
-          # and deleted once it is approved or has expired.
+          # also posted on the approvals issue of the repo this job runs in
+          # (found by its title, opened if missing), where a session can relay
+          # it, and deleted once it is approved or has expired.
           issues="https://api.github.com/repos/$GITHUB_REPOSITORY/issues"
+          relayApi() { # curl args...
+            curl -fsS -H "Authorization: Bearer $RELAY_TOKEN" -H 'Accept: application/vnd.github+json' "$@"
+          }
+          title="github-bootstrap approvals"
+          issue=$(relayApi "$issues?state=open&per_page=100" | jq -r --arg t "$title" 'map(select(.title == $t and (has("pull_request") | not)))[0].number // empty')
+          if [ -z "$issue" ]; then
+            issue=$(relayApi -X POST "$issues" -d "$(jq -n --arg t "$title" \
+              '{title: $t, body: "`github-bootstrap` posts each approval it waits for here, and deletes it once approved or expired. See `parts/github/bootstrap.nix`."}')" | jq -r .number)
+          fi
           relay() { # message -> comment id
-            curl -fsS -X POST -H "Authorization: Bearer $RELAY_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "$issues/${toString cfg.approvalsIssue}/comments" -d "$(jq -n --arg b "$1" '{body: $b}')" | jq -r .id
+            relayApi -X POST "$issues/$issue/comments" -d "$(jq -n --arg b "$1" '{body: $b}')" | jq -r .id
           }
           unrelay() {
-            curl -fsS -X DELETE -H "Authorization: Bearer $RELAY_TOKEN" "$issues/comments/$1" >/dev/null || true
+            relayApi -X DELETE "$issues/comments/$1" >/dev/null || true
           }
           # Runs a login in the background, relays the first match of a
           # pattern in its output, and waits for it to finish.
@@ -170,7 +182,7 @@ in
             exit 1
           done
 
-          for name in $(jq -r 'keys[]' <<<"$repos"); do
+          for name in $(jq -r 'with_entries(select(.value.archived | not)) | keys[]' <<<"$repos"); do
             r=$(jq -c --arg n "$name" '.[$n]' <<<"$repos")
             full="$org/$name"
             from=$(jq -r '.from // empty' <<<"$r")
@@ -181,6 +193,27 @@ in
                 ${cli.gh "api" { endpoint.shell = "repos/$full"; }} >/dev/null 2>&1 && break
                 sleep 5
               done
+            fi
+            if [ "$(jq -r .seed <<<"$r")" = true ]; then
+              if ! ${cli.gh "api" { endpoint.shell = "repos/$full"; }} >/dev/null 2>&1; then
+                step "Creating $full"
+                ${
+                  cli.gh "repo create" {
+                    name.shell = "$full";
+                    private = true;
+                    disable-wiki = true;
+                  }
+                } >/dev/null
+              fi
+              if ! ${cli.gh "api" { endpoint.shell = "repos/$full/branches/main"; }} >/dev/null 2>&1; then
+                step "Seeding $full with $GITHUB_SHA as main"
+                ${cli.gh "auth setup-git" { hostname = "github.com"; }}
+                git push "https://github.com/$full.git" "$GITHUB_SHA:refs/heads/main"
+                ${cli.gh "repo edit" {
+                  repository.shell = "$full";
+                  default-branch = "main";
+                }}
+              fi
             fi
 
             step "$full: visibility, environments, secrets, variables"
@@ -239,6 +272,17 @@ in
               }}
               echo "  variable $v"
             done
+          done
+
+          for name in $(jq -r 'with_entries(select(.value.archived)) | keys[]' <<<"$repos"); do
+            full="$org/$name"
+            if [ "$(${cli.gh "api" { endpoint.shell = "repos/$full"; }} | jq -r .archived)" != true ]; then
+              step "Archiving $full"
+              ${cli.gh "repo archive" {
+                repository.shell = "$full";
+                yes = true;
+              }}
+            fi
           done
 
         '';

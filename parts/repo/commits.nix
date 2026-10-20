@@ -38,9 +38,13 @@ let
   subjectMax = 70;
   lineMax = 100;
 
-  # Commits up to and including this one predate the convention and are not
-  # checked; everything after it is.
-  baseline = "66993b37261075ea1426b75afde604556d4c7375";
+  # Commits up to and including these predate the convention and are not
+  # checked; everything after them is. The second is the tip of the old beta
+  # branch, merged into main with its history.
+  baselines = [
+    "66993b37261075ea1426b75afde604556d4c7375"
+    "98bd2d2890bd9e475bcd9f03cf8b58c34cfe53af"
+  ];
 
   # A revert's subject is the reverted commit's header, so it is exempt from
   # the capital letter. Brackets instead of backslashes survive awk -v.
@@ -104,9 +108,11 @@ in
               ;;
             *)
               status=0
-              # Only commits after the baseline; skip it when it is not in this history.
+              # Only commits after the baselines; skip one when it is not in this history.
               exclude=()
-              if git cat-file -e "${baseline}^{commit}" 2>/dev/null; then exclude=(^${baseline}); fi
+              for b in ${lib.concatStringsSep " " baselines}; do
+                if git cat-file -e "$b^{commit}" 2>/dev/null; then exclude+=("^$b"); fi
+              done
               for sha in $(git rev-list --no-merges "$1" "''${exclude[@]}"); do
                 out=$(git log -1 --format=%B "$sha" | problems)
                 if [ -n "$out" ]; then
