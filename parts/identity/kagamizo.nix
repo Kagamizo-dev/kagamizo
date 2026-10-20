@@ -19,6 +19,7 @@
         "billing" # invoices and payments
         "legal" # registered agent, state filings, IRS
         "dev" # GitHub and the like
+        "automations" # automated mail, events and signups: routed, not read
       ];
     };
   };

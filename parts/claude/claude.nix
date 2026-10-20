@@ -25,6 +25,7 @@
           cf
           cloudflare-login
           bootstrap
+          signup
           infra
           registrar
           proton
