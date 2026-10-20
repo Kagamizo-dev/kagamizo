@@ -15,6 +15,11 @@
      "value": true
     },
     "role": {
+     "oneOf": [
+      "viewer",
+      "editor",
+      "manager"
+     ],
      "value": true
     },
     "share-id": {
@@ -47,6 +52,15 @@
    ],
    "options": {
     "expiration": {
+     "oneOf": [
+      "1h",
+      "1d",
+      "1w",
+      "1m",
+      "3m",
+      "6m",
+      "1y"
+     ],
      "value": true
     },
     "vault": {
@@ -71,6 +85,10 @@
    "args": [],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -87,6 +105,10 @@
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -100,9 +122,22 @@
    ],
    "options": {
     "expiration": {
+     "oneOf": [
+      "1h",
+      "1d",
+      "1w",
+      "1m",
+      "3m",
+      "6m",
+      "1y"
+     ],
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -111,6 +146,10 @@
    "args": [],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -145,6 +184,10 @@
    "args": [],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -162,6 +205,10 @@
    "args": [],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "prefix": {
@@ -332,6 +379,11 @@
      "value": true
     },
     "key-type": {
+     "oneOf": [
+      "ed25519",
+      "rsa2048",
+      "rsa4096"
+     ],
      "value": true
     },
     "password": {
@@ -426,6 +478,10 @@
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "share-id": {
@@ -449,6 +505,10 @@
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "share-id": {
@@ -474,6 +534,11 @@
      "value": true
     },
     "role": {
+     "oneOf": [
+      "viewer",
+      "editor",
+      "manager"
+     ],
      "value": true
     },
     "share-id": {
@@ -516,6 +581,11 @@
      "value": true
     },
     "role": {
+     "oneOf": [
+      "viewer",
+      "editor",
+      "manager"
+     ],
      "value": true
     },
     "share-id": {
@@ -541,6 +611,10 @@
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "share-id": {
@@ -623,6 +697,10 @@
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "share-id": {
@@ -661,18 +739,39 @@
    "args": [],
    "options": {
     "capitalise": {
+     "oneOf": [
+      "true",
+      "false"
+     ],
      "value": true
     },
     "count": {
      "value": true
     },
     "numbers": {
+     "oneOf": [
+      "true",
+      "false"
+     ],
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "separator": {
+     "oneOf": [
+      "hyphens",
+      "spaces",
+      "periods",
+      "commas",
+      "underscores",
+      "numbers",
+      "numbers-and-symbols"
+     ],
      "value": true
     }
    }
@@ -684,15 +783,31 @@
      "value": true
     },
     "numbers": {
+     "oneOf": [
+      "true",
+      "false"
+     ],
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "symbols": {
+     "oneOf": [
+      "true",
+      "false"
+     ],
      "value": true
     },
     "uppercase": {
+     "oneOf": [
+      "true",
+      "false"
+     ],
      "value": true
     }
    }
@@ -706,6 +821,10 @@
    ],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -726,6 +845,11 @@
      "value": true
     },
     "role": {
+     "oneOf": [
+      "viewer",
+      "editor",
+      "manager"
+     ],
      "value": true
     },
     "share-id": {
@@ -740,6 +864,10 @@
    "args": [],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "personal-access-token-id": {
@@ -768,12 +896,25 @@
    "args": [],
    "options": {
     "expiration": {
+     "oneOf": [
+      "1h",
+      "1d",
+      "1w",
+      "1m",
+      "3m",
+      "6m",
+      "1y"
+     ],
      "value": true
     },
     "name": {
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -790,6 +931,10 @@
    "args": [],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -798,9 +943,22 @@
    "args": [],
    "options": {
     "expiration": {
+     "oneOf": [
+      "1h",
+      "1d",
+      "1w",
+      "1m",
+      "3m",
+      "6m",
+      "1y"
+     ],
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "personal-access-token-id": {
@@ -883,12 +1041,24 @@
    "args": [],
    "options": {
     "only-items": {
+     "oneOf": [
+      "true",
+      "false"
+     ],
      "value": true
     },
     "only-vaults": {
+     "oneOf": [
+      "true",
+      "false"
+     ],
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -945,6 +1115,10 @@
      "value": true
     },
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "share-id": {
@@ -999,6 +1173,10 @@
    ],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -1018,6 +1196,10 @@
    "args": [],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -1026,6 +1208,10 @@
    "args": [],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -1053,6 +1239,10 @@
    "args": [],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     }
    }
@@ -1061,6 +1251,10 @@
    "args": [],
    "options": {
     "output": {
+     "oneOf": [
+      "human",
+      "json"
+     ],
      "value": true
     },
     "share-id": {
@@ -1092,6 +1286,11 @@
      "value": true
     },
     "role": {
+     "oneOf": [
+      "viewer",
+      "editor",
+      "manager"
+     ],
      "value": true
     },
     "share-id": {
@@ -1111,6 +1310,11 @@
    ],
    "options": {
     "role": {
+     "oneOf": [
+      "viewer",
+      "editor",
+      "manager"
+     ],
      "value": true
     },
     "share-id": {

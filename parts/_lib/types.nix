@@ -106,7 +106,6 @@ let
 
   Cloudflare = Record {
     accountId = Hex32;
-    stateBucket = refined "R2BucketName" String (matches "[a-z0-9][a-z0-9-]{1,61}[a-z0-9]");
     tokenExpiry = Timestamp;
     # Hard ceiling on Cloudflare spend per month, enforced by `registrar`.
     monthlyBudgetUsd = Usd;
@@ -129,6 +128,7 @@ let
       ]);
       ci = VaultName;
       agents = VaultName;
+      state = VaultName;
     };
 
   # Spend per month: domains bought that month, plus renewals of domains

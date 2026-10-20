@@ -31,16 +31,6 @@ let
         default = [ ];
         description = "Zone permission group names, granted on every zone in the account, including ones bought later.";
       };
-      bucket = mkOption {
-        type = types.listOf types.str;
-        default = [ ];
-        description = ''
-          R2 permission group names, granted on the state bucket only. A
-          profile with these is an S3 credential: it is stored as
-          AWS_ACCESS_KEY_ID (the token ID) and AWS_SECRET_ACCESS_KEY (the
-          SHA-256 of its value), and may hold nothing else.
-        '';
-      };
       storeIn = mkOption {
         type = types.nonEmptyListOf types.str;
         description = "secretspec profiles whose vaults receive the minted value.";
@@ -51,7 +41,6 @@ in
 {
   options.cloudflare = {
     accountId = mkOption { type = types.str; };
-    stateBucket = mkOption { type = types.str; };
     tokenExpiry = mkOption { type = types.str; };
     monthlyBudgetUsd = mkOption { type = types.number; };
     tokens = mkOption {
@@ -70,7 +59,6 @@ in
       t.cloudflare {
         inherit (cfg)
           accountId
-          stateBucket
           tokenExpiry
           monthlyBudgetUsd
           ;

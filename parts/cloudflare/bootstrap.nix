@@ -1,12 +1,12 @@
-# Mints the token profiles in ./tokens.nix and the OpenTofu state bucket, with
-# your `cloudflare-login` session as the only root credential:
+# Mints the token profiles in ./tokens.nix, with your `cloudflare-login`
+# session as the only root credential:
 #
-#   bootstrap plan            declared against live: bucket, permission groups,
-#                             tokens (Cloudflare only; `proton plan` diffs items)
-#   bootstrap apply           create the bucket and missing tokens, re-sync the
-#                             permissions of existing ones, and write every new
-#                             value straight into its vault (needs pass-cli
-#                             signed in); generates the state passphrase once
+#   bootstrap plan            declared against live: permission groups, tokens
+#                             (Cloudflare only; `proton plan` diffs items)
+#   bootstrap apply           mint missing tokens, re-sync the permissions of
+#                             existing ones, and write every new value straight
+#                             into its vault (needs pass-cli signed in);
+#                             generates the state passphrase once
 #   bootstrap rotate <name>   new value for one token, stored the same way
 #
 # Values never reach the terminal: each goes from cf's output into secretspec.
@@ -20,7 +20,7 @@
 }:
 let
   cloudflare = config.cloudflare.checked;
-  inherit (cloudflare) accountId stateBucket tokens;
+  inherit (cloudflare) accountId tokens;
   inherit (config.proton.secretspec) providers profiles;
   cli = import ../_lib/cli.nix {
     inherit lib;
@@ -46,10 +46,6 @@ let
       scope = "com.cloudflare.api.account";
       resources.${account} = "*";
     };
-    bucket = {
-      scope = "com.cloudflare.edge.r2.bucket";
-      resources."com.cloudflare.edge.r2.bucket.${accountId}_default_${stateBucket}" = "*";
-    };
   };
 
   # Policies with permission groups still named; the script swaps in IDs.
@@ -69,34 +65,22 @@ let
       ) grants
     );
 
-  # The variables a profile's value is stored as, checked against secretspec.
+  # Where a profile's value goes, checked against secretspec.
   stored =
     name: profile:
     let
-      s3 = profile.bucket != [ ];
-      vars =
-        if s3 then
-          [
-            "AWS_ACCESS_KEY_ID"
-            "AWS_SECRET_ACCESS_KEY"
-          ]
+      problems = lib.concatMap (
+        p:
+        if !(profiles ? ${p}) then
+          [ "storeIn: no secretspec profile `${p}`" ]
         else
-          [ "CLOUDFLARE_API_TOKEN" ];
-      problems =
-        lib.optional (
-          s3 && profile.zone ++ profile.account ++ profile.allZones != [ ]
-        ) "an S3 credential (bucket) may hold nothing else"
-        ++ lib.concatMap (
-          p:
-          if !(profiles ? ${p}) then
-            [ "storeIn: no secretspec profile `${p}`" ]
-          else
-            map (v: "storeIn: profile `${p}` declares no ${v}") (lib.filter (v: !(profiles.${p} ? ${v})) vars)
-        ) profile.storeIn;
+          lib.optional (
+            !(profiles.${p} ? CLOUDFLARE_API_TOKEN)
+          ) "storeIn: profile `${p}` declares no CLOUDFLARE_API_TOKEN"
+      ) profile.storeIn;
     in
     if problems == [ ] then
       {
-        inherit s3;
         policies = policies profile;
         targets = map (p: {
           profile = p;
@@ -108,8 +92,7 @@ let
 
   declared = lib.mapAttrs stored tokens;
 
-  # The passphrase every profile holding state credentials shares.
-  passphraseProfiles = lib.attrNames (lib.filterAttrs (_: p: p ? TOFU_STATE_PASSPHRASE) profiles);
+  stateVault = config.proton.infraVaults.state;
 in
 {
   perSystem =
@@ -179,18 +162,10 @@ in
           # Store a new token value (JSON with id and value on stdin) in every
           # vault the profile names.
           store() {
-            local name=$1 token s3 id value
-            token=$(cat)
-            id=$(jq -r .id <<<"$token")
-            value=$(jq -r .value <<<"$token")
-            s3=$(jq -r --arg n "$name" '.[$n].s3' <<<"$declared")
+            local name=$1 value
+            value=$(jq -r .value)
             for p in $(jq -r --arg n "$name" '.[$n].targets[].profile' <<<"$declared"); do
-              if [ "$s3" = true ]; then
-                printf %s "$id" | put "$p" AWS_ACCESS_KEY_ID
-                printf %s "$value" | sha256sum | cut -d' ' -f1 | tr -d '\n' | put "$p" AWS_SECRET_ACCESS_KEY
-              else
-                printf %s "$value" | put "$p" CLOUDFLARE_API_TOKEN
-              fi
+              printf %s "$value" | put "$p" CLOUDFLARE_API_TOKEN
               echo "  stored $name in profile $p"
             done
           }
@@ -199,11 +174,6 @@ in
           shift
           case "$cmd" in
             plan)
-              if ${cli.cf "r2 buckets get" { bucket-name = stateBucket; }} >/dev/null 2>&1; then
-                echo "  ok        bucket ${stateBucket}"
-              else
-                echo "+ create    bucket ${stateBucket}"
-              fi
               echo "  ok        permission groups (all resolve)"
               for name in $(jq -r 'keys[]' <<<"$declared"); do
                 vaults=$(jq -r --arg n "$name" '[.[$n].targets[].vault] | join(", ")' <<<"$declared")
@@ -216,25 +186,12 @@ in
               ;;
             apply)
               signedIn
-              if ! ${cli.cf "r2 buckets get" { bucket-name = stateBucket; }} >/dev/null 2>&1; then
-                ${cli.cf "r2 buckets create-by-name" { bucket-name = stateBucket; }} >/dev/null
-                echo "created bucket ${stateBucket}"
-              fi
 
-              # One passphrase, shared by every profile that reads the state.
-              missing=()
-              for p in ${lib.concatStringsSep " " passphraseProfiles}; do
-                vault=$(jq -r --arg p "$p" '[.[].targets[] | select(.profile == $p)][0].vault' <<<"$declared")
-                if ! titles "$vault" | jq -e 'index("tofu-state-passphrase")' >/dev/null; then missing+=("$p"); fi
-              done
-              if [ ''${#missing[@]} -eq ${toString (lib.length passphraseProfiles)} ]; then
-                pass=$(openssl rand -base64 32)
-                for p in "''${missing[@]}"; do printf %s "$pass" | put "$p" TOFU_STATE_PASSPHRASE; done
-                unset pass
-                echo "generated tofu-state-passphrase for: ''${missing[*]}"
-              elif [ ''${#missing[@]} -gt 0 ]; then
-                echo "tofu-state-passphrase is missing for ''${missing[*]} but set elsewhere; copy it over by hand." >&2
-                exit 1
+              # The state passphrase, once, in the state vault every state
+              # reader shares.
+              if ! titles ${stateVault} | jq -e 'index("tofu-state-passphrase")' >/dev/null; then
+                openssl rand -base64 32 | tr -d '\n' | put ci TOFU_STATE_PASSPHRASE
+                echo "generated tofu-state-passphrase in ${stateVault}"
               fi
 
               for name in $(jq -r 'keys[]' <<<"$declared"); do

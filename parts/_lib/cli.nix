@@ -143,8 +143,17 @@ let
       entry =
         passCatalog.commands.${command}
           or (throw "pass-cli has no command `${command}`${suggest passCatalog.commands command}");
+      # An option limited to fixed values (a role, an expiration) takes only those.
+      valueType =
+        name: o:
+        if o ? oneOf then
+          orRuntime "OneOf[${lib.concatStringsSep "|" o.oneOf}]" (
+            refined "${name}" String (v: builtins.elem v o.oneOf)
+          )
+        else
+          orRuntime "String" String;
       fields =
-        lib.mapAttrs (_: o: if o.value then orRuntime "String" String else Bool) entry.options
+        lib.mapAttrs (name: o: if o.value then valueType name o else Bool) entry.options
         // lib.listToAttrs (map (a: lib.nameValuePair a.name (orRuntime "String" String)) entry.args);
       required = map (a: a.name) (lib.filter (a: a.required) entry.args);
       p = checkParams {
@@ -206,6 +215,12 @@ let
 in
 {
   inherit cf passCli tofu;
+  # The values a pass-cli option is limited to, e.g. the roles of
+  # `agent access grant`, to type declarations with before anything runs.
+  passCliChoices =
+    command: option:
+    passCatalog.commands.${command}.options.${option}.oneOf
+      or (throw "pass-cli ${command} --${option} takes no fixed set of values");
   # The OAuth scopes cf's client may request.
   Scope = refined "CfOAuthScope" String (s: builtins.elem s cfCatalog.oauthScopes);
 }

@@ -1,10 +1,10 @@
-# Layer 2: what lives on each zone, derived from identity.domains. Planned on
+# The OpenTofu layer: what lives on each zone, derived from identity.domains. Planned on
 # every PR with the agent-readonly token, applied from master by CI with the
 # ci-apply token. Domains without a zoneId yet contribute nothing.
 {
   lib,
   domains,
-  backend,
+  terraform,
 }:
 let
   # Resource names must be unique across zones: kagamizo.com -> kagamizo-com.
@@ -74,7 +74,7 @@ let
   records = lib.concatMapAttrs zoneRecords (lib.filterAttrs (_: d: d.zoneId != null) domains);
 in
 {
-  terraform = backend "cloudflare";
+  inherit terraform;
   provider.cloudflare = { };
 }
 // lib.optionalAttrs (records != { }) {

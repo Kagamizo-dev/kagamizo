@@ -1,9 +1,12 @@
 # Cloudflare as code: each layer is plain Nix rendered to OpenTofu's JSON
 # syntax, run by the `infra` app with secrets supplied by secretspec.
 #
-#   nix run .#infra -- cloudflare <tofu args...>
+#   nix run .#infra -- <ci|agent> <tofu args...>
 #
-# The tokens and the state bucket come first, from `bootstrap` (bootstrap.nix).
+# The first word is the secretspec profile, i.e. the view: `agent` reads (PR
+# plans), `ci` applies. The state is a local file fetched from the state vault
+# (TOFU_STATE) and, under `ci`, written back when the run changed it, so Proton
+# Pass holds it like every other secret. Tokens come first, from `bootstrap`.
 {
   config,
   lib,
@@ -16,63 +19,45 @@ let
     inherit lib;
     fx = inputs.nix-effects.lib;
   };
-  cloudflare = config.cloudflare.checked;
 in
 {
   perSystem =
-    { pkgs, lib, ... }:
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
     let
       tofu = pkgs.opentofu.withPlugins (p: [ p.cloudflare_cloudflare ]);
 
-      # Encrypted state in R2 (S3 API). Credentials come from AWS_ACCESS_KEY_ID /
-      # AWS_SECRET_ACCESS_KEY; the encryption key from TOFU_STATE_PASSPHRASE.
-      backend = layer: {
+      # State stays local to the run; `infra` moves it in and out of Proton
+      # Pass. Encrypted with TOFU_STATE_PASSPHRASE before it leaves tofu.
+      terraform = {
         required_providers.cloudflare = {
           source = "cloudflare/cloudflare";
           version = "~> 5.19";
-        };
-        backend.s3 = {
-          bucket = cloudflare.stateBucket;
-          key = "${layer}.tfstate";
-          region = "auto";
-          endpoints.s3 = "https://${cloudflare.accountId}.r2.cloudflarestorage.com";
-          use_path_style = true;
-          skip_credentials_validation = true;
-          skip_region_validation = true;
-          skip_requesting_account_id = true;
-          skip_metadata_api_check = true;
-          skip_s3_checksum = true;
         };
       };
 
       # Each layer is checked against the pinned provider (catalog/) before it
       # is written out.
       configs = lib.mapAttrs (name: c: pkgs.writeText "${name}.tf.json" (builtins.toJSON (cli.tofu c))) {
-        cloudflare = import ./_zones.nix { inherit lib domains backend; };
+        cloudflare = import ./_zones.nix { inherit lib domains terraform; };
       };
-    in
-    {
-      # OpenTofu with the pinned Cloudflare provider; also feeds catalog/.
-      packages.tofu = tofu;
 
-      packages.infra = pkgs.writeShellApplication {
-        name = "infra";
+      # Inside secretspec: the profile's secrets are in the environment.
+      run = pkgs.writeShellApplication {
+        name = "infra-run";
         runtimeInputs = [
           tofu
           pkgs.jq
+          pkgs.diffutils
+          config.packages.secretspec
+          config.packages.pass-cli
         ];
         text = ''
-          usage="usage: infra cloudflare <tofu args...>"
-          layer=''${1:?$usage}
-          shift
-          case "$layer" in
-            cloudflare) config=${configs.cloudflare} ;;
-            *) echo "$usage" >&2; exit 2 ;;
-          esac
-
-          hint="run it through secretspec, e.g. secretspec run --profile agent -- nix run .#infra -- cloudflare plan"
-          : "''${CLOUDFLARE_API_TOKEN:?$hint}" "''${AWS_ACCESS_KEY_ID:?$hint}"
-          : "''${AWS_SECRET_ACCESS_KEY:?$hint}" "''${TOFU_STATE_PASSPHRASE:?$hint}"
+          : "''${CLOUDFLARE_API_TOKEN:?}" "''${TOFU_STATE_PASSPHRASE:?}"
 
           # HCL-quote the passphrase: JSON escaping plus escaped template markers.
           passphrase=$(jq -rn --arg p "$TOFU_STATE_PASSPHRASE" \
@@ -98,10 +83,57 @@ in
 
           work=$(mktemp -d)
           trap 'rm -rf "$work"' EXIT
-          cp "$config" "$work/main.tf.json"
+          cp ${configs.cloudflare} "$work/main.tf.json"
+          if [ -n "''${TOFU_STATE:-}" ]; then
+            printf %s "$TOFU_STATE" >"$work/terraform.tfstate"
+            cp "$work/terraform.tfstate" "$work/before"
+          fi
+          unset TOFU_STATE
           # stderr keeps stdout clean for `output -raw`.
           tofu -chdir="$work" init -input=false >&2
-          tofu -chdir="$work" "$@"
+          status=0
+          tofu -chdir="$work" "$@" || status=$?
+
+          # Write a changed state back, even after a partial failure, so
+          # what was created is never forgotten. Only `ci` holds the state
+          # vault as editor; anything else changing it is a bug.
+          if [ -f "$work/terraform.tfstate" ] && ! cmp -s "$work/terraform.tfstate" "$work/before" 2>/dev/null; then
+            if [ "$INFRA_PROFILE" != ci ]; then
+              echo "infra: the $INFRA_PROFILE view changed the state; not saving it" >&2
+              exit 1
+            fi
+            secretspec set TOFU_STATE --file "$INFRA_SPEC" --profile ci \
+              --from-file "$work/terraform.tfstate" >/dev/null
+            echo "infra: state saved to Proton Pass" >&2
+          fi
+          exit "$status"
+        '';
+      };
+    in
+    {
+      # OpenTofu with the pinned Cloudflare provider; also feeds catalog/.
+      packages.tofu = tofu;
+
+      packages.infra = pkgs.writeShellApplication {
+        name = "infra";
+        runtimeInputs = [
+          tofu
+          pkgs.jq
+          config.packages.pass-cli
+          config.packages.secretspec
+        ];
+        text = ''
+          usage="usage: infra <ci|agent> <tofu args...>"
+          profile=''${1:?$usage}
+          shift
+          case "$profile" in
+            ci | agent) ;;
+            *) echo "$usage" >&2; exit 2 ;;
+          esac
+          export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+          export INFRA_PROFILE=$profile INFRA_SPEC=${config.packages.secretspec-toml}
+          exec secretspec run --file "$INFRA_SPEC" --profile "$profile" \
+            --reason "''${SECRETSPEC_REASON:-infra $profile $*}" -- ${run}/bin/infra-run "$@"
         '';
       };
 

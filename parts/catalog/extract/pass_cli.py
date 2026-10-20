@@ -3,7 +3,8 @@
 pass-cli publishes no schema, but its help is clap's, which is regular:
 walk every subcommand and record its positional arguments (required when
 written <NAME>, optional when [NAME]) and its options (taking a value when
-written --name <VALUE>, a flag otherwise). Runs offline: help needs no
+written --name <VALUE>, a flag otherwise) with the values an option is
+limited to (clap's [possible values: ...]). Runs offline: help needs no
 session.
 """
 import json
@@ -28,6 +29,31 @@ def sections(text):
     return found
 
 
+OPTION = re.compile(r"^\s+(?:-\w, )?--([a-z0-9-]+)(?: <([A-Z0-9_]+)>)?")
+
+
+def options(lines):
+    """Each option with its help text, which may wrap onto further lines."""
+    found = {}
+    for line in lines:
+        m = OPTION.match(line)
+        if m:
+            name, text = m.group(1), [line]
+            found[name] = (m.group(2) is not None, text)
+        elif found:
+            text.append(line)
+    entries = {}
+    for name, (value, text) in found.items():
+        if name == "help":
+            continue
+        entry = {"value": value}
+        choices = re.search(r"\[possible values: ([^\]]+)\]", " ".join(text))
+        if choices:
+            entry["oneOf"] = [c.strip() for c in choices.group(1).split(",")]
+        entries[name] = entry
+    return entries
+
+
 def walk(path):
     help_text = subprocess.run([binary, *path, "--help"], capture_output=True, text=True, check=True).stdout
     s = sections(help_text)
@@ -39,11 +65,7 @@ def walk(path):
             for line in s.get("Arguments", [])
             if (m := re.match(r"^\s{2}([<\[])([A-Z0-9_]+)[>\]]", line))
         ],
-        "options": {
-            m.group(1): {"value": m.group(2) is not None}
-            for line in s.get("Options", [])
-            if (m := re.match(r"^\s+(?:-\w, )?--([a-z0-9-]+)(?: <([A-Z0-9_]+)>)?", line)) and m.group(1) != "help"
-        },
+        "options": options(s.get("Options", [])),
     }
     catalog = {} if subs else {" ".join(path): entry}
     for sub in subs:

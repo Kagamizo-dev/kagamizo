@@ -20,10 +20,10 @@ parts/
 │  ├─ qsearch.nix          QSearch LLC and its domain candidates
 │  └─ check.nix            `nix flake check` type-checks all of it
 ├─ cloudflare/
-│  ├─ account.nix          account ID, state bucket, token expiry
+│  ├─ account.nix          account ID, token expiry, budget
 │  ├─ tokens.nix           the API token profiles (views)
 │  ├─ login.nix            `cloudflare-login`: the OAuth session (you, 2FA)
-│  ├─ bootstrap.nix        `bootstrap`: mints tokens.nix and the state bucket
+│  ├─ bootstrap.nix        `bootstrap`: mints tokens.nix
 │  ├─ _zones.nix           the OpenTofu layer: DNS on every zone (CI, from master)
 │  ├─ infra.nix            the `infra` app and the offline validate check
 │  └─ registrar.nix        the `registrar` app: check and buy domains
@@ -83,8 +83,9 @@ vault can be which:
 | --- | --- | --- |
 | `Zachariah-Root` | your own logins; no Cloudflare credential (the root is your OAuth session) | a person's vault |
 | `Kagamizo-LLC` | Kagamizo's own credentials: its GitHub organization, its logins | an LLC's or nonprofit's vault |
-| `Kagamizo-CI` | `ci-apply` token, cloudflare state | CI only |
-| `Kagamizo-Agents` | `agent-readonly` token, read-only state, OpenRouter key | agents only |
+| `Kagamizo-CI` | `ci-apply` token | CI only |
+| `Kagamizo-Agents` | `agent-readonly` token, OpenRouter key | agents only |
+| `Kagamizo-State` | the encrypted OpenTofu state and its passphrase | CI as `editor`, plans and agents as `viewer` |
 
 Account-wide power (minting tokens, buying domains) is never stored: it is
 your `cloudflare-login` session, approved on your phone behind Cloudflare's
@@ -96,7 +97,7 @@ so what a process can do depends only on which vault it was given.
 
 | Role | Vault | Cloudflare token | Can |
 | --- | --- | --- | --- |
-| You (`bootstrap`) | none | OAuth session | mint the tokens below and the state bucket |
+| You (`bootstrap`) | none | OAuth session | mint the tokens below |
 | You (`registrar`) | none | OAuth session | buy domains, within budget; read zones |
 | CI on `master` | `Kagamizo-CI` | `ci-apply` | apply merged changes |
 | Agents, PR plans | `Kagamizo-Agents` | `agent-readonly` | read everything, change nothing |
@@ -107,19 +108,21 @@ Vault names are declared once, in `parts/proton/vaults.nix`.
 
 ```bash
 nix run .#cloudflare-login                                 # OAuth session: a link you approve
-nix run .#bootstrap -- <plan|apply|rotate <name>>          # tokens and state bucket
-nix run .#infra -- cloudflare <tofu args...>               # OpenTofu
+nix run .#bootstrap -- <plan|apply|rotate <name>>          # mint the tokens
+nix run .#infra -- <ci|agent> <tofu args...>               # OpenTofu, as that view
 nix run .#registrar -- check                               # price every candidate
 nix run .#registrar -- register <domain> <price>           # buy one (billed, budgeted)
 nix run .#registrar -- zone <domain>                       # its zone ID
 nix run .#registrar -- ledger                              # live registrations not declared
-nix run .#proton -- plan                                   # vaults and secret refs: the diff
-nix run .#proton -- apply                                  # create declared vaults
+nix run .#proton -- plan                                   # vaults, agents, secret refs: the diff
+nix run .#proton -- apply                                  # create vaults and agents, grant access
 ```
 
-`infra` and `registrar` need their secrets from secretspec, e.g.
-`secretspec run --profile agent -- nix run .#infra -- cloudflare plan`.
-In cloud sessions all four are on PATH (`.claude/hooks/session-start.sh`).
+`infra` resolves its view's secrets itself (`infra agent plan`); the state is
+a local file it fetches from `Kagamizo-State` and, under `ci`, writes back when
+the run changed it. `bootstrap` and `registrar` use your `cloudflare-login`
+session. In cloud sessions all of them are on PATH
+(`.claude/hooks/session-start.sh`).
 
 ## Day to day, from the phone
 
@@ -184,61 +187,49 @@ default list of common package managers*, and paste the output of
 
 ## One-time setup
 
-Done already: account and zone IDs, and the vaults (`proton apply`).
+Done already: account and zone IDs, and the first four vaults.
 
-1. **Dashboard, once** (these need your login and 2FA):
-   - **R2:** enable it (R2, Overview). The API refuses to create buckets
-     until it is on.
-   - **Registrar:** a default payment method (Billing), a default registrant
-     contact, and accepting the Domain Registration Agreement (Domains,
-     Registrations). Needed only for buying domains.
-2. **Sign in.** `cloudflare-login` (the link you approve) and `pass-cli login`.
-3. **Mint.** `bootstrap plan` shows what it will do; `bootstrap apply` creates
-   the state bucket, generates the state passphrase, mints the four tokens in
-   `tokens.nix` and writes each value into its vault:
+Your part is approvals only: a link for Cloudflare, a link for Proton Pass.
 
-   | Item title | `Kagamizo-CI` | `Kagamizo-Agents` |
-   | --- | --- | --- |
-   | `cloudflare-token` | `ci-apply` | `agent-readonly` |
-   | `r2-state-key-id`, `r2-state-secret` | `state-write` | `state-read` |
-   | `tofu-state-passphrase` | generated | the same value |
-   | `openrouter-api-key` | | your OpenRouter key, by hand |
-
-   R2's S3 API takes an account token as a key pair: the token ID is the
-   access key ID and the SHA-256 of its value the secret. If `bootstrap plan`
-   names a permission group Cloudflare does not offer account tokens, fix the
-   name in `tokens.nix`. `proton plan` then shows every reference as `ok`.
+1. **Sign in.** `cloudflare-login` and `pass-cli login`, each a link you
+   approve on your phone.
+2. **Proton.** `proton apply` creates `Kagamizo-State` and the three agents in
+   `agents.nix`, stores each agent token in `Zachariah-Root` (profile
+   `proton-agents`) and grants the declared roles.
+3. **Cloudflare.** `bootstrap apply` generates the state passphrase into
+   `Kagamizo-State` and mints `ci-apply` and `agent-readonly` into their
+   vaults. If it names a permission group Cloudflare does not offer account
+   tokens, fix the name in `tokens.nix`. `proton plan` then shows every
+   reference as `ok` (`tofu-state` stays optional until the first apply).
 
    Re-run `bootstrap apply` after changing `tokens.nix` or `tokenExpiry`: it
    updates existing tokens in place, keeping their values. `bootstrap rotate
    <name>` replaces one value.
-
-5. **Proton Pass agent tokens**, one per consumer, each limited to one vault:
-
-   ```bash
-   pass-cli agent create nix-images-ci   --vault Kagamizo-CI     --expiration 6m
-   pass-cli agent create nix-images-plan --vault Kagamizo-Agents --expiration 6m
-   pass-cli agent create orca-fleet      --vault Kagamizo-Agents --expiration 1m
-   ```
-
-   Each prints `PROTON_PASS_PERSONAL_ACCESS_TOKEN=pst_...`; keep the part after
-   the `=`. `pass-cli agent monitor <name>` shows what each one read and why.
-
-6. **GitHub.** Settings, Environments, new environment `cloudflare`, deployment
-   branches limited to `master`, secret `PROTON_PASS_CI_TOKEN` (from
-   `nix-images-ci`). Then a repository secret `PROTON_PASS_AGENT_TOKEN` (from
-   `nix-images-plan`). Finally, the repository variable `INFRA_ENABLED` set to
-   `true` switches the workflow on; until then both jobs are skipped.
-
-7. **Existing records.** OpenTofu only manages what it created. Before declaring
-   a record that already exists, import it (with the ci view, since import writes
-   state), or delete it on the dashboard. Resource names are prefixed with the
-   zone, e.g. `kagamizo-com-www`:
+4. **Existing records.** OpenTofu only manages what it created. Before
+   declaring a record that already exists, import it with the ci view, since
+   import writes state. Resource names are prefixed with the zone:
 
    ```bash
-   secretspec run --profile ci -- nix run .#infra -- cloudflare import \
-     'cloudflare_dns_record.kagamizo-com-www' '<zone id>/<record id>'
+   nix run .#infra -- ci import 'cloudflare_dns_record.kagamizo-com-www' '<zone id>/<record id>'
    ```
+
+## Gaps: anything that takes more than a 2FA approval
+
+The rule for this repo: the only thing you ever do by hand is approve 2FA.
+Each item below breaks that rule today and is to be closed, not documented
+around.
+
+- **GitHub Actions secrets** (`PROTON_PASS_CI_TOKEN` in the `cloudflare`
+  environment, `PROTON_PASS_AGENT_TOKEN`, the `INFRA_ENABLED` variable): to be
+  declared with OpenTofu's GitHub provider once the Kagamizo organization
+  exists, from the tokens `proton apply` stored.
+- **The GitHub organization itself**: github.com has no API to create one.
+- **Proton Mail domain and addresses** (`dev@kagamizo.com` and the others):
+  Proton publishes no API for them.
+- **Registrar prerequisites**: default payment method, registrant contact and
+  the registration agreement, dashboard only.
+- **The session's network allowlist** (`parts/claude/_environment.nix`):
+  cloud environment settings cannot be changed from inside a session.
 
 ## The agent fleet (Orca)
 

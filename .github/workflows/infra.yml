@@ -56,19 +56,14 @@ jobs:
         with:
           version: "2.4.2"
 
-      - name: Log in to Proton Pass (agents vault only)
+      - name: Log in to Proton Pass (agents vault, state as viewer)
         run: pass-cli login
         env:
           PROTON_PASS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PROTON_PASS_AGENT_TOKEN }}
 
-      - uses: cachix/secretspec-action@9a02088c2a41efaf75c0e10e574f0275964bbe7f # main
-        with:
-          profile: agent
-          version: "0.21.1"
+      - run: nix run .#infra -- agent plan -input=false -no-color
         env:
           SECRETSPEC_REASON: infra plan for a pull request
-
-      - run: nix run .#infra -- cloudflare plan -input=false -no-color
 
   apply:
     name: apply (ci view)
@@ -96,16 +91,13 @@ jobs:
         with:
           version: "2.4.2"
 
-      - name: Log in to Proton Pass (ci vault only)
+      - name: Log in to Proton Pass (ci vault, state as editor)
         run: pass-cli login
         env:
           PROTON_PASS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PROTON_PASS_CI_TOKEN }}
 
-      - uses: cachix/secretspec-action@9a02088c2a41efaf75c0e10e574f0275964bbe7f # main
-        with:
-          profile: ci
-          version: "0.21.1"
+      # Writes the state back to the state vault; the concurrency group above
+      # keeps two applies from racing on it.
+      - run: nix run .#infra -- ci apply -input=false -auto-approve -no-color
         env:
           SECRETSPEC_REASON: infra apply from master
-
-      - run: nix run .#infra -- cloudflare apply -input=false -auto-approve -no-color

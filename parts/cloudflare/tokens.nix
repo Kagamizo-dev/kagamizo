@@ -56,15 +56,5 @@
         "Access: Apps and Policies Write"
       ];
     };
-
-    # The OpenTofu state: CI writes it, agents and PR plans only read it.
-    state-write = {
-      storeIn = [ "ci" ];
-      bucket = [ "Workers R2 Storage Bucket Item Write" ];
-    };
-    state-read = {
-      storeIn = [ "agent" ];
-      bucket = [ "Workers R2 Storage Bucket Item Read" ];
-    };
   };
 }
