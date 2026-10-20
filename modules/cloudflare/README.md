@@ -227,6 +227,11 @@ around.
 - **Public's personal secret** (`Zachariah-Root/public-personal-secret`) is
   made in its settings, and funding Public has no API at all: deposits are
   started from Public's side.
+- **Proton Mail domains and addresses** are added in Proton's web settings
+  (account.proton.me, any browser; not the mobile app): Proton has no public
+  API for them, and its internal one only admits Proton's own clients. Each
+  new domain's verification and DKIM values are then read off that page into
+  `identity.domains.<d>.proton`, and OpenTofu publishes the records.
 - **Proton Mail's API is Proton's internal one.** Proton publishes no API for
   domains or addresses, so `mail` uses the one its own clients use, through
   its go-proton-api; signing in takes your 2FA code (and a verification link
