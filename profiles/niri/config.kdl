@@ -29,31 +29,31 @@ layout {
         inactive-color "#414868"
     }
     border { off; }
+    // Shown for a moment before the wallpaper loads; matches the wallpaper's night sky.
+    background-color "#14162b"
 }
 
 prefer-no-csd
 
-hotkey-overlay {
-    skip-at-startup
-}
-
-spawn-at-startup "waybar"
-spawn-at-startup "foot" "-e" "tmux" "new-session" "-A" "-s" "main"
+// Wallpaper (niri does not draw one itself); /etc/wallpaper.png comes from the desktop profile.
+spawn-at-startup "swaybg" "-i" "/etc/wallpaper.png" "-m" "fill"
+spawn-at-startup "waybar" "-c" "/etc/waybar/config.json" "-s" "/etc/waybar/style.css"
+spawn-at-startup "foot" "-e" "tmux" "new-session" "-A" "-s" "main" "welcome; setup; exec bash"
 
 binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     // Launch
-    Mod+Return { spawn "foot" "-e" "tmux" "new-session" "-A" "-s" "main"; }
+    Mod+Return hotkey-overlay-title="Open a terminal" { spawn "foot" "-e" "tmux" "new-session" "-A" "-s" "main" "welcome; exec bash"; }
     Mod+T { spawn "foot"; }
-    Mod+D { spawn "fuzzel"; }
-    Mod+B { spawn "firefox"; }
-    Mod+Q { close-window; }
+    Mod+D hotkey-overlay-title="Open the app launcher" { spawn "fuzzel"; }
+    Mod+B hotkey-overlay-title="Open Firefox" { spawn "firefox"; }
+    Mod+Q hotkey-overlay-title="Close the window" { close-window; }
 
     // Move around: columns left/right, windows up/down inside a column
-    Mod+H { focus-column-left; }
+    Mod+H hotkey-overlay-title="Move left (Mod+L: right)" { focus-column-left; }
     Mod+L { focus-column-right; }
-    Mod+J { focus-window-down; }
+    Mod+J hotkey-overlay-title="Move down in a column (Mod+K: up)" { focus-window-down; }
     Mod+K { focus-window-up; }
     Mod+Left { focus-column-left; }
     Mod+Right { focus-column-right; }
@@ -69,7 +69,7 @@ binds {
     Mod+Period { expel-window-from-column; }
 
     // Workspaces stack vertically
-    Mod+U { focus-workspace-down; }
+    Mod+U hotkey-overlay-title="Next workspace (Mod+I: previous)" { focus-workspace-down; }
     Mod+I { focus-workspace-up; }
     Mod+Shift+U { move-column-to-workspace-down; }
     Mod+Shift+I { move-column-to-workspace-up; }
@@ -77,7 +77,7 @@ binds {
     Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
 
     // Sizes
-    Mod+R { switch-preset-column-width; }
+    Mod+R hotkey-overlay-title="Cycle the window width" { switch-preset-column-width; }
     Mod+F { maximize-column; }
     Mod+Shift+F { fullscreen-window; }
     Mod+Minus { set-column-width "-10%"; }
@@ -91,5 +91,5 @@ binds {
     XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
 
     Print { screenshot; }
-    Mod+Shift+E { quit; }
+    Mod+Shift+E hotkey-overlay-title="Quit the session" { quit; }
 }

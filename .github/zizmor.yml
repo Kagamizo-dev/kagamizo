@@ -1,0 +1,4 @@
+rules:
+  # Keep the documented `uses: ./.github/workflows/...` form for the local reusable workflow.
+  self-repository:
+    disable: true

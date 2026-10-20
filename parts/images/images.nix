@@ -1,5 +1,6 @@
 # The bootable images: Raspberry Pi 5 SD cards and the Yoga C940 live USB.
-# Their NixOS modules live in ../../modules and ../../hosts.
+# Each device is a directory under ../../devices that pulls in the shared
+# ../../profiles it wants.
 { inputs, self, ... }:
 let
   inherit (inputs) nixos-raspberrypi;
@@ -18,8 +19,8 @@ let
             ];
           }
         )
-        ../../modules/base.nix
-        ../../modules/tmux.nix
+        ../../devices/rpi5/default.nix
+        ../../profiles/tmux.nix
       ]
       ++ extraModules;
     };
@@ -28,13 +29,13 @@ in
   flake = {
     nixosConfigurations = {
       # Default: amnesic, RAM-only root.
-      rpi5 = mkPi [ ../../modules/ephemeral.nix ];
+      rpi5 = mkPi [ ../../devices/rpi5/ephemeral.nix ];
       # Fallback with a normal writable SD root, in case the ephemeral
       # layout misbehaves on real hardware.
       rpi5-persistent = mkPi [ ];
       # Lenovo Yoga C940 live USB (x86_64), same nixpkgs as the Pi images.
-      yoga = inputs.nixpkgs.lib.nixosSystem {
-        modules = [ ../../hosts/yoga-c940.nix ];
+      yoga-c940 = inputs.nixpkgs.lib.nixosSystem {
+        modules = [ ../../devices/yoga-c940 ];
       };
     };
 
@@ -45,6 +46,6 @@ in
     };
   };
 
-  # nix build .#yoga-iso  ->  result/iso/*.iso
-  perSystem.packages.yoga-iso = self.nixosConfigurations.yoga.config.system.build.isoImage;
+  # nix build .#yoga-c940-iso  ->  result/iso/*.iso
+  perSystem.packages.yoga-c940-iso = self.nixosConfigurations.yoga-c940.config.system.build.isoImage;
 }

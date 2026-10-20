@@ -187,11 +187,13 @@ in
             # A transfer settles a while after the repo answers at its new
             # path; until then edits fail with "still in progress".
             for n in $(seq 30); do
-              if out=$(${cli.gh "repo edit" {
-                repository.shell = "$full";
-                visibility.shell = "$(jq -r .visibility <<<\"$r\")";
-                accept-visibility-change-consequences = true;
-              }} 2>&1); then
+              if out=$(${
+                cli.gh "repo edit" {
+                  repository.shell = "$full";
+                  visibility.shell = "$(jq -r .visibility <<<\"$r\")";
+                  accept-visibility-change-consequences = true;
+                }
+              } 2>&1); then
                 break
               fi
               if [ "$n" = 30 ] || ! grep -q 'still in progress' <<<"$out"; then

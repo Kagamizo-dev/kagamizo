@@ -1,4 +1,4 @@
-# NixOS VM test: boots a machine with modules/tmux.nix, then
+# NixOS VM test: boots a machine with profiles/tmux.nix, then
 #  1. checks the generated config (prefix, documented bindings), and
 #  2. attaches a real tmux client on the console, presses the prefix + ?,
 #     and reads the fuzzy key finder off the screen with OCR.
@@ -7,7 +7,7 @@
   enableOCR = true;
 
   nodes.machine = {
-    imports = [ ../modules/tmux.nix ];
+    imports = [ ../profiles/tmux.nix ];
     users.users.alice.isNormalUser = true;
     services.getty.autologinUser = "alice";
   };

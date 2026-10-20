@@ -1,0 +1,14 @@
+ Windows key = Mod        The bar at the top is clickable: Apps, Terminal, Firefox, Help, Wi-Fi
+
+ Apps         Mod+D launcher     Mod+B Firefox     Mod+Return terminal
+ Windows      Mod+H / Mod+L  move left / right      Mod+J / Mod+K  up / down in a column
+              Mod+Q close       Mod+R resize       Mod+F full-width column
+ Workspaces   Mod+U / Mod+I  switch      add Shift to carry the window along
+ Session      Mod+Shift+E quit niri      Mod+Shift+/  show every niri key
+
+ tmux (prefix = Ctrl-a)
+              Ctrl-a ?  find any key     Ctrl-a Space  quick menu
+              Ctrl-a |  split right      Ctrl-a -      split down       Ctrl-a h/j/k/l  move
+
+ First run    setup  (internet via phone USB tethering, Proton Pass, Wi-Fi, two AI agents)
+ Wi-Fi: nmtui      Passwords: pass-cli      AI agent: pi      This screen again: welcome

@@ -1,0 +1,124 @@
+name: yoga-c940
+
+# Pipeline for the Lenovo Yoga C940 live USB.
+#   beta   development branch: every push is built, boot-tested and published as
+#          the `yoga-c940-beta` pre-release.
+#   stable production branch: moved forward by this pipeline (never by hand) to a
+#          beta commit that passed ALL checks and the ISO boot test, and published
+#          as the `yoga-c940-stable` release.
+
+on:
+  push:
+    branches: [beta]
+    paths-ignore: ["README.md"]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+    permissions:
+      contents: read
+
+  iso:
+    runs-on: ubuntu-latest # x86_64 with KVM
+    timeout-minutes: 90
+    permissions:
+      contents: write # publish the beta release asset
+    outputs:
+      big: ${{ steps.size.outputs.big }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      - name: Build ISO
+        run: nix build --print-build-logs --out-link result .#yoga-c940-iso
+
+      - name: Boot the ISO in QEMU (UEFI, as a USB stick)
+        run: ./scripts/boot-iso.sh result/iso/*.iso 600
+
+      - name: Check size against the 2 GB release-asset limit
+        id: size
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          cp result/iso/*.iso out/yoga-c940-ephemeral.iso
+          bytes=$(stat -c %s out/yoga-c940-ephemeral.iso)
+          echo "ISO is $bytes bytes"
+          if [ "$bytes" -gt 2000000000 ]; then echo "big=true" >> "$GITHUB_OUTPUT"; else echo "big=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Publish beta release
+        if: steps.size.outputs.big == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: ./scripts/publish-release.sh yoga-c940-beta "Yoga C940 ISO (beta)" --prerelease out/yoga-c940-ephemeral.iso
+
+      - name: Upload as workflow artifact (too big for a release asset)
+        if: steps.size.outputs.big == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: yoga-c940-ephemeral-iso
+          path: out/yoga-c940-ephemeral.iso
+          retention-days: 14
+          compression-level: 0
+
+  promote:
+    name: promote to stable
+    needs: [checks, iso]
+    if: github.ref == 'refs/heads/beta'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write # move the stable branch, publish the stable release
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      ISO_TOO_BIG: ${{ needs.iso.outputs.big }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Refuse to promote an ISO that cannot be a release asset
+        run: |
+          if [ "$ISO_TOO_BIG" != "false" ]; then
+            echo "The ISO is over GitHub's 2 GB release-asset limit; shrink it before promoting." >&2
+            exit 1
+          fi
+
+      - name: Fetch the exact ISO this pipeline just tested
+        run: |
+          set -euo pipefail
+          # The beta release notes record the commit; make sure a newer push has not replaced it.
+          notes=$(gh release view yoga-c940-beta --repo "$REPO" --json body --jq .body)
+          case "$notes" in
+            *"$GITHUB_SHA"*) ;;
+            *) echo "beta release is not for $GITHUB_SHA (superseded by a newer push); not promoting." >&2; exit 1 ;;
+          esac
+          mkdir -p out
+          gh release download yoga-c940-beta --repo "$REPO" --pattern yoga-c940-ephemeral.iso --dir out
+
+      - name: Move the stable branch forward (fast-forward only)
+        run: |
+          set -euo pipefail
+          if gh api "repos/$REPO/git/ref/heads/stable" >/dev/null 2>&1; then
+            gh api -X PATCH "repos/$REPO/git/refs/heads/stable" -f sha="$GITHUB_SHA" -F force=false
+          else
+            gh api -X POST "repos/$REPO/git/refs" -f ref=refs/heads/stable -f sha="$GITHUB_SHA"
+          fi
+
+      - name: Publish stable release
+        run: ./scripts/publish-release.sh yoga-c940-stable "Yoga C940 ISO (stable)" --latest out/yoga-c940-ephemeral.iso

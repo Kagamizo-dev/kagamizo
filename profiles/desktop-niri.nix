@@ -6,7 +6,18 @@
     enable = true;
     useNautilus = false; # keeps the image smaller
   };
-  environment.etc."niri/config.kdl".source = ./niri/config.kdl;
+
+  # niri panics with "couldn't find a GPU" if the graphics device shows up after login,
+  # so wait (up to 30 s) for it before greetd starts the session. Instant on real hardware.
+  systemd.services.greetd = {
+    path = [ pkgs.coreutils ];
+    preStart = ''
+      for _ in $(seq 30); do
+        if ls /dev/dri/card* > /dev/null 2>&1; then exit 0; fi
+        sleep 1
+      done
+    '';
+  };
 
   # No password prompt: this is a live USB and nothing persists.
   services.greetd = {
@@ -34,17 +45,27 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [
-    foot # terminal
-    fuzzel # launcher
-    waybar # status bar
-    wl-clipboard
-    brightnessctl
-  ];
+  environment = {
+    etc = {
+      "niri/config.kdl".source = ./niri/config.kdl;
+      "wallpaper.png".source = ./wallpaper/japan-countryside-4k.png;
+      "waybar/config.json".source = ./waybar/config.json;
+      "waybar/style.css".source = ./waybar/style.css;
+    };
+    systemPackages = with pkgs; [
+      foot # terminal
+      fuzzel # launcher
+      waybar # status bar
+      swaybg # wallpaper
+      wl-clipboard
+      brightnessctl
+    ];
+  };
 
   fonts.packages = with pkgs; [
     dejavu_fonts
     font-awesome # waybar icons
+    nerd-fonts.symbols-only # icons in the welcome screen
   ];
 
   services.pipewire = {
