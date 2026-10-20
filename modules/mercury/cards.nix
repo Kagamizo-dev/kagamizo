@@ -10,10 +10,10 @@
 #   cards freeze <name>     stop a card at once; `unfreeze` restores it
 #   cards unfreeze <name>
 #
-# plan, spend and funds run anywhere on a read-only token; apply, freeze and
-# unfreeze need the card token, which Mercury only accepts from the host's
-# allowlisted IP (./secrets.nix). A card made by hand in Mercury with a
-# declared nickname (kagamizo/<vendor>) is simply adopted.
+# Every command runs on the OAuth session from `mercury-session login`
+# (./session.nix), which the CLI refreshes and the wrapper stores back. A card
+# made by hand in Mercury with a declared nickname (kagamizo/<vendor>) is
+# simply adopted.
 #
 # A card Mercury lets reveal (agentic cards) goes straight from `mercury
 # cards reveal` into a Proton Pass credit card item, card-<name> in the
@@ -85,6 +85,12 @@ in
   config.accounts.demands = lib.optionals (cfg.cards != { }) [
     {
       inherit (cfg) account;
+      capability = "oauthSessions";
+      need = true;
+      why = "cards and mercury-session run on an OAuth session, not dashboard tokens";
+    }
+    {
+      inherit (cfg) account;
       capability = "virtualCards";
       need = true;
       why = "mercury.cards (${lib.concatStringsSep ", " (lib.attrNames cfg.cards)})";
@@ -108,10 +114,15 @@ in
         runtimeInputs = [
           config.packages.mercury
           config.packages.pass-cli
+          config.packages.secretspec
+          pkgs.coreutils
           pkgs.jq
         ];
         text = ''
-          : "''${MERCURY_API_KEY:?}"
+          # shellcheck source=/dev/null
+          . ${config.packages.mercury-with-session}
+          creds=$XDG_CONFIG_HOME/mercury/credentials.json
+          [ -s "$creds" ] || { echo "cards: no Mercury session; run mercury-session login" >&2; exit 1; }
           cards=${lib.escapeShellArg (builtins.toJSON cards)}
           vault=${lib.escapeShellArg vault}
           usage="usage: cards <plan|spend [YYYY-MM]|funds|apply [--prune]|freeze <name>|unfreeze <name>>"
@@ -308,13 +319,7 @@ in
         # Builds only while the declared plans cover what the repo needs.
         text = builtins.seq top.accounts.checked ''
           export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
-          # Reads anywhere on the read-only token; writes on the card token,
-          # which Mercury accepts only from the host's allowlisted IP.
-          case "''${1:-}" in
-            apply | freeze | unfreeze) profile=mercury-cards ;;
-            *) profile=mercury ;;
-          esac
-          exec secretspec run --file ${spec} --profile "$profile" \
+          exec secretspec run --file ${spec} --profile mercury-session \
             --reason "cards $*" -- ${run}/bin/cards-run "$@"
         '';
       };

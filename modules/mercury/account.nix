@@ -11,6 +11,7 @@
       cardReveal = "flag";
       paymentApprovals = "flag";
       writeTokensNeedIpAllowlist = "flag";
+      oauthSessions = "flag";
     };
 
     plans.mercury.standard = {
@@ -37,11 +38,17 @@
           value = true;
           source = "https://github.com/MercuryTechnologies/mercury-go";
         };
-        # Read-write and custom write tokens only work from allowlisted IPs;
-        # read-only tokens need none. So card writes run on the host.
+        # Read-write and custom write tokens only work from allowlisted IPs,
+        # which is why the repo uses no dashboard tokens at all (below).
         writeTokensNeedIpAllowlist = {
           value = true;
           source = "https://docs.mercury.com/docs/getting-started";
+        };
+        # The official CLI signs in with OAuth (offline_access, read, write)
+        # and refreshes the session itself: `mercury-session login`.
+        oauthSessions = {
+          value = true;
+          source = "https://github.com/MercuryTechnologies/mercury-cli";
         };
         # Money movement asks for a tap in the Mercury app.
         paymentApprovals = {

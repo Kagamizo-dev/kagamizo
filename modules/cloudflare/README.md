@@ -220,13 +220,9 @@ around.
   `Kagamizo-LLC/openrouter-management-key`) and first credit top-up are made
   in its dashboard. After those, `hcloud`, OpenTofu and the
   `openrouter` wrapper do everything.
-- **Mercury's two API tokens** are made in its dashboard: a read-only one
-  (`Kagamizo-LLC/mercury-api-token-read`, no IP allowlist) for `cards plan`,
-  `spend` and `funds` anywhere, and a card-write one
-  (`Kagamizo-LLC/mercury-api-token-cards`) that Mercury only accepts from
-  allowlisted IPs, so it is bound to the host and `cards apply` runs there.
-  Until the host exists, cards are made in the Mercury app with their declared
-  nickname (`kagamizo/<vendor>`) and limit, and `cards plan` checks them.
+- **Mercury** needs no dashboard token: `mercury-session login` runs the
+  official CLI's OAuth sign-in, an approval link. Approving on a phone leaves
+  a failed 127.0.0.1 page whose address is handed back to the waiting login.
   Entering a card on a vendor's billing page is manual wherever Mercury will
   not reveal it into Proton Pass.
 - **Public's personal secret** (`Zachariah-Root/public-personal-secret`) is
