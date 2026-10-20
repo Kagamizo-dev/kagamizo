@@ -8,7 +8,7 @@
     # The images' nixpkgs, shared by everything else in the flake.
     nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
 
-    # Dendritic layout: every file under ./parts is a flake-parts module.
+    # Dendritic layout: every file under ./modules is a flake-parts module.
     flake-parts = {
       url = "git+https://github.com/hercules-ci/flake-parts?ref=main";
       inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -31,5 +31,5 @@
     ];
   };
 
-  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./parts);
+  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }

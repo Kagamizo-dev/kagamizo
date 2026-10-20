@@ -45,7 +45,7 @@ jobs:
         run: nix build --print-build-logs --out-link result .#yoga-c940-iso
 
       - name: Boot the ISO in QEMU (UEFI, as a USB stick)
-        run: ./scripts/boot-iso.sh result/iso/*.iso 600
+        run: ./modules/yoga-c940/_scripts/boot-iso.sh result/iso/*.iso 600
 
       - name: Check size against the 2 GB release-asset limit
         id: size
@@ -62,7 +62,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-        run: ./scripts/publish-release.sh yoga-c940-beta "Yoga C940 ISO (beta)" --prerelease out/yoga-c940-ephemeral.iso
+        run: ./modules/yoga-c940/_scripts/publish-release.sh yoga-c940-beta "Yoga C940 ISO (beta)" --prerelease out/yoga-c940-ephemeral.iso
 
       - name: Upload as workflow artifact (too big for a release asset)
         if: steps.size.outputs.big == 'true'
@@ -110,4 +110,4 @@ jobs:
           gh release download yoga-c940-beta --repo "$REPO" --pattern yoga-c940-ephemeral.iso --dir out
 
       - name: Publish stable release
-        run: ./scripts/publish-release.sh yoga-c940-stable "Yoga C940 ISO (stable)" --latest out/yoga-c940-ephemeral.iso
+        run: ./modules/yoga-c940/_scripts/publish-release.sh yoga-c940-stable "Yoga C940 ISO (stable)" --latest out/yoga-c940-ephemeral.iso

@@ -6,9 +6,11 @@ name: infra
 on:
   pull_request:
     paths:
-      - parts/_lib/**
-      - parts/cloudflare/**
-      - parts/identity/**
+      - modules/_lib/**
+      - modules/cloudflare/**
+      - modules/identity/**
+      - modules/github/**
+      - modules/catalog/**
       - secretspec.toml
       - flake.nix
       - flake.lock
@@ -16,9 +18,11 @@ on:
   push:
     branches: [main]
     paths:
-      - parts/_lib/**
-      - parts/cloudflare/**
-      - parts/identity/**
+      - modules/_lib/**
+      - modules/cloudflare/**
+      - modules/identity/**
+      - modules/github/**
+      - modules/catalog/**
       - secretspec.toml
       - flake.nix
       - flake.lock
@@ -33,7 +37,7 @@ env:
 jobs:
   plan:
     name: plan (agent view, read only)
-    # Off until setup is done (parts/cloudflare/README.md, step 7). Fork PRs get no
+    # Off until setup is done (modules/cloudflare/README.md, step 7). Fork PRs get no
     # secrets, so only branches of this repo are planned.
     if: >-
       vars.INFRA_ENABLED == 'true' && github.event_name == 'pull_request' &&
