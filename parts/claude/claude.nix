@@ -24,6 +24,7 @@
           secretspec
           cf
           cloudflare-login
+          bootstrap
           infra
           registrar
           proton

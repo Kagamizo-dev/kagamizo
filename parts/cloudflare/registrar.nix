@@ -14,9 +14,9 @@
 #                                          declared ledger (the budget counts
 #                                          only declared ones)
 #
-# Every call is a typed `cf` command (../_lib/cli.nix, catalog/cf.json). cf
-# authenticates with CLOUDFLARE_API_TOKEN when set (secretspec profile
-# `registrar`), otherwise with the session from `cloudflare-login`.
+# Every call is a typed `cf` command (../_lib/cli.nix, catalog/cf.json),
+# authenticated by your `cloudflare-login` session: account tokens cannot hold
+# Registrar, so no stored token can buy a domain.
 # Registrations are billed to the account's default payment method and are
 # non-refundable.
 {

@@ -4,9 +4,9 @@
 #
 # prints a link and a one-time code. Open the link on your phone, sign in to
 # Cloudflare (your 2FA), check the code and the scopes below, and approve.
-# The session then mints the scoped tokens in tokens.nix; tokens minted over
-# OAuth can never exceed the scopes approved here, so this list is the ceiling
-# for every token in the account.
+# `bootstrap` then mints the scoped tokens in tokens.nix with it; tokens minted
+# over OAuth can never exceed the scopes approved here, so this list is the
+# ceiling for every token in the account.
 {
   config,
   lib,

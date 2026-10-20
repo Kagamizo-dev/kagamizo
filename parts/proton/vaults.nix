@@ -7,7 +7,7 @@
 #   proton apply    create the missing vaults
 #
 # Values are never written by this tool: they come from you (dashboard tokens)
-# or from the bootstrap layer's outputs. Proton has no API for mail domains or
+# or from `bootstrap`. Proton has no API for mail domains or
 # addresses, so those stay manual: add the domain under Settings, Domain names,
 # then copy the verification and DKIM values into identity.domains.<name>.proton.
 {
@@ -61,7 +61,7 @@ in
 
   config = {
     proton = {
-      # Root-level secrets in your personal root vault; Kagamizo's own secrets
+      # Your personal root vault (your own logins); Kagamizo's own secrets
       # (its GitHub organization, its logins) in its vault. CI and agents each
       # get a vault of their own, so an agent token can never read the others.
       infraVaults = {

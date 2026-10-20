@@ -1,7 +1,9 @@
 # Cloudflare as code: each layer is plain Nix rendered to OpenTofu's JSON
 # syntax, run by the `infra` app with secrets supplied by secretspec.
 #
-#   nix run .#infra -- <bootstrap|cloudflare> <tofu args...>
+#   nix run .#infra -- cloudflare <tofu args...>
+#
+# The tokens and the state bucket come first, from `bootstrap` (bootstrap.nix).
 {
   config,
   lib,
@@ -46,10 +48,6 @@ in
       # Each layer is checked against the pinned provider (catalog/) before it
       # is written out.
       configs = lib.mapAttrs (name: c: pkgs.writeText "${name}.tf.json" (builtins.toJSON (cli.tofu c))) {
-        bootstrap = import ./_bootstrap.nix {
-          inherit lib cloudflare backend;
-          zoneIds = lib.filter (id: id != null) (lib.mapAttrsToList (_: d: d.zoneId) domains);
-        };
         cloudflare = import ./_zones.nix { inherit lib domains backend; };
       };
     in
@@ -64,11 +62,10 @@ in
           pkgs.jq
         ];
         text = ''
-          usage="usage: infra <bootstrap|cloudflare> <tofu args...>"
+          usage="usage: infra cloudflare <tofu args...>"
           layer=''${1:?$usage}
           shift
           case "$layer" in
-            bootstrap) config=${configs.bootstrap} ;;
             cloudflare) config=${configs.cloudflare} ;;
             *) echo "$usage" >&2; exit 2 ;;
           esac

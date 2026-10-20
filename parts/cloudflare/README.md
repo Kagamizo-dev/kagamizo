@@ -22,8 +22,9 @@ parts/
 ├─ cloudflare/
 │  ├─ account.nix          account ID, state bucket, token expiry
 │  ├─ tokens.nix           the API token profiles (views)
-│  ├─ _bootstrap.nix       layer 1: mints tokens.nix          (you, by hand)
-│  ├─ _zones.nix           layer 2: DNS on every zone          (CI, from master)
+│  ├─ login.nix            `cloudflare-login`: the OAuth session (you, 2FA)
+│  ├─ bootstrap.nix        `bootstrap`: mints tokens.nix and the state bucket
+│  ├─ _zones.nix           the OpenTofu layer: DNS on every zone (CI, from master)
 │  ├─ infra.nix            the `infra` app and the offline validate check
 │  └─ registrar.nix        the `registrar` app: check and buy domains
 └─ proton/
@@ -80,13 +81,14 @@ vault can be which:
 
 | Vault | Holds | Must be |
 | --- | --- | --- |
-| `Zachariah-Root` | Cloudflare root token, bootstrap state, `registrar` token | a person's vault |
+| `Zachariah-Root` | your own logins; no Cloudflare credential (the root is your OAuth session) | a person's vault |
 | `Kagamizo-LLC` | Kagamizo's own credentials: its GitHub organization, its logins | an LLC's or nonprofit's vault |
 | `Kagamizo-CI` | `ci-apply` token, cloudflare state | CI only |
 | `Kagamizo-Agents` | `agent-readonly` token, read-only state, OpenRouter key | agents only |
 
-The registrar token is root-level although it is minted, not dashboard-made:
-it spends money on the whole account and cannot be scoped to one LLC.
+Account-wide power (minting tokens, buying domains) is never stored: it is
+your `cloudflare-login` session, approved on your phone behind Cloudflare's
+2FA, and it dies with the container.
 
 Every credential is a view. A Proton Pass agent token opens exactly one vault,
 and secretspec turns a vault into the same environment variables every time,
@@ -94,8 +96,8 @@ so what a process can do depends only on which vault it was given.
 
 | Role | Vault | Cloudflare token | Can |
 | --- | --- | --- | --- |
-| You (bootstrap) | `Zachariah-Root` | root | mint the tokens below |
-| You (registrar) | `Zachariah-Root` | `registrar` | buy domains, within budget; read zones |
+| You (`bootstrap`) | none | OAuth session | mint the tokens below and the state bucket |
+| You (`registrar`) | none | OAuth session | buy domains, within budget; read zones |
 | CI on `master` | `Kagamizo-CI` | `ci-apply` | apply merged changes |
 | Agents, PR plans | `Kagamizo-Agents` | `agent-readonly` | read everything, change nothing |
 
@@ -105,7 +107,8 @@ Vault names are declared once, in `parts/proton/vaults.nix`.
 
 ```bash
 nix run .#cloudflare-login                                 # OAuth session: a link you approve
-nix run .#infra -- <bootstrap|cloudflare> <tofu args...>   # OpenTofu on a layer
+nix run .#bootstrap -- <plan|apply|rotate <name>>          # tokens and state bucket
+nix run .#infra -- cloudflare <tofu args...>               # OpenTofu
 nix run .#registrar -- check                               # price every candidate
 nix run .#registrar -- register <domain> <price>           # buy one (billed, budgeted)
 nix run .#registrar -- zone <domain>                       # its zone ID
@@ -126,12 +129,12 @@ In cloud sessions all four are on PATH (`.claude/hooks/session-start.sh`).
    the GitHub app.
 4. Merge. The `apply` job applies it with the `ci-apply` view.
 
-Changes to `tokens.nix` only take effect when bootstrap is re-run; CI cannot
-mint tokens.
+Changes to `tokens.nix` only take effect when you run `bootstrap apply`; CI
+cannot mint tokens.
 
 **Kill switch:** `pass-cli agent delete <name>` cuts an agent token off
 immediately. To kill Cloudflare access too, delete the token on the dashboard
-(My Profile, API Tokens) or run bootstrap with `destroy`.
+(Manage Account, Account API Tokens).
 
 ## Spending limits
 
@@ -146,9 +149,9 @@ here, twice:
 - **At purchase.** `registrar register` adds this month's purchases and
   renewals from that ledger to the price and refuses to buy over the budget.
 
-The `registrar` token is the only one that can buy domains, and it lives in
-the root vault, so every purchase goes through this check and your Proton
-Pass login (with 2FA). The ledger only knows what is declared, so record each
+Only your `cloudflare-login` session can buy domains (account tokens cannot
+hold Registrar), so every purchase goes through this check and your
+Cloudflare 2FA. The ledger only knows what is declared, so record each
 purchase right away; the command prints the lines to add.
 
 ## Adding a domain
@@ -159,8 +162,8 @@ purchase right away; the command prints the lines to add.
    nothing is charged by accident. Registrations are non-refundable.
 3. Declare it under `identity.domains` with `registrar = "cloudflare"`, the
    `registration` lines the command printed, its mailboxes, and its `zoneId`
-   from `registrar zone <domain>`. Re-run bootstrap so the ci and agent tokens
-   cover the new zone.
+   from `registrar zone <domain>`. Run `bootstrap apply` so the ci and agent
+   tokens cover the new zone.
 4. In Proton: Settings, Domain names, add it. Copy the verification value and
    DKIM ID into the domain's `proton` field; the next apply publishes MX, SPF,
    DKIM and DMARC. Then create the mailboxes in Proton, one per declared name.
@@ -184,45 +187,31 @@ default list of common package managers*, and paste the output of
 Done already: account and zone IDs, and the vaults (`proton apply`).
 
 1. **Dashboard, once** (these need your login and 2FA):
-   - **Root token:** My Profile, API Tokens, Create Token, template *Create
-     Additional Tokens*. It is the only token that can mint others.
+   - **R2:** enable it (R2, Overview). The API refuses to create buckets
+     until it is on.
    - **Registrar:** a default payment method (Billing), a default registrant
      contact, and accepting the Domain Registration Agreement (Domains,
      Registrations). Needed only for buying domains.
-2. **State bucket.** R2, create bucket `nix-images-tofu-state`. Then R2, Manage
-   API tokens: one token *Object Read & Write* and one *Object Read only*, both
-   scoped to that bucket. Each shows an S3 Access Key ID and Secret.
-3. **Items.** Add these as Note items (title exactly as shown, value in the
-   note body). `proton plan` lists whatever is still missing:
+2. **Sign in.** `cloudflare-login` (the link you approve) and `pass-cli login`.
+3. **Mint.** `bootstrap plan` shows what it will do; `bootstrap apply` creates
+   the state bucket, generates the state passphrase, mints the four tokens in
+   `tokens.nix` and writes each value into its vault:
 
-   | Item title | `Zachariah-Root` | `Kagamizo-CI` | `Kagamizo-Agents` |
-   | --- | --- | --- | --- |
-   | `cloudflare-token` | root token | after step 4 | after step 4 |
-   | `cloudflare-registrar-token` | after step 4 | | |
-   | `r2-state-key-id` | read & write | read & write | read only |
-   | `r2-state-secret` | read & write | read & write | read only |
-   | `tofu-state-passphrase` | passphrase A | passphrase B | passphrase B |
-   | `openrouter-api-key` | | | your OpenRouter key |
+   | Item title | `Kagamizo-CI` | `Kagamizo-Agents` |
+   | --- | --- | --- |
+   | `cloudflare-token` | `ci-apply` | `agent-readonly` |
+   | `r2-state-key-id`, `r2-state-secret` | `state-write` | `state-read` |
+   | `tofu-state-passphrase` | generated | the same value |
+   | `openrouter-api-key` | | your OpenRouter key, by hand |
 
-   `Kagamizo-LLC/github-token` comes later, with the GitHub organization.
+   R2's S3 API takes an account token as a key pair: the token ID is the
+   access key ID and the SHA-256 of its value the secret. If `bootstrap plan`
+   names a permission group Cloudflare does not offer account tokens, fix the
+   name in `tokens.nix`. `proton plan` then shows every reference as `ok`.
 
-   Generate each passphrase with `openssl rand -base64 32`. A encrypts the
-   bootstrap state (which contains token values), B the cloudflare state.
-
-4. **Mint the tokens.**
-
-   ```bash
-   secretspec run --profile bootstrap -- nix run .#infra -- bootstrap apply
-   secretspec run --profile bootstrap -- nix run .#infra -- bootstrap output -raw ci-apply \
-     | secretspec set CLOUDFLARE_API_TOKEN --profile ci
-   secretspec run --profile bootstrap -- nix run .#infra -- bootstrap output -raw agent-readonly \
-     | secretspec set CLOUDFLARE_API_TOKEN --profile agent
-   secretspec run --profile bootstrap -- nix run .#infra -- bootstrap output -raw registrar \
-     | secretspec set CLOUDFLARE_API_TOKEN --profile registrar
-   ```
-
-   If the plan fails with *Unknown Cloudflare permission groups*, Cloudflare
-   names one of them differently; fix the name in `tokens.nix`.
+   Re-run `bootstrap apply` after changing `tokens.nix` or `tokenExpiry`: it
+   updates existing tokens in place, keeping their values. `bootstrap rotate
+   <name>` replaces one value.
 
 5. **Proton Pass agent tokens**, one per consumer, each limited to one vault:
 
@@ -269,7 +258,5 @@ Agents then change infrastructure the same way you do: by opening a PR.
 
 ## Not covered yet
 
-- The registrar permission is declared as `Registrar Write`, after the docs'
-  "Registrar write"; the first bootstrap confirms the exact name.
 - Cloudflare Tunnel and Access (for God's Eye View on the Pi), Workers and
   Pages: the tokens already allow them; add the resources to `_zones.nix`.

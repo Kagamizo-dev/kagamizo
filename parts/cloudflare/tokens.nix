@@ -1,25 +1,18 @@
-# Cloudflare API token profiles, minted by the bootstrap layer. Each profile is
-# a view: the exact set of things whoever holds it can do. Names are permission
-# group names as the API lists them; an unknown name fails the plan with a
-# message naming it.
+# Cloudflare API token profiles, minted by `bootstrap` as account-owned tokens.
+# Each profile is a view: the exact set of things whoever holds it can do.
+# Names are permission group names as the API lists them; `bootstrap plan`
+# fails, naming it, on one Cloudflare does not offer account tokens.
 #
 # Deliberately absent everywhere: Billing, API Tokens, Account Settings Write,
-# Memberships, and Zone Write (which can delete the zone). Registrar only in
-# the registrar profile.
+# Memberships, Zone Write (which can delete the zone) and Registrar. Account
+# tokens cannot hold Registrar at all; buying domains takes your own
+# `cloudflare-login` session.
 # Zone permissions apply to every zone declared under identity.domains.
 {
   cloudflare.tokens = {
-    # Buying domains, nothing else. Lives in the root vault: only you can use it.
-    # Zone Read on every zone lets `registrar zone` find a new domain's zone ID.
-    # The name is the docs' "Registrar write"; bootstrap fails, naming it, if
-    # Cloudflare lists it differently.
-    registrar = {
-      account = [ "Registrar Write" ];
-      allZones = [ "Zone Read" ];
-    };
-
     # Agents and PR plans: look at everything, change nothing.
     agent-readonly = {
+      storeIn = [ "agent" ];
       zone = [
         "Zone Read"
         "DNS Read"
@@ -42,6 +35,7 @@
 
     # CI applying merged changes from master.
     ci-apply = {
+      storeIn = [ "ci" ];
       zone = [
         "Zone Read"
         "DNS Write"
@@ -61,6 +55,16 @@
         "Cloudflare Tunnel Write"
         "Access: Apps and Policies Write"
       ];
+    };
+
+    # The OpenTofu state: CI writes it, agents and PR plans only read it.
+    state-write = {
+      storeIn = [ "ci" ];
+      bucket = [ "Workers R2 Storage Bucket Item Write" ];
+    };
+    state-read = {
+      storeIn = [ "agent" ];
+      bucket = [ "Workers R2 Storage Bucket Item Read" ];
     };
   };
 }
