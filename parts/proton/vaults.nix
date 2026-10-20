@@ -88,7 +88,8 @@ in
             config.packages.pass-cli
             config.packages.secretspec
           ];
-          text = ''
+          # Builds only while the declared plans cover what the repo needs.
+          text = builtins.seq top.accounts.checked ''
             usage="usage: proton <plan|apply>"
             declared=${lib.escapeShellArg (builtins.toJSON vaults)}
             refs=${lib.escapeShellArg (builtins.toJSON refs)}

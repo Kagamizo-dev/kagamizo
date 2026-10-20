@@ -26,6 +26,7 @@
   ...
 }:
 let
+  top = config;
   inherit (config.cloudflare.checked) accountId monthlyBudgetUsd;
   inherit (config.identity.checked) entities domains;
   cli = import ../_lib/cli.nix {
@@ -37,6 +38,15 @@ let
   registrations = lib.filterAttrs (_: r: r != null) (lib.mapAttrs (_: d: d.registration) domains);
 in
 {
+  accounts.demands = [
+    {
+      account = "cloudflare";
+      capability = "registrarAtCost";
+      need = true;
+      why = "registrar register, budgeted at Cloudflare's registration price";
+    }
+  ];
+
   perSystem =
     { pkgs, config, ... }:
     {
@@ -47,7 +57,8 @@ in
           pkgs.jq
           pkgs.util-linux # column
         ];
-        text = ''
+        # Builds only while the declared plans cover what the repo needs.
+        text = builtins.seq top.accounts.checked ''
           usage="usage: registrar check [domain...] | register <domain> <price> | status <domain> | zone <domain> | ledger"
           export CLOUDFLARE_ACCOUNT_ID=${accountId}
           candidates=${lib.escapeShellArg (builtins.toJSON candidates)}

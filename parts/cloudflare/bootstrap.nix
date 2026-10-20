@@ -19,6 +19,7 @@
   ...
 }:
 let
+  top = config;
   cloudflare = config.cloudflare.checked;
   inherit (cloudflare) accountId tokens;
   inherit (config.proton.secretspec) providers profiles;
@@ -108,7 +109,8 @@ in
           pkgs.openssl
           pkgs.coreutils
         ];
-        text = ''
+        # Builds only while the declared plans cover what the repo needs.
+        text = builtins.seq top.accounts.checked ''
           usage="usage: bootstrap plan | apply | rotate <name>"
           export CLOUDFLARE_ACCOUNT_ID=${accountId}
           # Containers have no keyring; without this pass-cli logs itself out.

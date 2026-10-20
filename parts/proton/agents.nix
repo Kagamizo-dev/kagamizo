@@ -55,6 +55,15 @@ in
     default = { };
   };
 
+  config.accounts.demands = [
+    {
+      account = "proton";
+      capability = "passAccessTokens";
+      need = true;
+      why = "proton.agents (agent tokens) and secretspec in CI";
+    }
+  ];
+
   config.proton.agents = {
     # GitHub Actions on master: applies, so it writes the state.
     nix-images-ci = {

@@ -48,8 +48,31 @@ in
     };
   };
 
-  config.identity.checked = t.identity {
-    entities = lib.mapAttrs (_: e: entityDefaults // e) cfg.entities;
-    domains = lib.mapAttrs (_: d: domainDefaults // d) cfg.domains;
+  config = {
+    identity.checked = t.identity {
+      entities = lib.mapAttrs (_: e: entityDefaults // e) cfg.entities;
+      domains = lib.mapAttrs (_: d: domainDefaults // d) cfg.domains;
+    };
+
+    # Every domain with mailboxes is a Proton custom domain, and every mailbox
+    # a Proton address, on top of the account's own address.
+    accounts.demands =
+      let
+        mailDomains = lib.filterAttrs (_: d: d.mailboxes != [ ]) config.identity.checked.domains;
+      in
+      [
+        {
+          account = "proton";
+          capability = "customDomains";
+          need = lib.length (lib.attrNames mailDomains);
+          why = "identity.domains with mailboxes (${lib.concatStringsSep ", " (lib.attrNames mailDomains)})";
+        }
+        {
+          account = "proton";
+          capability = "addresses";
+          need = 1 + lib.foldl' (n: d: n + lib.length d.mailboxes) 0 (lib.attrValues mailDomains);
+          why = "identity mailboxes plus the account's own address";
+        }
+      ];
   };
 }

@@ -18,6 +18,11 @@ enums for CLI options (`parts/_lib/cli.nix`, `catalog/`), nix-effects types
 for the identity model (`parts/_lib/types.nix`). A wrong value fails
 evaluation, naming the field, before anything runs.
 
+Accounts are typed too (`parts/accounts/`): every account is declared on a
+plan, every plan lists its capabilities with the page that states them, and
+every module declares what it needs (`accounts.demands`). Never rely on what
+an account can do without a capability and a demand for it.
+
 ## Secrets
 
 Values live only in Proton Pass; `secretspec.toml` (generated from

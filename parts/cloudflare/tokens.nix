@@ -9,6 +9,15 @@
 # `cloudflare-login` session.
 # Zone permissions apply to every zone declared under identity.domains.
 {
+  accounts.demands = [
+    {
+      account = "cloudflare";
+      capability = "accountTokens";
+      need = true;
+      why = "cloudflare.tokens, minted as account tokens by bootstrap";
+    }
+  ];
+
   cloudflare.tokens = {
     # Agents and PR plans: look at everything, change nothing.
     agent-readonly = {

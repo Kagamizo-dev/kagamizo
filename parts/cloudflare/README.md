@@ -6,6 +6,14 @@ vaults are all declared in Nix under `parts/`, type-checked with
 JSON, and changed only through a reviewed plan. Secrets are never in this
 (public) repo: `secretspec.toml` names them, Proton Pass holds them.
 
+## Accounts and plans
+
+`parts/accounts/` declares every account (Proton Unlimited, Cloudflare Free,
+the planned Kagamizo GitHub organization on Free) and what each plan includes,
+with the provider's page as evidence. Modules declare what they need as
+`accounts.demands`, e.g. one Proton custom domain per domain with mailboxes;
+evaluation fails, naming the plan and its source, if a plan does not cover it.
+
 ## Layout
 
 Every `.nix` file under `parts/` is a flake-parts module (the dendritic

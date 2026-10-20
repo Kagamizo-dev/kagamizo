@@ -10,6 +10,7 @@
           inherit (config.identity.checked) entities domains;
           cloudflare = removeAttrs config.cloudflare.checked [ "tokens" ];
           inherit (config.proton) vaults;
+          accounts = config.accounts.checked;
         }
       );
     };
