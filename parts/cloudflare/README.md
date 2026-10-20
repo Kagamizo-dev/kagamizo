@@ -231,6 +231,10 @@ around.
   `signup` prepares it from Proton Pass. Everything after (repos, secrets,
   environments, domain verification) is `parts/github`, applied by the
   `github-bootstrap` workflow, since cloud sessions cannot reach org APIs.
+- **The Claude GitHub app on the organization**: a cloud session reaches
+  only repos the app is installed on, and installing it on a new org is a
+  page on github.com, not an API. Until then a session cannot follow
+  `github-bootstrap`'s transfer of a repo into the org.
 - **Proton Mail domain and addresses** (`dev@kagamizo.com` and the others):
   Proton publishes no API for them.
 - **Registrar prerequisites**: default payment method, registrant contact and

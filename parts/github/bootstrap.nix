@@ -184,11 +184,22 @@ in
             fi
 
             step "$full: visibility, environments, secrets, variables"
-            ${cli.gh "repo edit" {
-              repository.shell = "$full";
-              visibility.shell = "$(jq -r .visibility <<<\"$r\")";
-              accept-visibility-change-consequences = true;
-            }}
+            # A transfer settles a while after the repo answers at its new
+            # path; until then edits fail with "still in progress".
+            for n in $(seq 30); do
+              if out=$(${cli.gh "repo edit" {
+                repository.shell = "$full";
+                visibility.shell = "$(jq -r .visibility <<<\"$r\")";
+                accept-visibility-change-consequences = true;
+              }} 2>&1); then
+                break
+              fi
+              if [ "$n" = 30 ] || ! grep -q 'still in progress' <<<"$out"; then
+                echo "$out" >&2
+                exit 1
+              fi
+              sleep 10
+            done
             for env in $(jq -r '.environments | keys[]' <<<"$r"); do
               e=$(jq -c --arg e "$env" '.environments[$e]' <<<"$r")
               jq -n '{deployment_branch_policy: {protected_branches: false, custom_branch_policies: true}}' |
