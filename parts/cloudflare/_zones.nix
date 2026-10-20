@@ -1,22 +1,17 @@
-# Layer 2: what lives on the zone. Planned on every PR with the agent-readonly
-# token, applied from master by CI with the ci-apply token.
+# Layer 2: what lives on each zone, derived from identity.domains. Planned on
+# every PR with the agent-readonly token, applied from master by CI with the
+# ci-apply token. Domains without a zoneId yet contribute nothing.
 {
   lib,
-  settings,
+  domains,
   backend,
 }:
 let
-  inherit (settings) zone proton;
+  # Resource names must be unique across zones: kagamizo.com -> kagamizo-com.
+  slug = lib.replaceStrings [ "." ] [ "-" ];
 
-  record =
-    attrs:
-    {
-      zone_id = settings.zoneId;
-      ttl = 1; # automatic
-    }
-    // attrs;
-
-  protonRecords = lib.optionalAttrs proton.enable (
+  protonRecords =
+    zone: proton:
     {
       proton-verification = {
         name = zone;
@@ -61,10 +56,22 @@ let
           "2"
           "3"
         ]
-    )
-  );
+    );
 
-  records = lib.mapAttrs (_: record) (protonRecords // settings.records);
+  zoneRecords =
+    zone: d:
+    lib.mapAttrs' (
+      name: attrs:
+      lib.nameValuePair "${slug zone}-${name}" (
+        {
+          zone_id = d.zoneId;
+          ttl = 1; # automatic
+        }
+        // attrs
+      )
+    ) (lib.optionalAttrs (d.proton != null) (protonRecords zone d.proton) // d.records);
+
+  records = lib.concatMapAttrs zoneRecords (lib.filterAttrs (_: d: d.zoneId != null) domains);
 in
 {
   terraform = backend "cloudflare";

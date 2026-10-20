@@ -2,14 +2,17 @@
 # with your own root token (one that can create API tokens). Never in CI.
 {
   lib,
-  settings,
-  tokens,
+  cloudflare,
+  zoneIds,
   backend,
 }:
 let
-  resourceKeys = {
-    zone = "com.cloudflare.api.account.zone.${settings.zoneId}";
-    account = "com.cloudflare.api.account.${settings.accountId}";
+  inherit (cloudflare) tokens;
+
+  # Zone permissions cover every declared zone; account ones the account.
+  resources = {
+    zone = lib.genAttrs (map (id: "com.cloudflare.api.account.zone.${id}") zoneIds) (_: "*");
+    account."com.cloudflare.api.account.${cloudflare.accountId}" = "*";
   };
 
   # Unknown names resolve to a dummy ID so the precondition below can report
@@ -19,7 +22,7 @@ let
   policy = scope: names: {
     effect = "allow";
     permission_groups = map (name: { id = groupId name; }) names;
-    resources = builtins.toJSON { ${resourceKeys.${scope}} = "*"; };
+    resources = builtins.toJSON resources.${scope};
   };
 
   token =
@@ -29,11 +32,13 @@ let
     in
     {
       name = "nix-images-${name}";
-      expires_on = settings.tokenExpiry;
-      policies = lib.mapAttrsToList policy (lib.filterAttrs (_: n: n != [ ]) profile);
+      expires_on = cloudflare.tokenExpiry;
+      policies = lib.mapAttrsToList policy (
+        lib.filterAttrs (scope: n: n != [ ] && resources.${scope} != { }) profile
+      );
       lifecycle.precondition = {
         condition = "\${length(setsubtract(${builtins.toJSON names}, keys(local.permission_ids))) == 0}";
-        error_message = "Unknown Cloudflare permission groups in infra/tokens.nix: \${join(\", \", setsubtract(${builtins.toJSON names}, keys(local.permission_ids)))}";
+        error_message = "Unknown Cloudflare permission groups in parts/cloudflare/tokens.nix: \${join(\", \", setsubtract(${builtins.toJSON names}, keys(local.permission_ids)))}";
       };
     };
 in

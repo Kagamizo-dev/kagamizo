@@ -1,7 +1,12 @@
 # Tools for Claude sessions on this repo, pinned to releases newer than nixpkgs
 # carries: pass-cli 2.1+ for agent tokens, secretspec 0.19+ for current pass-cli.
 # Hashes match each project's published .sha256 file.
-{ pkgs, infra }:
+{
+  pkgs,
+  infra,
+  registrar,
+  proton,
+}:
 let
   pass-cli = pkgs.stdenv.mkDerivation rec {
     pname = "pass-cli";
@@ -32,6 +37,8 @@ pkgs.symlinkJoin {
   paths = [
     pass-cli
     secretspec
-    infra.app
+    infra
+    registrar
+    proton
   ];
 }

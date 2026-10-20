@@ -40,7 +40,7 @@ in
 
     allow = {
       cloudflare = {
-        reason = "Cloudflare API for infra/ (OpenTofu, wrangler)";
+        reason = "Cloudflare API: OpenTofu layers and the registrar (parts/cloudflare)";
         hosts = [ "api.cloudflare.com" ];
       };
       proton = {

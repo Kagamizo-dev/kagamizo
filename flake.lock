@@ -31,6 +31,65 @@
         "type": "github"
       }
     },
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790898470,
+        "narHash": "sha256-zTwuwezD0w3hpga6a6P8emidzAZFyWqlNeRBlpWOOl8=",
+        "ref": "main",
+        "rev": "024633cd702b10285db5cb19b40ad48d2399ba60",
+        "revCount": 497,
+        "type": "git",
+        "url": "https://github.com/hercules-ci/flake-parts"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "https://github.com/hercules-ci/flake-parts"
+      }
+    },
+    "import-tree": {
+      "locked": {
+        "lastModified": 1788467110,
+        "narHash": "sha256-ljEMTXP/rH0tOvDzc9gzwww6KcHRPRnEHzd9lK48V7s=",
+        "ref": "main",
+        "rev": "eb1b52eaecc57f7c136d07ae8a93e724dfecac46",
+        "revCount": 104,
+        "type": "git",
+        "url": "https://github.com/vic/import-tree"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "https://github.com/vic/import-tree"
+      }
+    },
+    "nix-effects": {
+      "inputs": {
+        "nix-unit": [],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1782558527,
+        "narHash": "sha256-HHeN3xPIXCKNgko7O1r1TztyYAiHON7reZg6gDc1910=",
+        "ref": "refs/tags/v0.16.0",
+        "rev": "95ef1fbe285069d77f20be2bfc6b56f3bbaac268",
+        "revCount": 94,
+        "type": "git",
+        "url": "https://github.com/kleisli-io/nix-effects"
+      },
+      "original": {
+        "ref": "refs/tags/v0.16.0",
+        "type": "git",
+        "url": "https://github.com/kleisli-io/nix-effects"
+      }
+    },
     "nixos-images": {
       "inputs": {
         "nixos-stable": [
@@ -97,7 +156,14 @@
     },
     "root": {
       "inputs": {
-        "nixos-raspberrypi": "nixos-raspberrypi"
+        "flake-parts": "flake-parts",
+        "import-tree": "import-tree",
+        "nix-effects": "nix-effects",
+        "nixos-raspberrypi": "nixos-raspberrypi",
+        "nixpkgs": [
+          "nixos-raspberrypi",
+          "nixpkgs"
+        ]
       }
     }
   },

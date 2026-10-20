@@ -77,9 +77,15 @@ The Cloudflare account is declared in Nix and applied by OpenTofu: PRs get a
 read-only plan, merging to `master` applies it. Secrets live in Proton Pass and
 are named in `secretspec.toml`. Setup and the token model: [infra/README.md](infra/README.md).
 
+## Identity: domains, mailboxes, vaults
+
+Kagamizo's domains, their mailboxes (seven per domain at most), the Cloudflare
+account and the Proton Pass vaults are declared under `parts/` and type-checked
+with nix-effects. See [parts/cloudflare/README.md](parts/cloudflare/README.md).
+
 ## Checks
 
-`nix flake check` runs nixfmt, statix, deadnix and a NixOS VM test that boots a
+`nix flake check` runs nixfmt, statix, deadnix, the identity type check and a NixOS VM test that boots a
 VM, attaches tmux, presses `Ctrl-a ?` and reads the key finder off the screen.
 CI also runs actionlint and zizmor on the workflows. Format locally with `nix fmt`.
 
