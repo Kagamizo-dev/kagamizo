@@ -1,0 +1,8 @@
+{
+  "name": "cf-pinned",
+  "private": true,
+  "description": "Pins Cloudflare's cf CLI; built by parts/cloudflare/cf.nix. Regenerate package-lock.json with: npm install --package-lock-only --ignore-scripts",
+  "dependencies": {
+    "cf": "1.0.0-beta.13"
+  }
+}

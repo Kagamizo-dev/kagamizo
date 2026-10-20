@@ -7,6 +7,8 @@
   registrar,
   proton,
   commit-lint,
+  cf,
+  cloudflare-login,
 }:
 let
   pass-cli = pkgs.stdenv.mkDerivation rec {
@@ -42,5 +44,7 @@ pkgs.symlinkJoin {
     registrar
     proton
     commit-lint
+    cf
+    cloudflare-login
   ];
 }

@@ -41,7 +41,11 @@ in
     allow = {
       cloudflare = {
         reason = "Cloudflare API: OpenTofu layers and the registrar (parts/cloudflare)";
-        hosts = [ "api.cloudflare.com" ];
+        hosts = [
+          "api.cloudflare.com"
+          # OAuth device login (cloudflare-login): the root session
+          "dash.cloudflare.com"
+        ];
       };
       proton = {
         reason = "pass-cli and secretspec reading Proton Pass";

@@ -24,6 +24,8 @@
           registrar
           proton
           commit-lint
+          cf
+          cloudflare-login
           ;
       };
     in
