@@ -237,8 +237,9 @@ around.
   `github-bootstrap`'s transfer of a repo into the org.
 - **Hetzner and OpenRouter signups** (`signup plan`): web-only. Hetzner
   checks a government ID and a selfie, and its first project API token is made
-  in the Cloud Console; OpenRouter's first management key and first credit
-  top-up are made in its dashboard. After those, `hcloud`, OpenTofu and the
+  in the Cloud Console; OpenRouter's first management key (saved as
+  `Kagamizo-LLC/openrouter-management-key`) and first credit top-up are made
+  in its dashboard. After those, `hcloud`, OpenTofu and the
   `openrouter` wrapper do everything.
 - **Proton Mail domain and addresses** (`dev@kagamizo.com` and the others):
   Proton publishes no API for them.
@@ -257,8 +258,12 @@ launches inherits `OPENROUTER_API_KEY` and the read-only `CLOUDFLARE_API_TOKEN`:
 ```bash
 export PROTON_PASS_SESSION_DIR=$HOME/.pass-orca-fleet
 pass-cli info >/dev/null 2>&1 || PROTON_PASS_PERSONAL_ACCESS_TOKEN=pst_... pass-cli login
-secretspec run --profile agent --reason "orca fleet" -- orca
+nix run .#orca-fleet
 ```
+
+`orca-fleet` runs Orca under the `agent` profile, so its agents hold the
+fleet's own OpenRouter key (`openrouter.keys.orca-fleet`, capped per month),
+and OpenCode starts on `deepseek/deepseek-v4-flash` (`packages.opencode-config`).
 
 Agent sessions last two hours, after which `pass-cli login` has to run again.
 Agents then change infrastructure the same way you do: by opening a PR.

@@ -80,6 +80,13 @@ let
       }
       // state;
 
+      # Kagamizo's OpenRouter account: the management key `openrouter apply`
+      # mints every other key with. It cannot call models itself.
+      openrouter = {
+        defaults.providers = [ "kagamizo" ];
+        OPENROUTER_MANAGEMENT_KEY = secret "OpenRouter management key, made once in the dashboard (a Gap)" "openrouter-management-key";
+      };
+
       # The always-on host, read at boot by its own agent token: the model key
       # Open WebUI and OpenCode use, and the tunnel it serves them through.
       host = {
