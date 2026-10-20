@@ -6,6 +6,7 @@
   infra,
   registrar,
   proton,
+  commit-lint,
 }:
 let
   pass-cli = pkgs.stdenv.mkDerivation rec {
@@ -40,5 +41,6 @@ pkgs.symlinkJoin {
     infra
     registrar
     proton
+    commit-lint
   ];
 }

@@ -49,3 +49,31 @@ jobs:
 
       - run: nix run nixpkgs#actionlint
       - run: nix run nixpkgs#zizmor -- --offline .github/workflows
+
+  commits:
+    name: commit messages (Sentry conventions)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # the whole range, not just the tip
+
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      # PRs: every commit the PR adds. Pushes: every commit pushed; a new
+      # branch (before is all zeros) checks its whole history after the baseline.
+      - name: commit-lint
+        env:
+          RANGE: >-
+            ${{ github.event_name == 'pull_request'
+            && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha)
+            || (github.event.before == '0000000000000000000000000000000000000000' && github.sha
+            || format('{0}..{1}', github.event.before, github.sha)) }}
+        run: nix run .#commit-lint -- "$RANGE"

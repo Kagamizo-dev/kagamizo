@@ -19,7 +19,12 @@
       # Put on PATH by .claude/hooks/session-start.sh in cloud sessions.
       session-tools = import ./_tools.nix {
         inherit pkgs;
-        inherit (config.packages) infra registrar proton;
+        inherit (config.packages)
+          infra
+          registrar
+          proton
+          commit-lint
+          ;
       };
     in
     {
