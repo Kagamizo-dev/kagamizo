@@ -10,6 +10,7 @@
       cardSpendLimits = "flag";
       cardReveal = "flag";
       paymentApprovals = "flag";
+      writeTokensNeedIpAllowlist = "flag";
     };
 
     plans.mercury.standard = {
@@ -35,6 +36,12 @@
         cardReveal = {
           value = true;
           source = "https://github.com/MercuryTechnologies/mercury-go";
+        };
+        # Read-write and custom write tokens only work from allowlisted IPs;
+        # read-only tokens need none. So card writes run on the host.
+        writeTokensNeedIpAllowlist = {
+          value = true;
+          source = "https://docs.mercury.com/docs/getting-started";
         };
         # Money movement asks for a tap in the Mercury app.
         paymentApprovals = {

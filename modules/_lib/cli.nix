@@ -287,7 +287,10 @@ let
         mercuryCatalog.commands.${command}
           or (throw "mercury has no command `${command}`${suggest mercuryCatalog.commands command}");
       options = mercuryCatalog.global // entry.options;
-      Strings = refined "ListOfString" Any (v: builtins.isList v && lib.all builtins.isString v);
+      # A list may mix strings and values the shell supplies ({ shell = "$id"; }).
+      Strings = refined "ListOfString" Any (
+        v: builtins.isList v && lib.all (x: builtins.isString x || isRuntime x) v
+      );
       typeOf =
         name: o:
         if o ? oneOf then

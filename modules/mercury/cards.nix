@@ -3,10 +3,17 @@
 # card (mercury.cards.<vendor>), so the limit sits next to what it pays for.
 #
 #   cards plan              declared cards against the live ones
+#   cards spend [YYYY-MM]   each card's spend this month against its limit
+#   cards funds             the balances the cards draw from
 #   cards apply [--prune]   issue missing cards, correct limits; --prune
 #                           cancels kagamizo/ cards no longer declared (final)
 #   cards freeze <name>     stop a card at once; `unfreeze` restores it
 #   cards unfreeze <name>
+#
+# plan, spend and funds run anywhere on a read-only token; apply, freeze and
+# unfreeze need the card token, which Mercury only accepts from the host's
+# allowlisted IP (./secrets.nix). A card made by hand in Mercury with a
+# declared nickname (kagamizo/<vendor>) is simply adopted.
 #
 # A card Mercury lets reveal (agentic cards) goes straight from `mercury
 # cards reveal` into a Proton Pass credit card item, card-<name> in the
@@ -107,7 +114,7 @@ in
           : "''${MERCURY_API_KEY:?}"
           cards=${lib.escapeShellArg (builtins.toJSON cards)}
           vault=${lib.escapeShellArg vault}
-          usage="usage: cards <plan|apply [--prune]|freeze <name>|unfreeze <name>>"
+          usage="usage: cards <plan|spend [YYYY-MM]|funds|apply [--prune]|freeze <name>|unfreeze <name>>"
 
           # Each line of jsonl output is a card, or a page holding cards.
           live() {
@@ -231,6 +238,37 @@ in
                   fi
                 done
               ;;
+            spend)
+              # One month of card spend against each card's limit (monthly
+              # limits only compare like for like).
+              month=''${2:-$(date -u +%Y-%m)}
+              start="$month-01"
+              end=$(date -u -d "$start +1 month" +%Y-%m-%d)
+              l=$(live)
+              for name in $(jq -r 'keys[]' <<<"$cards"); do
+                c=$(jq -c --arg n "$name" '.[$n]' <<<"$cards")
+                id=$(jq -r --arg n "$(jq -r .nickname <<<"$c")" 'map(select(.nickname == $n))[0].id // empty' <<<"$l")
+                if [ -z "$id" ]; then
+                  echo "  $name: no live card"
+                  continue
+                fi
+                spent=$(${
+                  cli.mercury "transactions list" {
+                    card-id = [ { shell = "$id"; } ];
+                    start.shell = "$start";
+                    end.shell = "$end";
+                    format = "jsonl";
+                  }
+                } | jq -s '[.[] | if has("transactions") then .transactions[] else . end
+                    | select(.status != "failed" and .status != "cancelled") | .amount] | map(-.) | add // 0')
+                echo "  $name: \$$spent of \$$(jq -r .limitUsd <<<"$c")/$(jq -r .interval <<<"$c") in $month"
+              done
+              ;;
+            funds)
+              ${cli.mercury "accounts list" { format = "jsonl"; }} |
+                jq -rs '.[] | if has("accounts") then .accounts[] else . end
+                  | "  \(.name // .nickname): $\(.availableBalance) available (\(.kind), \(.status))"'
+              ;;
             freeze | unfreeze)
               name=''${2:?$usage}
               have=$(byName "$name")
@@ -270,7 +308,13 @@ in
         # Builds only while the declared plans cover what the repo needs.
         text = builtins.seq top.accounts.checked ''
           export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
-          exec secretspec run --file ${spec} --profile mercury \
+          # Reads anywhere on the read-only token; writes on the card token,
+          # which Mercury accepts only from the host's allowlisted IP.
+          case "''${1:-}" in
+            apply | freeze | unfreeze) profile=mercury-cards ;;
+            *) profile=mercury ;;
+          esac
+          exec secretspec run --file ${spec} --profile "$profile" \
             --reason "cards $*" -- ${run}/bin/cards-run "$@"
         '';
       };
