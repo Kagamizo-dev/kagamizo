@@ -2,8 +2,8 @@
 # before the first run; `nix run .#infra` refuses to start while they remain.
 # IDs are on the dashboard: open the zone, Overview page, "API" box (right column).
 {
-  accountId = "REPLACE_ACCOUNT_ID";
-  zoneId = "REPLACE_ZONE_ID";
+  accountId = "73f11fa58ac09529a4fb40284b8ce236";
+  zoneId = "2f1f4505269c5d5ea904ca73d379ef99";
   zone = "example.com";
 
   # R2 bucket holding the encrypted OpenTofu state. Created by hand once, since
