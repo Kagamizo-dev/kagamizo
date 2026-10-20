@@ -1,10 +1,12 @@
 # Applies ./kagamizo.nix to GitHub. It runs on a GitHub Actions runner
 # (.github/workflows/github-bootstrap.yml), because a Claude cloud session
-# may only reach its own repository's API. Your part is two approvals the job
-# prints: a Proton Pass login link and a GitHub device code.
+# may only reach its own repository's API. Your part is the approvals the job
+# posts: a Proton Pass login link, and a GitHub device code when the stored
+# token no longer works.
 #
 #   1. Proton Pass and gh sign in (both logged out again when it ends)
-#   2. gh's token is stored as Kagamizo-LLC/github-token (profile github)
+#   2. gh's token is stored as Kagamizo-LLC/github-token (profile github);
+#      later runs sign in with it, and need a device code only once it fails
 #   3. each verified domain: added to the org; its TXT token is printed for
 #      github.verifiedDomains, and once the record resolves it is verified
 #   4. each repo: transferred in if declared elsewhere, or created and
@@ -119,23 +121,36 @@ in
           step "Proton Pass: approve the link"
           retry approve "Proton Pass login, approve" 'https://account\.proton\.me/[^[:space:]]+' ${cli.passCli "login" { }}
 
-          step "GitHub: approve the code at https://github.com/login/device"
-          retry approve "GitHub device code, enter at https://github.com/login/device" '[A-Z0-9]{4}-[A-Z0-9]{4}' ${
-            cli.gh "auth login" {
-              hostname = "github.com";
-              git-protocol = "https";
-              web = true;
-              scopes = [
-                "admin:org"
-                "repo"
-                "workflow"
-              ];
+          # The token a previous run stored, if GitHub still accepts it; a
+          # device code only when it is missing, expired or revoked.
+          step "GitHub: the stored token"
+          if secretspec get GITHUB_TOKEN --file "$spec" --profile github --reason "$reason" 2>/dev/null |
+            ${
+              cli.gh "auth login" {
+                hostname = "github.com";
+                with-token = true;
+              }
+            } 2>/dev/null && ${cli.gh "auth status" { hostname = "github.com"; }} >/dev/null 2>&1; then
+            echo "  signed in"
+          else
+            step "GitHub: approve the code at https://github.com/login/device"
+            retry approve "GitHub device code, enter at https://github.com/login/device" '[A-Z0-9]{4}-[A-Z0-9]{4}' ${
+              cli.gh "auth login" {
+                hostname = "github.com";
+                git-protocol = "https";
+                web = true;
+                scopes = [
+                  "admin:org"
+                  "repo"
+                  "workflow"
+                ];
+              }
             }
-          }
 
-          step "Storing gh's token as Kagamizo-LLC/github-token"
-          ${cli.gh "auth token" { }} | secretspec set GITHUB_TOKEN --file "$spec" --profile github \
-            --from-file - --reason "$reason" >/dev/null
+            step "Storing gh's token as Kagamizo-LLC/github-token"
+            ${cli.gh "auth token" { }} | secretspec set GITHUB_TOKEN --file "$spec" --profile github \
+              --from-file - --reason "$reason" >/dev/null
+          fi
 
           # A proton-agents variable into a GitHub secret; never printed.
           secret() { # var gh-args...
