@@ -13,9 +13,9 @@
       visibility = "public";
       # PR plans: the read-only view.
       secrets.PROTON_PASS_AGENT_TOKEN = "PROTON_PASS_AGENT_TOKEN";
-      # Applies from master only.
+      # Applies from main only.
       environments.cloudflare = {
-        branches = [ "master" ];
+        branches = [ "main" ];
         secrets.PROTON_PASS_CI_TOKEN = "PROTON_PASS_CI_TOKEN";
       };
       variables.INFRA_ENABLED = "true";

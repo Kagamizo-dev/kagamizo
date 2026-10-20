@@ -1,5 +1,5 @@
 # The OpenTofu layer: what lives on each zone, derived from identity.domains. Planned on
-# every PR with the agent-readonly token, applied from master by CI with the
+# every PR with the agent-readonly token, applied from main by CI with the
 # ci-apply token. Domains without a zoneId yet contribute nothing.
 {
   lib,

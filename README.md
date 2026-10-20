@@ -1,33 +1,37 @@
-# nix-images
+# kagamizo
 
-Ephemeral NixOS images for specific devices, built by GitHub Actions and flashed
-from a phone. Stable `nixos-26.05` base, pinned in `flake.lock`.
+Kagamizo as code: ephemeral NixOS images for specific devices (built by GitHub
+Actions and flashed from a phone), the Cloudflare account, the Proton Pass
+vaults, the GitHub organization and every account they run on. Stable
+`nixos-26.05` base, pinned in `flake.lock`.
 
 ## Devices
 
 | Device | Directory | Arch | Image | Status |
 |---|---|---|---|---|
 | Lenovo Yoga C940-14IIL | `devices/yoga-c940` | x86_64 | live USB ISO, niri desktop | active |
-| Raspberry Pi 5 | `devices/rpi5` | aarch64 | SD card image, headless | paused (beta only) |
+| Raspberry Pi 5 | `devices/rpi5` | aarch64 | SD card image, headless | paused |
 
 Shared building blocks live in `profiles/` (tmux, Proton Pass CLI, niri desktop,
 a welcome screen). A device is a directory under `devices/` that pulls in the
 profiles it wants and adds its own hardware settings (firmware, kernel params).
 To add a device: copy a directory under `devices/`, register it in
-`nixosConfigurations` in `flake.nix`, and add a pipeline like
+`nixosConfigurations` in `parts/images/images.nix`, and add a pipeline like
 `.github/workflows/yoga-c940.yml`.
 
-## Branches: beta and stable
+## One branch, release tags as channels
 
-- **`beta`**: where work happens. Every push is checked, built, boot-tested and
-  published as a **pre-release** (`yoga-c940-beta`).
-- **`stable`**: production. Nobody pushes to it by hand. The pipeline moves it
-  forward to a `beta` commit only after **all** flake checks and the ISO boot test
-  passed, and publishes that ISO as the `yoga-c940-stable` release.
+All work lands on **`main`**, through PRs. The channels are release tags that
+only the pipeline moves:
+
+- **`yoga-c940-beta`**: every push to `main` is checked, built, boot-tested and
+  published as this **pre-release**.
+- **`yoga-c940-stable`**: the same ISO, republished once **all** flake checks
+  and the ISO boot test passed.
 
 Stable download (always the last build that passed everything):
 
-    https://github.com/presentatou/nix-images/releases/download/yoga-c940-stable/yoga-c940-ephemeral.iso
+    https://github.com/kagamizo-dev/kagamizo/releases/download/yoga-c940-stable/yoga-c940-ephemeral.iso
 
 ## Lenovo Yoga C940-14IIL live USB
 
@@ -69,7 +73,7 @@ alone as long as you don't mount or write to it yourself.
 
 Wallpaper: `profiles/wallpaper/japan-countryside-4k.png` (drawn by `scripts/make-wallpaper.py`), set at startup by `swaybg`
 (niri draws no wallpaper itself). To change it, replace that file (keep it a PNG under
-~8 MB; the build checks) and push to `beta`.
+~8 MB; the build checks) and push to `main`.
 
 Hardware notes: Intel graphics only. The image carries only the firmware this
 laptop needs (Intel AX201 Wi-Fi/Bluetooth, i915, Sound Open Firmware), which keeps
@@ -78,7 +82,7 @@ the bottom pair needs an init sequence mainline Linux lacks.
 
 ## Raspberry Pi 5 SD card (paused)
 
-Built from the `beta` branch only, as the `rpi5-beta` pre-release
+Built from `main` as the `rpi5-beta` pre-release
 (`rpi5-nixos-ephemeral.img.zip`; `rpi5-nixos-persistent.img.zip` is a fallback with a
 normal writable card). Unzip with the Files app, then flash the `.img` with
 EtchDroid. Same ephemeral idea: root in RAM, the card mounted read-only. Headless:
@@ -119,6 +123,6 @@ Images contain no secrets: the repository is public.
 
 ## Changing things
 
-There is no remote access by design. To change an image: commit to `beta`, wait for
-the pipeline, reflash. `stable` follows by itself when everything passes. The base
+There is no remote access by design. To change an image: merge to `main`, wait for
+the pipeline, reflash. `yoga-c940-stable` follows by itself when everything passes. The base
 only moves when you run `nix flake update`.

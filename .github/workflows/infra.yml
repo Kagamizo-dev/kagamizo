@@ -1,6 +1,6 @@
 name: infra
 
-# PRs get a plan made with the read-only agent view; merging to master applies
+# PRs get a plan made with the read-only agent view; merging to main applies
 # it with the ci view. The only GitHub secrets are two Proton Pass agent
 # tokens; everything else is resolved from Proton Pass by secretspec.
 on:
@@ -14,7 +14,7 @@ on:
       - flake.lock
       - .github/workflows/infra.yml
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - parts/_lib/**
       - parts/cloudflare/**
@@ -70,7 +70,7 @@ jobs:
     if: vars.INFRA_ENABLED == 'true' && github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Holds PROTON_PASS_CI_TOKEN; restrict it to master in the repo settings.
+    # Holds PROTON_PASS_CI_TOKEN; restrict it to main in the repo settings.
     environment: cloudflare
     concurrency:
       group: infra-apply
@@ -100,4 +100,4 @@ jobs:
       # keeps two applies from racing on it.
       - run: nix run .#infra -- ci apply -input=false -auto-approve -no-color
         env:
-          SECRETSPEC_REASON: infra apply from master
+          SECRETSPEC_REASON: infra apply from main

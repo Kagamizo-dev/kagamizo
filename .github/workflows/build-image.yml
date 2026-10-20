@@ -2,7 +2,7 @@ name: build-image
 
 on:
   push:
-    branches: [beta]
+    branches: [main]
     paths-ignore: ["README.md", "tests/**"]
   workflow_dispatch:
 
@@ -43,12 +43,11 @@ jobs:
       - name: Publish release assets
         env:
           GH_TOKEN: ${{ github.token }}
-          REF_NAME: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          tag="rpi5-${REF_NAME//\//-}"
+          tag=rpi5-beta
           notes="Unzip, then flash the .img (EtchDroid / dd / Pi Imager). rpi5-nixos-ephemeral = RAM-only root, wipes on power-off (default). rpi5-nixos-persistent = normal writable SD, fallback. Built from $GITHUB_SHA."
           gh release view "$tag" >/dev/null 2>&1 || \
-            gh release create "$tag" --target "$GITHUB_SHA" --title "Pi 5 images ($REF_NAME)" --notes "$notes"
+            gh release create "$tag" --target "$GITHUB_SHA" --title "Pi 5 images (beta)" --prerelease --notes "$notes"
           gh release upload "$tag" out/*.zip --clobber
           gh release edit "$tag" --notes "$notes"

@@ -42,7 +42,7 @@
       ];
     };
 
-    # CI applying merged changes from master.
+    # CI applying merged changes from main.
     ci-apply = {
       storeIn = [ "ci" ];
       zone = [

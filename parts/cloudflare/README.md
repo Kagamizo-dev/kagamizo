@@ -32,7 +32,7 @@ parts/
 │  ├─ tokens.nix           the API token profiles (views)
 │  ├─ login.nix            `cloudflare-login`: the OAuth session (you, 2FA)
 │  ├─ bootstrap.nix        `bootstrap`: mints tokens.nix
-│  ├─ _zones.nix           the OpenTofu layer: DNS on every zone (CI, from master)
+│  ├─ _zones.nix           the OpenTofu layer: DNS on every zone (CI, from main)
 │  ├─ infra.nix            the `infra` app and the offline validate check
 │  └─ registrar.nix        the `registrar` app: check and buy domains
 └─ proton/
@@ -107,7 +107,7 @@ so what a process can do depends only on which vault it was given.
 | --- | --- | --- | --- |
 | You (`bootstrap`) | none | OAuth session | mint the tokens below |
 | You (`registrar`) | none | OAuth session | buy domains, within budget; read zones |
-| CI on `master` | `Kagamizo-CI` | `ci-apply` | apply merged changes |
+| CI on `main` | `Kagamizo-CI` | `ci-apply` | apply merged changes |
 | Agents, PR plans | `Kagamizo-Agents` | `agent-readonly` | read everything, change nothing |
 
 Vault names are declared once, in `parts/proton/vaults.nix`.

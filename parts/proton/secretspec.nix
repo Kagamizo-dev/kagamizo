@@ -58,7 +58,7 @@ let
         GITHUB_TOKEN = secret "Fine-grained token administering the kagamizo GitHub organization" "github-token";
       };
 
-      # GitHub Actions on master, behind the `cloudflare` environment.
+      # GitHub Actions on main, behind the `cloudflare` environment.
       ci = {
         defaults.providers = [ "ci" ];
         CLOUDFLARE_API_TOKEN = secret "ci-apply token, minted by bootstrap" "cloudflare-token";

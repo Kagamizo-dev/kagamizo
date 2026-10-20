@@ -65,7 +65,7 @@ in
   ];
 
   config.proton.agents = {
-    # GitHub Actions on master: applies, so it writes the state.
+    # GitHub Actions on main: applies, so it writes the state.
     nix-images-ci = {
       vault = infraVaults.ci;
       expiration = "6m";
