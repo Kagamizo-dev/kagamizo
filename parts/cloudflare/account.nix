@@ -11,5 +11,11 @@
     # Every minted token stops working on this date. To rotate: bump it and
     # re-apply the bootstrap layer, then store the new values in Proton Pass.
     tokenExpiry = "2027-01-15T00:00:00Z";
+
+    # Cloudflare has no spending cap of its own (budget alerts only email), so
+    # this one is enforced here: the declared registrations must fit it, and
+    # `registrar register` refuses a purchase that would exceed it this month.
+    # About three domains a month at current prices.
+    monthlyBudgetUsd = 40;
   };
 }

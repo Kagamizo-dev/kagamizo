@@ -54,7 +54,8 @@ environment variables every time.
 
 | Role | Vault | Cloudflare token | Can |
 | --- | --- | --- | --- |
-| You (bootstrap, registrar) | `Kagamizo-LLC` | root, registrar | mint tokens, buy domains |
+| You (bootstrap) | `Kagamizo-LLC` | root | mint the tokens below |
+| You (registrar) | `Kagamizo-LLC` | `registrar` | buy domains, within budget; read zones |
 | CI on `master` | `Kagamizo-CI` | `ci-apply` | apply merged changes |
 | Agents, PR plans | `Kagamizo-Agents` | `agent-readonly` | read everything, change nothing |
 
@@ -65,7 +66,8 @@ Vault names are declared once, in `parts/proton/vaults.nix`.
 ```bash
 nix run .#infra -- <bootstrap|cloudflare> <tofu args...>   # OpenTofu on a layer
 nix run .#registrar -- check                               # price every candidate
-nix run .#registrar -- register <domain> <price>           # buy one (billed)
+nix run .#registrar -- register <domain> <price>           # buy one (billed, budgeted)
+nix run .#registrar -- zone <domain>                       # its zone ID
 nix run .#proton -- plan | apply                           # create declared vaults
 ```
 
@@ -88,14 +90,33 @@ mint tokens.
 immediately. To kill Cloudflare access too, delete the token on the dashboard
 (My Profile, API Tokens) or run bootstrap with `destroy`.
 
+## Spending limits
+
+Every paid resource gets a declared limit, checked before anything is spent.
+Cloudflare has no spending cap of its own (its budget alerts only send an
+email), so `cloudflare.monthlyBudgetUsd` (in `account.nix`, 40 USD) is enforced
+here, twice:
+
+- **In the types.** Each domain bought through Cloudflare records its
+  `registration = { month; costUsd; renewalUsd; }`. Eval fails if any month's
+  purchases plus that month's renewals exceed the budget, naming the month.
+- **At purchase.** `registrar register` adds this month's purchases and
+  renewals from that ledger to the price and refuses to buy over the budget.
+
+The `registrar` token is the only one that can buy domains, and it lives in
+the root vault, so every purchase goes through this check and your Proton
+Pass login (with 2FA). The ledger only knows what is declared, so record each
+purchase right away; the command prints the lines to add.
+
 ## Adding a domain
 
 1. Add names to the entity's `domainCandidates` and run `registrar check`.
 2. Pick one. `registrar register <domain> <price>` buys it only if `<price>` is
-   exactly the current registration cost, so nothing is charged by accident.
-   Registrations are non-refundable.
-3. Declare it under `identity.domains` with its `zoneId` (dashboard, Overview),
-   `registrar = "cloudflare"` and its mailboxes. Re-run bootstrap so the tokens
+   exactly the current registration cost and the month stays within budget, so
+   nothing is charged by accident. Registrations are non-refundable.
+3. Declare it under `identity.domains` with `registrar = "cloudflare"`, the
+   `registration` lines the command printed, its mailboxes, and its `zoneId`
+   from `registrar zone <domain>`. Re-run bootstrap so the ci and agent tokens
    cover the new zone.
 4. In Proton: Settings, Domain names, add it. Copy the verification value and
    DKIM ID into the domain's `proton` field; the next apply publishes MX, SPF,
@@ -151,6 +172,8 @@ Done already: account and zone IDs, and the vaults (`proton apply`).
      | secretspec set CLOUDFLARE_API_TOKEN --profile ci
    secretspec run --profile bootstrap -- nix run .#infra -- bootstrap output -raw agent-readonly \
      | secretspec set CLOUDFLARE_API_TOKEN --profile agent
+   secretspec run --profile bootstrap -- nix run .#infra -- bootstrap output -raw registrar \
+     | secretspec set CLOUDFLARE_API_TOKEN --profile registrar
    ```
 
    If the plan fails with *Unknown Cloudflare permission groups*, Cloudflare
@@ -201,8 +224,7 @@ Agents then change infrastructure the same way you do: by opening a PR.
 
 ## Not covered yet
 
-- The registrar token profile: it is added to `tokens.nix` once the exact
-  permission group name is read from the live API (the docs only say
-  "Registrar write").
+- The registrar permission is declared as `Registrar Write`, after the docs'
+  "Registrar write"; the first bootstrap confirms the exact name.
 - Cloudflare Tunnel and Access (for God's Eye View on the Pi), Workers and
   Pages: the tokens already allow them; add the resources to `_zones.nix`.

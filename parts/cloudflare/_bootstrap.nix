@@ -9,10 +9,13 @@
 let
   inherit (cloudflare) tokens;
 
-  # Zone permissions cover every declared zone; account ones the account.
+  # Zone permissions cover every declared zone, account ones the account, and
+  # allZones every zone in the account, including ones not declared yet.
+  account = "com.cloudflare.api.account.${cloudflare.accountId}";
   resources = {
     zone = lib.genAttrs (map (id: "com.cloudflare.api.account.zone.${id}") zoneIds) (_: "*");
-    account."com.cloudflare.api.account.${cloudflare.accountId}" = "*";
+    account.${account} = "*";
+    allZones.${account}."com.cloudflare.api.account.zone.*" = "*";
   };
 
   # Unknown names resolve to a dummy ID so the precondition below can report
@@ -28,7 +31,7 @@ let
   token =
     name: profile:
     let
-      names = profile.zone ++ profile.account;
+      names = profile.zone ++ profile.account ++ profile.allZones;
     in
     {
       name = "nix-images-${name}";

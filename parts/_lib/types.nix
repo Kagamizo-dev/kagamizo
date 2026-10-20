@@ -29,6 +29,17 @@ let
   );
   oneOf = name: xs: refined name String (s: builtins.elem s xs);
 
+  Month = refined "YearMonth" String (matches "[0-9]{4}-(0[1-9]|1[0-2])");
+  Usd = refined "UsdAmount" fx.types.Any (x: (builtins.isInt x || builtins.isFloat x) && x >= 0);
+
+  # What buying a domain through Cloudflare cost, written down after
+  # `registrar register`. It renews on the same month every year.
+  Registration = Record {
+    month = Month;
+    costUsd = Usd;
+    renewalUsd = Usd;
+  };
+
   # At most seven addresses per domain, each once. An eighth means a new domain.
   Mailboxes = refined "AtMostSevenMailboxes" (ListOf LocalPart) (
     l: builtins.length l <= 7 && lib.allUnique l
@@ -68,6 +79,8 @@ let
         "external"
       ];
       mailboxes = Mailboxes;
+      # Only domains bought through Cloudflare have a registration to budget.
+      registration = if d.registrar or "" == "cloudflare" then Registration else Null;
       proton = if zoned then Maybe ProtonMail else Null;
       records = if zoned then Attrs else refined "NoRecordsWithoutZone" Attrs (r: r == { });
     };
@@ -95,6 +108,8 @@ let
     accountId = Hex32;
     stateBucket = refined "R2BucketName" String (matches "[a-z0-9][a-z0-9-]{1,61}[a-z0-9]");
     tokenExpiry = Timestamp;
+    # Hard ceiling on Cloudflare spend per month, enforced by `registrar`.
+    monthlyBudgetUsd = Usd;
   };
 
   # Vaults holding the infra secrets, one per trust level (see secretspec.toml).
@@ -103,6 +118,28 @@ let
     ci = VaultName;
     agents = VaultName;
   };
+
+  # Spend per month: domains bought that month, plus renewals of domains
+  # bought in the same calendar month of an earlier year. Months with no
+  # purchase only carry renewals, so the worst of those is checked too.
+  spend =
+    domains:
+    let
+      bought = lib.filter (r: r != null) (lib.mapAttrsToList (_: d: d.registration) domains);
+      monthOf = r: lib.substring 5 2 r.month;
+      inMonth =
+        m:
+        lib.foldl' (acc: r: acc + r.costUsd) 0 (lib.filter (r: r.month == m) bought)
+        + lib.foldl' (acc: r: acc + r.renewalUsd) 0 (
+          lib.filter (r: monthOf r == lib.substring 5 2 m && r.month < m) bought
+        );
+      renewalsOnly =
+        mm: lib.foldl' (acc: r: acc + r.renewalUsd) 0 (lib.filter (r: monthOf r == mm) bought);
+    in
+    lib.genAttrs (map (r: r.month) bought) inMonth
+    // lib.listToAttrs (
+      map (mm: lib.nameValuePair "every ${mm}" (renewalsOnly mm)) (lib.unique (map monthOf bought))
+    );
 
   errorsOf =
     type: value:
@@ -131,5 +168,19 @@ in
     in
     builtins.seq (checked "identity" T (T.pack (v // { domainNames = lib.attrNames v.domains; }))) v;
   cloudflare = checked "cloudflare" Cloudflare;
+
+  # The domains when every month's spend fits the budget, otherwise an error
+  # naming each month over it.
+  budget =
+    limit: domains:
+    let
+      over = lib.filterAttrs (_: usd: usd > limit) (spend domains);
+    in
+    if over == { } then
+      domains
+    else
+      throw "Cloudflare spend over the ${toString limit} USD monthly budget:\n${
+        lib.concatStrings (lib.mapAttrsToList (m: usd: "  - ${m}: ${toString usd} USD\n") over)
+      }";
   infraVaults = checked "proton.infraVaults" InfraVaults;
 }

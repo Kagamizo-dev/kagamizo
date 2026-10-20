@@ -3,11 +3,21 @@
 # group names as the API lists them; an unknown name fails the plan with a
 # message naming it.
 #
-# Deliberately absent everywhere: Billing, Registrar, API Tokens, Account
-# Settings Write, Memberships, and Zone Write (which can delete the zone).
+# Deliberately absent everywhere: Billing, API Tokens, Account Settings Write,
+# Memberships, and Zone Write (which can delete the zone). Registrar only in
+# the registrar profile.
 # Zone permissions apply to every zone declared under identity.domains.
 {
   cloudflare.tokens = {
+    # Buying domains, nothing else. Lives in the root vault: only you can use it.
+    # Zone Read on every zone lets `registrar zone` find a new domain's zone ID.
+    # The name is the docs' "Registrar write"; bootstrap fails, naming it, if
+    # Cloudflare lists it differently.
+    registrar = {
+      account = [ "Registrar Write" ];
+      allZones = [ "Zone Read" ];
+    };
+
     # Agents and PR plans: look at everything, change nothing.
     agent-readonly = {
       zone = [

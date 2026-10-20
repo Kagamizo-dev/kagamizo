@@ -3,7 +3,8 @@
 # against ../_lib/types.nix and read by consumers as `identity.checked`.
 #
 #   identity.entities.<name> = { legalName; kind; vault; domainCandidates; };
-#   identity.domains.<fqdn>  = { entity; zoneId; registrar; mailboxes; proton; records; };
+#   identity.domains.<fqdn>  = { entity; zoneId; registrar; registration; mailboxes;
+#                                proton; records; };
 {
   lib,
   config,
@@ -25,6 +26,7 @@ let
     zoneId = null;
     registrar = "external";
     mailboxes = [ ];
+    registration = null;
     proton = null;
     records = { };
   };
