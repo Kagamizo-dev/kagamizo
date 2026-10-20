@@ -41,21 +41,23 @@ let
         content = "v=DMARC1; p=quarantine";
       };
     }
-    // lib.listToAttrs (
-      map
-        (n: {
-          name = "proton-dkim${n}";
-          value = {
-            name = "protonmail${n}._domainkey.${zone}";
-            type = "CNAME";
-            content = "protonmail${n}.domainkey.${proton.dkimId}.domains.proton.ch";
-          };
-        })
-        [
-          ""
-          "2"
-          "3"
-        ]
+    // lib.optionalAttrs (proton.dkimId != null) (
+      lib.listToAttrs (
+        map
+          (n: {
+            name = "proton-dkim${n}";
+            value = {
+              name = "protonmail${n}._domainkey.${zone}";
+              type = "CNAME";
+              content = "protonmail${n}.domainkey.${proton.dkimId}.domains.proton.ch";
+            };
+          })
+          [
+            ""
+            "2"
+            "3"
+          ]
+      )
     );
 
   zoneRecords =

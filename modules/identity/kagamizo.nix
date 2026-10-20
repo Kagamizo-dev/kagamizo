@@ -13,6 +13,11 @@
     domains."kagamizo.com" = {
       entity = "kagamizo";
       zoneId = "2f1f4505269c5d5ea904ca73d379ef99";
+      # The domain is added in Proton; its DKIM targets come next.
+      proton = {
+        verification = "11675870bd5ab9f95798ea614579fbb880696a86";
+        dkimId = null;
+      };
       mailboxes = [
         "zach" # the face of the company
         "admin" # SaaS and tool accounts

@@ -58,9 +58,11 @@ let
     domainCandidates = ListOf Fqdn;
   };
 
+  # dkimId is null until Proton's DKIM targets are known; the domain's other
+  # mail records go out without it.
   ProtonMail = Record {
     verification = NonEmpty;
-    dkimId = NonEmpty;
+    dkimId = Maybe NonEmpty;
   };
 
   # A dependent type: a domain's record type is computed from its own zoneId.
