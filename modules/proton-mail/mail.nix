@@ -57,7 +57,7 @@ in
       };
       item = mkOption {
         type = types.str;
-        description = "Its title; `mail login` reads its username and password fields.";
+        description = "Its title; `mail login` reads its email (or username) and password fields.";
       };
     };
     catchAll = mkOption {
@@ -127,7 +127,8 @@ in
 
             case "''${1:-}" in
               login)
-                PROTON_USERNAME=$(field username)
+                # Proton Pass logins keep the address in `email`; older ones in `username`.
+                PROTON_USERNAME=$(field email 2>/dev/null || field username)
                 PROTON_PASSWORD=$(field password)
                 export PROTON_USERNAME PROTON_PASSWORD
                 status=0
