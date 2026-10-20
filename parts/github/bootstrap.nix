@@ -101,11 +101,14 @@ in
             return "$status"
           }
 
+          # Each login gives up after 10 minutes; offer a fresh one, three times.
+          retry() { local n; for n in 1 2 3; do "$@" && return 0; echo "attempt $n expired" >&2; done; return 1; }
+
           step "Proton Pass: approve the link"
-          approve "Proton Pass login, approve" 'https://account\.proton\.me/[^[:space:]]+' ${cli.passCli "login" { }}
+          retry approve "Proton Pass login, approve" 'https://account\.proton\.me/[^[:space:]]+' ${cli.passCli "login" { }}
 
           step "GitHub: approve the code at https://github.com/login/device"
-          approve "GitHub device code, enter at https://github.com/login/device" '[A-Z0-9]{4}-[A-Z0-9]{4}' ${
+          retry approve "GitHub device code, enter at https://github.com/login/device" '[A-Z0-9]{4}-[A-Z0-9]{4}' ${
             cli.gh "auth login" {
               hostname = "github.com";
               git-protocol = "https";
