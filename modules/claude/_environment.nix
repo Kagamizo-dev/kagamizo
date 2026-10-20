@@ -63,6 +63,8 @@ in
         hosts = [
           "api.mercury.com"
           "vault-api.mercury.com"
+          # `mercury-session login`: the CLI's OAuth sign-in and refresh
+          "oauth2.mercury.com"
         ];
       };
       public = {
