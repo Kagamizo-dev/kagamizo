@@ -22,7 +22,7 @@
       provider = "github";
       plan = "free-org";
       owner = "kagamizo";
-      status = "planned";
+      status = "active";
       signup = {
         url = "https://github.com/account/organizations/new?plan=free";
         handle = "kagamizo-dev";

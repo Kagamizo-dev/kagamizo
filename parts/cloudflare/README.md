@@ -227,11 +227,10 @@ The rule for this repo: the only thing you ever do by hand is approve 2FA.
 Each item below breaks that rule today and is to be closed, not documented
 around.
 
-- **GitHub Actions secrets** (`PROTON_PASS_CI_TOKEN` in the `cloudflare`
-  environment, `PROTON_PASS_AGENT_TOKEN`, the `INFRA_ENABLED` variable): to be
-  declared with OpenTofu's GitHub provider once the Kagamizo organization
-  exists, from the tokens `proton apply` stored.
-- **The GitHub organization itself**: github.com has no API to create one.
+- **The GitHub organization itself**: github.com has no API to create one;
+  `signup` prepares it from Proton Pass. Everything after (repos, secrets,
+  environments, domain verification) is `parts/github`, applied by the
+  `github-bootstrap` workflow, since cloud sessions cannot reach org APIs.
 - **Proton Mail domain and addresses** (`dev@kagamizo.com` and the others):
   Proton publishes no API for them.
 - **Registrar prerequisites**: default payment method, registrant contact and

@@ -2,6 +2,7 @@
 #
 #   cli.cf "accounts tokens create" { name = "x"; policies = [ ... ]; }
 #   cli.passCli "vault create" { name = "Kagamizo-CI"; }
+#   cli.gh "secret set" { secret-name = "X"; repo = "o/r"; env = "e"; }
 #
 # return the command as one shell-quoted string. An unknown command, an
 # unknown option, a missing required one or a value of the wrong type fails
@@ -26,6 +27,7 @@ let
   catalog = name: builtins.fromJSON (builtins.readFile ../../catalog/${name}.json);
   cfCatalog = catalog "cf";
   passCatalog = catalog "pass-cli";
+  ghCatalog = catalog "gh";
   provider = catalog "cloudflare-provider";
 
   # A value the shell supplies at run time; the tool checks it then.
@@ -174,6 +176,65 @@ let
     in
     lib.concatStringsSep " " ([ "pass-cli ${command}" ] ++ positional ++ options);
 
+  gh =
+    command: params:
+    let
+      entry =
+        ghCatalog.commands.${command}
+          or (throw "gh has no command `${command}`${suggest ghCatalog.commands command}");
+      Strings = refined "ListOfString" Any (v: builtins.isList v && lib.all builtins.isString v);
+      valueType =
+        name: o:
+        if o ? oneOf then
+          orRuntime "OneOf[${lib.concatStringsSep "|" o.oneOf}]" (
+            refined name String (v: builtins.elem v o.oneOf)
+          )
+        else
+          {
+            number = orRuntime "Number" Number;
+            list = orRuntime "ListOfString" Strings;
+          }
+          .${o.type or ""} or (orRuntime "String" String);
+      fields =
+        lib.mapAttrs (name: o: if o.value then valueType name o else Bool) entry.options
+        // lib.listToAttrs (
+          map (
+            a: lib.nameValuePair a.name (if a.variadic then Strings else orRuntime "String" String)
+          ) entry.args
+        );
+      required = map (a: a.name) (lib.filter (a: a.required) entry.args);
+      p = checkParams {
+        what = "gh ${command}";
+        inherit fields required params;
+      };
+      positional = lib.concatMap (
+        a:
+        if !(p ? ${a.name}) then
+          [ ]
+        else if builtins.isList p.${a.name} then
+          map quote p.${a.name}
+        else
+          [ (quote p.${a.name}) ]
+      ) entry.args;
+      option =
+        name: v:
+        if !entry.options.${name}.value then
+          lib.optional v "--${name}"
+        # cobra string slices take one comma-separated value.
+        else if builtins.isList v then
+          [
+            "--${name}"
+            (quote (lib.concatStringsSep "," v))
+          ]
+        else
+          [
+            "--${name}"
+            (quote v)
+          ];
+      options = lib.concatLists (lib.mapAttrsToList option (removeAttrs p (map (a: a.name) entry.args)));
+    in
+    lib.concatStringsSep " " ([ "gh ${command}" ] ++ positional ++ options);
+
   # Arguments every resource takes besides its schema's.
   meta = [
     "count"
@@ -214,7 +275,17 @@ let
     if problems == [ ] then config else fail "OpenTofu config does not match the provider" problems;
 in
 {
-  inherit cf passCli tofu;
+  inherit
+    cf
+    passCli
+    gh
+    tofu
+    ;
+  # The values a gh option is limited to, e.g. `repo edit` visibilities.
+  ghChoices =
+    command: option:
+    ghCatalog.commands.${command}.options.${option}.oneOf
+      or (throw "gh ${command} --${option} takes no fixed set of values");
   # The values a pass-cli option is limited to, e.g. the roles of
   # `agent access grant`, to type declarations with before anything runs.
   passCliChoices =

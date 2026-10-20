@@ -1,0 +1,30 @@
+name: github-bootstrap
+
+# Applies parts/github to GitHub (see parts/github/bootstrap.nix). Cloud
+# sessions cannot reach organization APIs, so this runs here. It starts when
+# .github/github-bootstrap.request changes, and waits for two approvals it
+# prints in the log: a Proton Pass link and a GitHub device code.
+on:
+  push:
+    paths:
+      - .github/github-bootstrap.request
+
+permissions: {}
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      - run: nix run .#github-bootstrap

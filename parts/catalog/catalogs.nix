@@ -6,6 +6,7 @@
 #   catalog/cloudflare-provider.json  every OpenTofu resource and data source
 #                                     of the pinned provider, per attribute
 #   catalog/pass-cli.json             every pass-cli command and option
+#   catalog/gh.json                   every gh command, argument and option
 #
 # ../_lib/cli.nix types every invocation in this repo against them. Bumping a
 # tool changes its catalog, so a version bump arrives as a reviewable diff;
@@ -38,6 +39,11 @@
         ${python} ${./extract/pass_cli.py} ${config.packages.pass-cli}/bin/pass-cli $out
       '';
 
+      gh = pkgs.runCommand "gh.json" { } ''
+        export HOME=$TMPDIR GH_NO_UPDATE_NOTIFIER=1
+        ${python} ${./extract/gh.py} ${config.packages.gh}/bin/gh $out
+      '';
+
       catalogs = pkgs.linkFarm "catalog" [
         {
           name = "cf.json";
@@ -50,6 +56,10 @@
         {
           name = "pass-cli.json";
           path = pass-cli;
+        }
+        {
+          name = "gh.json";
+          path = gh;
         }
       ];
     in

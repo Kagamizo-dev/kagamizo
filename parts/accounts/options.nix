@@ -53,6 +53,7 @@ let
       actionsMinutesPrivate = Limit;
       verifiedDomains = Flag;
       protectedBranchesPrivate = Flag;
+      environmentsPrivate = Flag;
     };
   };
   providers = lib.attrNames capabilities;

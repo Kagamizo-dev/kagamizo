@@ -73,6 +73,12 @@
           value = true;
           source = "https://docs.github.com/en/organizations/managing-organization-settings/verifying-or-approving-a-domain-for-your-organization";
         };
+        # Environments (and their secrets and branch rules) on private repos
+        # are paid; public repos get them on every plan.
+        environmentsPrivate = {
+          value = false;
+          source = "https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment";
+        };
         # Required reviewers and branch protection on private repos are Team and up.
         protectedBranchesPrivate = {
           value = false;
