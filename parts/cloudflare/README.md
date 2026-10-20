@@ -31,6 +31,24 @@ parts/
    └─ secretspec.nix       generates ../../secretspec.toml
 ```
 
+## Catalogs: what each tool can do, typed
+
+Nothing about a CLI or the provider is guessed. `catalog/` holds what each
+pinned tool can do, extracted from the tool itself (`parts/catalog/`):
+
+| Catalog | From | Holds |
+| --- | --- | --- |
+| `cf.json` | cf's own metadata | every command: arguments (variadic or not), options and body fields with types and required, the API call; cf's OAuth scopes |
+| `cloudflare-provider.json` | `tofu providers schema -json` | every resource and data source, per attribute: type, required, optional, computed |
+| `pass-cli.json` | pass-cli's help tree | every command, its arguments and options |
+
+`parts/_lib/cli.nix` types every use against them: `cli.cf`, `cli.passCli` and
+`cli.tofu` reject an unknown command, option, resource or attribute, a missing
+required one, or a wrongly typed value, naming the field, before anything
+runs. OAuth scopes in `login.nix` must be cf's. Bumping a tool changes its
+catalog, so an upgrade is a reviewable diff, and `nix flake check` fails until
+the committed catalog matches the pinned tool (`nix run .#catalog-update`).
+
 ## The model
 
 An **entity** (a person, an LLC, a nonprofit) owns **domains**, and each domain
@@ -86,10 +104,12 @@ Vault names are declared once, in `parts/proton/vaults.nix`.
 ## Commands
 
 ```bash
+nix run .#cloudflare-login                                 # OAuth session: a link you approve
 nix run .#infra -- <bootstrap|cloudflare> <tofu args...>   # OpenTofu on a layer
 nix run .#registrar -- check                               # price every candidate
 nix run .#registrar -- register <domain> <price>           # buy one (billed, budgeted)
 nix run .#registrar -- zone <domain>                       # its zone ID
+nix run .#registrar -- ledger                              # live registrations not declared
 nix run .#proton -- plan                                   # vaults and secret refs: the diff
 nix run .#proton -- apply                                  # create declared vaults
 ```

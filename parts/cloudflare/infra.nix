@@ -2,9 +2,18 @@
 # syntax, run by the `infra` app with secrets supplied by secretspec.
 #
 #   nix run .#infra -- <bootstrap|cloudflare> <tofu args...>
-{ config, ... }:
+{
+  config,
+  lib,
+  inputs,
+  ...
+}:
 let
   inherit (config.identity.checked) domains;
+  cli = import ../_lib/cli.nix {
+    inherit lib;
+    fx = inputs.nix-effects.lib;
+  };
   cloudflare = config.cloudflare.checked;
 in
 {
@@ -34,7 +43,9 @@ in
         };
       };
 
-      configs = lib.mapAttrs (name: c: pkgs.writeText "${name}.tf.json" (builtins.toJSON c)) {
+      # Each layer is checked against the pinned provider (catalog/) before it
+      # is written out.
+      configs = lib.mapAttrs (name: c: pkgs.writeText "${name}.tf.json" (builtins.toJSON (cli.tofu c))) {
         bootstrap = import ./_bootstrap.nix {
           inherit lib cloudflare backend;
           zoneIds = lib.filter (id: id != null) (lib.mapAttrsToList (_: d: d.zoneId) domains);
@@ -43,6 +54,9 @@ in
       };
     in
     {
+      # OpenTofu with the pinned Cloudflare provider; also feeds catalog/.
+      packages.tofu = tofu;
+
       packages.infra = pkgs.writeShellApplication {
         name = "infra";
         runtimeInputs = [

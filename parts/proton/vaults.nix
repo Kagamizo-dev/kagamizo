@@ -23,6 +23,10 @@ let
     fx = inputs.nix-effects.lib;
   };
   inherit (config.identity.checked) entities;
+  cli = import ../_lib/cli.nix {
+    inherit lib;
+    fx = inputs.nix-effects.lib;
+  };
   infraVaults = t.infraVaults entities config.proton.infraVaults;
 
   vaults = lib.unique (lib.mapAttrsToList (_: e: e.vault) entities ++ lib.attrValues infraVaults);
@@ -70,16 +74,19 @@ in
     };
 
     perSystem =
-      { pkgs, ... }:
+      { pkgs, config, ... }:
       {
         packages.proton = pkgs.writeShellApplication {
           name = "proton";
-          runtimeInputs = [ pkgs.jq ];
+          runtimeInputs = [
+            pkgs.jq
+            config.packages.pass-cli
+          ];
           text = ''
             usage="usage: proton <plan|apply>"
             declared=${lib.escapeShellArg (builtins.toJSON vaults)}
             refs=${lib.escapeShellArg (builtins.toJSON refs)}
-            existing=$(pass-cli vault list --output json | jq -c '[.vaults[].name]')
+            existing=$(${cli.passCli "vault list" { output = "json"; }} | jq -c '[.vaults[].name]')
             missing=$(jq -cn --argjson d "$declared" --argjson e "$existing" '$d - $e')
 
             case "''${1:?$usage}" in
@@ -93,7 +100,12 @@ in
                 echo "secret references (secretspec.toml):"
                 jq -r '[.[].vault] | unique[]' <<<"$refs" | while read -r vault; do
                   if jq -e --arg v "$vault" 'any(. == $v)' <<<"$existing" >/dev/null; then
-                    titles=$(pass-cli item list "$vault" --output json | jq -c '[.items[].title]')
+                    titles=$(${
+                      cli.passCli "item list" {
+                        vault-name.shell = "$vault";
+                        output = "json";
+                      }
+                    } | jq -c '[.items[].title]')
                   else
                     titles='[]'
                   fi
@@ -105,7 +117,7 @@ in
                 ;;
               apply)
                 jq -r '.[]' <<<"$missing" | while read -r name; do
-                  pass-cli vault create --name "$name" >/dev/null
+                  ${cli.passCli "vault create" { name.shell = "$name"; }} >/dev/null
                   echo "created $name"
                 done
                 ;;

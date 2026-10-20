@@ -17,16 +17,18 @@
       # it with the "include default list" box set to network.includeDefaults.
       allowed-domains = pkgs.writeText "allowed-domains.txt" (lib.concatLines hosts);
       # Put on PATH by .claude/hooks/session-start.sh in cloud sessions.
-      session-tools = import ./_tools.nix {
-        inherit pkgs;
-        inherit (config.packages)
+      session-tools = pkgs.symlinkJoin {
+        name = "session-tools";
+        paths = with config.packages; [
+          pass-cli
+          secretspec
+          cf
+          cloudflare-login
           infra
           registrar
           proton
           commit-lint
-          cf
-          cloudflare-login
-          ;
+        ];
       };
     in
     {

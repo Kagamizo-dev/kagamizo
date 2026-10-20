@@ -10,58 +10,63 @@
 #                                          fit cloudflare.monthlyBudgetUsd
 #   registrar status <domain>              registration workflow state
 #   registrar zone <domain>                the zone ID to declare
+#   registrar ledger                       live registrations missing from the
+#                                          declared ledger (the budget counts
+#                                          only declared ones)
 #
-# Needs CLOUDFLARE_API_TOKEN with Registrar write (secretspec profile
-# `registrar`). Registrations are billed to the account's default payment
-# method and are non-refundable.
-{ config, ... }:
+# Every call is a typed `cf` command (../_lib/cli.nix, catalog/cf.json). cf
+# authenticates with CLOUDFLARE_API_TOKEN when set (secretspec profile
+# `registrar`), otherwise with the session from `cloudflare-login`.
+# Registrations are billed to the account's default payment method and are
+# non-refundable.
+{
+  config,
+  lib,
+  inputs,
+  ...
+}:
 let
   inherit (config.cloudflare.checked) accountId monthlyBudgetUsd;
   inherit (config.identity.checked) entities domains;
+  cli = import ../_lib/cli.nix {
+    inherit lib;
+    fx = inputs.nix-effects.lib;
+  };
+  candidates = lib.unique (lib.concatMap (e: e.domainCandidates) (lib.attrValues entities));
+  # The ledger: every declared Cloudflare registration, by domain.
+  registrations = lib.filterAttrs (_: r: r != null) (lib.mapAttrs (_: d: d.registration) domains);
 in
 {
   perSystem =
-    { pkgs, lib, ... }:
-    let
-      candidates = lib.unique (lib.concatMap (e: e.domainCandidates) (lib.attrValues entities));
-      # The ledger: every declared Cloudflare registration.
-      registrations = lib.filter (r: r != null) (lib.mapAttrsToList (_: d: d.registration) domains);
-    in
+    { pkgs, config, ... }:
     {
       packages.registrar = pkgs.writeShellApplication {
         name = "registrar";
         runtimeInputs = [
-          pkgs.curl
+          config.packages.cf
           pkgs.jq
           pkgs.util-linux # column
         ];
         text = ''
-          usage="usage: registrar check [domain...] | register <domain> <price> | status <domain> | zone <domain>"
-          : "''${CLOUDFLARE_API_TOKEN:?run it through secretspec: secretspec run --profile registrar -- registrar ...}"
-          root="https://api.cloudflare.com/client/v4"
-          base="$root/accounts/${accountId}/registrar"
+          usage="usage: registrar check [domain...] | register <domain> <price> | status <domain> | zone <domain> | ledger"
+          export CLOUDFLARE_ACCOUNT_ID=${accountId}
           candidates=${lib.escapeShellArg (builtins.toJSON candidates)}
           registrations=${lib.escapeShellArg (builtins.toJSON registrations)}
           budget=${toString monthlyBudgetUsd}
 
-          api() {
-            local method=$1 path=$2 body=''${3:-}
-            curl -sS --fail-with-body -X "$method" "$base/$path" \
-              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-              -H "Content-Type: application/json" \
-              ''${body:+--data "$body"}
-          }
+          # cf prints the API result; accept it with or without the envelope.
+          result() { jq -c '.result // .'; }
+          # List commands print a bare array.
+          items() { jq -c 'if type == "array" then . else .result end'; }
 
-          # Up to 20 names per request; one line per name: name, verdict, price.
+          # One line per name: name, verdict, price. At most 20 names per call.
           check() {
-            jq -cn '$ARGS.positional | _nwise(20)' --args "$@" | while read -r batch; do
-              api POST domain-check "$(jq -cn --argjson d "$batch" '{domains: $d}')" |
-                jq -r '.result.domains[] |
-                  [.name,
-                   (if .registrable then "available" else (.reason // "unavailable") end),
-                   (.pricing // {} | "\(.registration_cost // "-") \(.currency // "")/yr, renews \(.renewal_cost // "-")")]
-                  | @tsv'
-            done
+            ${cli.cf "registrar registrations check" { domains.shell = "$@"; }} | result |
+              jq -r '.domains[] |
+                [.name,
+                 (if .registrable then "available" else (.reason // "unavailable") end),
+                 (.pricing // {} | "\(.registration_cost // "-") \(.currency // "")/yr, renews \(.renewal_cost // "-")")]
+                | @tsv'
           }
 
           cmd=''${1:?$usage}
@@ -74,12 +79,14 @@ in
             register)
               domain=''${1:?$usage}
               confirm=''${2:?$usage}
-              if ! jq -e --arg d "$domain" 'any(. == $d)' <<<"$candidates" >/dev/null; then
+              if ! jq -e --arg d "$domain" 'any(.[]; . == $d)' <<<"$candidates" >/dev/null; then
                 echo "$domain is not a declared candidate; add it to an entity's domainCandidates first." >&2
                 exit 1
               fi
               # Check immediately before buying, as the API docs require.
-              result=$(api POST domain-check "$(jq -cn --arg d "$domain" '{domains: [$d]}')" | jq -c '.result.domains[0]')
+              result=$(${
+                cli.cf "registrar registrations check" { domains.shell = "$domain"; }
+              } | result | jq -c '.domains[0]')
               if [ "$(jq -r .registrable <<<"$result")" != true ]; then
                 echo "$domain cannot be registered: $(jq -r '.reason // "unavailable"' <<<"$result")" >&2
                 exit 1
@@ -104,8 +111,15 @@ in
                 echo "Buying $domain would bring $month to $total USD, over the $budget USD monthly budget." >&2
                 exit 1
               fi
-              api POST registrations "$(jq -cn --arg d "$domain" '{domain_name: $d, auto_renew: true}')" |
-                jq '.result | {domain_name, state, completed}'
+              # --force skips cf's own prompt: the price and budget checks above
+              # are the confirmation.
+              ${
+                cli.cf "registrar registrations create" {
+                  domain-name.shell = "$domain";
+                  auto-renew = true;
+                  force = true;
+                }
+              } | result | jq '{domain_name, state, completed}'
               cat <<NIX
 
           Record it in the ledger, under identity.domains."$domain":
@@ -115,12 +129,19 @@ in
               ;;
             status)
               domain=''${1:?$usage}
-              api GET "registrations/$domain/registration-status" | jq '.result'
+              ${
+                cli.cf "registrar registrations get-registration-status" { domain-name.shell = "$domain"; }
+              } | result
               ;;
             zone)
               domain=''${1:?$usage}
-              curl -sS --fail-with-body -G "$root/zones" --data-urlencode "name=$domain" \
-                -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq -r --arg d "$domain" '.result[0].id // error("no zone named \($d)")'
+              ${cli.cf "zones list" { name.shell = "$domain"; }} | items |
+                jq -r '.[0].id // error("no such zone")'
+              ;;
+            ledger)
+              ${cli.cf "registrar registrations list" { }} | items |
+                jq -r --argjson r "$registrations" '.[] | .domain_name
+                  | select(. as $d | $r | has($d) | not) | "undeclared: \(.)"'
               ;;
             *)
               echo "$usage" >&2

@@ -1,0 +1,1155 @@
+{
+ "commands": {
+  "agent access grant": {
+   "args": [
+    {
+     "name": "name",
+     "required": true
+    }
+   ],
+   "options": {
+    "item-id": {
+     "value": true
+    },
+    "item-title": {
+     "value": true
+    },
+    "role": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "agent access revoke": {
+   "args": [
+    {
+     "name": "name",
+     "required": true
+    }
+   ],
+   "options": {
+    "share-id": {
+     "value": true
+    }
+   }
+  },
+  "agent create": {
+   "args": [
+    {
+     "name": "name",
+     "required": true
+    }
+   ],
+   "options": {
+    "expiration": {
+     "value": true
+    },
+    "vault": {
+     "value": true
+    }
+   }
+  },
+  "agent delete": {
+   "args": [
+    {
+     "name": "name",
+     "required": true
+    }
+   ],
+   "options": {}
+  },
+  "agent instructions": {
+   "args": [],
+   "options": {}
+  },
+  "agent list": {
+   "args": [],
+   "options": {
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "agent monitor": {
+   "args": [
+    {
+     "name": "name",
+     "required": false
+    }
+   ],
+   "options": {
+    "limit": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "agent renew": {
+   "args": [
+    {
+     "name": "name",
+     "required": true
+    }
+   ],
+   "options": {
+    "expiration": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "info": {
+   "args": [],
+   "options": {
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "inject": {
+   "args": [],
+   "options": {
+    "file-mode": {
+     "value": true
+    },
+    "force": {
+     "value": false
+    },
+    "in-file": {
+     "value": true
+    },
+    "out-file": {
+     "value": true
+    }
+   }
+  },
+  "invite accept": {
+   "args": [
+    {
+     "name": "invite-id",
+     "required": true
+    }
+   ],
+   "options": {}
+  },
+  "invite list": {
+   "args": [],
+   "options": {
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "invite reject": {
+   "args": [
+    {
+     "name": "invite-id",
+     "required": true
+    }
+   ],
+   "options": {}
+  },
+  "item alias create": {
+   "args": [],
+   "options": {
+    "output": {
+     "value": true
+    },
+    "prefix": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item attachment download": {
+   "args": [],
+   "options": {
+    "attachment-id": {
+     "value": true
+    },
+    "item-id": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    }
+   }
+  },
+  "item create credit-card": {
+   "args": [],
+   "options": {
+    "cardholder-name": {
+     "value": true
+    },
+    "cvv": {
+     "value": true
+    },
+    "expiration-date": {
+     "value": true
+    },
+    "from-template": {
+     "value": true
+    },
+    "get-template": {
+     "value": false
+    },
+    "note": {
+     "value": true
+    },
+    "number": {
+     "value": true
+    },
+    "pin": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "title": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item create custom": {
+   "args": [],
+   "options": {
+    "from-template": {
+     "value": true
+    },
+    "get-template": {
+     "value": false
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item create identity": {
+   "args": [],
+   "options": {
+    "from-template": {
+     "value": true
+    },
+    "get-template": {
+     "value": false
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item create login": {
+   "args": [],
+   "options": {
+    "email": {
+     "value": true
+    },
+    "from-template": {
+     "value": true
+    },
+    "generate-passphrase": {
+     "value": false
+    },
+    "generate-password": {
+     "value": false
+    },
+    "get-template": {
+     "value": false
+    },
+    "password": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "title": {
+     "value": true
+    },
+    "url": {
+     "value": true
+    },
+    "username": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item create note": {
+   "args": [],
+   "options": {
+    "from-template": {
+     "value": true
+    },
+    "get-template": {
+     "value": false
+    },
+    "note": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "title": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item create ssh-key generate": {
+   "args": [],
+   "options": {
+    "comment": {
+     "value": true
+    },
+    "key-type": {
+     "value": true
+    },
+    "password": {
+     "value": false
+    },
+    "share-id": {
+     "value": true
+    },
+    "title": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item create ssh-key import": {
+   "args": [],
+   "options": {
+    "from-private-key": {
+     "value": true
+    },
+    "password": {
+     "value": false
+    },
+    "share-id": {
+     "value": true
+    },
+    "title": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item create wifi": {
+   "args": [],
+   "options": {
+    "from-template": {
+     "value": true
+    },
+    "get-template": {
+     "value": false
+    },
+    "note": {
+     "value": true
+    },
+    "password": {
+     "value": true
+    },
+    "security": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "ssid": {
+     "value": true
+    },
+    "title": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item delete": {
+   "args": [],
+   "options": {
+    "item-id": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    }
+   }
+  },
+  "item list": {
+   "args": [
+    {
+     "name": "vault-name",
+     "required": false
+    }
+   ],
+   "options": {
+    "filter-state": {
+     "value": true
+    },
+    "filter-type": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "show-secrets": {
+     "value": false
+    },
+    "sort-by": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item member list": {
+   "args": [],
+   "options": {
+    "item-id": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    }
+   }
+  },
+  "item member remove": {
+   "args": [],
+   "options": {
+    "member-share-id": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    }
+   }
+  },
+  "item member update": {
+   "args": [],
+   "options": {
+    "member-share-id": {
+     "value": true
+    },
+    "role": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    }
+   }
+  },
+  "item move": {
+   "args": [],
+   "options": {
+    "from-share-id": {
+     "value": true
+    },
+    "from-vault-name": {
+     "value": true
+    },
+    "item-id": {
+     "value": true
+    },
+    "item-title": {
+     "value": true
+    },
+    "to-share-id": {
+     "value": true
+    },
+    "to-vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item share": {
+   "args": [
+    {
+     "name": "email",
+     "required": true
+    }
+   ],
+   "options": {
+    "item-id": {
+     "value": true
+    },
+    "role": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    }
+   }
+  },
+  "item totp": {
+   "args": [
+    {
+     "name": "uri",
+     "required": false
+    }
+   ],
+   "options": {
+    "field": {
+     "value": true
+    },
+    "item-id": {
+     "value": true
+    },
+    "item-title": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item trash": {
+   "args": [],
+   "options": {
+    "item-id": {
+     "value": true
+    },
+    "item-title": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item untrash": {
+   "args": [],
+   "options": {
+    "item-id": {
+     "value": true
+    },
+    "item-title": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item update": {
+   "args": [],
+   "options": {
+    "field": {
+     "value": true
+    },
+    "item-id": {
+     "value": true
+    },
+    "item-title": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "item view": {
+   "args": [
+    {
+     "name": "uri",
+     "required": false
+    }
+   ],
+   "options": {
+    "field": {
+     "value": true
+    },
+    "item-id": {
+     "value": true
+    },
+    "item-title": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "login": {
+   "args": [
+    {
+     "name": "username",
+     "required": false
+    }
+   ],
+   "options": {
+    "interactive": {
+     "value": false
+    },
+    "pat": {
+     "value": true
+    }
+   }
+  },
+  "logout": {
+   "args": [],
+   "options": {
+    "force": {
+     "value": false
+    }
+   }
+  },
+  "password generate passphrase": {
+   "args": [],
+   "options": {
+    "capitalise": {
+     "value": true
+    },
+    "count": {
+     "value": true
+    },
+    "numbers": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    },
+    "separator": {
+     "value": true
+    }
+   }
+  },
+  "password generate random": {
+   "args": [],
+   "options": {
+    "length": {
+     "value": true
+    },
+    "numbers": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    },
+    "symbols": {
+     "value": true
+    },
+    "uppercase": {
+     "value": true
+    }
+   }
+  },
+  "password score": {
+   "args": [
+    {
+     "name": "password",
+     "required": true
+    }
+   ],
+   "options": {
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "personal-access-token access grant": {
+   "args": [],
+   "options": {
+    "item-id": {
+     "value": true
+    },
+    "item-title": {
+     "value": true
+    },
+    "personal-access-token-id": {
+     "value": true
+    },
+    "personal-access-token-name": {
+     "value": true
+    },
+    "role": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "personal-access-token access list-access": {
+   "args": [],
+   "options": {
+    "output": {
+     "value": true
+    },
+    "personal-access-token-id": {
+     "value": true
+    },
+    "personal-access-token-name": {
+     "value": true
+    }
+   }
+  },
+  "personal-access-token access revoke": {
+   "args": [],
+   "options": {
+    "personal-access-token-id": {
+     "value": true
+    },
+    "personal-access-token-name": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    }
+   }
+  },
+  "personal-access-token create": {
+   "args": [],
+   "options": {
+    "expiration": {
+     "value": true
+    },
+    "name": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "personal-access-token delete": {
+   "args": [],
+   "options": {
+    "personal-access-token-id": {
+     "value": true
+    }
+   }
+  },
+  "personal-access-token list": {
+   "args": [],
+   "options": {
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "personal-access-token renew": {
+   "args": [],
+   "options": {
+    "expiration": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    },
+    "personal-access-token-id": {
+     "value": true
+    },
+    "personal-access-token-name": {
+     "value": true
+    }
+   }
+  },
+  "run": {
+   "args": [
+    {
+     "name": "command",
+     "required": true
+    }
+   ],
+   "options": {
+    "env-file": {
+     "value": true
+    },
+    "no-masking": {
+     "value": false
+    }
+   }
+  },
+  "session create-lock": {
+   "args": [],
+   "options": {
+    "idle-timeout": {
+     "value": true
+    }
+   }
+  },
+  "session lock": {
+   "args": [],
+   "options": {}
+  },
+  "session remove-lock": {
+   "args": [],
+   "options": {}
+  },
+  "session unlock": {
+   "args": [],
+   "options": {}
+  },
+  "settings set default-format": {
+   "args": [
+    {
+     "name": "format",
+     "required": true
+    }
+   ],
+   "options": {}
+  },
+  "settings set default-vault": {
+   "args": [],
+   "options": {
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "settings unset default-format": {
+   "args": [],
+   "options": {}
+  },
+  "settings unset default-vault": {
+   "args": [],
+   "options": {}
+  },
+  "settings view": {
+   "args": [],
+   "options": {}
+  },
+  "share list": {
+   "args": [],
+   "options": {
+    "only-items": {
+     "value": true
+    },
+    "only-vaults": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "ssh-agent daemon start": {
+   "args": [],
+   "options": {
+    "create-new-identities": {
+     "value": true
+    },
+    "log-file": {
+     "value": true
+    },
+    "pid-file": {
+     "value": true
+    },
+    "refresh-interval": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "socket-path": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "ssh-agent daemon status": {
+   "args": [],
+   "options": {
+    "pid-file": {
+     "value": true
+    }
+   }
+  },
+  "ssh-agent daemon stop": {
+   "args": [],
+   "options": {
+    "pid-file": {
+     "value": true
+    }
+   }
+  },
+  "ssh-agent debug": {
+   "args": [],
+   "options": {
+    "item-id": {
+     "value": true
+    },
+    "item-title": {
+     "value": true
+    },
+    "output": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "ssh-agent load": {
+   "args": [],
+   "options": {
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "ssh-agent start": {
+   "args": [],
+   "options": {
+    "create-new-identities": {
+     "value": true
+    },
+    "refresh-interval": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "socket-path": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "support": {
+   "args": [],
+   "options": {}
+  },
+  "totp generate": {
+   "args": [
+    {
+     "name": "secret-or-uri",
+     "required": true
+    }
+   ],
+   "options": {
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "update": {
+   "args": [],
+   "options": {
+    "set-track": {
+     "value": true
+    },
+    "yes": {
+     "value": false
+    }
+   }
+  },
+  "user generate-report": {
+   "args": [],
+   "options": {
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "user info": {
+   "args": [],
+   "options": {
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "vault create": {
+   "args": [],
+   "options": {
+    "name": {
+     "value": true
+    }
+   }
+  },
+  "vault delete": {
+   "args": [],
+   "options": {
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "vault list": {
+   "args": [],
+   "options": {
+    "output": {
+     "value": true
+    }
+   }
+  },
+  "vault member list": {
+   "args": [],
+   "options": {
+    "output": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "vault member remove": {
+   "args": [],
+   "options": {
+    "member-share-id": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "vault member update": {
+   "args": [],
+   "options": {
+    "member-share-id": {
+     "value": true
+    },
+    "role": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "vault share": {
+   "args": [
+    {
+     "name": "email",
+     "required": true
+    }
+   ],
+   "options": {
+    "role": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "vault transfer": {
+   "args": [
+    {
+     "name": "member-share-id",
+     "required": true
+    }
+   ],
+   "options": {
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  },
+  "vault update": {
+   "args": [],
+   "options": {
+    "name": {
+     "value": true
+    },
+    "share-id": {
+     "value": true
+    },
+    "vault-name": {
+     "value": true
+    }
+   }
+  }
+ }
+}

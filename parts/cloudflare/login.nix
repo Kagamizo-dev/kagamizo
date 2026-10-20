@@ -7,14 +7,26 @@
 # The session then mints the scoped tokens in tokens.nix; tokens minted over
 # OAuth can never exceed the scopes approved here, so this list is the ceiling
 # for every token in the account.
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  inputs,
+  ...
+}:
 let
-  inherit (config.cloudflare.login) scopes;
+  cli = import ../_lib/cli.nix {
+    inherit lib;
+    fx = inputs.nix-effects.lib;
+  };
+  # Each scope must be one cf's OAuth client is registered for (catalog/cf.json).
+  scopes = map (
+    s: if cli.Scope.check s then s else throw "cloudflare.login.scopes: `${s}` is not a cf OAuth scope"
+  ) config.cloudflare.login.scopes;
 in
 {
   options.cloudflare.login.scopes = lib.mkOption {
-    type = lib.types.listOf (lib.types.strMatching "[a-z0-9_-]+([:.][a-z0-9_-]+)?");
-    description = "OAuth scopes requested by `cloudflare-login`; cf rejects unknown ones.";
+    type = lib.types.listOf lib.types.str;
+    description = "OAuth scopes requested by `cloudflare-login`, checked against catalog/cf.json.";
   };
 
   config = {
@@ -68,10 +80,16 @@ in
           name = "cloudflare-login";
           runtimeInputs = [ config.packages.cf ];
           text = ''
-            # Containers have no OS keychain; the session file lives in
-            # ~/.config/cloudflare and dies with the container.
-            exec cf auth login --no-browser --no-use-keyring --force \
-              --scopes ${lib.escapeShellArgs scopes} "$@"
+            # The session file lives in ~/.config/cloudflare and dies with the
+            # container.
+            exec ${
+              cli.cf "auth login" {
+                browser = false;
+                device = true;
+                force = true;
+                inherit scopes;
+              }
+            }
           '';
         };
       };
