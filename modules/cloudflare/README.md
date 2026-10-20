@@ -220,6 +220,13 @@ around.
   `Kagamizo-LLC/openrouter-management-key`) and first credit top-up are made
   in its dashboard. After those, `hcloud`, OpenTofu and the
   `openrouter` wrapper do everything.
+- **Mercury's first API token** (`Kagamizo-LLC/mercury-api-token`, scoped to
+  cards) is made in its dashboard; then `cards` issues and limits every card.
+  Entering a card on a vendor's billing page is manual wherever Mercury will
+  not reveal it into Proton Pass, and even then the vendor's form is a web form.
+- **Public's personal secret** (`Zachariah-Root/public-personal-secret`) is
+  made in its settings, and funding Public has no API at all: deposits are
+  started from Public's side.
 - **Proton Mail domain and addresses** (`dev@kagamizo.com` and the others):
   Proton publishes no API for them.
 - **Registrar prerequisites**: default payment method, registrant contact and

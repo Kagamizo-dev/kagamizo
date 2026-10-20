@@ -15,6 +15,17 @@
     };
     import-tree.url = "git+https://github.com/vic/import-tree?ref=main";
 
+    # Banking and brokerage CLIs, built from their pinned release sources with
+    # this flake's nixpkgs (modules/mercury, modules/public).
+    mercury-cli = {
+      url = "git+https://github.com/MercuryTechnologies/mercury-cli?ref=refs/tags/v0.11.8";
+      flake = false;
+    };
+    publicdotcom-cli = {
+      url = "git+https://github.com/PublicDotCom/publicdotcom-cli?ref=refs/tags/v1.3.7";
+      flake = false;
+    };
+
     # Typed declarations: refinement and dependent types checked at eval time.
     nix-effects = {
       url = "git+https://github.com/kleisli-io/nix-effects?ref=refs/tags/v0.16.0";

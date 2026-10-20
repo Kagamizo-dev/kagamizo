@@ -3,6 +3,8 @@
 #   cli.cf "accounts tokens create" { name = "x"; policies = [ ... ]; }
 #   cli.passCli "vault create" { name = "Kagamizo-CI"; }
 #   cli.gh "secret set" { secret-name = "X"; repo = "o/r"; env = "e"; }
+#   cli.mercury "cards list" { type = [ "virtual" ]; format = "jsonl"; }
+#   cli.public "portfolio show" { json = true; }
 #
 # return the command as one shell-quoted string. An unknown command, an
 # unknown option, a missing required one or a value of the wrong type fails
@@ -28,6 +30,8 @@ let
   cfCatalog = catalog "cf";
   passCatalog = catalog "pass-cli";
   ghCatalog = catalog "gh";
+  mercuryCatalog = catalog "mercury";
+  publicCatalog = catalog "public";
   provider = catalog "cloudflare-provider";
 
   # A value the shell supplies at run time; the tool checks it then.
@@ -273,12 +277,147 @@ let
       problems = inBlock "resource" provider.resources ++ inBlock "data" provider.data;
     in
     if problems == [ ] then config else fail "OpenTofu config does not match the provider" problems;
+
+  # Every option is a flag; the global ones (format, transform, ...) apply to
+  # every command. Lists repeat their flag, JSON options take one JSON value.
+  mercury =
+    command: params:
+    let
+      entry =
+        mercuryCatalog.commands.${command}
+          or (throw "mercury has no command `${command}`${suggest mercuryCatalog.commands command}");
+      options = mercuryCatalog.global // entry.options;
+      Strings = refined "ListOfString" Any (v: builtins.isList v && lib.all builtins.isString v);
+      typeOf =
+        name: o:
+        if o ? oneOf then
+          orRuntime "OneOf[${lib.concatStringsSep "|" o.oneOf}]" (
+            refined name String (v: builtins.elem v o.oneOf)
+          )
+        else
+          {
+            string = orRuntime "String" String;
+            boolean = orRuntime "Bool" Bool;
+            number = orRuntime "Number" Number;
+            list = orRuntime "ListOfString" Strings;
+            json = orRuntime "Json" Text;
+          }
+          .${o.type};
+      p = checkParams {
+        what = "mercury ${command}";
+        fields = lib.mapAttrs typeOf options;
+        required = lib.attrNames (lib.filterAttrs (_: o: o.required) entry.options);
+        inherit params;
+      };
+      option =
+        name: v:
+        let
+          o = options.${name};
+        in
+        if o.type == "boolean" && !isRuntime v then
+          [ "--${name}=${lib.boolToString v}" ]
+        else if o.type == "list" && builtins.isList v then
+          lib.concatMap (x: [
+            "--${name}"
+            (quote x)
+          ]) v
+        else
+          [
+            "--${name}"
+            (quote (json v))
+          ];
+    in
+    lib.concatStringsSep " " (
+      [ "mercury ${command}" ] ++ lib.concatLists (lib.mapAttrsToList option p)
+    );
+
+  # Typer: global options (json, timeout, ...) go before the command; a flag
+  # is --x or --no-x, a repeatable option repeats.
+  public =
+    command: params:
+    let
+      entry =
+        publicCatalog.commands.${command}
+          or (throw "public has no command `${command}`${suggest publicCatalog.commands command}");
+      options = publicCatalog.global // entry.options;
+      Strings = refined "ListOfString" Any (v: builtins.isList v && lib.all builtins.isString v);
+      typeOf =
+        name: o:
+        if o ? oneOf then
+          orRuntime "OneOf[${lib.concatStringsSep "|" o.oneOf}]" (
+            refined name String (v: builtins.elem v o.oneOf)
+          )
+        else if o.multiple or false then
+          orRuntime "ListOfString" Strings
+        else
+          {
+            string = orRuntime "String" String;
+            boolean = orRuntime "Bool" Bool;
+            number = orRuntime "Number" Number;
+          }
+          .${o.type};
+      p = checkParams {
+        what = "public ${command}";
+        fields =
+          lib.mapAttrs typeOf options
+          // lib.listToAttrs (
+            map (
+              a:
+              lib.nameValuePair a.name (if a.variadic then orRuntime "ListOfString" Strings else typeOf a.name a)
+            ) entry.args
+          );
+        required =
+          lib.attrNames (lib.filterAttrs (_: o: o.required) entry.options)
+          ++ map (a: a.name) (lib.filter (a: a.required) entry.args);
+        inherit params;
+      };
+      argNames = map (a: a.name) entry.args;
+      positional = lib.concatMap (
+        a:
+        if !(p ? ${a.name}) then
+          [ ]
+        else if builtins.isList p.${a.name} then
+          map quote p.${a.name}
+        else
+          [ (quote p.${a.name}) ]
+      ) entry.args;
+      option =
+        name: v:
+        let
+          o = options.${name};
+        in
+        if o.type == "boolean" && !isRuntime v then
+          [ (if v then "--${name}" else "--no-${name}") ]
+        else if builtins.isList v then
+          lib.concatMap (x: [
+            "--${name}"
+            (quote x)
+          ]) v
+        else
+          [
+            "--${name}"
+            (quote v)
+          ];
+      flagsOf = names: lib.concatLists (lib.mapAttrsToList option (lib.getAttrs names p));
+      given = lib.subtractLists argNames (lib.attrNames p);
+      globals = lib.filter (n: publicCatalog.global ? ${n} && !(entry.options ? ${n})) given;
+    in
+    lib.concatStringsSep " " (
+      [ "public" ]
+      ++ flagsOf globals
+      ++ [ command ]
+      ++ positional
+      ++ flagsOf (lib.subtractLists globals given)
+    );
+
 in
 {
   inherit
     cf
     passCli
     gh
+    mercury
+    public
     tofu
     ;
   # The values a gh option is limited to, e.g. `repo edit` visibilities.

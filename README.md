@@ -47,7 +47,9 @@ modules/
 ├─ cloudflare/    account, tokens, `bootstrap`, `infra` (OpenTofu), `registrar`
 ├─ github/        the organization and its repos; `github-bootstrap`
 ├─ hetzner/       account and secrets (the host comes next)
-├─ openrouter/    account, models, capped keys; `openrouter`, `orca-fleet`
+├─ openrouter/    account, models, capped keys and card; `openrouter`, `orca-fleet`
+├─ mercury/       the bank: CLI, account, one capped virtual card per vendor; `cards`
+├─ public/        the brokerage: CLI, account; `brokerage`
 ├─ catalog/       what each pinned tool can do (_json/), and its extractors
 ├─ claude/        cloud session tools and network allowlist
 ├─ repo/          commit convention, lint
@@ -147,6 +149,18 @@ Kagamizo's domains, their mailboxes, the Cloudflare and GitHub accounts and the
 Proton Pass vaults are declared under `modules/` and type-checked with
 nix-effects. The GitHub organization is applied by the `github-bootstrap`
 workflow (`modules/github`).
+
+## Money: one capped card per vendor
+
+Nothing is paid with a long-lived card. Each vendor's module declares its own
+Mercury virtual card with a spend limit (`mercury.cards.<vendor>`: OpenRouter's
+is the sum of its key caps, Cloudflare's the registrar budget), and
+`nix run .#cards -- plan|apply` issues, re-limits, freezes or cancels them.
+Where Mercury reveals a card, its details go straight into a Proton Pass card
+item. Moving money still asks for a tap in the Mercury app.
+
+`nix run .#brokerage -- summary` reads Public (accounts, portfolio); any other
+arguments go to Public's own CLI, with its secret from Proton Pass.
 
 ## Checks
 

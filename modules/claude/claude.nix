@@ -29,6 +29,9 @@
           infra
           registrar
           proton
+          openrouter
+          cards
+          brokerage
           commit-lint
         ];
       };

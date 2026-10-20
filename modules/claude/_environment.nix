@@ -55,8 +55,19 @@ in
         ];
       };
       openrouter = {
-        reason = "Agent fleet models";
+        reason = "Models and key management (modules/openrouter)";
         hosts = [ "openrouter.ai" ];
+      };
+      mercury = {
+        reason = "Virtual cards (modules/mercury); card details go to the vault API";
+        hosts = [
+          "api.mercury.com"
+          "vault-api.mercury.com"
+        ];
+      };
+      public = {
+        reason = "Brokerage reads and orders (modules/public)";
+        hosts = [ "api.public.com" ];
       };
       # Live data for running World Monitor / God's Eye View in a session.
       globe-data = {

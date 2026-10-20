@@ -7,13 +7,17 @@
 #                                     of the pinned provider, per attribute
 #   _json/pass-cli.json             every pass-cli command and option
 #   _json/gh.json                   every gh command, argument and option
+#   _json/mercury.json              every mercury command and option, read
+#                                     from its pinned Go source
+#   _json/public.json               every public command, argument and
+#                                     option, from its click tree
 #
 # ../_lib/cli.nix types every invocation in this repo against them. Bumping a
 # tool changes its catalog, so a version bump arrives as a reviewable diff;
 # `nix flake check` fails until the committed catalogs match the pinned tools:
 #
 #   nix run .#catalog-update
-{ self, ... }:
+{ self, inputs, ... }:
 {
   perSystem =
     { pkgs, config, ... }:
@@ -44,7 +48,28 @@
         ${python} ${./_extract/gh.py} ${config.packages.gh}/bin/gh $out
       '';
 
+      # Read from the pinned source: its help is a drawn TUI.
+      mercury = pkgs.runCommand "mercury.json" { } ''
+        ${python} ${./_extract/mercury.py} ${inputs.mercury-cli} $out
+      '';
+
+      # Walks the CLI's own click tree: its help is a drawn TUI too.
+      public = pkgs.runCommand "public.json" { } ''
+        export HOME=$TMPDIR
+        ${
+          pkgs.python3.withPackages (ps: [ (ps.toPythonModule config.packages.public) ])
+        }/bin/python3 -I ${./_extract/public.py} $out
+      '';
+
       catalogs = pkgs.linkFarm "catalog" [
+        {
+          name = "mercury.json";
+          path = mercury;
+        }
+        {
+          name = "public.json";
+          path = public;
+        }
         {
           name = "cf.json";
           path = cf;

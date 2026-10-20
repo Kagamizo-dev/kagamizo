@@ -68,6 +68,23 @@
         "url": "https://github.com/vic/import-tree"
       }
     },
+    "mercury-cli": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786509855,
+        "narHash": "sha256-yCnBNeMy157m1ShcIGNAx626uCPLLLugUty0miYouao=",
+        "ref": "refs/tags/v0.11.8",
+        "rev": "25cc254e78eddfbbd4f13cfc90a0beca930a2c0e",
+        "revCount": 343,
+        "type": "git",
+        "url": "https://github.com/MercuryTechnologies/mercury-cli"
+      },
+      "original": {
+        "ref": "refs/tags/v0.11.8",
+        "type": "git",
+        "url": "https://github.com/MercuryTechnologies/mercury-cli"
+      }
+    },
     "nix-effects": {
       "inputs": {
         "nix-unit": [],
@@ -154,16 +171,35 @@
         "type": "github"
       }
     },
+    "publicdotcom-cli": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791558761,
+        "narHash": "sha256-HkG8A7aLtCNgmH+KI7UiHrQGlHqxhe1zS7uCS4vHDCw=",
+        "ref": "refs/tags/v1.3.7",
+        "rev": "bac3f08ca76a3794b610bcda9b217d15e895365b",
+        "revCount": 34,
+        "type": "git",
+        "url": "https://github.com/PublicDotCom/publicdotcom-cli"
+      },
+      "original": {
+        "ref": "refs/tags/v1.3.7",
+        "type": "git",
+        "url": "https://github.com/PublicDotCom/publicdotcom-cli"
+      }
+    },
     "root": {
       "inputs": {
         "flake-parts": "flake-parts",
         "import-tree": "import-tree",
+        "mercury-cli": "mercury-cli",
         "nix-effects": "nix-effects",
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixpkgs": [
           "nixos-raspberrypi",
           "nixpkgs"
-        ]
+        ],
+        "publicdotcom-cli": "publicdotcom-cli"
       }
     }
   },
