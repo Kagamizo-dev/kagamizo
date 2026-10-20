@@ -49,6 +49,7 @@ let
       ci = "protonpass://${infraVaults.ci}";
       agents = "protonpass://${infraVaults.agents}";
       state = "protonpass://${infraVaults.state}";
+      host = "protonpass://${infraVaults.host}";
     };
 
     profiles = {
@@ -62,6 +63,10 @@ let
       ci = {
         defaults.providers = [ "ci" ];
         CLOUDFLARE_API_TOKEN = secret "ci-apply token, minted by bootstrap" "cloudflare-token";
+        # Absent until the hetzner account exists (its first token is a Gap).
+        HCLOUD_TOKEN = secret "Hetzner Cloud project token for OpenTofu and hcloud" "hcloud-token" // {
+          required = false;
+        };
       }
       // state;
 
@@ -74,6 +79,22 @@ let
         };
       }
       // state;
+
+      # The always-on host, read at boot by its own agent token: the model key
+      # Open WebUI and OpenCode use, and the tunnel it serves them through.
+      host = {
+        defaults.providers = [ "host" ];
+        OPENROUTER_API_KEY =
+          secret "OpenRouter key for chat and code, minted by `openrouter keys`" "openrouter-api-key"
+          // {
+            required = false;
+          };
+        TUNNEL_TOKEN =
+          secret "Cloudflare Tunnel token for chat and code, from the access layer" "tunnel-token"
+          // {
+            required = false;
+          };
+      };
 
       # Yours: the Proton Pass agent tokens `proton apply` creates, kept until
       # they are handed to their consumer (GitHub Actions secrets, Orca).

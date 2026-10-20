@@ -47,6 +47,15 @@ let
       emailRoutingAddresses = Limit;
       workersRequestsPerDay = Limit;
       kvWritesPerDay = Limit;
+      zeroTrustSeats = Limit;
+    };
+    hetzner = {
+      projects = Limit;
+      apiTokens = Flag;
+    };
+    openrouter = {
+      managementKeys = Flag;
+      keyCreditLimits = Flag;
     };
     github = {
       privateRepos = Limit;

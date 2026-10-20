@@ -235,6 +235,11 @@ around.
   only repos the app is installed on, and installing it on a new org is a
   page on github.com, not an API. Until then a session cannot follow
   `github-bootstrap`'s transfer of a repo into the org.
+- **Hetzner and OpenRouter signups** (`signup plan`): web-only. Hetzner
+  checks a government ID and a selfie, and its first project API token is made
+  in the Cloud Console; OpenRouter's first management key and first credit
+  top-up are made in its dashboard. After those, `hcloud`, OpenTofu and the
+  `openrouter` wrapper do everything.
 - **Proton Mail domain and addresses** (`dev@kagamizo.com` and the others):
   Proton publishes no API for them.
 - **Registrar prerequisites**: default payment method, registrant contact and

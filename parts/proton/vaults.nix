@@ -53,7 +53,7 @@ in
   options.proton = {
     infraVaults = mkOption {
       type = types.attrsOf types.str;
-      description = "Vaults holding the infra secrets: root (person), entity, ci, agents, state.";
+      description = "Vaults holding the infra secrets: root (person), entity, ci, agents, state, host.";
     };
     vaults = mkOption {
       type = types.listOf types.str;
@@ -74,6 +74,8 @@ in
         ci = "Kagamizo-CI";
         agents = "Kagamizo-Agents";
         state = "Kagamizo-State";
+        # What the always-on host (devices/kagamizo-host) reads at boot.
+        host = "Kagamizo-Host";
       };
       inherit vaults;
     };

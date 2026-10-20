@@ -55,6 +55,44 @@
           value = 1000;
           source = "https://developers.cloudflare.com/kv/platform/limits/";
         };
+        # Access users on the free Zero Trust plan.
+        zeroTrustSeats = {
+          value = 50;
+          source = "https://blog.cloudflare.com/teams-plans";
+        };
+      };
+    };
+
+    # Pay as you go: servers are billed hourly, capped monthly.
+    hetzner.cloud = {
+      checked = "2026-10-20";
+      capabilities = {
+        projects = {
+          value = 20;
+          source = "https://docs.hetzner.com/cloud/general/faq/";
+        };
+        # Per-project API tokens, which hcloud and the OpenTofu provider use.
+        apiTokens = {
+          value = true;
+          source = "https://docs.hetzner.cloud/";
+        };
+      };
+    };
+
+    # Prepaid credits, spent per token.
+    openrouter.pay-as-you-go = {
+      checked = "2026-10-20";
+      capabilities = {
+        # A management key creates, limits and disables API keys; it cannot
+        # call models itself.
+        managementKeys = {
+          value = true;
+          source = "https://openrouter.ai/docs/guides/overview/auth/management-api-keys";
+        };
+        keyCreditLimits = {
+          value = true;
+          source = "https://openrouter.ai/docs/guides/overview/auth/management-api-keys";
+        };
       };
     };
 

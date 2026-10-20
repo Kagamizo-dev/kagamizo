@@ -91,6 +91,13 @@ in
       secret = "PROTON_PASS_AGENT_TOKEN";
     };
 
+    # The always-on host: reads its own vault at boot, nothing else.
+    kagamizo-host = {
+      vault = infraVaults.host;
+      expiration = "6m";
+      secret = "PROTON_PASS_HOST_TOKEN";
+    };
+
     # The Orca agent fleet: the same view as plans, renewed monthly.
     orca-fleet = {
       vault = infraVaults.agents;

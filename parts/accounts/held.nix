@@ -16,6 +16,63 @@
       status = "active";
     };
 
+    # The always-on host for chat and code (devices/kagamizo-host).
+    hetzner = {
+      provider = "hetzner";
+      plan = "cloud";
+      owner = "kagamizo";
+      status = "planned";
+      signup = {
+        url = "https://accounts.hetzner.com/signUp";
+        handle = "kagamizo";
+        email = "admin@kagamizo.com";
+        credential = "password";
+        findings = [
+          {
+            fact = "signup checks identity with a government ID and a selfie (iDenfy)";
+            source = "https://docs.hetzner.com/general/security-and-identify/fraud-prevention-faq/";
+            checked = "2026-10-20";
+          }
+          {
+            fact = "sign up without a VPN and with a non-free mail domain, or the fraud check may hold the account";
+            source = "https://docs.hetzner.com/general/security-and-identify/fraud-prevention-faq/";
+            checked = "2026-10-20";
+          }
+          {
+            fact = "the first project API token is created in the Cloud Console; after it, hcloud and OpenTofu do everything";
+            source = "https://docs.hetzner.cloud/";
+            checked = "2026-10-20";
+          }
+        ];
+      };
+    };
+
+    # Models for chat and code, default deepseek/deepseek-v4-flash.
+    openrouter = {
+      provider = "openrouter";
+      plan = "pay-as-you-go";
+      owner = "kagamizo";
+      status = "planned";
+      signup = {
+        url = "https://openrouter.ai/sign-up";
+        handle = "kagamizo";
+        email = "dev@kagamizo.com";
+        credential = "password";
+        findings = [
+          {
+            fact = "OpenRouter has no official CLI; its management API creates, limits and disables keys";
+            source = "https://openrouter.ai/docs/guides/overview/auth/management-api-keys";
+            checked = "2026-10-20";
+          }
+          {
+            fact = "the first management key and the first credit top-up are made in the web dashboard";
+            source = "https://openrouter.ai/docs/guides/overview/auth/management-api-keys";
+            checked = "2026-10-20";
+          }
+        ];
+      };
+    };
+
     # Kagamizo's organization, contact dev@kagamizo.com, created from your
     # own GitHub account (it owns the org; the repo moves over from it).
     github-kagamizo = {
