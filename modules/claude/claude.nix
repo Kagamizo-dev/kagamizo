@@ -29,6 +29,7 @@
           infra
           registrar
           proton
+          mail
           openrouter
           cards
           brokerage

@@ -227,8 +227,11 @@ around.
 - **Public's personal secret** (`Zachariah-Root/public-personal-secret`) is
   made in its settings, and funding Public has no API at all: deposits are
   started from Public's side.
-- **Proton Mail domain and addresses** (`dev@kagamizo.com` and the others):
-  Proton publishes no API for them.
+- **Proton Mail's API is Proton's internal one.** Proton publishes no API for
+  domains or addresses, so `mail` uses the one its own clients use, through
+  its go-proton-api; signing in takes your 2FA code (and a verification link
+  if Proton asks for one). It is a gap in the sense that Proton could change
+  it without notice.
 - **Registrar prerequisites**: default payment method, registrant contact and
   the registration agreement, dashboard only.
 - **The session's network allowlist** (`modules/claude/_environment.nix`):

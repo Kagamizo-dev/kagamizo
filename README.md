@@ -44,6 +44,7 @@ modules/
 ├─ accounts/      the account, plan and capability types; `signup`
 ├─ identity/      entities, domains, mailboxes (nix-effects)
 ├─ proton/        vaults, agent tokens, `proton`; renders secretspec.toml
+├─ proton-mail/   custom domains and addresses (Go, on go-proton-api); `mail`
 ├─ cloudflare/    account, tokens, `bootstrap`, `infra` (OpenTofu), `registrar`
 ├─ github/        the organization and its repos; `github-bootstrap`
 ├─ hetzner/       account and secrets (the host comes next)
