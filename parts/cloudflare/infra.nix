@@ -103,6 +103,7 @@ in
               exit 1
             fi
             secretspec set TOFU_STATE --file "$INFRA_SPEC" --profile ci \
+              --reason "infra: save the state after ci $*" \
               --from-file "$work/terraform.tfstate" >/dev/null
             echo "infra: state saved to Proton Pass" >&2
           fi

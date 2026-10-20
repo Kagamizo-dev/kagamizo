@@ -156,8 +156,14 @@ in
                       echo "agent $name: no token in pass-cli's output; deleted it again" >&2
                       exit 1
                     fi
-                    printf %s "$token" | secretspec set "$(jq -r --arg n "$name" '.[$n].secret' <<<"$agents")" \
-                      --file "$spec" --profile proton-agents --from-file - >/dev/null
+                    # A token that cannot be stored is useless: delete the agent.
+                    if ! printf %s "$token" | secretspec set "$(jq -r --arg n "$name" '.[$n].secret' <<<"$agents")" \
+                      --file "$spec" --profile proton-agents --from-file - \
+                      --reason "proton apply: store the token of new agent $name" >/dev/null; then
+                      ${cli.passCli "agent delete" { name.shell = "$name"; }} >/dev/null
+                      echo "agent $name: could not store its token; deleted it again" >&2
+                      exit 1
+                    fi
                     unset token
                     echo "created agent $name (token stored in ${top.proton.infraVaults.root})"
                   fi

@@ -158,7 +158,8 @@ in
             } | jq -c '[.items[].title]'
           }
           put() { # profile var: value on stdin
-            secretspec set "$2" --file "$spec" --profile "$1" --from-file - >/dev/null
+            secretspec set "$2" --file "$spec" --profile "$1" --from-file - \
+              --reason "bootstrap: store $2 for profile $1" >/dev/null
           }
 
           # Store a new token value (JSON with id and value on stdin) in every
