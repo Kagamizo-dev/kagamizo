@@ -2,7 +2,18 @@
 # one place. The committed file must match; regenerate it with
 #
 #   nix build .#secretspec-toml && cp result secretspec.toml
-{ config, self, ... }:
+#
+# The rule: a secret lives with the identity it belongs to. Account-wide
+# power (the Cloudflare root token, the bootstrap state, the registrar token,
+# which spends money on the account) sits in your root vault; Kagamizo's own
+# credentials (its GitHub organization) in Kagamizo's; CI and agents in their
+# own vaults. `proton plan` diffs these references against Proton Pass.
+{
+  lib,
+  config,
+  self,
+  ...
+}:
 let
   inherit (config.proton) infraVaults;
 
@@ -26,6 +37,7 @@ let
 
     providers = {
       root = "protonpass://${infraVaults.root}";
+      kagamizo = "protonpass://${infraVaults.entity}";
       ci = "protonpass://${infraVaults.ci}";
       agents = "protonpass://${infraVaults.agents}";
     };
@@ -38,6 +50,12 @@ let
         TOFU_STATE_PASSPHRASE = secret "Encrypts the bootstrap layer state (holds token values)" "tofu-state-passphrase";
       }
       // state "read and write";
+
+      # Kagamizo's GitHub organization, declared with OpenTofu once it exists.
+      github = {
+        defaults.providers = [ "kagamizo" ];
+        GITHUB_TOKEN = secret "Fine-grained token administering the kagamizo GitHub organization" "github-token";
+      };
 
       # Yours only: buying domains (`registrar register`), which costs money.
       registrar = {
@@ -67,27 +85,36 @@ let
   };
 in
 {
-  perSystem =
-    { pkgs, ... }:
-    let
-      toml = (pkgs.formats.toml { }).generate "secretspec.toml" spec;
-      file = pkgs.runCommand "secretspec.toml" { } ''
-        {
-          echo "# Generated from parts/proton/secretspec.nix; edit that, not this."
-          echo "# Values never live here: only names, descriptions and Proton Pass item titles."
-          echo
-          cat ${toml}
-        } > $out
-      '';
-    in
-    {
-      packages.secretspec-toml = file;
-      checks.secretspec-toml = pkgs.runCommand "secretspec-toml-in-sync" { } ''
-        if ! diff -u ${self}/secretspec.toml ${file}; then
-          echo "secretspec.toml is stale: nix build .#secretspec-toml && cp result secretspec.toml" >&2
-          exit 1
-        fi
-        touch $out
-      '';
-    };
+  options.proton.secretspec = lib.mkOption {
+    type = lib.types.raw;
+    readOnly = true;
+    description = "The secretspec declaration; secretspec.toml is rendered from it.";
+  };
+  config = {
+    proton.secretspec = spec;
+
+    perSystem =
+      { pkgs, ... }:
+      let
+        toml = (pkgs.formats.toml { }).generate "secretspec.toml" spec;
+        file = pkgs.runCommand "secretspec.toml" { } ''
+          {
+            echo "# Generated from parts/proton/secretspec.nix; edit that, not this."
+            echo "# Values never live here: only names, descriptions and Proton Pass item titles."
+            echo
+            cat ${toml}
+          } > $out
+        '';
+      in
+      {
+        packages.secretspec-toml = file;
+        checks.secretspec-toml = pkgs.runCommand "secretspec-toml-in-sync" { } ''
+          if ! diff -u ${self}/secretspec.toml ${file}; then
+            echo "secretspec.toml is stale: nix build .#secretspec-toml && cp result secretspec.toml" >&2
+            exit 1
+          fi
+          touch $out
+        '';
+      };
+  };
 }

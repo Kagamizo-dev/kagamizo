@@ -48,14 +48,36 @@ The types enforce this at eval time, and each failure names its field:
 - mailbox names, domain names, Cloudflare IDs and vault names are refined
   strings.
 
-Every credential is a view. A Proton Pass vault holds one view; a Proton Pass
-agent token opens exactly one vault; secretspec turns the vault into the same
-environment variables every time.
+## Secrets: declared refs, values in Proton Pass
+
+Infrastructure changes are OpenTofu plans, code changes are git diffs, and
+secret changes are diffs of references: `secretspec.toml` (generated from
+`parts/proton/secretspec.nix`) names every secret by vault and item title,
+Proton Pass holds the value, and `proton plan` shows which references exist
+and which are missing. Values never pass through git, and every vault opens
+only through a Proton login carrying your 2FA.
+
+A secret lives with the identity it belongs to, and the types enforce which
+vault can be which:
+
+| Vault | Holds | Must be |
+| --- | --- | --- |
+| `Zachariah-Root` | Cloudflare root token, bootstrap state, `registrar` token | a person's vault |
+| `Kagamizo-LLC` | Kagamizo's own credentials: its GitHub organization, its logins | an LLC's or nonprofit's vault |
+| `Kagamizo-CI` | `ci-apply` token, cloudflare state | CI only |
+| `Kagamizo-Agents` | `agent-readonly` token, read-only state, OpenRouter key | agents only |
+
+The registrar token is root-level although it is minted, not dashboard-made:
+it spends money on the whole account and cannot be scoped to one LLC.
+
+Every credential is a view. A Proton Pass agent token opens exactly one vault,
+and secretspec turns a vault into the same environment variables every time,
+so what a process can do depends only on which vault it was given.
 
 | Role | Vault | Cloudflare token | Can |
 | --- | --- | --- | --- |
-| You (bootstrap) | `Kagamizo-LLC` | root | mint the tokens below |
-| You (registrar) | `Kagamizo-LLC` | `registrar` | buy domains, within budget; read zones |
+| You (bootstrap) | `Zachariah-Root` | root | mint the tokens below |
+| You (registrar) | `Zachariah-Root` | `registrar` | buy domains, within budget; read zones |
 | CI on `master` | `Kagamizo-CI` | `ci-apply` | apply merged changes |
 | Agents, PR plans | `Kagamizo-Agents` | `agent-readonly` | read everything, change nothing |
 
@@ -68,7 +90,8 @@ nix run .#infra -- <bootstrap|cloudflare> <tofu args...>   # OpenTofu on a layer
 nix run .#registrar -- check                               # price every candidate
 nix run .#registrar -- register <domain> <price>           # buy one (billed, budgeted)
 nix run .#registrar -- zone <domain>                       # its zone ID
-nix run .#proton -- plan | apply                           # create declared vaults
+nix run .#proton -- plan                                   # vaults and secret refs: the diff
+nix run .#proton -- apply                                  # create declared vaults
 ```
 
 `infra` and `registrar` need their secrets from secretspec, e.g.
@@ -150,9 +173,9 @@ Done already: account and zone IDs, and the vaults (`proton apply`).
    API tokens: one token *Object Read & Write* and one *Object Read only*, both
    scoped to that bucket. Each shows an S3 Access Key ID and Secret.
 3. **Items.** Add these as Note items (title exactly as shown, value in the
-   note body):
+   note body). `proton plan` lists whatever is still missing:
 
-   | Item title | `Kagamizo-LLC` | `Kagamizo-CI` | `Kagamizo-Agents` |
+   | Item title | `Zachariah-Root` | `Kagamizo-CI` | `Kagamizo-Agents` |
    | --- | --- | --- | --- |
    | `cloudflare-token` | root token | after step 4 | after step 4 |
    | `cloudflare-registrar-token` | after step 4 | | |
@@ -160,6 +183,8 @@ Done already: account and zone IDs, and the vaults (`proton apply`).
    | `r2-state-secret` | read & write | read & write | read only |
    | `tofu-state-passphrase` | passphrase A | passphrase B | passphrase B |
    | `openrouter-api-key` | | | your OpenRouter key |
+
+   `Kagamizo-LLC/github-token` comes later, with the GitHub organization.
 
    Generate each passphrase with `openssl rand -base64 32`. A encrypts the
    bootstrap state (which contains token values), B the cloudflare state.

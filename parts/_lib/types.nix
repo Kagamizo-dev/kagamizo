@@ -113,11 +113,23 @@ let
   };
 
   # Vaults holding the infra secrets, one per trust level (see secretspec.toml).
-  InfraVaults = Record {
-    root = VaultName;
-    ci = VaultName;
-    agents = VaultName;
-  };
+  # Dependent on the entities: root-level secrets must sit in a person's vault,
+  # an entity's secrets in that LLC's or nonprofit's vault.
+  InfraVaults =
+    entities:
+    let
+      vaultsOf =
+        kinds: map (e: e.vault) (lib.filter (e: builtins.elem e.kind kinds) (lib.attrValues entities));
+    in
+    Record {
+      root = oneOf "PersonVault" (vaultsOf [ "person" ]);
+      entity = oneOf "EntityVault" (vaultsOf [
+        "llc"
+        "nonprofit"
+      ]);
+      ci = VaultName;
+      agents = VaultName;
+    };
 
   # Spend per month: domains bought that month, plus renewals of domains
   # bought in the same calendar month of an earlier year. Months with no
@@ -182,5 +194,5 @@ in
       throw "Cloudflare spend over the ${toString limit} USD monthly budget:\n${
         lib.concatStrings (lib.mapAttrsToList (m: usd: "  - ${m}: ${toString usd} USD\n") over)
       }";
-  infraVaults = checked "proton.infraVaults" InfraVaults;
+  infraVaults = entities: checked "proton.infraVaults" (InfraVaults entities);
 }
