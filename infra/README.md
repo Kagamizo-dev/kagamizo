@@ -48,6 +48,18 @@ below); CI cannot mint tokens.
 immediately. To kill Cloudflare access too, delete the token on the dashboard
 (My Profile, API Tokens) or run bootstrap with `destroy`.
 
+## Claude sessions
+
+`.claude/settings.json` runs `.claude/hooks/session-start.sh` in cloud
+sessions, which builds `.#session-tools` (pinned `pass-cli`, `secretspec` and
+the `infra` app) and puts it on PATH.
+
+The session's network allowlist is declared, type-checked, in
+`claude/environment.nix`. It cannot apply itself, so paste it once: cloud
+environment menu, Edit, Network access **Custom**, tick *Also include default
+list of common package managers*, and paste the output of
+`nix build .#claude-allowed-domains && cat result` into Allowed domains.
+
 ## One-time setup
 
 Do these in order. Steps 4 to 6 need `pass-cli` signed in as you (the Yoga live

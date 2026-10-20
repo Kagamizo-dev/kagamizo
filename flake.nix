@@ -19,6 +19,7 @@
       # Same nixpkgs the image is built from.
       pkgs = import nixos-raspberrypi.inputs.nixpkgs { system = "x86_64-linux"; };
       infra = import ./infra { inherit pkgs; };
+      claude = import ./claude { inherit pkgs infra; };
     in
     {
       nixosConfigurations =
@@ -68,6 +69,10 @@
         yoga-iso = self.nixosConfigurations.yoga.config.system.build.isoImage;
         # nix run .#infra -- cloudflare plan  (see infra/README.md)
         infra = infra.app;
+        # Put on PATH by .claude/hooks/session-start.sh in cloud sessions.
+        session-tools = claude.tools;
+        # Paste into the cloud environment's Allowed domains (see claude/environment.nix).
+        claude-allowed-domains = claude.allowed-domains;
       };
 
       formatter.x86_64-linux = pkgs.nixfmt;
@@ -75,7 +80,7 @@
       # `nix flake check` runs these (CI does the same).
       checks.x86_64-linux = {
         formatting = pkgs.runCommand "nixfmt-check" { nativeBuildInputs = [ pkgs.nixfmt ]; } ''
-          nixfmt --check ${self}/flake.nix ${self}/hosts/*.nix ${self}/modules/*.nix ${self}/tests/*.nix ${self}/infra/*.nix
+          nixfmt --check ${self}/flake.nix ${self}/hosts/*.nix ${self}/modules/*.nix ${self}/tests/*.nix ${self}/infra/*.nix ${self}/claude/*.nix
           touch $out
         '';
         statix = pkgs.runCommand "statix-check" { nativeBuildInputs = [ pkgs.statix ]; } ''
@@ -108,6 +113,9 @@
           pkgs.runCommand "yoga-disk-guard-check" { } "touch $out";
         # Both infra layers against the pinned Cloudflare provider schema.
         infra = infra.check;
+        # Type-checks the allowlist and builds the pinned session tools.
+        claude-allowed-domains = claude.allowed-domains;
+        session-tools = claude.tools;
         disk-guard = pkgs.testers.runNixOSTest ./tests/disk-guard.nix;
         # Boots a VM with the tmux module and drives it like a user would.
         tmux = pkgs.testers.runNixOSTest ./tests/tmux.nix;
