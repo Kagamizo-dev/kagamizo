@@ -41,7 +41,7 @@ root session (`cloudflare-login`, a device code, 5 minutes) is only needed for
 | Registered agent | northwest-kagamizo, planned (login item ready) | northwest-qsearch, active, not signed in yet | — |
 | Bank | mercury, planned (needs the LLC and EIN) | mercury-qsearch, active, no session or cards here yet | — |
 | Brokerage | — | — | public, active; personal secret missing (a Gap) |
-| Other | github active; hetzner, openrouter planned | arxiv-qsearch planned | proton, cloudflare active |
+| Other | github active; hetzner, openrouter planned | arxiv-qsearch planned (paused) | proton, cloudflare active |
 
 Proton Pass has every entity's vault plus a `<Vault>-Sessions` vault each, and
 nine swarm agent tokens (legal, accounting and governance per identity) in the
@@ -76,6 +76,57 @@ root vault.
 6. **The PR** from this branch into `main`, once the owner asks; the branch
    is green (`nix flake check`, everything but the VM and image builds run
    here).
+
+## Paused
+
+arXiv (`arxiv-qsearch`, planned, login item ready): paused by the owner.
+
+## How much of each lifecycle is CLI
+
+### Northwest (MCP server, `northwest`)
+
+Not yet checked live: this environment could not reach Northwest's hosts, so
+the first job in a session that can is `northwest login` for
+`northwest-qsearch`, then `northwest catalog`, then fill in this table from
+the real tool list. From Northwest's tools page (19 of its 131 tools named):
+
+| Stage | CLI | How |
+|---|---|---|
+| Open the account | no | web signup, with the first order (a Gap) |
+| Form the LLC, EIN | likely | formation, amendment and EIN orders priced and carted; checkout is an invoice or a texted pay link, so paying stays your tap |
+| Company record | yes | companies, entity details, EIN lookup, profile updates |
+| Filings, annual reports | yes | filing statuses, due dates, autopay; a renewal-filing tool |
+| Documents | yes | list, read unlocked ones, invoice to unlock, order mailed copies |
+| Invoices, payment methods | yes | list, pay with a saved method, refunds, autopay |
+| Registered agent, mail | yes | services, status, mail plans; cancel |
+| Domains, DNS | yes | not used: Cloudflare holds the domains |
+| Dissolution | unknown | look for it in the live catalog |
+
+Documents stay at Northwest. The repo keeps pointers only: an index item per
+entity in its Proton Pass vault (`northwest-documents`: Northwest's company
+and document IDs, titles, dates), written from `get_documents_tool`, since
+titles can be sensitive (service of process) and the repo is public. Make it
+a `northwest documents` command once the tool's output shape is known.
+
+### Public (`brokerage`, pinned CLI v1.3.7)
+
+Read from the CLI's generated API client; every endpoint it has is wrapped
+and typed (`modules/public/actions.nix`):
+
+| Stage | CLI | How |
+|---|---|---|
+| Open the account, fund it | no | app only; deposits and withdrawals have no API |
+| Personal secret | no | made once in settings (a Gap); tokens are minted from it |
+| Accounts, portfolio, buying power | yes | `accounts`, `portfolio show` |
+| Market data, options, bonds | yes | quotes, bars, chains, greeks, bond details |
+| Orders | yes | preflight, place, multi-leg, replace, cancel, search |
+| History | yes | trades, deposits, withdrawals, dividends, interest, fees (read only) |
+| Tax | partly | unrealized tax lots (also CSV); no 1099s or statements |
+
+No token scopes: a token minted from the secret can always trade
+(`accounts.plans.public.individual.capabilities.scopedSecrets = false`).
+So agents still get no brokerage access, and the API stays personal: it is
+for personal, non-commercial use, never the LLCs'.
 
 ## Research to do: closing the Gaps
 
