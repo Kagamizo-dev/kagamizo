@@ -9,13 +9,19 @@
 #       one strategy on one instrument of one backend.
 #
 #   nix run .#trade -- backtest <strategy> <bars.csv>
+#   nix run .#trade -- bars <symbol> <step> [period]     Public's bars as CSV
+#   nix run .#trade -- paper <strategy> [bars.csv] [--all]
 #
 # Backtests touch no account: a simulated venue named after the backend, with
-# a simulated balance. Bars come from anywhere with the columns in _trade.py;
-# Public's `brokerage historicdata bars` is one source.
+# a simulated balance. Bars come from anywhere with the columns in _trade.py.
+# `bars` and `paper` read Public through our adapter (_public.py) under the
+# `public` secretspec profile, asking governance-authorize first, as the
+# matching `brokerage` commands would: paper preflights orders at Public,
+# which places nothing. So they are the owner's: no agent holds Public.
 { lib, config, ... }:
 let
   inherit (lib) mkOption types;
+  top = config;
   cfg = config.trading;
   held = config.accounts.held;
   brokerages = lib.attrNames (
@@ -130,12 +136,38 @@ in
       { pkgs, config, ... }:
       let
         python = pkgs.python313.withPackages (_: [ config.packages.nautilus-trader ]);
-        trade = pkgs.writeShellApplication {
-          name = "trade";
+        scripts = pkgs.linkFarm "trade-scripts" {
+          "trade.py" = ./_trade.py;
+          "_public.py" = ./_public.py;
+        };
+        # The engine itself, with whatever Public credentials the caller set.
+        run = pkgs.writeShellApplication {
+          name = "trade-run";
           runtimeInputs = [ python ];
           text = builtins.seq (lib.assertMsg (problems == [ ]) (lib.concatStringsSep "\n" problems)) ''
             export TRADE_STRATEGIES=${lib.escapeShellArg (builtins.toJSON declared)}
-            exec python3 -I ${./_trade.py} "$@"
+            exec python3 -I ${scripts}/trade.py "$@"
+          '';
+        };
+        trade = pkgs.writeShellApplication {
+          name = "trade";
+          runtimeInputs = [
+            run
+            config.packages.secretspec
+            config.packages.pass-cli
+            config.packages.governance-authorize
+          ];
+          text = builtins.seq top.accounts.checked ''
+            case "''${1:-}" in
+              bars | paper)
+                export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+                governance-authorize public:historicdata-bars public
+                [ "$1" = bars ] || governance-authorize public:order-preflight-single public
+                exec secretspec run --file ${config.packages.secretspec-toml} --profile public \
+                  --reason "trade $*" -- trade-run "$@"
+                ;;
+              *) exec trade-run "$@" ;;
+            esac
           '';
         };
       in
@@ -148,7 +180,7 @@ in
           pkgs.runCommand "trading-backtest"
             {
               nativeBuildInputs = [
-                trade
+                run
                 pkgs.jq
               ];
             }
@@ -166,9 +198,22 @@ in
                   print(f"{t.isoformat()},{o:.2f},{max(o, p) + 0.5:.2f},{min(o, p) - 0.5:.2f},{p:.2f},{random.randint(1000, 5000)}")
                   t += datetime.timedelta(days=1)
               EOF
-              trade backtest ema-cross-spy bars.csv > result.json
+              trade-run backtest ema-cross-spy bars.csv > result.json
               jq -e '.bars == 300 and .orders_filled >= 2' result.json
-              cp result.json $out
+
+              # The Public adapter against a stand-in for Public's API: the
+              # same bars back, BUY preflights taken, SELLs refused.
+              ${pkgs.python313}/bin/python3 -I ${./_stub_public.py} bars.csv > port &
+              while [ ! -s port ]; do sleep 0.1; done
+              export PUBLIC_API_BASE_URL=http://127.0.0.1:$(cat port) PUBLIC_PERSONAL_SECRET=stub-secret
+              trade-run bars SPY 1-DAY > public.csv
+              [ "$(wc -l < public.csv)" = 301 ]
+              trade-run paper ema-cross-spy --all > paper.json
+              jq -e --slurpfile b result.json '.orders_filled == $b[0].orders_filled
+                and (.preflight | length) >= 2
+                and any(.preflight[]; .accepted and .preflight.estimatedCost == "1000.00")
+                and any(.preflight[]; (.accepted | not) and .refused_by == "public" and .status == 400)' paper.json
+              jq -s '{backtest: .[0], paper: .[1]}' result.json paper.json > $out
             '';
       };
   };
