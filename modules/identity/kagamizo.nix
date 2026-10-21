@@ -12,6 +12,7 @@
       # (modules/northwest) once its account exists.
       legal = {
         status = "planned";
+        jurisdiction = "US-WY";
         registeredAgent = "northwest-kagamizo";
         ein = "none";
       };

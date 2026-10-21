@@ -223,8 +223,8 @@ around.
 - **Kagamizo LLC is not formed yet.** Its Northwest account
   (`northwest-kagamizo`, `signup plan`) opens on Northwest's site; after it,
   the formation and EIN orders are placed through Northwest's MCP server and
-  paid by a pay link texted to you. Its state of formation is still to be
-  chosen (`identity.entities.kagamizo.legal.jurisdiction`).
+  paid by a pay link texted to you. It is formed in Wyoming
+  (`identity.entities.kagamizo.legal.jurisdiction`).
 - **arXiv** (`arxiv-qsearch`): registration is a web form, and a first
   submission needs a personal endorsement from an established author in the
   field; arXiv has no submission API. It signs up as research@jingzo.com once
