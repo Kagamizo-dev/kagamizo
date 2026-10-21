@@ -139,6 +139,31 @@ No token scopes: a token minted from the secret can always trade
 So agents still get no brokerage access, and the API stays personal: it is
 for personal, non-commercial use, never the LLCs'.
 
+## Trading (`modules/trading`)
+
+NautilusTrader 1.231.0 (the last stable; 2.x is a release candidate) is
+packaged from its wheel, and `trade backtest <strategy> <bars.csv>` runs a
+declared strategy; `checks.trading-backtest` proves the engine trades end to
+end. Brokerages are backends (`trading.backends`), Public first, at stage
+`backtest`. Next:
+
+1. **The Public adapter**, ours (NautilusTrader has none): an instrument
+   provider (`instruments get`), a data client (quotes and bars, polled), an
+   execution client (preflight, place, replace, cancel, order status), on the
+   generated client in the pinned publicdotcom-cli. Paper first, against
+   Public's preflight, which places nothing.
+2. **`trade bars`**: Public's `historicdata bars` into the CSV backtests read,
+   through `brokerage` so it is authorized.
+3. **Live** as a `trading` governance action with effect spend: only a
+   controller places orders; agents backtest and paper-trade.
+4. **The account question for the legal swarm**: Public now opens business
+   accounts for single-owner LLCs, but its Individual API terms say personal,
+   non-commercial use and forbid wrapping the API; nothing found addresses
+   the API on a business account. Settle it, ideally in writing from Public,
+   before an LLC's account trades through it. Funding is a deposit started
+   from Public's side, from the entity's own Mercury account.
+5. **IBKR** as a second backend (NautilusTrader's adapter; corporate accounts).
+
 ## Research to do: closing the Gaps
 
 A pass through open-source projects for each remaining manual step, recorded
