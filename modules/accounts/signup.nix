@@ -7,7 +7,9 @@
 #   signup prepare <name>   create the login item in the owner's vault (email,
 #                           URL, handle; a generated password when the account
 #                           has its own login), so the form is filled from
-#                           Proton Pass and the 2FA seed is saved back there
+#                           Proton Pass and the 2FA seed is saved back there.
+#                           An active account with a signup is one held from
+#                           before: its item is the login it is moved to.
 #
 # After the form: set the account's status to "active" in held.nix, and from
 # then on the provider's CLI or API takes over.
@@ -28,10 +30,15 @@ let
     _: a:
     a.signup
     // {
-      inherit (a) provider plan owner;
+      inherit (a)
+        provider
+        plan
+        owner
+        status
+        ;
       vault = entities.${a.owner}.vault;
     }
-  ) (lib.filterAttrs (_: a: a.status == "planned" && a.signup != null) config.accounts.held);
+  ) (lib.filterAttrs (_: a: a.signup != null) config.accounts.held);
 in
 {
   perSystem =
@@ -62,7 +69,7 @@ in
           shift
           case "$cmd" in
             plan)
-              for name in $(jq -r 'keys[]' <<<"$pending"); do
+              for name in $(jq -r 'to_entries[] | select(.value.status == "planned") | .key' <<<"$pending"); do
                 a=$(jq -c --arg n "$name" '.[$n]' <<<"$pending")
                 vault=$(jq -r .vault <<<"$a")
                 if exists "$vault" "$name"; then item="ready in $vault"; else item="+ prepare in $vault"; fi

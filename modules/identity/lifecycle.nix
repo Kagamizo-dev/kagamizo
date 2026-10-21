@@ -28,6 +28,7 @@ let
     "hosting"
     "models"
     "research"
+    "credit"
   ];
   required =
     kind:

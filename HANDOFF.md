@@ -12,18 +12,40 @@ managers" ticked, and these allowed domains (`nix build
 .#claude-allowed-domains` prints the current list):
 
 ```
+*.cachix.org
+*.ghcr.io
+*.interactivebrokers.com
 *.proton.me
-proton.me
+accounts.hetzner.com
 api.cloudflare.com
-dash.cloudflare.com
+api.hetzner.cloud
+api.ibkr.com
 api.mercury.com
-oauth2.mercury.com
-vault-api.mercury.com
 api.public.com
-openrouter.ai
-mcp.northwestregisteredagent.com
+app.mercury.com
+arxiv.org
+blog.arxiv.org
+cloudflare-dns.com
+dash.cloudflare.com
+dns.google
+docs.hetzner.cloud
+docs.hetzner.com
+docs.mercury.com
+export.arxiv.org
+ghcr.io
 id.northwestregisteredagent.com
+info.arxiv.org
+mcp.northwestregisteredagent.com
+mercury.com
+models.dev
+oauth2.mercury.com
+opencode.ai
+openrouter.ai
+proton.me
+public.com
+vault-api.mercury.com
 www.northwestregisteredagent.com
+wyobiz.wyo.gov
 ```
 
 Then sign the session in: `pass-cli login` (an approval link). Cloudflare's
@@ -37,13 +59,15 @@ root session (`cloudflare-login`, a device code, 5 minutes) is only needed for
 | | Kagamizo LLC | QSearch LLC | Zachariah (person) |
 |---|---|---|---|
 | Legal | planned, Wyoming, EIN none | active; state, date, EIN unknown | natural |
-| Domain | kagamizo.com, mail live | jingzo.org, mail live | mirazo.org, bought; Proton domain, then DNS |
+| Domain | kagamizo.com, mail live | jingzo.org, mail live | mirazo.org, mail live (zach@, automations@; more as Pass aliases) |
 | Registered agent | northwest-kagamizo, planned (login item ready) | northwest-qsearch, active, not signed in yet | — |
 | Bank | mercury, planned (needs the LLC and EIN) | mercury-qsearch, active, no session or cards here yet | — |
 | Brokerage | — | — | public, active; personal secret missing (a Gap) |
+| Credit | — (a D-U-N-S number once the EIN exists) | — (D-U-N-S) | experian, active; its email to move to automations@mirazo.org |
 | Other | github active; hetzner, openrouter planned | arxiv-qsearch planned (paused) | proton, cloudflare active |
 
-Proton Pass has every entity's vault plus a `<Vault>-Sessions` vault each, and
+Proton's plan is full: 3 of 3 custom domains, 15 of 15 addresses; any further
+address is a Proton Pass alias. Proton Pass has every entity's vault plus a `<Vault>-Sessions` vault each, and
 nine swarm agent tokens (legal, accounting and governance per identity) in the
 root vault.
 

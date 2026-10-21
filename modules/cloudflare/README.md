@@ -251,6 +251,10 @@ around.
   when the identity server allows dynamic registration and otherwise falls
   back to `mcp-connector`; whether either accepts a 127.0.0.1 redirect is
   untested until the first login.
+- **Credit bureaus** (`modules/experian`): no bureau has an API for your own
+  file, so moving Experian's email to automations@mirazo.org, alerts and
+  freezes are its web settings. A freeze at each of the three bureaus is the
+  standing recommendation.
 - **Public's personal secret** (`Zachariah-Root/public-personal-secret`) is
   made in its settings, and funding Public has no API at all: deposits are
   started from Public's side.
