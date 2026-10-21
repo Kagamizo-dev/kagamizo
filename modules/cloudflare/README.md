@@ -295,7 +295,8 @@ nix run .#orca-swarm -- legal-qsearch
 The base policies hold whatever the grants say: an agent never spends,
 destroys or signs in, and never reaches another entity's accounts. Each
 swarm has its own Proton Pass agent token (`swarm-<name>`), opening only its
-entity's sessions vault (`<Vault>-Sessions`); that is the hard boundary,
+entity's sessions vault (`<Vault>-Sessions`, which also holds the entity's
+capped swarm key, `openrouter.keys.swarms-<entity>`); that is the hard boundary,
 and Cedar is what the wrappers check (`governance-authorize`) inside it.
 `nix flake check` validates the policies against the schema and runs tests
 derived from the declarations, each naming the policy that must decide it.

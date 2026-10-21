@@ -1,5 +1,6 @@
 # Each governance agent as an Orca swarm: its own Proton Pass agent token
-# (opening only its entity's sessions vault), its own Cedar principal, and an
+# (opening only its entity's sessions vault, where its model key and the
+# entity's sessions live), its own Cedar principal, and an
 # OpenCode config whose subagents are its agency-agents personas.
 #
 #   nix run .#orca-swarm -- <agent> [orca args]
@@ -25,6 +26,8 @@ let
   cfg = config.governance;
   persona = p: "${inputs.agency-agents}/${p}.md";
   slug = p: lib.last (lib.splitString "/" p);
+  secret = import ../_lib/secret.nix;
+  served = lib.listToAttrs (map (a: lib.nameValuePair a.serves true) (lib.attrValues cfg.agents));
   tokenVar = name: "PROTON_PASS_SWARM_${lib.toUpper (lib.replaceStrings [ "-" ] [ "_" ] name)}_TOKEN";
 
   missing = lib.concatLists (
@@ -39,20 +42,39 @@ in
 {
   governance.problems = missing;
 
+  # Home is the entity's sessions vault and nothing else: a QSearch swarm
+  # cannot open a Kagamizo vault, not even the shared agents one.
   proton.agents = lib.mapAttrs' (
     name: a:
     lib.nameValuePair "swarm-${name}" {
-      vault = config.proton.infraVaults.agents;
+      vault = config.proton.sessionVaults.${a.serves};
       expiration = "1m";
-      access = [
-        {
-          vault = config.proton.sessionVaults.${a.serves};
-          role = "editor";
-        }
-      ];
       secret = tokenVar name;
     }
   ) cfg.agents;
+
+  # What an entity's swarms run on, in that same vault: their own capped
+  # model key, apart from the fleet's.
+  secrets.profiles = lib.mapAttrs' (
+    entity: _:
+    lib.nameValuePair "swarm-${entity}" {
+      defaults.providers = [ "${entity}-sessions" ];
+      OPENROUTER_API_KEY =
+        secret "OpenRouter key for ${entity}'s swarms, minted by `openrouter apply`" "openrouter-api-key"
+        // {
+          required = false;
+        };
+    }
+  ) served;
+
+  openrouter.keys = lib.mapAttrs' (
+    entity: _:
+    lib.nameValuePair "swarms-${entity}" {
+      profile = "swarm-${entity}";
+      limitUsd = 10;
+      why = "${entity}'s legal, accounting and governance swarms";
+    }
+  ) served;
 
   perSystem =
     { pkgs, config, ... }:
@@ -149,6 +171,7 @@ in
           config.packages.secretspec
           config.packages.pass-cli
           config.packages.northwest
+          pkgs.jq
         ];
         text = ''
           agents=(${lib.concatStringsSep " " (lib.attrNames cfg.agents)})
@@ -163,7 +186,10 @@ in
           }
           export KAGAMIZO_PRINCIPAL=agent:$name
           export OPENCODE_CONFIG=${configs}/$name.json
-          exec secretspec run --file ${config.packages.secretspec-toml} --profile agent \
+          serves=$(jq -r --arg n "$name" '.[$n]' <<<${
+            lib.escapeShellArg (builtins.toJSON (lib.mapAttrs (_: a: a.serves) cfg.agents))
+          })
+          exec secretspec run --file ${config.packages.secretspec-toml} --profile "swarm-$serves" \
             --reason "orca swarm $name" -- orca "$@"
         '';
       };
