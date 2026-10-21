@@ -29,6 +29,11 @@
         costUsd = 8.50;
         renewalUsd = 11.20;
       };
+      # From Proton's Domain names settings (it has no API for them).
+      proton = {
+        verification = "1439dcf0d60be363048ae4a3a198ff8a1b642477";
+        dkimId = null;
+      };
       mailboxes = [
         "zach" # you
         "automations" # automated mail and signups, and the catch-all
