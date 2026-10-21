@@ -58,10 +58,45 @@
       };
     };
 
+    # Kagamizo's own business account. Until it is open, nothing is signed in
+    # with a personal account: the cards are Kagamizo's spending, and the
+    # API, OAuth and agent cards are documented for business customers.
     held.mercury = {
       provider = "mercury";
       plan = "standard";
       owner = "kagamizo";
+      status = "planned";
+      signup = {
+        url = "https://mercury.com/";
+        handle = "kagamizo";
+        email = "billing@kagamizo.com";
+        credential = "password";
+        findings = [
+          {
+            fact = "the application asks for the EIN (the IRS confirmation letter), the articles of organization and each 25%+ owner with a government ID";
+            source = "https://www.zenind.com/help/post/how-to-open-a-mercury-business-account-for-your-llc-a-practical-founder-guide";
+            checked = "2026-10-21";
+          }
+          {
+            fact = "the legal name, EIN record, owner names and addresses must match exactly; a registered agent's address may not be accepted as the business address";
+            source = "https://www.zenind.com/help/post/how-to-open-a-mercury-business-account-for-your-llc-a-practical-founder-guide";
+            checked = "2026-10-21";
+          }
+          {
+            fact = "after approval, mercury-session login signs the repo in; no dashboard token is made";
+            source = "https://github.com/MercuryTechnologies/mercury-cli";
+            checked = "2026-10-20";
+          }
+        ];
+      };
+    };
+
+    # QSearch's account, already open. Declared so nothing reaches for it
+    # without a demand; it has no cards or session here yet.
+    held.mercury-qsearch = {
+      provider = "mercury";
+      plan = "standard";
+      owner = "qsearch";
       status = "active";
     };
   };

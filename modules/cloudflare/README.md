@@ -220,6 +220,10 @@ around.
   `Kagamizo-LLC/openrouter-management-key`) and first credit top-up are made
   in its dashboard. After those, `hcloud`, OpenTofu and the
   `openrouter` wrapper do everything.
+- **Kagamizo's Mercury account** is not open yet (`signup plan`): Mercury's
+  business application is web-only and checks the EIN letter, formation
+  documents and the owner's ID. The vendor cards wait for it; they are not
+  issued from a personal account.
 - **Mercury** needs no dashboard token: `mercury-session login` runs the
   official CLI's OAuth sign-in, an approval link. Approving on a phone leaves
   a failed 127.0.0.1 page whose address is handed back to the waiting login.
