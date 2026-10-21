@@ -27,6 +27,11 @@
         costUsd = 8.50;
         renewalUsd = 11.20;
       };
+      # From Proton's Domain names settings (it has no API for them).
+      proton = {
+        verification = "8f98c21f96d25746076c2ea834a2c823d41c1116";
+        dkimId = null;
+      };
       mailboxes = [
         "admin" # account owner, replacing the old Outlook address
         "finance" # banking and brokerage
