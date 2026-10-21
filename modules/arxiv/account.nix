@@ -34,14 +34,31 @@
       };
     };
 
-    # Signs up as research@jingzo.com, organization "QSearch LLC", once
-    # jingzo.com and its mailboxes are declared (modules/identity/qsearch.nix):
-    # a signup's address must be a declared mailbox.
+    # Organization "QSearch LLC". The verification mail goes to
+    # research@jingzo.org, so it waits on jingzo.org's mail being live.
     held.arxiv-qsearch = {
       provider = "arxiv";
       plan = "author";
       owner = "qsearch";
       status = "planned";
+      signup = {
+        url = "https://arxiv.org/user/register";
+        handle = "qsearch";
+        email = "research@jingzo.org";
+        credential = "password";
+        findings = [
+          {
+            fact = "the form asks for a name, an organization and an email tied to it; an unaffiliated author enters Independent";
+            source = "https://info.arxiv.org/help/registerhelp.html";
+            checked = "2026-10-21";
+          }
+          {
+            fact = "a first submission needs a personal endorsement from an established author in the domain; arXiv staff cannot give one";
+            source = "https://blog.arxiv.org/2026/01/21/attention-authors-updated-endorsement-policy/";
+            checked = "2026-10-21";
+          }
+        ];
+      };
     };
   };
 }

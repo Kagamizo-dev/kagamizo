@@ -227,8 +227,8 @@ around.
   (`identity.entities.kagamizo.legal.jurisdiction`).
 - **arXiv** (`arxiv-qsearch`): registration is a web form, and a first
   submission needs a personal endorsement from an established author in the
-  field; arXiv has no submission API. It signs up as research@jingzo.com once
-  that domain is bought and its mail is live.
+  field; arXiv has no submission API. It signs up as research@jingzo.org once
+  that domain's mail is live.
 - **Kagamizo's Mercury account** is not open yet (`signup plan`): Mercury's
   business application is web-only and checks the EIN letter, formation
   documents and the owner's ID. The vendor cards wait for it; they are not
@@ -253,6 +253,10 @@ around.
 - **Public's personal secret** (`Zachariah-Root/public-personal-secret`) is
   made in its settings, and funding Public has no API at all: deposits are
   started from Public's side.
+- **jingzo.org's mail is not live yet.** The domain is bought and declared
+  with its mailboxes, but adding it to Proton is the web step below, since
+  `mail login` is refused by Proton's API (Invalid section name, code 2064)
+  for a client that is not Proton's own; this repo does not pose as one.
 - **Proton Mail domains and addresses** are added in Proton's web settings
   (account.proton.me, any browser; not the mobile app): Proton has no public
   API for them, and its internal one only admits Proton's own clients. Each
