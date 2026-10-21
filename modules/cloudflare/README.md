@@ -238,8 +238,9 @@ around.
   a failed 127.0.0.1 page whose address is handed back to the waiting login.
   Entering a card on a vendor's billing page is manual wherever Mercury will
   not reveal it into Proton Pass.
-- **Northwest's tool catalog** (`modules/northwest/_json/tools.json`) is a
-  seed of the 19 tool names on Northwest's tools page, of the 131 it states.
+- **Northwest's tool catalog** (`modules/northwest/_json/tools.json`) holds
+  130 of the 131 tools on Northwest's tools page, read through search results
+  rather than from the server.
   `northwest catalog` replaces it with the server's own tools/list once
   `northwest login` has run, and every new tool then needs an effect in
   `modules/northwest/tools.nix` before anything can call it. The session's

@@ -85,22 +85,33 @@ arXiv (`arxiv-qsearch`, planned, login item ready): paused by the owner.
 
 ### Northwest (MCP server, `northwest`)
 
-Not yet checked live: this environment could not reach Northwest's hosts, so
-the first job in a session that can is `northwest login` for
-`northwest-qsearch`, then `northwest catalog`, then fill in this table from
-the real tool list. From Northwest's tools page (19 of its 131 tools named):
+From Northwest's tools page, read through search results (no sign-in): 130
+of its 131 tools are in `modules/northwest/_json/tools.json`, each typed in
+`modules/northwest/tools.nix` (68 read, 41 write, 17 spend, 4 destroy).
+`northwest catalog` replaces the list with the server's own once signed in;
+some clients see the names with a `v2__` prefix, which the catalog will show.
+OAuth: Keycloak realm `northwestregisteredagent.com` on
+id.northwestregisteredagent.com (`/auth/realms/...`), public client
+`mcp-connector` with PKCE; whether it takes a 127.0.0.1 redirect or offers
+dynamic registration is settled by the client's discovery on first login.
 
 | Stage | CLI | How |
 |---|---|---|
-| Open the account | no | web signup, with the first order (a Gap) |
-| Form the LLC, EIN | likely | formation, amendment and EIN orders priced and carted; checkout is an invoice or a texted pay link, so paying stays your tap |
-| Company record | yes | companies, entity details, EIN lookup, profile updates |
-| Filings, annual reports | yes | filing statuses, due dates, autopay; a renewal-filing tool |
-| Documents | yes | list, read unlocked ones, invoice to unlock, order mailed copies |
-| Invoices, payment methods | yes | list, pay with a saved method, refunds, autopay |
-| Registered agent, mail | yes | services, status, mail plans; cancel |
-| Domains, DNS | yes | not used: Cloudflare holds the domains |
-| Dissolution | unknown | look for it in the live catalog |
+| Open the account | no | web signup; `create_company_tool` needs an account |
+| Form the LLC | mostly | `company_entity_catalog`, `create_company`, `list_formation_filing_options`, `add_formation_to_cart`, checkout; the form's signature, dates and SSN are typed in the portal |
+| EIN | partly | `list_ein_filing_options`, `add_ein_to_cart` (an SSN flag only), checkout; `get_company_ein` reads it back; SSN and signature in the portal |
+| Annual reports | read, plus auto-filing | `get_annual_reports` (due dates, autopay); `purchase_compliance_service` starts the free renewal filing service |
+| Amendments | yes, with form limits | `list_amendment_filing_options`, `add_amendment_filing_to_cart`, the form tools |
+| Company record, standing | yes | details, EIN, state status, action items, orders needing attention |
+| Documents | yes | list, details, text of unlocked ones (not legal documents), unlock invoice, mailed copies; legal originals download in the portal |
+| Invoices, payments | partly | pay with a saved method, autopay, refunds, pay links; adding a method is the portal |
+| Registered agent, mail | yes | services, status, mail plans, RA in a new state (`add_ra_service_to_cart`), cancel |
+| Email, phone, domains, DNS | yes | not used: Proton holds mail, Cloudflare the domains |
+| Operating agreement, foreign registration, dissolution | unknown | no tool by name; maybe products (`discover_products`), else the portal |
+
+Northwest's own limits: no card or SSN in chat; payment is a saved method or
+a texted pay link; write tools run only after an approval in chat, some only
+for the account owner.
 
 Documents stay at Northwest. The repo keeps pointers only: an index item per
 entity in its Proton Pass vault (`northwest-documents`: Northwest's company
