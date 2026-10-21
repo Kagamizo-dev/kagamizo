@@ -253,10 +253,10 @@ around.
 - **Public's personal secret** (`Zachariah-Root/public-personal-secret`) is
   made in its settings, and funding Public has no API at all: deposits are
   started from Public's side.
-- **jingzo.org's mail is not live yet.** The domain is bought and declared
-  with its mailboxes, but adding it to Proton is the web step below, since
-  `mail login` is refused by Proton's API (Invalid section name, code 2064)
-  for a client that is not Proton's own; this repo does not pose as one.
+- **`mail login` is refused by Proton's API** (Invalid section name, code
+  2064) for a client that is not Proton's own, and this repo does not pose
+  as one; so jingzo.org, like kagamizo.com, was added and its addresses made
+  in Proton's web settings (below).
 - **Proton Mail domains and addresses** are added in Proton's web settings
   (account.proton.me, any browser; not the mobile app): Proton has no public
   API for them, and its internal one only admits Proton's own clients. Each
