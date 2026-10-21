@@ -19,6 +19,13 @@
           "-w"
           "-X main.version=0.11.8"
         ];
+        # The login waits 2 minutes for its callback, too short for approving
+        # on a phone and handing the address back (`mercury-session
+        # callback`); wait 10, as `northwest login` does.
+        postPatch = ''
+          substituteInPlace internal/auth/oauth.go \
+            --replace-fail 'context.WithTimeout(ctx, 2*time.Minute)' 'context.WithTimeout(ctx, 10*time.Minute)'
+        '';
         nativeBuildInputs = [ pkgs.makeWrapper ];
         postInstall = ''
           wrapProgram $out/bin/mercury --set MERCURY_NO_UPDATE_CHECK 1
