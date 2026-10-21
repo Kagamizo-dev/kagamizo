@@ -128,12 +128,12 @@ in
       login = {
         effect = "session";
         description = "Sign in and store the session";
-        command = "login";
+        command = "northwest login";
       };
       tools = {
         effect = "read";
         description = "List the server's tools";
-        command = "tools";
+        command = "northwest tools";
       };
     };
 }

@@ -86,21 +86,34 @@ in
           awk 'NR==1 && /^---$/ {fm=1; next} fm && /^---$/ {fm=0; next} !fm' ${persona p} > $out
         '';
 
+      # What a grant lets an agent run: each action of its effects, as
+      # [program, rest of the command].
+      granted =
+        g:
+        let
+          provider = top.accounts.held.${g.account}.provider;
+        in
+        lib.concatLists (
+          lib.mapAttrsToList (
+            tool: x:
+            let
+              words = lib.splitString " " (if x.command == null then "${provider} call ${tool}" else x.command);
+            in
+            lib.optional (lib.elem x.effect g.effects) {
+              program = lib.head words;
+              rest = lib.concatStringsSep " " (lib.tail words);
+              inherit (x) description;
+            }
+          ) (cfg.actions.${provider} or { })
+        );
+
       lead =
         name: a:
         let
           tools = lib.concatMapStrings (
             g:
-            let
-              provider = top.accounts.held.${g.account}.provider;
-            in
-            lib.concatStrings (
-              lib.mapAttrsToList (
-                tool: x:
-                lib.optionalString (lib.elem x.effect g.effects) "- `${provider} --account ${g.account} ${
-                  if x.command == null then "call ${tool}" else x.command
-                }`: ${x.description}\n"
-              ) (cfg.actions.${provider} or { })
+            lib.concatMapStrings (x: "- `${x.program} --account ${g.account} ${x.rest}`: ${x.description}\n") (
+              granted g
             )
           ) a.grants;
         in
@@ -151,7 +164,9 @@ in
             permission.bash = {
               "*" = "ask";
             }
-            // lib.genAttrs (map (g: "${top.accounts.held.${g.account}.provider} *") a.grants) (_: "allow");
+            // lib.genAttrs (lib.unique (lib.concatMap (g: map (x: "${x.program} *") (granted g)) a.grants)) (
+              _: "allow"
+            );
           }
         );
 
@@ -171,6 +186,8 @@ in
           config.packages.secretspec
           config.packages.pass-cli
           config.packages.northwest
+          config.packages.cards
+          config.packages.mercury-session
           pkgs.jq
         ];
         text = ''

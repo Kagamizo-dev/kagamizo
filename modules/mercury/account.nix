@@ -93,8 +93,8 @@
       };
     };
 
-    # QSearch's account, already open. Declared so nothing reaches for it
-    # without a demand; it has no cards or session here yet.
+    # QSearch's account, already open: its session is mercury-qsearch in
+    # QSearch's sessions vault, and its swarms read it (modules/governance).
     held.mercury-qsearch = {
       provider = "mercury";
       plan = "standard";

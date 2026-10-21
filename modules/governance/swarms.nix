@@ -62,6 +62,11 @@ in
           effects = [ "read" ];
           why = "Northwest invoices and refunds, for the books";
         }
+        {
+          account = "mercury-qsearch";
+          effects = [ "read" ];
+          why = "balances and card spend, for the books";
+        }
       ];
       # Reads only: changing the company's record stays with its controller.
       governance-qsearch.grants = [
@@ -69,6 +74,11 @@ in
           account = "northwest-qsearch";
           effects = [ "read" ];
           why = "company records and registered agent services";
+        }
+        {
+          account = "mercury-qsearch";
+          effects = [ "read" ];
+          why = "what the bank holds and what the cards spend, against their limits";
         }
       ];
     }

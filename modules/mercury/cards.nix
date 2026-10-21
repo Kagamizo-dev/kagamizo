@@ -2,6 +2,8 @@
 # vendor, with a spend limit per interval. A vendor's module declares its own
 # card (mercury.cards.<vendor>), so the limit sits next to what it pays for.
 #
+#   cards [--account A] <command>, on mercury.account unless named:
+#
 #   cards plan              declared cards against the live ones
 #   cards spend [YYYY-MM]   each card's spend this month against its limit
 #   cards funds             the balances the cards draw from
@@ -10,8 +12,10 @@
 #   cards freeze <name>     stop a card at once; `unfreeze` restores it
 #   cards unfreeze <name>
 #
-# Every command runs on the OAuth session from `mercury-session login`
-# (./session.nix), which the CLI refreshes and the wrapper stores back. A card
+# Every command runs on the named account's OAuth session from
+# `mercury-session login` (./session.nix), which the CLI refreshes and the
+# wrapper stores back. The reads work on any held Mercury account; issuing
+# or unfreezing a card only on mercury.account, the one the cards draw on. A card
 # made by hand in Mercury with a declared nickname (kagamizo/<vendor>) is
 # simply adopted.
 #
@@ -85,12 +89,6 @@ in
   config.accounts.demands = lib.optionals (cfg.cards != { }) [
     {
       inherit (cfg) account;
-      capability = "oauthSessions";
-      need = true;
-      why = "cards and mercury-session run on an OAuth session, not dashboard tokens";
-    }
-    {
-      inherit (cfg) account;
       capability = "virtualCards";
       need = true;
       why = "mercury.cards (${lib.concatStringsSep ", " (lib.attrNames cfg.cards)})";
@@ -122,7 +120,7 @@ in
           # shellcheck source=/dev/null
           . ${config.packages.mercury-with-session}
           creds=$XDG_CONFIG_HOME/mercury/credentials.json
-          [ -s "$creds" ] || { echo "cards: no Mercury session; run mercury-session login" >&2; exit 1; }
+          [ -s "$creds" ] || { echo "cards: no Mercury session; run mercury-session --account <account> login" >&2; exit 1; }
           cards=${lib.escapeShellArg (builtins.toJSON cards)}
           vault=${lib.escapeShellArg vault}
           usage="usage: cards <plan|spend [YYYY-MM]|funds|apply [--prune]|freeze <name>|unfreeze <name>>"
@@ -316,20 +314,33 @@ in
           config.packages.secretspec
           config.packages.pass-cli
           config.packages.governance-authorize
+          pkgs.jq
         ];
         # Builds only while the declared plans cover what the repo needs.
         text = builtins.seq top.accounts.checked ''
           export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+          if [ "''${1:-}" != --account ]; then set -- --account ${cfg.account} "$@"; fi
+          account= # set by the sourced picker
+          # shellcheck source=/dev/null
+          . ${config.packages.mercury-pick-account}
+          case "''${1:-}" in
+            apply | unfreeze)
+              [ "$account" = ${cfg.account} ] || {
+                echo "cards: the declared cards draw on ${cfg.account}, not $account" >&2
+                exit 1
+              }
+              ;;
+          esac
           case "''${1:-}" in
             apply) if [ "''${2:-}" = --prune ]; then action=cards-prune; else action=cards-apply; fi ;;
             plan | spend | funds | freeze | unfreeze) action=cards-$1 ;;
             *) action= ;;
           esac
           if [ -n "$action" ]; then
-            governance-authorize "mercury:$action" ${cfg.account}
+            governance-authorize "mercury:$action" "$account"
           fi
-          exec secretspec run --file ${spec} --profile mercury-session \
-            --reason "cards $*" -- ${run}/bin/cards-run "$@"
+          exec secretspec run --file ${spec} --profile "$MERCURY_PROFILE" \
+            --reason "cards $* ($account)" -- ${run}/bin/cards-run "$@"
         '';
       };
     };

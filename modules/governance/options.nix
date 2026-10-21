@@ -42,7 +42,7 @@ let
       command = mkOption {
         type = types.nullOr types.str;
         default = null;
-        description = "The wrapper's own subcommand for it; null is `call <tool>`.";
+        description = "The command for it, program first (`cards spend`); null is `<provider> call <tool>`.";
       };
     };
   };
