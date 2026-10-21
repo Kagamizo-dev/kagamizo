@@ -32,7 +32,7 @@
       # From Proton's Domain names settings (it has no API for them).
       proton = {
         verification = "1439dcf0d60be363048ae4a3a198ff8a1b642477";
-        dkimId = null;
+        dkimId = "dfxtxh6qnok4p4dzsq7tamma65i247rtr6jphy7eguvnv6wasrfla";
       };
       mailboxes = [
         "zach" # you
