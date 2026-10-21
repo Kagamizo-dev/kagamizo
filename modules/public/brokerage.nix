@@ -49,9 +49,19 @@ in
         runtimeInputs = [
           config.packages.secretspec
           config.packages.pass-cli
+          config.packages.governance-authorize
         ];
         text = builtins.seq top.accounts.checked ''
           export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+          # The command's words, up to its first option: `order place`.
+          words=()
+          for w in "$@"; do
+            case "$w" in -*) break ;; esac
+            words+=("$w")
+          done
+          action=$(IFS=-; echo "''${words[*]:0:2}")
+          [ "''${words[0]:-}" = summary ] && action=summary
+          governance-authorize "public:''${action:-none}" public
           exec secretspec run --file ${config.packages.secretspec-toml} --profile public \
             --reason "brokerage $*" -- ${run}/bin/brokerage-run "$@"
         '';

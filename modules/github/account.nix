@@ -3,6 +3,8 @@
 # the page that states it (../accounts).
 {
   accounts = {
+    roles.github = [ "code" ];
+
     capabilities.github = {
       privateRepos = "limit";
       actionsMinutesPrivate = "limit";

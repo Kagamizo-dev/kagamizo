@@ -2,7 +2,9 @@
 # Any file in the tree can declare into these; the merged result is checked
 # against ../_lib/types.nix and read by consumers as `identity.checked`.
 #
-#   identity.entities.<name> = { legalName; kind; vault; domainCandidates; };
+#   identity.entities.<name> = { legalName; kind; vault; domainCandidates;
+#                                legal = { status; jurisdiction; formed;
+#                                          registeredAgent; ein; }; };
 #   identity.domains.<fqdn>  = { entity; zoneId; registrar; registration; mailboxes;
 #                                proton; records; };
 {
@@ -21,6 +23,11 @@ let
 
   entityDefaults = {
     domainCandidates = [ ];
+  };
+  legalDefaults = {
+    jurisdiction = null;
+    formed = null;
+    registeredAgent = null;
   };
   domainDefaults = {
     zoneId = null;
@@ -50,7 +57,9 @@ in
 
   config = {
     identity.checked = t.identity {
-      entities = lib.mapAttrs (_: e: entityDefaults // e) cfg.entities;
+      entities = lib.mapAttrs (
+        _: e: entityDefaults // e // { legal = legalDefaults // e.legal or { }; }
+      ) cfg.entities;
       domains = lib.mapAttrs (_: d: domainDefaults // d) cfg.domains;
     };
 

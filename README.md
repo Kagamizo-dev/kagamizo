@@ -42,7 +42,8 @@ modules/
 ├─ _lib/          cli.nix, types.nix, secret.nix
 ├─ core/          systems, formatter
 ├─ accounts/      the account, plan and capability types; `signup`
-├─ identity/      entities, domains, mailboxes (nix-effects)
+├─ identity/      legal identities (people and companies), domains, mailboxes,
+│                 the standard account slots; `identity-status`
 ├─ proton/        vaults, agent tokens, `proton`; renders secretspec.toml
 ├─ proton-mail/   custom domains and addresses (Go, on go-proton-api); `mail`
 ├─ cloudflare/    account, tokens, `bootstrap`, `infra` (OpenTofu), `registrar`
@@ -52,6 +53,7 @@ modules/
 ├─ mercury/       the bank: CLI, account, one capped virtual card per vendor; `cards`
 ├─ northwest/     registered agent and filings over its MCP server; `northwest`
 ├─ governance/    controllers, typed actions, agents; Cedar; `orca-swarm`
+├─ arxiv/         QSearch's author account (planned)
 ├─ public/        the brokerage: CLI, account; `brokerage`
 ├─ catalog/       what each pinned tool can do (_json/), and its extractors
 ├─ claude/        cloud session tools and network allowlist

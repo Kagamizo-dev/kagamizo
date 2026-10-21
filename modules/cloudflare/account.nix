@@ -17,6 +17,8 @@
   };
 
   accounts = {
+    roles.cloudflare = [ "registrar" ];
+
     capabilities.cloudflare = {
       registrarAtCost = "flag";
       accountTokens = "flag";

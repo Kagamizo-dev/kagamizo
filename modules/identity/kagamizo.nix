@@ -1,13 +1,20 @@
-# Kagamizo LLC (鏡, kagami: mirror). Role mailboxes, not one per service:
-# per-service addresses are Proton Pass aliases on the domain and don't count
-# toward the seven. Which service uses which address lives in Proton Pass,
-# never here: this repo is public.
+# Kagamizo LLC (鏡, kagami: mirror), to be formed; its domain came first.
+# Role mailboxes, not one per service: per-service addresses are Proton Pass
+# aliases on the domain and don't count toward the seven. Which service uses
+# which address lives in Proton Pass, never here: this repo is public.
 {
   identity = {
     entities.kagamizo = {
       legalName = "Kagamizo LLC";
       kind = "llc";
       vault = "Kagamizo-LLC";
+      # Not formed yet: Northwest files it, ordered through its MCP server
+      # (modules/northwest) once its account exists.
+      legal = {
+        status = "planned";
+        registeredAgent = "northwest-kagamizo";
+        ein = "none";
+      };
     };
 
     domains."kagamizo.com" = {

@@ -6,6 +6,8 @@
 # link, and the policy layer (modules/governance) keeps agents off it.
 {
   accounts = {
+    roles.northwest = [ "registered-agent" ];
+
     capabilities.northwest = {
       mcpServer = "flag";
       oauthSessions = "flag";
@@ -61,6 +63,34 @@
           value = false;
           source = "https://www.northwestregisteredagent.com/wholesale";
         };
+      };
+    };
+
+    # Kagamizo's, to open with its formation order: one Northwest account per
+    # entity, so each company's documents and invoices stay apart. After it,
+    # the formation, EIN and annual reports are ordered through the server.
+    held.northwest-kagamizo = {
+      provider = "northwest";
+      plan = "registered-agent";
+      owner = "kagamizo";
+      status = "planned";
+      signup = {
+        url = "https://www.northwestregisteredagent.com/";
+        handle = "kagamizo";
+        email = "legal@kagamizo.com";
+        credential = "password";
+        findings = [
+          {
+            fact = "the MCP server prices formation, amendment and EIN orders, and checks out as an invoice or a texted pay link";
+            source = "https://www.northwestregisteredagent.com/ai/mcp/tools";
+            checked = "2026-10-21";
+          }
+          {
+            fact = "a client account is needed before the MCP server can be signed in to";
+            source = "https://www.northwestregisteredagent.com/ai/mcp/connect";
+            checked = "2026-10-21";
+          }
+        ];
       };
     };
 

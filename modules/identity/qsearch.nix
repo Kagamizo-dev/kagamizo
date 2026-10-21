@@ -14,6 +14,13 @@
     legalName = "QSearch LLC";
     kind = "llc";
     vault = "QSearch-LLC";
+    # Formed before this repo: the state and date are read off Northwest's
+    # records (`northwest call get_company_details_tool`) and written here.
+    legal = {
+      status = "active";
+      registeredAgent = "northwest-qsearch";
+      ein = "unknown";
+    };
     domainCandidates = [ "jingzo.com" ]; # 镜 + -zo, the same shape as kagamizo
   };
 }

@@ -315,10 +315,19 @@ in
         runtimeInputs = [
           config.packages.secretspec
           config.packages.pass-cli
+          config.packages.governance-authorize
         ];
         # Builds only while the declared plans cover what the repo needs.
         text = builtins.seq top.accounts.checked ''
           export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+          case "''${1:-}" in
+            apply) if [ "''${2:-}" = --prune ]; then action=cards-prune; else action=cards-apply; fi ;;
+            plan | spend | funds | freeze | unfreeze) action=cards-$1 ;;
+            *) action= ;;
+          esac
+          if [ -n "$action" ]; then
+            governance-authorize "mercury:$action" ${cfg.account}
+          fi
           exec secretspec run --file ${spec} --profile mercury-session \
             --reason "cards $*" -- ${run}/bin/cards-run "$@"
         '';

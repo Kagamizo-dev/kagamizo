@@ -3,6 +3,8 @@
 # so funding it stays a Gap.
 {
   accounts = {
+    roles.public = [ "brokerage" ];
+
     capabilities.public = {
       tradingApi = "flag";
       personalSecrets = "flag";

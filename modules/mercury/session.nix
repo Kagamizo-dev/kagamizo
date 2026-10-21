@@ -96,6 +96,7 @@ in
         runtimeInputs = [
           config.packages.secretspec
           config.packages.pass-cli
+          config.packages.governance-authorize
           pkgs.curl
         ];
         text = builtins.seq top.accounts.checked ''
@@ -110,6 +111,9 @@ in
             curl -fsS -o /dev/null "$address" && echo "mercury-session: delivered" >&2
             exit
           fi
+          case "''${1:-}" in
+            login | status) governance-authorize "mercury:$1" ${top.mercury.account} ;;
+          esac
           exec secretspec run --file ${config.packages.secretspec-toml} --profile mercury-session \
             --reason "mercury-session $*" -- ${run}/bin/mercury-session-run "$@"
         '';

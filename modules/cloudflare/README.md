@@ -220,6 +220,15 @@ around.
   `Kagamizo-LLC/openrouter-management-key`) and first credit top-up are made
   in its dashboard. After those, `hcloud`, OpenTofu and the
   `openrouter` wrapper do everything.
+- **Kagamizo LLC is not formed yet.** Its Northwest account
+  (`northwest-kagamizo`, `signup plan`) opens on Northwest's site; after it,
+  the formation and EIN orders are placed through Northwest's MCP server and
+  paid by a pay link texted to you. Its state of formation is still to be
+  chosen (`identity.entities.kagamizo.legal.jurisdiction`).
+- **arXiv** (`arxiv-qsearch`): registration is a web form, and a first
+  submission needs a personal endorsement from an established author in the
+  field; arXiv has no submission API. It signs up as research@jingzo.com once
+  that domain is bought and its mail is live.
 - **Kagamizo's Mercury account** is not open yet (`signup plan`): Mercury's
   business application is web-only and checks the EIN letter, formation
   documents and the owner's ID. The vendor cards wait for it; they are not

@@ -31,11 +31,9 @@ let
   };
   infraVaults = t.infraVaults entities config.proton.infraVaults;
 
-  # Each LLC's or nonprofit's sessions (OAuth sessions its agents may use),
+  # Each legal identity's sessions (OAuth sessions its agents may use),
   # apart from its logins: an agent token opens this vault, never the other.
-  sessionVaults = lib.mapAttrs (_: e: "${e.vault}-Sessions") (
-    lib.filterAttrs (_: e: e.kind != "person") entities
-  );
+  sessionVaults = lib.mapAttrs (_: e: "${e.vault}-Sessions") entities;
 
   vaults = lib.unique (
     lib.mapAttrsToList (_: e: e.vault) entities
@@ -72,7 +70,7 @@ in
     sessionVaults = mkOption {
       type = types.attrsOf types.str;
       readOnly = true;
-      description = "Per entity (LLC or nonprofit): the vault holding the sessions its agents use.";
+      description = "Per legal identity: the vault holding the sessions its agents use.";
     };
   };
 

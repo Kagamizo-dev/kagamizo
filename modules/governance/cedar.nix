@@ -10,9 +10,8 @@
 #
 # Principals: Person (identity entities of kind person), Agent (one per
 # governance.agents entry, the identity its Proton Pass token carries).
-# Resources: Account, every held account owned by an LLC or nonprofit, a
-# child of that Entity. Accounts a person holds are outside this model:
-# no agent can be granted them, and their wrappers do not ask.
+# Entities: every legal identity, people included; a person controls their
+# own. Resources: Account, every held account, a child of its owner.
 #
 # The base policies come first and are the same for every declaration: a
 # controller may do anything to their entity's accounts; an agent never
@@ -23,9 +22,10 @@ let
   cfg = config.governance;
   inherit (config.identity.checked) entities;
   ns = "Kagamizo";
-  orgs = lib.filterAttrs (_: e: e.kind != "person") entities;
   people = lib.filterAttrs (_: e: e.kind == "person") entities;
-  accounts = lib.filterAttrs (_: a: orgs ? ${a.owner}) config.accounts.held;
+  accounts = config.accounts.held;
+  # A person is a legal identity like any company, and controls their own.
+  controllers = n: lib.unique (lib.optional (people ? ${n}) n ++ cfg.controllers.${n} or [ ]);
   root = lib.head (
     lib.attrNames (lib.filterAttrs (_: e: e.vault == config.proton.infraVaults.root) people)
   );
@@ -127,10 +127,10 @@ let
       uid = (uid "Entity" n).__entity;
       attrs = {
         inherit (e) kind;
-        controllers = map (uid "Person") (cfg.controllers.${n} or [ ]);
+        controllers = map (uid "Person") (controllers n);
       };
       parents = [ ];
-    }) orgs
+    }) entities
     ++ lib.mapAttrsToList (n: a: {
       uid = (uid "Account" n).__entity;
       attrs = {
@@ -182,7 +182,7 @@ let
             null
           else
             test "${person} controls ${acc}" (ref "Person" person) x.id acc "allow" [ "controllers" ]
-        ) (cfg.controllers.${a.owner} or [ ])
+        ) (controllers a.owner)
       ) withActions
     )
     ++ lib.concatLists (

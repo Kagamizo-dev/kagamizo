@@ -4,6 +4,8 @@
 # Mercury app, the one approval that stays manual by design.
 {
   accounts = {
+    roles.mercury = [ "bank" ];
+
     capabilities.mercury = {
       apiTokens = "flag";
       virtualCards = "flag";

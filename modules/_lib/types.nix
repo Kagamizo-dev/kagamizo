@@ -45,13 +45,67 @@ let
     l: builtins.length l <= 7 && lib.allUnique l
   );
 
-  Entity = Record {
+  Date = refined "IsoDate" String (matches "[0-9]{4}-[0-9]{2}-[0-9]{2}");
+  # ISO 3166-2 for a US state, e.g. US-WY: where an entity is formed.
+  UsState = refined "UsState" String (matches "US-[A-Z]{2}");
+
+  # An entity's standing as a legal person. Nothing in it is a secret (no
+  # EIN or SSN, only whether there is one): this repo is public.
+  Legal = Record {
+    status = oneOf "LegalStatus" [
+      "natural" # a person
+      "planned" # to be formed; nothing filed yet
+      "forming" # formation filed, not yet approved
+      "active"
+      "dissolved"
+    ];
+    jurisdiction = Maybe UsState;
+    formed = Maybe Date;
+    # The held account (accounts.held) that is its registered agent.
+    registeredAgent = Maybe NonEmpty;
+    ein = oneOf "EinStatus" [
+      "not-applicable" # a person
+      "none"
+      "applied"
+      "assigned"
+      "unknown" # assigned before this repo; to be read off the filings
+    ];
+  };
+
+  # A person is a natural legal identity with no filings; an organization is
+  # never natural, and has formation facts only once formed.
+  legalFits =
+    e:
+    let
+      l = e.legal or { };
+      person = (e.kind or "") == "person";
+    in
+    if person then
+      l.status or "" == "natural"
+      && l.registeredAgent or null == null
+      && l.ein or "" == "not-applicable"
+      && l.jurisdiction or null == null
+    else
+      l.status or "" != "natural"
+      && l.ein or "" != "not-applicable"
+      && (
+        lib.elem (l.status or "") [
+          "planned"
+          "forming"
+        ]
+        -> l.formed or null == null
+      );
+
+  Entity = refined "LegalIdentity" EntityRecord legalFits;
+
+  EntityRecord = Record {
     legalName = NonEmpty;
     kind = oneOf "EntityKind" [
       "person"
       "llc"
       "nonprofit"
     ];
+    legal = Legal;
     # Proton Pass vault holding this entity's logins.
     vault = VaultName;
     # Names to check with `nix run .#registrar -- check` before buying one.

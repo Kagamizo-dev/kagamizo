@@ -6,5 +6,9 @@
     legalName = "Zachariah";
     kind = "person";
     vault = "Zachariah-Root";
+    legal = {
+      status = "natural";
+      ein = "not-applicable";
+    };
   };
 }

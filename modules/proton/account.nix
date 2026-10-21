@@ -3,6 +3,11 @@
 # the page that states it (../accounts).
 {
   accounts = {
+    roles.proton = [
+      "mail"
+      "passwords"
+    ];
+
     capabilities.proton = {
       customDomains = "limit";
       addresses = "limit";

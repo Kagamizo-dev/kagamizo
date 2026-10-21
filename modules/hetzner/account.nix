@@ -3,6 +3,8 @@
 # the page that states it (../accounts).
 {
   accounts = {
+    roles.hetzner = [ "hosting" ];
+
     capabilities.hetzner = {
       projects = "limit";
       apiTokens = "flag";

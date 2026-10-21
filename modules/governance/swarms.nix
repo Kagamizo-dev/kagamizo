@@ -1,5 +1,5 @@
-# The agent swarms: legal, accounting and governance, one of each per entity,
-# so no agent ever works for two companies. Personas are agency-agents'
+# The agent swarms: legal, accounting and governance, one of each per legal
+# identity (you included), so no agent ever works for two of them. Personas are agency-agents'
 # (flake input); grants are the only account access an agent gets, and the
 # base policies (./cedar.nix) cap them whatever they say.
 { lib, ... }:
@@ -41,9 +41,13 @@ in
     qsearch = [ "zachariah" ];
   };
 
+  # Public's personal secret trades as well as reads, so no swarm holds it:
+  # brokerage stays with its owner until Public offers a read-only credential.
+
   governance.agents = lib.mkMerge [
     (swarm "kagamizo")
     (swarm "qsearch")
+    (swarm "zachariah")
     {
       legal-qsearch.grants = [
         {

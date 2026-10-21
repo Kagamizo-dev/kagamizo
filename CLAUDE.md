@@ -32,6 +32,15 @@ capabilities with the page that states them, and every module declares what it
 needs (`accounts.demands`). Never rely on what
 an account can do without a capability and a demand for it.
 
+## Legal identities
+
+People and companies are the same kind of thing: an entity with a typed
+legal record (`identity.entities.<e>.legal`) and the account slots its kind
+requires (`modules/identity/lifecycle.nix`). A new company, domain or login
+starts as a declaration on its owner, never as an account made first.
+Every wrapper that acts on an account asks `governance-authorize`
+(`modules/governance`), and every operation it exposes is a typed action.
+
 ## Secrets
 
 Values live only in Proton Pass; `secretspec.toml` (generated from each

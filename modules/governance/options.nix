@@ -2,7 +2,8 @@
 #
 #   governance.controllers.<entity> = [ <person> ... ]
 #       the people who act for an entity: they may do anything to its
-#       accounts, through the same wrappers the agents use
+#       accounts, through the same wrappers the agents use (a person
+#       always controls their own)
 #   governance.actions.<provider>.<tool> = { effect; description; }
 #       every operation a wrapper exposes, typed by what it does: read,
 #       write, spend, destroy, or session (signing in)
@@ -22,7 +23,6 @@ let
   inherit (lib) mkOption types;
   entities = config.identity.checked.entities;
   people = lib.attrNames (lib.filterAttrs (_: e: e.kind == "person") entities);
-  orgs = lib.attrNames (lib.filterAttrs (_: e: e.kind != "person") entities);
   effects = [
     "read"
     "write"
@@ -69,7 +69,7 @@ let
   agent = types.submodule {
     options = {
       serves = mkOption {
-        type = types.enum orgs;
+        type = types.enum (lib.attrNames entities);
         description = "The one entity this agent works for.";
       };
       purpose = mkOption { type = types.str; };

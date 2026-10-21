@@ -3,6 +3,8 @@
 # the page that states it (../accounts).
 {
   accounts = {
+    roles.openrouter = [ "models" ];
+
     capabilities.openrouter = {
       managementKeys = "flag";
       keyCreditLimits = "flag";
