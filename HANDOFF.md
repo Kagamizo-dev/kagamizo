@@ -37,7 +37,7 @@ root session (`cloudflare-login`, a device code, 5 minutes) is only needed for
 | | Kagamizo LLC | QSearch LLC | Zachariah (person) |
 |---|---|---|---|
 | Legal | planned, Wyoming, EIN none | active; state, date, EIN unknown | natural |
-| Domain | kagamizo.com, mail live | jingzo.org, DNS complete; Proton verify pending | — |
+| Domain | kagamizo.com, mail live | jingzo.org, mail live | mirazo.org, bought; Proton domain, then DNS |
 | Registered agent | northwest-kagamizo, planned (login item ready) | northwest-qsearch, active, not signed in yet | — |
 | Bank | mercury, planned (needs the LLC and EIN) | mercury-qsearch, active, no session or cards here yet | — |
 | Brokerage | — | — | public, active; personal secret missing (a Gap) |
