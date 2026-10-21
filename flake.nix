@@ -26,6 +26,13 @@
       flake = false;
     };
 
+    # Agent personas for the Orca swarms (modules/governance), MIT; pinned
+    # to a commit since the repository has no releases.
+    agency-agents = {
+      url = "git+https://github.com/msitarzewski/agency-agents?ref=main&rev=4e3ac3ca6604c75113f52c695dbddcc7af928b46";
+      flake = false;
+    };
+
     # Typed declarations: refinement and dependent types checked at eval time.
     nix-effects = {
       url = "git+https://github.com/kleisli-io/nix-effects?ref=refs/tags/v0.16.0";

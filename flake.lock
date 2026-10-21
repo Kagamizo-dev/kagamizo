@@ -1,5 +1,23 @@
 {
   "nodes": {
+    "agency-agents": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792428454,
+        "narHash": "sha256-KAtwMQYlKDRdbG+gSNpEbIjd5YJAKSx7nDzbaXU09jo=",
+        "ref": "main",
+        "rev": "4e3ac3ca6604c75113f52c695dbddcc7af928b46",
+        "revCount": 837,
+        "type": "git",
+        "url": "https://github.com/msitarzewski/agency-agents"
+      },
+      "original": {
+        "ref": "main",
+        "rev": "4e3ac3ca6604c75113f52c695dbddcc7af928b46",
+        "type": "git",
+        "url": "https://github.com/msitarzewski/agency-agents"
+      }
+    },
     "argononed": {
       "flake": false,
       "locked": {
@@ -190,6 +208,7 @@
     },
     "root": {
       "inputs": {
+        "agency-agents": "agency-agents",
         "flake-parts": "flake-parts",
         "import-tree": "import-tree",
         "mercury-cli": "mercury-cli",

@@ -50,6 +50,8 @@ modules/
 ├─ hetzner/       account and secrets (the host comes next)
 ├─ openrouter/    account, models, capped keys and card; `openrouter`, `orca-fleet`
 ├─ mercury/       the bank: CLI, account, one capped virtual card per vendor; `cards`
+├─ northwest/     registered agent and filings over its MCP server; `northwest`
+├─ governance/    controllers, typed actions, agents; Cedar; `orca-swarm`
 ├─ public/        the brokerage: CLI, account; `brokerage`
 ├─ catalog/       what each pinned tool can do (_json/), and its extractors
 ├─ claude/        cloud session tools and network allowlist

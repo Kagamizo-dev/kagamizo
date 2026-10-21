@@ -229,6 +229,18 @@ around.
   a failed 127.0.0.1 page whose address is handed back to the waiting login.
   Entering a card on a vendor's billing page is manual wherever Mercury will
   not reveal it into Proton Pass.
+- **Northwest's tool catalog** (`modules/northwest/_json/tools.json`) is a
+  seed of the 19 tool names on Northwest's tools page, of the 131 it states.
+  `northwest catalog` replaces it with the server's own tools/list once
+  `northwest login` has run, and every new tool then needs an effect in
+  `modules/northwest/tools.nix` before anything can call it. The session's
+  network allowlist must include Northwest's hosts first (below).
+- **Northwest's OAuth client for the CLI**: Northwest documents the public
+  `mcp-connector` client for AI clients with manual OAuth settings, not a
+  loopback redirect for a CLI. `northwest login` registers its own client
+  when the identity server allows dynamic registration and otherwise falls
+  back to `mcp-connector`; whether either accepts a 127.0.0.1 redirect is
+  untested until the first login.
 - **Public's personal secret** (`Zachariah-Root/public-personal-secret`) is
   made in its settings, and funding Public has no API at all: deposits are
   started from Public's side.
@@ -266,6 +278,27 @@ and OpenCode starts on `deepseek/deepseek-v4-flash` (`packages.opencode-config`)
 
 Agent sessions last two hours, after which `pass-cli login` has to run again.
 Agents then change infrastructure the same way you do: by opening a PR.
+
+## The legal, accounting and governance swarms
+
+`modules/governance` declares who may do what and compiles it to Cedar:
+people control entities (`governance.controllers`), every wrapper operation
+is an action typed by its effect (read, write, spend, destroy, session), and
+each agent serves exactly one entity with only the grants listed. Three
+swarms per entity (legal, accounting, governance) run agency-agents personas
+as OpenCode subagents:
+
+```bash
+nix run .#orca-swarm -- legal-qsearch
+```
+
+The base policies hold whatever the grants say: an agent never spends,
+destroys or signs in, and never reaches another entity's accounts. Each
+swarm has its own Proton Pass agent token (`swarm-<name>`), opening only its
+entity's sessions vault (`<Vault>-Sessions`); that is the hard boundary,
+and Cedar is what the wrappers check (`governance-authorize`) inside it.
+`nix flake check` validates the policies against the schema and runs tests
+derived from the declarations, each naming the policy that must decide it.
 
 ## Not covered yet
 

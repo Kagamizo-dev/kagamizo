@@ -1,0 +1,81 @@
+{
+  "_source": "seed: the tool names shown on https://www.northwestregisteredagent.com/ai/mcp/tools (checked 2026-10-21); replaced by `northwest catalog`, the server's own tools/list",
+  "tools": [
+    {
+      "name": "cancel_service_tool",
+      "description": "Cancel a service"
+    },
+    {
+      "name": "checkout_cart_invoice_only_tool",
+      "description": "Check out the cart as an invoice or texted pay link"
+    },
+    {
+      "name": "create_document_unlock_invoice_tool",
+      "description": "Create the invoice that unlocks a document"
+    },
+    {
+      "name": "get_account_summary_tool",
+      "description": "Summarize the account"
+    },
+    {
+      "name": "get_annual_reports_tool",
+      "description": "Annual report due dates and autopay status"
+    },
+    {
+      "name": "get_companies_tool",
+      "description": "List the account's companies"
+    },
+    {
+      "name": "get_company_details_tool",
+      "description": "Show an entity's details"
+    },
+    {
+      "name": "get_document_content_tool",
+      "description": "Read an unlocked document"
+    },
+    {
+      "name": "get_documents_tool",
+      "description": "List portal documents"
+    },
+    {
+      "name": "get_domain_dns_records_tool",
+      "description": "View a domain's DNS records"
+    },
+    {
+      "name": "get_domains_tool",
+      "description": "List domains"
+    },
+    {
+      "name": "get_filing_statuses_tool",
+      "description": "Track formation, annual report and amendment filings"
+    },
+    {
+      "name": "get_invoices_tool",
+      "description": "List open and paid invoices"
+    },
+    {
+      "name": "get_mail_service_plan_details_tool",
+      "description": "Show mail plans"
+    },
+    {
+      "name": "get_refund_status_tool",
+      "description": "Check a refund"
+    },
+    {
+      "name": "get_registered_agents_tool",
+      "description": "Show registered agent services"
+    },
+    {
+      "name": "pay_invoice_tool",
+      "description": "Pay an invoice with a saved method"
+    },
+    {
+      "name": "search_domains_tool",
+      "description": "Search domains"
+    },
+    {
+      "name": "update_company_details_tool",
+      "description": "Update a company's profile"
+    }
+  ]
+}

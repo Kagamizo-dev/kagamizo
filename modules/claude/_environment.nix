@@ -67,6 +67,16 @@ in
           "oauth2.mercury.com"
         ];
       };
+      northwest = {
+        reason = "Registered agent and filings through Northwest's MCP server (modules/northwest)";
+        hosts = [
+          "mcp.northwestregisteredagent.com"
+          # OAuth sign-in and refresh (its identity server)
+          "id.northwestregisteredagent.com"
+          # The tools and connection pages the catalog cites
+          "www.northwestregisteredagent.com"
+        ];
+      };
       public = {
         reason = "Brokerage reads and orders (modules/public)";
         hosts = [ "api.public.com" ];

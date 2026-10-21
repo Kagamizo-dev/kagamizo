@@ -31,7 +31,17 @@ let
   };
   infraVaults = t.infraVaults entities config.proton.infraVaults;
 
-  vaults = lib.unique (lib.mapAttrsToList (_: e: e.vault) entities ++ lib.attrValues infraVaults);
+  # Each LLC's or nonprofit's sessions (OAuth sessions its agents may use),
+  # apart from its logins: an agent token opens this vault, never the other.
+  sessionVaults = lib.mapAttrs (_: e: "${e.vault}-Sessions") (
+    lib.filterAttrs (_: e: e.kind != "person") entities
+  );
+
+  vaults = lib.unique (
+    lib.mapAttrsToList (_: e: e.vault) entities
+    ++ lib.attrValues infraVaults
+    ++ lib.attrValues sessionVaults
+  );
 
   # Every (vault, item) pair secretspec.toml refers to.
   inherit (config.proton.secretspec) providers profiles;
@@ -59,6 +69,11 @@ in
       type = types.listOf types.str;
       readOnly = true;
     };
+    sessionVaults = mkOption {
+      type = types.attrsOf types.str;
+      readOnly = true;
+      description = "Per entity (LLC or nonprofit): the vault holding the sessions its agents use.";
+    };
   };
 
   config = {
@@ -77,7 +92,7 @@ in
         # What the always-on host (modules/kagamizo-host) reads at boot.
         host = "Kagamizo-Host";
       };
-      inherit vaults;
+      inherit vaults sessionVaults;
     };
 
     perSystem =

@@ -32,7 +32,10 @@ let
       agents = "protonpass://${infraVaults.agents}";
       state = "protonpass://${infraVaults.state}";
       host = "protonpass://${infraVaults.host}";
-    };
+    }
+    // lib.mapAttrs' (
+      entity: vault: lib.nameValuePair "${entity}-sessions" "protonpass://${vault}"
+    ) config.proton.sessionVaults;
 
     profiles = config.secrets.profiles;
   };
