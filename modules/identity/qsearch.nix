@@ -30,7 +30,7 @@
       # From Proton's Domain names settings (it has no API for them).
       proton = {
         verification = "8f98c21f96d25746076c2ea834a2c823d41c1116";
-        dkimId = null;
+        dkimId = "dcv33m3a3qcfza5y3f4dr2fdtxr76nqchvdymk7ckiaoajelyohda";
       };
       mailboxes = [
         "admin" # account owner, replacing the old Outlook address
