@@ -78,8 +78,66 @@ in
         ];
       };
       public = {
-        reason = "Brokerage reads and orders (modules/public)";
+        reason = "Brokerage reads and orders (modules/public), the first trading backend";
         hosts = [ "api.public.com" ];
+      };
+      hetzner = {
+        reason = "The always-on host: hcloud and OpenTofu (modules/hetzner)";
+        hosts = [ "api.hetzner.cloud" ];
+      };
+      interactive-brokers = {
+        reason = "The second trading backend: IB Gateway's sign-in and IBKR's Web API (modules/trading)";
+        hosts = [
+          "api.ibkr.com"
+          "*.interactivebrokers.com"
+          # IB Gateway's container image
+          "ghcr.io"
+          "*.ghcr.io"
+        ];
+      };
+      opencode = {
+        reason = "OpenCode's config schema and model list, for the swarms (modules/governance)";
+        hosts = [
+          "opencode.ai"
+          "models.dev"
+        ];
+      };
+      arxiv = {
+        reason = "QSearch's and Zachariah's research: the query API (modules/arxiv, paused)";
+        hosts = [
+          "arxiv.org"
+          "export.arxiv.org"
+        ];
+      };
+      # Pages the declared signups, capabilities and findings cite, so a session
+      # can re-read them (and browser automation can reach the signups).
+      sources = {
+        reason = "Provider pages cited by accounts.plans and signups";
+        hosts = [
+          "public.com"
+          "mercury.com"
+          "app.mercury.com"
+          "docs.mercury.com"
+          "accounts.hetzner.com"
+          "docs.hetzner.cloud"
+          "docs.hetzner.com"
+          "info.arxiv.org"
+          "blog.arxiv.org"
+          # Wyoming's business search: Kagamizo's filing and standing
+          "wyobiz.wyo.gov"
+        ];
+      };
+      # Checking that published records resolve, after an infra apply.
+      dns = {
+        reason = "DNS-over-HTTPS lookups to verify published records";
+        hosts = [
+          "cloudflare-dns.com"
+          "dns.google"
+        ];
+      };
+      nix-caches = {
+        reason = "Binary caches the flake trusts (nixos-raspberrypi)";
+        hosts = [ "*.cachix.org" ];
       };
       # Live data for running World Monitor / God's Eye View in a session.
       globe-data = {
