@@ -52,3 +52,18 @@ tool that produced it into `secretspec set`.
 
 `nix flake check`; the VM tests need KVM. Commit messages follow
 `modules/repo/commits.nix` (`commit-lint --message-file`).
+
+## Ending a session
+
+The owner starts a new session for one reason only: the network allowlist
+missed a host. Every session ends by giving the owner exactly two things,
+each in one code block ready to paste:
+
+1. **The full allowlist**, one host per line: everything
+   `nix build .#claude-allowed-domains` prints plus every host found this
+   session and not yet declared. The whole list, never a diff, and only
+   when it changed.
+2. **The start message** for the next session, kept current at the top of
+   `HANDOFF.md` ("End of every session").
+
+Update `HANDOFF.md` and push before handing these over.

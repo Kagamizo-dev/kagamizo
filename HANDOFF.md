@@ -5,6 +5,27 @@ Read `CLAUDE.md`, `README.md` and the Gaps in `modules/cloudflare/README.md`
 first; this file says where things stand and what comes next. Delete it once
 its items are done.
 
+## End of every session
+
+The owner gets two things, each one code block to paste: the full
+allowlist (one host per line, the whole list, only when it changed; the
+environment's Network access → Allowed domains, with package managers
+ticked) and the start message below, kept current.
+
+Start message for the next session:
+
+```
+Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; HANDOFF.md's "The owner's standing decisions" holds what I've already decided, and its Roadmap is the order of work.
+
+The network allowlist now has every host in HANDOFF.md's "The allowlist to apply": add them to modules/claude/_environment.nix first.
+
+Start by signing the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login` and send me the approval link. Run no other pass-cli command until it returns.
+
+Then work the Roadmap from epic 0 (validate before acting), then epic 1 (Mercury: explore the signed-in pages with mercury:invite-own-user, invite finance@jingzo.org, register its passkey, sign mercury-jingzo in and send me the Mercury link), and on down.
+
+The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, all in the one modules tree. End the session with the full allowlist (if it changed) and the updated start message, each ready to paste.
+```
+
 ## A new cloud environment
 
 Network access: **Custom**, with "Also include default list of common package
