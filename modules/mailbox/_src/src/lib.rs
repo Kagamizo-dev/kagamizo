@@ -12,6 +12,15 @@ use zeroize::Zeroizing;
 
 const FOLDER: &str = "docker-credential-helpers";
 
+/// The XDG folders Bridge is given privately and secretspec needs as the
+/// caller's.
+pub const XDG: [&str; 4] = [
+    "XDG_CONFIG_HOME",
+    "XDG_DATA_HOME",
+    "XDG_CACHE_HOME",
+    "XDG_STATE_HOME",
+];
+
 /// Where Docker's pass helper keeps a server URL's entry: its folder, and
 /// the folder plus its one username.
 pub fn entry(url: &str, user: &str) -> (String, String) {
@@ -76,10 +85,14 @@ fn run(args: &[&str]) -> Result<Zeroizing<String>> {
         .env("HOME", var("MAILBOX_CALLER_HOME")?)
         .stdin(Stdio::null())
         .stderr(Stdio::null());
-    match std::env::var("MAILBOX_CALLER_CONFIG") {
-        Ok(c) if !c.is_empty() => cmd.env("XDG_CONFIG_HOME", c),
-        _ => cmd.env_remove("XDG_CONFIG_HOME"),
-    };
+    // pass-cli keeps its session under the caller's XDG data folder, so
+    // every XDG folder is the caller's, not Bridge's private one.
+    for name in XDG {
+        match std::env::var(format!("MAILBOX_CALLER_{name}")) {
+            Ok(v) if !v.is_empty() => cmd.env(name, v),
+            _ => cmd.env_remove(name),
+        };
+    }
     let out = cmd.output().context("running secretspec")?;
     let text = Zeroizing::new(String::from_utf8(out.stdout).context("secretspec output is not UTF-8")?);
     if !out.status.success() {

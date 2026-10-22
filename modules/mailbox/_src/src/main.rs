@@ -24,7 +24,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use anyhow::{bail, Context, Result};
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
-use mailbox::{get, marker, set, vault_key};
+use mailbox::{get, marker, set, vault_key, XDG};
 use zeroize::Zeroizing;
 
 fn var(name: &str) -> Result<String> {
@@ -97,16 +97,20 @@ struct Bridge {
 impl Bridge {
     fn start(home: &Home) -> Result<Self> {
         let path = format!("{}:{}", var("MAILBOX_KEYCHAIN_DIR")?, var("PATH")?);
-        let mut child = Command::new(var("MAILBOX_BRIDGE")?)
+        let mut cmd = Command::new(var("MAILBOX_BRIDGE")?);
+        for name in XDG {
+            cmd.env(format!("MAILBOX_CALLER_{name}"), std::env::var(name).unwrap_or_default());
+        }
+        let mut child = cmd
             .arg("--cli")
             .env("HOME", &home.home)
             .env("XDG_CONFIG_HOME", home.home.join(".config"))
             .env("XDG_DATA_HOME", home.home.join(".local/share"))
             .env("XDG_CACHE_HOME", home.home.join(".cache"))
+            .env("XDG_STATE_HOME", home.home.join(".local/state"))
             .env("PASSWORD_STORE_DIR", &home.store)
             .env("PATH", path)
             .env("MAILBOX_CALLER_HOME", var("HOME")?)
-            .env("MAILBOX_CALLER_CONFIG", std::env::var("XDG_CONFIG_HOME").unwrap_or_default())
             .env("DBUS_SESSION_BUS_ADDRESS", "disabled:")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -128,6 +132,12 @@ impl Bridge {
         });
         let mut bridge = Bridge { child, stdin, out, seen: 0 };
         bridge.wait(&["jgs"], 120).context("Bridge did not start")?;
+        // Without its key from the keychain, Bridge keeps an unencrypted
+        // vault in a folder of that name: never sign in to one.
+        if home.home.join(".config/protonmail/bridge-v3/insecure").exists() {
+            bridge.child.kill().ok();
+            bail!("Bridge could not keep its vault key in Proton Pass and fell back to an unencrypted vault");
+        }
         Ok(bridge)
     }
 
@@ -234,6 +244,35 @@ fn password() -> Result<Zeroizing<String>> {
     Ok(Zeroizing::new(text.trim_end_matches('\n').to_owned()))
 }
 
+/// The login item's current 2FA code, from its TOTP key in Proton Pass:
+/// the first 6 to 8 digits in pass-cli's answer.
+fn totp() -> Result<Zeroizing<String>> {
+    let out = Command::new("pass-cli")
+        .args([
+            "item",
+            "totp",
+            "--vault-name",
+            &var("MAILBOX_LOGIN_VAULT")?,
+            "--item-title",
+            &var("MAILBOX_LOGIN_ITEM")?,
+            "--output",
+            "json",
+        ])
+        .stderr(Stdio::null())
+        .output()
+        .context("running pass-cli")?;
+    let text = Zeroizing::new(String::from_utf8(out.stdout).context("pass-cli output is not UTF-8")?);
+    if !out.status.success() {
+        bail!("the login item has no 2FA key");
+    }
+    let code: String = text
+        .split(|c: char| !c.is_ascii_digit())
+        .find(|run| (6..=8).contains(&run.len()))
+        .context("no code in pass-cli's answer")?
+        .to_owned();
+    Ok(Zeroizing::new(code))
+}
+
 fn login() -> Result<()> {
     let home = Home::new()?;
     home.restore()?;
@@ -259,7 +298,10 @@ fn login() -> Result<()> {
             )? {
                 0 => break,
                 1 => {
-                    let code = ask("Proton's 2FA code for the account:")?;
+                    let code = match totp() {
+                        Ok(code) => code,
+                        Err(_) => ask("Proton's 2FA code for the account:")?,
+                    };
                     bridge.send(&code)?;
                 }
                 2 => {

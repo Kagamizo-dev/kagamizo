@@ -240,6 +240,9 @@ in
                 done
               export PASSWORD_STORE_DIR=$TMPDIR/store SECRETSPEC_STUB_DIR=$TMPDIR/pp MAILBOX_PRIVATE=$TMPDIR/private
               export MAILBOX_SECRETSPEC_FILE=/dev/null MAILBOX_PROFILE=${profile} MAILBOX_CALLER_HOME=$TMPDIR
+              # Bridge's children see its private folders; secretspec must not.
+              export XDG_DATA_HOME=$TMPDIR/bridge-data MAILBOX_CALLER_XDG_DATA_HOME=$TMPDIR/caller-data
+              export EXPECT_XDG_DATA_HOME=$TMPDIR/caller-data
               mkdir -p $PASSWORD_STORE_DIR $SECRETSPEC_STUB_DIR $MAILBOX_PRIVATE $TMPDIR/bin
               cp ${./_test/secretspec} $TMPDIR/bin/secretspec
               export PATH=$TMPDIR/bin:$PATH
