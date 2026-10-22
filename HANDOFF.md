@@ -53,38 +53,90 @@ address is a Proton Pass alias. Proton Pass has every entity's vault plus a `<Va
 nine swarm agent tokens (legal, accounting and governance per identity) in the
 root vault.
 
+## The owner's standing decisions
+
+- The owner's only manual step is approving 2FA or a sign-in link. Never
+  hand them a form, a click-path, a value to copy or a command. The
+  network allowlist (`modules/claude/_environment.nix`) is the one
+  exception, since a session cannot change its own; it was applied on
+  2026-10-22 with every host listed there.
+- Ask before anything that spends money or applies infrastructure, unless
+  the owner already said go. Already approved: the R2 build cache; the
+  `move-login` exception; the Proton Pass renames (done); the $5 OpenRouter
+  card once mercury-jingzo's login is finance@jingzo.org.
+- The login rule stays strict, the card included: move a login before
+  acting on its account.
+- OpenRouter belongs to Kagamizo (the consulting side). Kagamizo is not
+  formed yet, so a Jingzo card paying for it is a cost between the two
+  companies: record it as owed by Kagamizo, or wait. Not decided yet.
+- Every tool or API touched is first mapped in full, its options, types and
+  auth extracted from the pinned thing itself (the catalogs), then wrapped:
+  Rust for what we write, Nix for packaging, Cedar for who may act, all in
+  the one modules tree. No guessed configuration.
+- Kagamizo: consulting. Jingzo (QSearch LLC on paper): research, finance,
+  quant trading. Mirazo: the owner, personal portfolio and retirement.
+  Three GitHub organizations, one per identity.
+
 ## Next, in this order
 
-1. **Logins onto their domains.** governance-authorize now refuses any
-   account whose Proton Pass login is not its declared address on its
-   owner's domain, the card included (the owner's call). Per account, the
-   provider's email moves (its settings, a Gap), then the Pass item is
-   updated to match, then `identity-audit` shows ok. First: Jingzo's own
-   Mercury user on finance@jingzo.org, then `mercury-session --account
-   mercury-jingzo login`.
-2. **The $5 OpenRouter card** from mercury-jingzo once it is signed in:
-   `mercury.account` to mercury-jingzo and the OpenRouter card at $5
-   (both waiting on the owner: which entity owns OpenRouter, since the card
-   is Jingzo's and the account is declared Kagamizo's).
-3. **Proton Pass renames** (vaults, agent tokens) to the new names, on the
-   owner's go; then `proton plan` shows nothing to do.
-4. **Public.** public-mirazo's login item and personal secret (Gaps); then
-   `brokerage summary`. public-jingzo waits on the API terms question.
-5. **OpenRouter.** Signup, first top-up and management key (Gaps), then
-   `openrouter apply` mints the capped keys.
-6. **Northwest.** `northwest login` cannot sign in: dynamic registration is
-   refused (403) and `mcp-connector` rejects a 127.0.0.1 redirect (a Gap).
-   Northwest's documented path is a custom connector in Claude
-   (claude.ai/customize/connectors); a session started after it is added
-   reaches the tools directly. Then: the server's tools/list into
-   `modules/northwest/_json/tools.json`, every new tool's effect in
-   `modules/northwest/tools.nix`, and Jingzo's state, formation date and
-   EIN status off `get_company_details_tool` into
-   `modules/identity/jingzo.nix`.
-7. **The host** (Hetzner: Open WebUI, OpenCode, Proton Bridge on a private
-   domain), then the swarms at work. Agents are denied by the login rule
-   until they can read an audit record (a Gap).
-8. **The PR** from this branch into `main`, once the owner asks.
+1. **Sign the session in**: `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`,
+   send the owner the link, and run no other pass-cli command until it
+   returns (a concurrent call corrupted the session store once).
+2. **Mercury, Jingzo's own login.** The allowlist now has cdn.mercury.com.
+   Run `nix run .#browser -- --account mercury-jingzo mercury:survey` to see
+   the sign-in page's real controls, then write a `move-login` flow in
+   `modules/mercury/flows.nix`. It signs in with the current login from
+   Proton Pass (app.mercury.com item: username and password), waits for the
+   owner's approval, opens the team settings, invites finance@jingzo.org as
+   Jingzo's own user and registers a passkey (Mercury requires an
+   authenticator-app 2FA first). The invite mail goes to finance@jingzo.org
+   (step 4 reads it; until then the owner opens it). Then a login item for
+   the new user in Jingzo-LLC, `identity-audit` ok, set
+   `login.passkey.rpId` from what the registration reports, and
+   `mercury-session --account mercury-jingzo login` (send the owner the
+   link; their phone lands on a failed 127.0.0.1 page whose address they
+   paste back).
+3. **The $5 OpenRouter card**: `mercury.account = "mercury-jingzo"`,
+   OpenRouter's card at $5 a month, `cards plan`, then `cards apply`.
+4. **Confirmation mail**: Proton Mail Bridge (nixpkgs `protonmail-bridge`,
+   `--noninteractive`; login is an interactive prompt for username,
+   password and TOTP; its vault key lives in `pass` or gnome-keyring)
+   driven from Proton Pass, and a Rust IMAP reader in the modules tree that
+   takes only mail to declared addresses from declared senders and follows
+   only links on the flow's hosts.
+5. **The build cache**: an R2 bucket declared in the Cloudflare module and
+   applied with the CI token (it has R2 write), a Nix signing key kept in
+   Proton Pass, CI pushing to it and every machine pulling from it; CI's
+   `nix flake check` split into one job per check; Rust built with crane so
+   dependencies are cached. If Cloudflare refuses until R2 is enabled on
+   the account, record it as a Gap and tell the owner.
+6. **Every other login onto its domain**, one browser flow each (Northwest,
+   Public, Cloudflare, Experian, the undeclared Jingzo logins: IBKR,
+   GitHub, Gitea, the outlook Email), with passkeys where the plan allows.
+   The research is in the Gaps (`modules/cloudflare/README.md`).
+7. **Public.** public-mirazo has no login item in Proton Pass and no
+   personal secret; both through the browser. public-jingzo's API waits on
+   whether Public's personal-use API terms cover a business account.
+8. **OpenRouter**: signup (passkey sign-in exists), first top-up, the
+   management key, then `openrouter apply` mints the capped keys.
+9. **Northwest**: `northwest login` cannot sign in (registration refused,
+   `mcp-connector` rejects a loopback redirect). Its documented path is a
+   custom connector in Claude; or its portal through the browser flows.
+   Then the server's own tools/list, and Jingzo's state, formation date and
+   EIN status into `modules/identity/jingzo.nix`.
+10. **The legal module**: Catala rules (the §475(f) election and its
+    revocation, Wyoming's annual report and license tax, estimated tax
+    dates) against pinned snapshots of eCFR Title 26 and the US Code. The
+    sources and their terms are in this session's research; the hosts are
+    allowlisted.
+11. **The host** (Hetzner: Open WebUI, OpenCode, Bridge on a private
+    domain) and the swarms. Agents are denied by the login rule until they
+    can read an audit record (a Gap).
+12. **The PR** from this branch into `main`, once the owner asks.
+
+Leftovers: six old swarm agents (`swarm-*-qsearch`, `swarm-*-zachariah`)
+and their token items in Mirazo-Root; deleting them was refused by the
+permission check, and they expire on 2026-11-21.
 
 ## Paused
 
