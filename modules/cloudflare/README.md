@@ -266,11 +266,14 @@ around.
   settings. Proton Pass's item is updated after, to match. The personal
   Public account has no login item in Proton Pass at all yet.
 - **Browser flows** (`modules/browser`): what a provider has no API for
-  runs as a typed flow, stopping only for your approval. Two things wait on
-  you: the session's network allowlist must add `cdn.mercury.com` (Mercury's
-  web app loads its scripts from there), and a flow that moves an account's
-  login has to be allowed by the login rule, which today refuses every
-  action on a mismatched account.
+  runs as a typed flow, stopping only for your approval. A flow that moves
+  an account's login runs under the `move-login` effect, the one action the
+  login rule admits on a mismatched account. Hosts a web app needs only
+  show once its sign-in is submitted: Mercury's posts to
+  `backend.mercury.com` and `fp.mercury.com`, now in the allowlist
+  (`modules/claude/_environment.nix`) and waiting on the environment's
+  settings. Pages behind a sign-in are mapped with an `explore` step, typed
+  steps given one at a time under the same action and hosts.
 - **Passkeys** (`accounts.held.<a>.login.passkey`, modules/browser): the
   browser engine registers a passkey as a virtual authenticator and keeps it
   in the owner's vault, so a later sign-in needs no code. Passkey alone

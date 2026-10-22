@@ -131,11 +131,16 @@ in
       # loading its sign-in page and keeping every refused host that is the
       # app itself (scripts, its API, its sign-in, its captcha); analytics
       # and trackers are left out. For the browser flows (modules/browser).
+      # A page only loading is not enough: Mercury's API and device check
+      # showed only once its sign-in was submitted.
       browser = {
         reason = "Provider web apps the browser flows drive (modules/browser)";
         hosts = [
-          # Mercury's web app scripts
+          # Mercury's web app: its scripts, its API, the device check its
+          # sign-in posts to (refused on a submitted sign-in, 2026-10-22)
           "cdn.mercury.com"
+          "backend.mercury.com"
+          "fp.mercury.com"
           # Public's web app: its API and the identity check at sign-in
           "plat.public.com"
           "prod-api.154310543964.hellopublic.com"

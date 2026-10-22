@@ -75,11 +75,21 @@ pub enum Step {
         target: Target,
     },
     /// The page's controls and headings by role and name (no values), to
-    /// write the next steps against.
-    Snapshot,
+    /// write the next steps against; with `text`, the page's words as well.
+    Snapshot {
+        #[serde(default)]
+        text: bool,
+    },
     /// Keep the passkey the site just registered with the engine's
     /// authenticator, in Proton Pass; it is never printed.
     PasskeySave,
+    /// Map pages a flow cannot see before it signs in: further steps, one
+    /// JSON object per line on stdin, each typed and held to the flow's
+    /// hosts like a declared one, until stdin closes or `minutes` pass. A
+    /// failed step is reported and the session stays open.
+    Explore {
+        minutes: u64,
+    },
 }
 
 #[derive(Debug, Deserialize)]

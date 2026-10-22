@@ -71,27 +71,35 @@ let
   firstOf =
     provider: effect: lib.findFirst (a: a.provider == provider && a.effect == effect) null actionList;
 
-  schema = ''
-    namespace ${ns} {
-      entity Person;
-      entity Entity { kind: String, controllers: Set<Person>, domains: Set<String> };
-      entity Account in [Entity] { owner: Entity, provider: String, login: String, loginDomain: String };
-      entity Agent { serves: Entity, purpose: String };
+  # A tool named after an effect would share its id with the provider's
+  # group for that effect, and Cedar would read it as its own group.
+  clashes = lib.filter (a: lib.elem a.tool cfg.effects) actionList;
+  schema =
+    assert lib.assertMsg (clashes == [ ]) (
+      "modules/governance: actions named after an effect: "
+      + lib.concatMapStringsSep ", " (a: a.id) clashes
+    );
+    ''
+      namespace ${ns} {
+        entity Person;
+        entity Entity { kind: String, controllers: Set<Person>, domains: Set<String> };
+        entity Account in [Entity] { owner: Entity, provider: String, login: String, loginDomain: String };
+        entity Agent { serves: Entity, purpose: String };
 
-      action ${lib.concatMapStringsSep ", " str cfg.effects};
-    ${lib.concatMapStrings (
-      p:
-      lib.concatMapStrings (e: ''
-        action ${str "${p}:${e}"} in [${str e}];
-      '') cfg.effects
-    ) providers}
-    ${
-      lib.concatMapStrings (a: ''
-        action ${str a.id} in [${str "${a.provider}:${a.effect}"}]
-          appliesTo { principal: [Person, Agent], resource: [Account], context: { login?: String } };
-      '') actionList
-    }}
-  '';
+        action ${lib.concatMapStringsSep ", " str cfg.effects};
+      ${lib.concatMapStrings (
+        p:
+        lib.concatMapStrings (e: ''
+          action ${str "${p}:${e}"} in [${str e}];
+        '') cfg.effects
+      ) providers}
+      ${
+        lib.concatMapStrings (a: ''
+          action ${str a.id} in [${str "${a.provider}:${a.effect}"}]
+            appliesTo { principal: [Person, Agent], resource: [Account], context: { login?: String } };
+        '') actionList
+      }}
+    '';
 
   base = ''
     @id("controllers")

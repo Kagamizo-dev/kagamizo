@@ -60,7 +60,10 @@ async fn main() -> Result<()> {
 
     let page = browser.new_page("about:blank").await?;
     let result = run(&flow, &page).await;
+    // Chromium is waited for, so the wrapper removes a profile nothing is
+    // still writing.
     browser.close().await.ok();
+    browser.wait().await.ok();
     events.abort();
     match &result {
         Ok(()) => eprintln!("browser: {} on {}: done", flow.action, flow.account),
@@ -83,27 +86,108 @@ async fn run(flow: &Flow, page: &Page) -> Result<()> {
     };
     for (i, step) in flow.steps.iter().enumerate() {
         let n = i + 1;
-        // A browser that dies mid-flow leaves its socket open; every step
-        // has a deadline, its own wait plus a minute.
-        let limit = Duration::from_secs(60)
-            + match step {
-                Step::WaitFor { seconds, .. } | Step::WaitUrl { seconds, .. } => {
-                    Duration::from_secs(*seconds)
-                }
-                Step::Approve { minutes, .. } => Duration::from_secs(minutes * 60),
-                Step::Code { .. } => Duration::from_secs(600),
-                _ => Duration::ZERO,
-            };
-        tokio::time::timeout(limit, one(flow, page, authenticator.as_ref(), n, step))
-            .await
-            .map_err(|_| {
-                anyhow::anyhow!(
-                    "step {n}: no answer from the browser in {}s",
-                    limit.as_secs()
-                )
-            })??;
+        if let Step::Explore { minutes } = step {
+            explore(flow, page, authenticator.as_ref(), n, *minutes).await?;
+            continue;
+        }
+        bounded(flow, page, authenticator.as_ref(), n, step).await?;
     }
     Ok(())
+}
+
+/// One step under its deadline: a browser that dies mid-flow leaves its
+/// socket open, so every step gets its own wait plus a minute.
+async fn bounded(
+    flow: &Flow,
+    page: &Page,
+    authenticator: Option<&passkey::Authenticator>,
+    n: usize,
+    step: &Step,
+) -> Result<()> {
+    let limit = Duration::from_secs(60)
+        + match step {
+            Step::WaitFor { seconds, .. } | Step::WaitUrl { seconds, .. } => {
+                Duration::from_secs(*seconds)
+            }
+            Step::Approve { minutes, .. } => Duration::from_secs(minutes * 60),
+            Step::Code { .. } => Duration::from_secs(600),
+            _ => Duration::ZERO,
+        };
+    tokio::time::timeout(limit, one(flow, page, authenticator, n, step))
+        .await
+        .map_err(|_| {
+            anyhow::anyhow!(
+                "step {n}: no answer from the browser in {}s",
+                limit.as_secs()
+            )
+        })?
+}
+
+/// A one-time code into its field: letters and digits only.
+async fn type_code(flow: &Flow, page: &Page, target: &Target, line: &str) -> Result<()> {
+    stay(flow, page).await?;
+    let node = find(page, target, 20).await?;
+    let code = line.trim();
+    if code.is_empty() || !code.chars().all(|c| c.is_ascii_alphanumeric()) {
+        bail!("not a code");
+    }
+    page.execute(FocusParams::builder().backend_node_id(node).build())
+        .await?;
+    page.execute(InsertTextParams::new(code)).await?;
+    Ok(())
+}
+
+/// Steps read from stdin, one JSON object per line, after the declared ones.
+/// Each is the same typed Step (an explore inside an explore is refused), so
+/// it stays on the flow's hosts and types Proton Pass values unprinted.
+async fn explore(
+    flow: &Flow,
+    page: &Page,
+    authenticator: Option<&passkey::Authenticator>,
+    n: usize,
+    minutes: u64,
+) -> Result<()> {
+    let deadline = Instant::now() + Duration::from_secs(minutes * 60);
+    let mut lines = tokio::io::BufReader::new(tokio::io::stdin()).lines();
+    let mut k = 0;
+    eprintln!("browser: step {n}: exploring, one step per line on stdin");
+    loop {
+        let left = deadline.saturating_duration_since(Instant::now());
+        let line = match tokio::time::timeout(left, lines.next_line()).await {
+            Err(_) => bail!("step {n}: exploring ran past {minutes} min"),
+            Ok(line) => match line? {
+                Some(line) => line,
+                None => return Ok(()),
+            },
+        };
+        if line.trim().is_empty() {
+            continue;
+        }
+        k += 1;
+        let at = format!("{n}.{k}");
+        let result = match serde_json::from_str::<Step>(&line) {
+            Err(e) => Err(anyhow::anyhow!("step {at} does not type-check: {e}")),
+            Ok(Step::Explore { .. }) => Err(anyhow::anyhow!("step {at}: already exploring")),
+            // A code is the next line of the same stdin, read here so no
+            // second reader can swallow it.
+            Ok(Step::Code { prompt, target }) => {
+                eprintln!("browser: {prompt}");
+                match lines.next_line().await? {
+                    Some(code) => type_code(flow, page, &target, &Zeroizing::new(code))
+                        .await
+                        .with_context(|| format!("step {at}")),
+                    None => return Ok(()),
+                }
+            }
+            Ok(step) => bounded(flow, page, authenticator, k, &step)
+                .await
+                .with_context(|| format!("step {at}")),
+        };
+        match result {
+            Ok(()) => eprintln!("browser: step {at}: done"),
+            Err(e) => eprintln!("browser: {e:#}"),
+        }
+    }
 }
 
 async fn one(
@@ -169,26 +253,17 @@ async fn one(
                 .with_context(|| format!("step {n}: not approved in time"))?;
             }
             Step::Code { prompt, target } => {
-                stay(flow, page)
-                    .await
-                    .with_context(|| format!("step {n}"))?;
-                let node = find(page, target, 20)
-                    .await
-                    .with_context(|| format!("step {n}"))?;
                 eprintln!("browser: {prompt}");
                 let mut line = Zeroizing::new(String::new());
                 tokio::io::BufReader::new(tokio::io::stdin())
                     .read_line(&mut line)
                     .await?;
-                let code = line.trim();
-                if code.is_empty() || !code.chars().all(|c| c.is_ascii_alphanumeric()) {
-                    bail!("step {n}: not a code");
-                }
-                page.execute(FocusParams::builder().backend_node_id(node).build())
-                    .await?;
-                page.execute(InsertTextParams::new(code)).await?;
+                type_code(flow, page, target, &line)
+                    .await
+                    .with_context(|| format!("step {n}"))?;
             }
-            Step::Snapshot => snapshot(page).await?,
+            Step::Snapshot { text } => snapshot(page, *text).await?,
+            Step::Explore { .. } => bail!("step {n}: explore runs only from the flow's steps"),
             Step::PasskeySave => match (authenticator, &flow.passkey) {
                 (Some(auth), Some(store)) => passkey::save(page, auth, store)
                     .await
@@ -361,8 +436,10 @@ async fn click(page: &Page, node: BackendNodeId) -> Result<()> {
 }
 
 /// Controls and headings by role and name; text fields' values are left out.
-async fn snapshot(page: &Page) -> Result<()> {
-    const ROLES: [&str; 12] = [
+/// With `text`, the page's words too, for a message no control carries; off
+/// by default, since a signed-in page's text is the account's data.
+async fn snapshot(page: &Page, text: bool) -> Result<()> {
+    const ROLES: [&str; 16] = [
         "button",
         "link",
         "textbox",
@@ -375,6 +452,11 @@ async fn snapshot(page: &Page) -> Result<()> {
         "heading",
         "searchbox",
         "switch",
+        // What the page says back: errors, prompts for a second factor.
+        "alert",
+        "alertdialog",
+        "status",
+        "dialog",
     ];
     let url = page.url().await?.unwrap_or_default();
     println!("== {}", url.split('?').next().unwrap_or(&url));
@@ -384,9 +466,34 @@ async fn snapshot(page: &Page) -> Result<()> {
             params: serde_json::json!({}),
         })
         .await?;
+    // A text field's value shows as text inside it: never printed.
+    let parents: std::collections::HashMap<&str, (&str, &str)> = tree.result["nodes"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|n| {
+            (
+                n["nodeId"].as_str().unwrap_or_default(),
+                (
+                    ax_str(n, "role"),
+                    n["parentId"].as_str().unwrap_or_default(),
+                ),
+            )
+        })
+        .collect();
+    let in_field = |node: &serde_json::Value| {
+        let mut at = node["parentId"].as_str().unwrap_or_default();
+        while let Some((role, up)) = parents.get(at) {
+            if matches!(*role, "textbox" | "searchbox" | "combobox") {
+                return true;
+            }
+            at = up;
+        }
+        false
+    };
     for node in ax_nodes(&tree.result) {
         let role = ax_str(node, "role");
-        if ROLES.contains(&role) {
+        if ROLES.contains(&role) || (text && role == "StaticText" && !in_field(node)) {
             println!("{role:<10} {:?}", ax_str(node, "name"));
         }
     }

@@ -10,6 +10,6 @@
     { "do": "click", "target": { "by": "role", "role": "button", "name": "Continue" } },
     { "do": "approve", "prompt": "approve the sign-in", "until": { "when": "url-prefix", "prefix": "http://127.0.0.1:PORT/done" }, "minutes": 1 },
     { "do": "wait-for", "target": { "by": "role", "role": "button", "name": "Invite member" }, "seconds": 5 },
-    { "do": "snapshot" }
+    { "do": "snapshot", "text": true }
   ]
 }

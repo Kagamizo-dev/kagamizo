@@ -110,6 +110,8 @@ let
           "approve"
           "code"
           "snapshot"
+          "passkey-save"
+          "explore"
         ];
       };
       url = mkOption {
@@ -143,6 +145,11 @@ let
       minutes = mkOption {
         type = types.nullOr types.ints.positive;
         default = null;
+      };
+      text = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        description = "snapshot: the page's words too, not only its controls.";
       };
     };
   };
@@ -403,6 +410,7 @@ in
               mkdir profile
               BROWSER_PROFILE=$PWD/profile browser flow.json > snapshot.txt
               grep -q 'button     "Invite member"' snapshot.txt
+              grep -q 'StaticText "Signed in"' snapshot.txt
               ! grep -q 'finance@' snapshot.txt
               jq -c 'to_entries[] | .value.flow + {account: "check", login: {vault: "v", item: "i", email: "a@b.c"}}' ${flowsJson} |
                 while read -r f; do echo "$f" > one.json; browser --check one.json; done
