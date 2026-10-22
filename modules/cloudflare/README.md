@@ -317,6 +317,9 @@ around.
   it without notice.
 - **Registrar prerequisites**: default payment method, registrant contact and
   the registration agreement, dashboard only.
+- **Hetzner's sign-in is behind a proof-of-work page** (`/_ray/pow`, seen
+  on 2026-10-22): a browser flow has to pass it before the form shows,
+  and its signup checks a government ID and a selfie besides.
 - **The session's network allowlist** (`modules/claude/_environment.nix`):
   cloud environment settings cannot be changed from inside a session.
 

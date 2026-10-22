@@ -58,8 +58,9 @@ root vault.
 - The owner's only manual step is approving 2FA or a sign-in link. Never
   hand them a form, a click-path, a value to copy or a command. The
   network allowlist (`modules/claude/_environment.nix`) is the one
-  exception, since a session cannot change its own; it was applied on
-  2026-10-22 with every host listed there.
+  exception, since a session cannot change its own (it may not edit the
+  declaration either until the owner has applied it); the hosts to apply
+  next are listed below.
 - Ask before anything that spends money or applies infrastructure, unless
   the owner already said go. Already approved: the R2 build cache; the
   `move-login` exception; the Proton Pass renames (done); the $5 OpenRouter
@@ -77,62 +78,82 @@ root vault.
   quant trading. Mirazo: the owner, personal portfolio and retirement.
   Three GitHub organizations, one per identity.
 
-## Next, in this order
+## Where this session left it (2026-10-22)
+
+- Proton Pass signed in (`pass-cli login`, approved).
+- Mercury: `mercury:survey` mapped the sign-in page (Email, Password,
+  "Log in", "Continue with passkey"). `mercury:invite-own-user` signs in
+  with today's login and then explores (typed steps on stdin, same action
+  and hosts), so one approval maps the signed-in pages. Its submitted
+  sign-in failed with "We couldn't reach our servers": the allowlist lacks
+  Mercury's API and device check. Nothing was approved or invited yet.
+- Fixed on the way: a flow named after an effect shared its Cedar id with
+  that effect's group and was denied (evaluation now fails on it); a text
+  snapshot printed a field's typed value (never now; the check asserts
+  it); the wrapper's cleanup raced Chromium and failed good runs.
+
+## The allowlist to apply (one change, all of it)
+
+Found on 2026-10-22 by loading every provider's sign-in page in the pinned
+Chromium, recording every host it contacted (net log) and every host its
+scripts name, and keeping the app's own hosts, its sign-in, its captcha and
+payment where a flow pays (analytics, ads and Chromium's own calls left
+out). `modules/claude/_environment.nix` already has the first two; the rest
+go in once applied (the session may not widen its own allowlist).
+
+| For | Hosts |
+|---|---|
+| Mercury's web app | `backend.mercury.com`, `fp.mercury.com`, `acdn.mercury.com`, `ldr.mercury.com` |
+| Public's web app | `*.hellopublic.com`, `network.dv.socure.io`, `ingestion.dv.socure.us` |
+| OpenRouter sign-in and top-up | `cdn.protect.clerk.com`, `js.stripe.com`, `api.stripe.com`, `m.stripe.network`, `hooks.stripe.com`, `checkout.stripe.com` |
+| Northwest's portal | `ct-frontend.corporatetools.com` |
+| GitHub's web flows | `octocaptcha.com`, `avatars.githubusercontent.com` |
+| Experian's sign-in | `hcaptcha.com`, `*.hcaptcha.com` |
+| Hetzner's console | `console.hetzner.cloud`, `console.hetzner.com` |
+| Gitea, Substack | `gitea.com`, `substackcdn.com` |
+| The outlook mailbox (moving a login confirms at the old address) | `login.live.com`, `account.live.com`, `outlook.live.com`, `login.microsoftonline.com`, `outlook.office365.com` |
+
+Already covered: Proton (`*.proton.me`, Bridge included), IBKR
+(`*.interactivebrokers.com`), Cloudflare's Turnstile, R2
+(`*.r2.cloudflarestorage.com`, in the defaults). Hosts seen only after a
+sign-in are found by the flows' explore runs; each is added the same way.
+
+## Roadmap
+
+ETAs are working time for a session once nothing blocks it; "you" is the
+owner's part, always an approval. Order is the order of work.
+
+| # | Epic | Stories | Blocked on | You | ETA |
+|---|---|---|---|---|---|
+| 0 | **Validate before acting** | Host map per provider from a submitted sign-in (explore runs); a Cedar test for every flow (allowed for the controller under its effect, denied to agents); every tool and API checked against its pinned catalog, with a coverage report per module | the allowlist above | — | 3 h |
+| 1 | **Mercury, Jingzo's own login** | Explore the signed-in pages; invite finance@jingzo.org (team settings); its passkey (after an authenticator-app 2FA); login item in Jingzo-LLC; `login.passkey.rpId`; `mercury-session --account mercury-jingzo login` | the allowlist | sign-in approval; Mercury link; the invite mail until epic 3 | 2 h |
+| 2 | **$5 OpenRouter card** | `mercury.account = "mercury-jingzo"`, `cards plan`, `cards apply` | 1; how to record it between Jingzo and Kagamizo (owed, or wait) | that decision | 30 min |
+| 3 | **Confirmation mail** | Bridge headless under Nix, its login driven from Proton Pass; a Rust IMAP reader (declared addresses, declared senders, links on the flow's hosts only); then the outlook mailbox the same way | — | one Proton sign-in approval | 6 h |
+| 4 | **Build cache and CI** (approved) | R2 bucket in the Cloudflare module, signing key in Proton Pass, CI pushes and machines pull; `nix flake check` one job per check; Rust with crane | — | — (a Gap if R2 is not enabled) | 5 h |
+| 5 | **Every login onto its domain** | One flow each, passkeys where offered: Northwest, Public, Cloudflare, Experian, IBKR (two), GitHub, Gitea; the outlook Email retired last | 0, 3 | a sign-in approval each | 1 h each, ~1.5 days |
+| 6 | **Public** | public-mirazo's login item and personal secret through the browser; whether the API may serve an LLC's account | 5 | the terms question | 2 h |
+| 7 | **OpenRouter** | Signup (passkey), first top-up from the card, management key, `openrouter apply` mints the capped keys | 2 | approvals | 2 h |
+| 8 | **Northwest** | Its portal through the flows (or its connector in Claude); `northwest catalog` from the server; Jingzo's state, formation date, EIN into `modules/identity/jingzo.nix` | 5 | sign-in approval | 4 h |
+| 9 | **Legal module** | Catala: §475(f) election and revocation, Wyoming annual report and license tax, estimated tax dates; pinned eCFR Title 26 and US Code | — | — | 2–3 days |
+| 10 | **Kagamizo LLC** | Formation and EIN through Northwest; Mercury's business application; its own cards | 8 | signature and SSN in Northwest's portal (a Gap); the pay link | 1 day of work, weeks of state and IRS time |
+| 11 | **The host and swarms** | Hetzner (signup is ID and selfie, a Gap; console behind proof-of-work), Open WebUI, OpenCode, Bridge on a private domain; agents' audit record | 3, 7 | Hetzner's ID check | 2–3 days |
+| 12 | **Trading live** | Public adapter's first real run, live as a governed spend action, IBKR as a second backend | 6, 9 | — | 2–3 days |
+| 13 | **The PR into `main`** | Review, CI green | when you ask | — | 1 h |
+
+Total before the PR: about 2 weeks of session time, with Kagamizo's
+formation running on the state's and the IRS's clocks in parallel.
+
+## Next
 
 1. **Sign the session in**: `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`,
    send the owner the link, and run no other pass-cli command until it
    returns (a concurrent call corrupted the session store once).
-2. **Mercury, Jingzo's own login.** The allowlist now has cdn.mercury.com.
-   Run `nix run .#browser -- --account mercury-jingzo mercury:survey` to see
-   the sign-in page's real controls, then write a `move-login` flow in
-   `modules/mercury/flows.nix`. It signs in with the current login from
-   Proton Pass (app.mercury.com item: username and password), waits for the
-   owner's approval, opens the team settings, invites finance@jingzo.org as
-   Jingzo's own user and registers a passkey (Mercury requires an
-   authenticator-app 2FA first). The invite mail goes to finance@jingzo.org
-   (step 4 reads it; until then the owner opens it). Then a login item for
-   the new user in Jingzo-LLC, `identity-audit` ok, set
-   `login.passkey.rpId` from what the registration reports, and
-   `mercury-session --account mercury-jingzo login` (send the owner the
-   link; their phone lands on a failed 127.0.0.1 page whose address they
-   paste back).
-3. **The $5 OpenRouter card**: `mercury.account = "mercury-jingzo"`,
-   OpenRouter's card at $5 a month, `cards plan`, then `cards apply`.
-4. **Confirmation mail**: Proton Mail Bridge (nixpkgs `protonmail-bridge`,
-   `--noninteractive`; login is an interactive prompt for username,
-   password and TOTP; its vault key lives in `pass` or gnome-keyring)
-   driven from Proton Pass, and a Rust IMAP reader in the modules tree that
-   takes only mail to declared addresses from declared senders and follows
-   only links on the flow's hosts.
-5. **The build cache**: an R2 bucket declared in the Cloudflare module and
-   applied with the CI token (it has R2 write), a Nix signing key kept in
-   Proton Pass, CI pushing to it and every machine pulling from it; CI's
-   `nix flake check` split into one job per check; Rust built with crane so
-   dependencies are cached. If Cloudflare refuses until R2 is enabled on
-   the account, record it as a Gap and tell the owner.
-6. **Every other login onto its domain**, one browser flow each (Northwest,
-   Public, Cloudflare, Experian, the undeclared Jingzo logins: IBKR,
-   GitHub, Gitea, the outlook Email), with passkeys where the plan allows.
-   The research is in the Gaps (`modules/cloudflare/README.md`).
-7. **Public.** public-mirazo has no login item in Proton Pass and no
-   personal secret; both through the browser. public-jingzo's API waits on
-   whether Public's personal-use API terms cover a business account.
-8. **OpenRouter**: signup (passkey sign-in exists), first top-up, the
-   management key, then `openrouter apply` mints the capped keys.
-9. **Northwest**: `northwest login` cannot sign in (registration refused,
-   `mcp-connector` rejects a loopback redirect). Its documented path is a
-   custom connector in Claude; or its portal through the browser flows.
-   Then the server's own tools/list, and Jingzo's state, formation date and
-   EIN status into `modules/identity/jingzo.nix`.
-10. **The legal module**: Catala rules (the §475(f) election and its
-    revocation, Wyoming's annual report and license tax, estimated tax
-    dates) against pinned snapshots of eCFR Title 26 and the US Code. The
-    sources and their terms are in this session's research; the hosts are
-    allowlisted.
-11. **The host** (Hetzner: Open WebUI, OpenCode, Bridge on a private
-    domain) and the swarms. Agents are denied by the login rule until they
-    can read an audit record (a Gap).
-12. **The PR** from this branch into `main`, once the owner asks.
+2. Once the allowlist above is applied: add its hosts to
+   `modules/claude/_environment.nix`, then work the roadmap from epic 0.
+   Mercury: `tail -f steps.jsonl | nix run .#browser -- --account
+   mercury-jingzo mercury:invite-own-user`, append typed steps
+   (`{"do":"snapshot","text":true}` reads the page's words), and write what
+   the exploring shows into the flow's declared steps.
 
 Leftovers: six old swarm agents (`swarm-*-qsearch`, `swarm-*-zachariah`)
 and their token items in Mirazo-Root; deleting them was refused by the
