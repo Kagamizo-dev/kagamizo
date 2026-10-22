@@ -16,6 +16,10 @@ pub struct Flow {
     pub hosts: Vec<String>,
     /// The account's login item, for values read from Proton Pass.
     pub login: Login,
+    /// Where the account's passkey is kept, when it has one: the engine
+    /// then signs in as a virtual authenticator holding it.
+    #[serde(default)]
+    pub passkey: Option<PasskeyStore>,
     pub steps: Vec<Step>,
 }
 
@@ -26,6 +30,15 @@ pub struct Login {
     pub item: String,
     /// The declared address (accounts.held.<a>.login.email).
     pub email: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+pub struct PasskeyStore {
+    /// The site's WebAuthn relying party id (its domain).
+    pub rp_id: String,
+    /// The secretspec profile whose PASSKEY holds the credential.
+    pub profile: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -64,6 +77,9 @@ pub enum Step {
     /// The page's controls and headings by role and name (no values), to
     /// write the next steps against.
     Snapshot,
+    /// Keep the passkey the site just registered with the engine's
+    /// authenticator, in Proton Pass; it is never printed.
+    PasskeySave,
 }
 
 #[derive(Debug, Deserialize)]

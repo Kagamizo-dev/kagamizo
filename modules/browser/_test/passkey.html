@@ -1,0 +1,29 @@
+<!doctype html>
+<title>Passkey</title>
+<h1>Passkey</h1>
+<button type="button" id="register">Register passkey</button>
+<button type="button" id="signin">Sign in with passkey</button>
+<div id="result"></div>
+<script>
+  const random = () => crypto.getRandomValues(new Uint8Array(32));
+  const show = (text) => { const h = document.createElement("h2"); h.textContent = text; result.replaceChildren(h); };
+  register.onclick = async () => {
+    try {
+      await navigator.credentials.create({ publicKey: {
+        challenge: random(),
+        rp: { name: "Test", id: "localhost" },
+        user: { id: new Uint8Array([1, 2, 3]), name: "finance@jingzo.org", displayName: "Finance" },
+        pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+        authenticatorSelection: { residentKey: "required", userVerification: "required" },
+      }});
+      show("Registered");
+    } catch (e) { show("Failed " + e.name); }
+  };
+  signin.onclick = async () => {
+    try {
+      const c = await navigator.credentials.get({ publicKey: { challenge: random(), rpId: "localhost", userVerification: "required" } });
+      const user = new Uint8Array(c.response.userHandle).join(",");
+      show(user === "1,2,3" ? "Signed in" : "Wrong user");
+    } catch (e) { show("Failed " + e.name); }
+  };
+</script>

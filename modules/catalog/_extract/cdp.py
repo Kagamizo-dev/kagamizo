@@ -4,8 +4,8 @@ Chromium serves the exact protocol it speaks at /json/protocol once it is
 started with a debugging port. Start it headless on an ephemeral port, read
 the port from DevToolsActivePort in its profile, fetch the protocol and keep,
 per domain, every command with its parameters (type or $ref, optional,
-enum) and its return values, and every type's enum values. Nothing leaves
-the loopback.
+enum) and its return values, every type's enum values and every object
+type's fields. Nothing leaves the loopback.
 """
 import json
 import os
@@ -71,6 +71,7 @@ for d in protocol["domains"]:
             for c in d.get("commands", [])
         },
         "enums": {t["id"]: t["enum"] for t in d.get("types", []) if "enum" in t},
+        "objects": {t["id"]: fields(t["properties"]) for t in d.get("types", []) if "properties" in t},
     }
 
 with open(out, "w") as f:

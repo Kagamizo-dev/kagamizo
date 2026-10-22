@@ -7,6 +7,7 @@
 
 mod flow;
 mod pass;
+mod passkey;
 
 use std::time::{Duration, Instant};
 
@@ -72,6 +73,14 @@ async fn main() -> Result<()> {
 }
 
 async fn run(flow: &Flow, page: &Page) -> Result<()> {
+    let authenticator = match &flow.passkey {
+        Some(store) => Some(
+            passkey::start(page, store)
+                .await
+                .context("the passkey authenticator")?,
+        ),
+        None => None,
+    };
     for (i, step) in flow.steps.iter().enumerate() {
         let n = i + 1;
         // A browser that dies mid-flow leaves its socket open; every step
@@ -85,7 +94,7 @@ async fn run(flow: &Flow, page: &Page) -> Result<()> {
                 Step::Code { .. } => Duration::from_secs(600),
                 _ => Duration::ZERO,
             };
-        tokio::time::timeout(limit, one(flow, page, n, step))
+        tokio::time::timeout(limit, one(flow, page, authenticator.as_ref(), n, step))
             .await
             .map_err(|_| {
                 anyhow::anyhow!(
@@ -97,7 +106,13 @@ async fn run(flow: &Flow, page: &Page) -> Result<()> {
     Ok(())
 }
 
-async fn one(flow: &Flow, page: &Page, n: usize, step: &Step) -> Result<()> {
+async fn one(
+    flow: &Flow,
+    page: &Page,
+    authenticator: Option<&passkey::Authenticator>,
+    n: usize,
+    step: &Step,
+) -> Result<()> {
     {
         match step {
             Step::Goto { url } => {
@@ -174,20 +189,27 @@ async fn one(flow: &Flow, page: &Page, n: usize, step: &Step) -> Result<()> {
                 page.execute(InsertTextParams::new(code)).await?;
             }
             Step::Snapshot => snapshot(page).await?,
+            Step::PasskeySave => match (authenticator, &flow.passkey) {
+                (Some(auth), Some(store)) => passkey::save(page, auth, store)
+                    .await
+                    .with_context(|| format!("step {n}"))?,
+                _ => bail!("step {n}: the flow declares no passkey store"),
+            },
         }
     }
     Ok(())
 }
 
-/// The host of an HTTPS address; plain HTTP only on the loopback, which the
+/// The host of an HTTPS address; plain HTTP only on the loopback (127.0.0.1
+/// or localhost, which WebAuthn needs as a domain), which the
 /// module's types allow solely in its own check.
 fn host_of(url: &str) -> Option<&str> {
-    let rest = url
-        .strip_prefix("https://")
-        .or_else(|| url.strip_prefix("http://127.0.0.1"))?;
-    if url.starts_with("http://") {
-        return rest.starts_with([':', '/']).then_some("127.0.0.1");
+    for loopback in ["127.0.0.1", "localhost"] {
+        if let Some(rest) = url.strip_prefix(&format!("http://{loopback}")) {
+            return rest.starts_with([':', '/']).then_some(loopback);
+        }
     }
+    let rest = url.strip_prefix("https://")?;
     Some(
         rest.split(['/', '?', '#'])
             .next()
@@ -236,24 +258,32 @@ async fn wait_url(page: &Page, prefix: &str, limit: Duration) -> Result<()> {
     }
 }
 
-/// An accessibility call read as plain JSON: chromiumoxide's typed tree
-/// rejects property values newer Chromium sends, so the few fields used
-/// here are read by name instead.
+/// A protocol call read as plain JSON, for the domains where chromiumoxide's
+/// generated types lag the pinned Chromium (its accessibility tree rejects
+/// property values newer Chromium sends) or are not used (WebAuthn). Every
+/// method named here is declared in the module's cdpCalls and checked
+/// against the pinned protocol.
 #[derive(Debug, Serialize)]
-struct Ax {
+pub(crate) struct Raw {
     #[serde(skip)]
     method: &'static str,
     #[serde(flatten)]
     params: serde_json::Value,
 }
 
-impl chromiumoxide::Method for Ax {
+impl Raw {
+    pub(crate) fn new(method: &'static str, params: serde_json::Value) -> Self {
+        Raw { method, params }
+    }
+}
+
+impl chromiumoxide::Method for Raw {
     fn identifier(&self) -> chromiumoxide::types::MethodId {
         self.method.into()
     }
 }
 
-impl chromiumoxide::Command for Ax {
+impl chromiumoxide::Command for Raw {
     type Response = serde_json::Value;
 }
 
@@ -296,7 +326,7 @@ async fn locate(page: &Page, target: &Target) -> Result<Option<BackendNodeId>> {
             let doc = page
                 .execute(GetDocumentParams::builder().depth(0).build())
                 .await?;
-            let query = Ax {
+            let query = Raw {
                 method: "Accessibility.queryAXTree",
                 params: serde_json::json!({
                     "backendNodeId": doc.result.root.backend_node_id,
@@ -349,7 +379,7 @@ async fn snapshot(page: &Page) -> Result<()> {
     let url = page.url().await?.unwrap_or_default();
     println!("== {}", url.split('?').next().unwrap_or(&url));
     let tree = page
-        .execute(Ax {
+        .execute(Raw {
             method: "Accessibility.getFullAXTree",
             params: serde_json::json!({}),
         })

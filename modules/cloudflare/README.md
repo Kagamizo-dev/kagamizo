@@ -271,6 +271,23 @@ around.
   web app loads its scripts from there), and a flow that moves an account's
   login has to be allowed by the login rule, which today refuses every
   action on a mismatched account.
+- **Passkeys** (`accounts.held.<a>.login.passkey`, modules/browser): the
+  browser engine registers a passkey as a virtual authenticator and keeps it
+  in the owner's vault, so a later sign-in needs no code. Passkey alone
+  signs in at Mercury (business), GitHub (your user account), OpenRouter and
+  probably Experian. Cloudflare, Proton and Interactive Brokers take one only
+  as a second factor after the password; Public, Hetzner, Northwest,
+  Substack and arXiv have none, so they stay on TOTP or emailed codes.
+  Whether any site refuses a software authenticator is only known by
+  registering. Proton's own login cannot hold its key in Proton Pass (the
+  key would be behind the lock it opens): your Proton sign-in approval stays
+  the one 2FA.
+- **Confirmation mail**: Proton Mail Bridge (nixpkgs `protonmail-bridge`,
+  headless with `--noninteractive`) serves the mailboxes over IMAP on the
+  loopback, for a reader that follows only declared links. Its login is an
+  interactive prompt (username, password, a TOTP code), and it keeps its
+  vault key in `pass` or gnome-keyring; both are to be driven from Proton
+  Pass, not typed.
 - **Agents and logins**: an agent's Proton Pass token opens only its
   entity's sessions vault, not the login items, so governance-authorize
   denies every agent until an audit record it can read exists.

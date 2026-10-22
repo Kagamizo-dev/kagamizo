@@ -14,6 +14,7 @@
       paymentApprovals = "flag";
       writeTokensNeedIpAllowlist = "flag";
       oauthSessions = "flag";
+      passkeys = "flag";
     };
 
     plans.mercury.standard = {
@@ -57,6 +58,12 @@
           value = true;
           source = "https://mercury.com/api";
         };
+        # "Continue with passkey" bypasses the password and the 2FA code;
+        # adding one needs an authenticator-app 2FA set up first.
+        passkeys = {
+          value = true;
+          source = "https://support.mercury.com/hc/en-us/articles/48188889174036";
+        };
       };
     };
 
@@ -94,6 +101,12 @@
         paymentApprovals = {
           value = true;
           source = "https://mercury.com/personal-banking";
+        };
+        # Mercury's passkey page is about business sign-in; personal
+        # banking's is unconfirmed, so it is not relied on.
+        passkeys = {
+          value = false;
+          source = "https://support.mercury.com/hc/en-us/articles/48188889174036";
         };
       };
     };

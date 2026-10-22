@@ -7,6 +7,7 @@
 
     capabilities.openrouter = {
       managementKeys = "flag";
+      passkeys = "flag";
       keyCreditLimits = "flag";
     };
 
@@ -14,6 +15,11 @@
     plans.openrouter.pay-as-you-go = {
       checked = "2026-10-20";
       capabilities = {
+        # A passkey signs in on its own ("a safer, passwordless login").
+        passkeys = {
+          value = true;
+          source = "https://openrouter.ai/blog/announcements/passkeys-devex-upgrades-and-a-new-guide-for-typescript-agents/";
+        };
         # A management key creates, limits and disables API keys; it cannot
         # call models itself.
         managementKeys = {

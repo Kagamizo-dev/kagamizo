@@ -239,6 +239,135 @@
      "internalRole",
      "valueUndefined"
     ]
+   },
+   "objects": {
+    "AXNode": {
+     "backendDOMNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "childIds": {
+      "optional": true,
+      "type": "array<AXNodeId>"
+     },
+     "chromeRole": {
+      "optional": true,
+      "type": "AXValue"
+     },
+     "description": {
+      "optional": true,
+      "type": "AXValue"
+     },
+     "frameId": {
+      "optional": true,
+      "type": "Page.FrameId"
+     },
+     "ignored": {
+      "type": "boolean"
+     },
+     "ignoredReasons": {
+      "optional": true,
+      "type": "array<AXProperty>"
+     },
+     "name": {
+      "optional": true,
+      "type": "AXValue"
+     },
+     "nodeId": {
+      "type": "AXNodeId"
+     },
+     "parentId": {
+      "optional": true,
+      "type": "AXNodeId"
+     },
+     "properties": {
+      "optional": true,
+      "type": "array<AXProperty>"
+     },
+     "role": {
+      "optional": true,
+      "type": "AXValue"
+     },
+     "value": {
+      "optional": true,
+      "type": "AXValue"
+     }
+    },
+    "AXProperty": {
+     "name": {
+      "type": "AXPropertyName"
+     },
+     "value": {
+      "type": "AXValue"
+     }
+    },
+    "AXRelatedNode": {
+     "backendDOMNodeId": {
+      "type": "DOM.BackendNodeId"
+     },
+     "idref": {
+      "optional": true,
+      "type": "string"
+     },
+     "text": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "AXValue": {
+     "relatedNodes": {
+      "optional": true,
+      "type": "array<AXRelatedNode>"
+     },
+     "sources": {
+      "optional": true,
+      "type": "array<AXValueSource>"
+     },
+     "type": {
+      "type": "AXValueType"
+     },
+     "value": {
+      "optional": true,
+      "type": "any"
+     }
+    },
+    "AXValueSource": {
+     "attribute": {
+      "optional": true,
+      "type": "string"
+     },
+     "attributeValue": {
+      "optional": true,
+      "type": "AXValue"
+     },
+     "invalid": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "invalidReason": {
+      "optional": true,
+      "type": "string"
+     },
+     "nativeSource": {
+      "optional": true,
+      "type": "AXValueNativeSourceType"
+     },
+     "nativeSourceValue": {
+      "optional": true,
+      "type": "AXValue"
+     },
+     "superseded": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "type": {
+      "type": "AXValueSourceType"
+     },
+     "value": {
+      "optional": true,
+      "type": "AXValue"
+     }
+    }
    }
   },
   "Ads": {
@@ -252,7 +381,29 @@
      }
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "AdMetrics": {
+     "averageViewportAdCount": {
+      "type": "number"
+     },
+     "averageViewportAdDensityByArea": {
+      "type": "number"
+     },
+     "totalAdCpuTime": {
+      "type": "number"
+     },
+     "totalAdNetworkBytes": {
+      "type": "number"
+     },
+     "viewportAdCount": {
+      "type": "integer"
+     },
+     "viewportAdDensityByArea": {
+      "type": "integer"
+     }
+    }
+   }
   },
   "Animation": {
    "commands": {
@@ -349,7 +500,125 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "Animation": {
+     "cssId": {
+      "optional": true,
+      "type": "string"
+     },
+     "currentTime": {
+      "type": "number"
+     },
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "pausedState": {
+      "type": "boolean"
+     },
+     "playState": {
+      "type": "string"
+     },
+     "playbackRate": {
+      "type": "number"
+     },
+     "source": {
+      "optional": true,
+      "type": "AnimationEffect"
+     },
+     "startTime": {
+      "type": "number"
+     },
+     "type": {
+      "enum": [
+       "CSSTransition",
+       "CSSAnimation",
+       "WebAnimation"
+      ],
+      "type": "string"
+     },
+     "viewOrScrollTimeline": {
+      "optional": true,
+      "type": "ViewOrScrollTimeline"
+     }
+    },
+    "AnimationEffect": {
+     "backendNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "delay": {
+      "type": "number"
+     },
+     "direction": {
+      "type": "string"
+     },
+     "duration": {
+      "type": "number"
+     },
+     "easing": {
+      "type": "string"
+     },
+     "endDelay": {
+      "type": "number"
+     },
+     "fill": {
+      "type": "string"
+     },
+     "iterationStart": {
+      "type": "number"
+     },
+     "iterations": {
+      "optional": true,
+      "type": "number"
+     },
+     "keyframesRule": {
+      "optional": true,
+      "type": "KeyframesRule"
+     }
+    },
+    "KeyframeStyle": {
+     "easing": {
+      "type": "string"
+     },
+     "offset": {
+      "type": "string"
+     }
+    },
+    "KeyframesRule": {
+     "keyframes": {
+      "type": "array<KeyframeStyle>"
+     },
+     "name": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "ViewOrScrollTimeline": {
+     "axis": {
+      "type": "DOM.ScrollOrientation"
+     },
+     "endOffset": {
+      "optional": true,
+      "type": "number"
+     },
+     "sourceNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "startOffset": {
+      "optional": true,
+      "type": "number"
+     },
+     "subjectNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     }
+    }
+   }
   },
   "Audits": {
    "commands": {
@@ -827,6 +1096,619 @@
      "BlockedSubresource",
      "NoisedCanvasReadback"
     ]
+   },
+   "objects": {
+    "AffectedCookie": {
+     "domain": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     }
+    },
+    "AffectedFrame": {
+     "frameId": {
+      "type": "Page.FrameId"
+     }
+    },
+    "AffectedRequest": {
+     "requestId": {
+      "optional": true,
+      "type": "Network.RequestId"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "AttributionReportingIssueDetails": {
+     "invalidParameter": {
+      "optional": true,
+      "type": "string"
+     },
+     "request": {
+      "optional": true,
+      "type": "AffectedRequest"
+     },
+     "violatingNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "violationType": {
+      "type": "AttributionReportingIssueType"
+     }
+    },
+    "BlockedByResponseIssueDetails": {
+     "blockedFrame": {
+      "optional": true,
+      "type": "AffectedFrame"
+     },
+     "parentFrame": {
+      "optional": true,
+      "type": "AffectedFrame"
+     },
+     "reason": {
+      "type": "BlockedByResponseReason"
+     },
+     "request": {
+      "type": "AffectedRequest"
+     }
+    },
+    "BounceTrackingIssueDetails": {
+     "trackingSites": {
+      "type": "array<string>"
+     }
+    },
+    "ClientHintIssueDetails": {
+     "clientHintIssueReason": {
+      "type": "ClientHintIssueReason"
+     },
+     "sourceCodeLocation": {
+      "type": "SourceCodeLocation"
+     }
+    },
+    "ConnectionAllowlistIssueDetails": {
+     "error": {
+      "type": "ConnectionAllowlistError"
+     },
+     "request": {
+      "type": "AffectedRequest"
+     }
+    },
+    "ContentSecurityPolicyIssueDetails": {
+     "blockedURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "contentSecurityPolicyViolationType": {
+      "type": "ContentSecurityPolicyViolationType"
+     },
+     "frameAncestor": {
+      "optional": true,
+      "type": "AffectedFrame"
+     },
+     "isReportOnly": {
+      "type": "boolean"
+     },
+     "sourceCodeLocation": {
+      "optional": true,
+      "type": "SourceCodeLocation"
+     },
+     "violatedDirective": {
+      "type": "string"
+     },
+     "violatingNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     }
+    },
+    "CookieDeprecationMetadataIssueDetails": {
+     "allowedSites": {
+      "type": "array<string>"
+     },
+     "isOptOutTopLevel": {
+      "type": "boolean"
+     },
+     "operation": {
+      "type": "CookieOperation"
+     },
+     "optOutPercentage": {
+      "type": "number"
+     }
+    },
+    "CookieIssueDetails": {
+     "cookie": {
+      "optional": true,
+      "type": "AffectedCookie"
+     },
+     "cookieExclusionReasons": {
+      "type": "array<CookieExclusionReason>"
+     },
+     "cookieUrl": {
+      "optional": true,
+      "type": "string"
+     },
+     "cookieWarningReasons": {
+      "type": "array<CookieWarningReason>"
+     },
+     "insight": {
+      "optional": true,
+      "type": "CookieIssueInsight"
+     },
+     "operation": {
+      "type": "CookieOperation"
+     },
+     "rawCookieLine": {
+      "optional": true,
+      "type": "string"
+     },
+     "request": {
+      "optional": true,
+      "type": "AffectedRequest"
+     },
+     "siteForCookies": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "CookieIssueInsight": {
+     "tableEntryUrl": {
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "type": "InsightType"
+     }
+    },
+    "CorsIssueDetails": {
+     "clientSecurityState": {
+      "optional": true,
+      "type": "Network.ClientSecurityState"
+     },
+     "corsErrorStatus": {
+      "type": "Network.CorsErrorStatus"
+     },
+     "initiatorOrigin": {
+      "optional": true,
+      "type": "string"
+     },
+     "isWarning": {
+      "type": "boolean"
+     },
+     "location": {
+      "optional": true,
+      "type": "SourceCodeLocation"
+     },
+     "request": {
+      "type": "AffectedRequest"
+     },
+     "resourceIPAddressSpace": {
+      "optional": true,
+      "type": "Network.IPAddressSpace"
+     }
+    },
+    "DeprecationIssueDetails": {
+     "affectedFrame": {
+      "optional": true,
+      "type": "AffectedFrame"
+     },
+     "sourceCodeLocation": {
+      "type": "SourceCodeLocation"
+     },
+     "type": {
+      "type": "string"
+     }
+    },
+    "ElementAccessibilityIssueDetails": {
+     "elementAccessibilityIssueReason": {
+      "type": "ElementAccessibilityIssueReason"
+     },
+     "hasDisallowedAttributes": {
+      "type": "boolean"
+     },
+     "nodeId": {
+      "type": "DOM.BackendNodeId"
+     }
+    },
+    "EmailVerificationRequestIssueDetails": {
+     "emailVerificationRequestIssueReason": {
+      "type": "EmailVerificationRequestIssueReason"
+     }
+    },
+    "FailedRequestInfo": {
+     "failureMessage": {
+      "type": "string"
+     },
+     "requestId": {
+      "optional": true,
+      "type": "Network.RequestId"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "FederatedAuthRequestIssueDetails": {
+     "federatedAuthRequestIssueReason": {
+      "type": "FederatedAuthRequestIssueReason"
+     }
+    },
+    "FederatedAuthUserInfoRequestIssueDetails": {
+     "federatedAuthUserInfoRequestIssueReason": {
+      "type": "FederatedAuthUserInfoRequestIssueReason"
+     }
+    },
+    "GenericIssueDetails": {
+     "errorType": {
+      "type": "GenericIssueErrorType"
+     },
+     "frameId": {
+      "optional": true,
+      "type": "Page.FrameId"
+     },
+     "request": {
+      "optional": true,
+      "type": "AffectedRequest"
+     },
+     "violatingNodeAttribute": {
+      "optional": true,
+      "type": "string"
+     },
+     "violatingNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     }
+    },
+    "HeavyAdIssueDetails": {
+     "frame": {
+      "type": "AffectedFrame"
+     },
+     "reason": {
+      "type": "HeavyAdReason"
+     },
+     "resolution": {
+      "type": "HeavyAdResolutionStatus"
+     }
+    },
+    "InspectorIssue": {
+     "code": {
+      "type": "InspectorIssueCode"
+     },
+     "details": {
+      "type": "InspectorIssueDetails"
+     },
+     "issueId": {
+      "optional": true,
+      "type": "IssueId"
+     }
+    },
+    "InspectorIssueDetails": {
+     "attributionReportingIssueDetails": {
+      "optional": true,
+      "type": "AttributionReportingIssueDetails"
+     },
+     "blockedByResponseIssueDetails": {
+      "optional": true,
+      "type": "BlockedByResponseIssueDetails"
+     },
+     "bounceTrackingIssueDetails": {
+      "optional": true,
+      "type": "BounceTrackingIssueDetails"
+     },
+     "clientHintIssueDetails": {
+      "optional": true,
+      "type": "ClientHintIssueDetails"
+     },
+     "connectionAllowlistIssueDetails": {
+      "optional": true,
+      "type": "ConnectionAllowlistIssueDetails"
+     },
+     "contentSecurityPolicyIssueDetails": {
+      "optional": true,
+      "type": "ContentSecurityPolicyIssueDetails"
+     },
+     "cookieDeprecationMetadataIssueDetails": {
+      "optional": true,
+      "type": "CookieDeprecationMetadataIssueDetails"
+     },
+     "cookieIssueDetails": {
+      "optional": true,
+      "type": "CookieIssueDetails"
+     },
+     "corsIssueDetails": {
+      "optional": true,
+      "type": "CorsIssueDetails"
+     },
+     "deprecationIssueDetails": {
+      "optional": true,
+      "type": "DeprecationIssueDetails"
+     },
+     "elementAccessibilityIssueDetails": {
+      "optional": true,
+      "type": "ElementAccessibilityIssueDetails"
+     },
+     "emailVerificationRequestIssueDetails": {
+      "optional": true,
+      "type": "EmailVerificationRequestIssueDetails"
+     },
+     "federatedAuthRequestIssueDetails": {
+      "optional": true,
+      "type": "FederatedAuthRequestIssueDetails"
+     },
+     "federatedAuthUserInfoRequestIssueDetails": {
+      "optional": true,
+      "type": "FederatedAuthUserInfoRequestIssueDetails"
+     },
+     "genericIssueDetails": {
+      "optional": true,
+      "type": "GenericIssueDetails"
+     },
+     "heavyAdIssueDetails": {
+      "optional": true,
+      "type": "HeavyAdIssueDetails"
+     },
+     "mixedContentIssueDetails": {
+      "optional": true,
+      "type": "MixedContentIssueDetails"
+     },
+     "navigatorUserAgentIssueDetails": {
+      "optional": true,
+      "type": "NavigatorUserAgentIssueDetails"
+     },
+     "partitioningBlobURLIssueDetails": {
+      "optional": true,
+      "type": "PartitioningBlobURLIssueDetails"
+     },
+     "performanceIssueDetails": {
+      "optional": true,
+      "type": "PerformanceIssueDetails"
+     },
+     "permissionElementIssueDetails": {
+      "optional": true,
+      "type": "PermissionElementIssueDetails"
+     },
+     "propertyRuleIssueDetails": {
+      "optional": true,
+      "type": "PropertyRuleIssueDetails"
+     },
+     "quirksModeIssueDetails": {
+      "optional": true,
+      "type": "QuirksModeIssueDetails"
+     },
+     "selectivePermissionsInterventionIssueDetails": {
+      "optional": true,
+      "type": "SelectivePermissionsInterventionIssueDetails"
+     },
+     "sharedArrayBufferIssueDetails": {
+      "optional": true,
+      "type": "SharedArrayBufferIssueDetails"
+     },
+     "sharedDictionaryIssueDetails": {
+      "optional": true,
+      "type": "SharedDictionaryIssueDetails"
+     },
+     "sriMessageSignatureIssueDetails": {
+      "optional": true,
+      "type": "SRIMessageSignatureIssueDetails"
+     },
+     "stylesheetLoadingIssueDetails": {
+      "optional": true,
+      "type": "StylesheetLoadingIssueDetails"
+     },
+     "unencodedDigestIssueDetails": {
+      "optional": true,
+      "type": "UnencodedDigestIssueDetails"
+     },
+     "userReidentificationIssueDetails": {
+      "optional": true,
+      "type": "UserReidentificationIssueDetails"
+     }
+    },
+    "MixedContentIssueDetails": {
+     "frame": {
+      "optional": true,
+      "type": "AffectedFrame"
+     },
+     "insecureURL": {
+      "type": "string"
+     },
+     "mainResourceURL": {
+      "type": "string"
+     },
+     "request": {
+      "optional": true,
+      "type": "AffectedRequest"
+     },
+     "resolutionStatus": {
+      "type": "MixedContentResolutionStatus"
+     },
+     "resourceType": {
+      "optional": true,
+      "type": "MixedContentResourceType"
+     }
+    },
+    "NavigatorUserAgentIssueDetails": {
+     "location": {
+      "optional": true,
+      "type": "SourceCodeLocation"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "PartitioningBlobURLIssueDetails": {
+     "partitioningBlobURLInfo": {
+      "type": "PartitioningBlobURLInfo"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "PerformanceIssueDetails": {
+     "performanceIssueType": {
+      "type": "PerformanceIssueType"
+     },
+     "sourceCodeLocation": {
+      "optional": true,
+      "type": "SourceCodeLocation"
+     }
+    },
+    "PermissionElementIssueDetails": {
+     "disableReason": {
+      "optional": true,
+      "type": "string"
+     },
+     "isWarning": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "issueType": {
+      "type": "PermissionElementIssueType"
+     },
+     "nodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "occluderNodeInfo": {
+      "optional": true,
+      "type": "string"
+     },
+     "occluderParentNodeInfo": {
+      "optional": true,
+      "type": "string"
+     },
+     "permissionName": {
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "PropertyRuleIssueDetails": {
+     "propertyRuleIssueReason": {
+      "type": "PropertyRuleIssueReason"
+     },
+     "propertyValue": {
+      "optional": true,
+      "type": "string"
+     },
+     "sourceCodeLocation": {
+      "type": "SourceCodeLocation"
+     }
+    },
+    "QuirksModeIssueDetails": {
+     "documentNodeId": {
+      "type": "DOM.BackendNodeId"
+     },
+     "frameId": {
+      "type": "Page.FrameId"
+     },
+     "isLimitedQuirksMode": {
+      "type": "boolean"
+     },
+     "loaderId": {
+      "type": "Network.LoaderId"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "SRIMessageSignatureIssueDetails": {
+     "error": {
+      "type": "SRIMessageSignatureError"
+     },
+     "integrityAssertions": {
+      "type": "array<string>"
+     },
+     "request": {
+      "type": "AffectedRequest"
+     },
+     "signatureBase": {
+      "type": "string"
+     }
+    },
+    "SelectivePermissionsInterventionIssueDetails": {
+     "adAncestry": {
+      "type": "Network.AdAncestry"
+     },
+     "apiName": {
+      "type": "string"
+     },
+     "stackTrace": {
+      "optional": true,
+      "type": "Runtime.StackTrace"
+     }
+    },
+    "SharedArrayBufferIssueDetails": {
+     "isWarning": {
+      "type": "boolean"
+     },
+     "sourceCodeLocation": {
+      "type": "SourceCodeLocation"
+     },
+     "type": {
+      "type": "SharedArrayBufferIssueType"
+     }
+    },
+    "SharedDictionaryIssueDetails": {
+     "request": {
+      "type": "AffectedRequest"
+     },
+     "sharedDictionaryError": {
+      "type": "SharedDictionaryError"
+     }
+    },
+    "SourceCodeLocation": {
+     "columnNumber": {
+      "type": "integer"
+     },
+     "lineNumber": {
+      "type": "integer"
+     },
+     "scriptId": {
+      "optional": true,
+      "type": "Runtime.ScriptId"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "StylesheetLoadingIssueDetails": {
+     "failedRequestInfo": {
+      "optional": true,
+      "type": "FailedRequestInfo"
+     },
+     "sourceCodeLocation": {
+      "type": "SourceCodeLocation"
+     },
+     "styleSheetLoadingIssueReason": {
+      "type": "StyleSheetLoadingIssueReason"
+     }
+    },
+    "UnencodedDigestIssueDetails": {
+     "error": {
+      "type": "UnencodedDigestError"
+     },
+     "request": {
+      "type": "AffectedRequest"
+     }
+    },
+    "UserReidentificationIssueDetails": {
+     "request": {
+      "optional": true,
+      "type": "AffectedRequest"
+     },
+     "sourceCodeLocation": {
+      "optional": true,
+      "type": "SourceCodeLocation"
+     },
+     "type": {
+      "type": "UserReidentificationIssueType"
+     }
+    }
    }
   },
   "Autofill": {
@@ -873,6 +1755,74 @@
      "autocompleteAttribute",
      "autofillInferred"
     ]
+   },
+   "objects": {
+    "Address": {
+     "fields": {
+      "type": "array<AddressField>"
+     }
+    },
+    "AddressField": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "AddressFields": {
+     "fields": {
+      "type": "array<AddressField>"
+     }
+    },
+    "AddressUI": {
+     "addressFields": {
+      "type": "array<AddressFields>"
+     }
+    },
+    "CreditCard": {
+     "cvc": {
+      "type": "string"
+     },
+     "expiryMonth": {
+      "type": "string"
+     },
+     "expiryYear": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "number": {
+      "type": "string"
+     }
+    },
+    "FilledField": {
+     "autofillType": {
+      "type": "string"
+     },
+     "fieldId": {
+      "type": "DOM.BackendNodeId"
+     },
+     "fillingStrategy": {
+      "type": "FillingStrategy"
+     },
+     "frameId": {
+      "type": "Page.FrameId"
+     },
+     "htmlType": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    }
    }
   },
   "BackgroundService": {
@@ -922,6 +1872,42 @@
      "paymentHandler",
      "periodicBackgroundSync"
     ]
+   },
+   "objects": {
+    "BackgroundServiceEvent": {
+     "eventMetadata": {
+      "type": "array<EventMetadata>"
+     },
+     "eventName": {
+      "type": "string"
+     },
+     "instanceId": {
+      "type": "string"
+     },
+     "origin": {
+      "type": "string"
+     },
+     "service": {
+      "type": "ServiceName"
+     },
+     "serviceWorkerRegistrationId": {
+      "type": "ServiceWorker.RegistrationID"
+     },
+     "storageKey": {
+      "type": "string"
+     },
+     "timestamp": {
+      "type": "Network.TimeSinceEpoch"
+     }
+    },
+    "EventMetadata": {
+     "key": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    }
    }
   },
   "BluetoothEmulation": {
@@ -1130,6 +2116,83 @@
      "connection",
      "discovery"
     ]
+   },
+   "objects": {
+    "CharacteristicProperties": {
+     "authenticatedSignedWrites": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "broadcast": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "extendedProperties": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "indicate": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "notify": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "read": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "write": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "writeWithoutResponse": {
+      "optional": true,
+      "type": "boolean"
+     }
+    },
+    "ManufacturerData": {
+     "data": {
+      "type": "binary"
+     },
+     "key": {
+      "type": "integer"
+     }
+    },
+    "ScanEntry": {
+     "deviceAddress": {
+      "type": "string"
+     },
+     "rssi": {
+      "type": "integer"
+     },
+     "scanRecord": {
+      "type": "ScanRecord"
+     }
+    },
+    "ScanRecord": {
+     "appearance": {
+      "optional": true,
+      "type": "integer"
+     },
+     "manufacturerData": {
+      "optional": true,
+      "type": "array<ManufacturerData>"
+     },
+     "name": {
+      "optional": true,
+      "type": "string"
+     },
+     "txPower": {
+      "optional": true,
+      "type": "integer"
+     },
+     "uuids": {
+      "optional": true,
+      "type": "array<string>"
+     }
+    }
    }
   },
   "Browser": {
@@ -1474,6 +2537,80 @@
      "maximized",
      "fullscreen"
     ]
+   },
+   "objects": {
+    "Bounds": {
+     "height": {
+      "optional": true,
+      "type": "integer"
+     },
+     "left": {
+      "optional": true,
+      "type": "integer"
+     },
+     "top": {
+      "optional": true,
+      "type": "integer"
+     },
+     "width": {
+      "optional": true,
+      "type": "integer"
+     },
+     "windowState": {
+      "optional": true,
+      "type": "WindowState"
+     }
+    },
+    "Bucket": {
+     "count": {
+      "type": "integer"
+     },
+     "high": {
+      "type": "integer"
+     },
+     "low": {
+      "type": "integer"
+     }
+    },
+    "Histogram": {
+     "buckets": {
+      "type": "array<Bucket>"
+     },
+     "count": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "sum": {
+      "type": "integer"
+     }
+    },
+    "PermissionDescriptor": {
+     "allowWithoutGesture": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "allowWithoutSanitization": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "panTiltZoom": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "sysex": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "userVisibleOnly": {
+      "optional": true,
+      "type": "boolean"
+     }
+    }
    }
   },
   "CSS": {
@@ -2104,6 +3241,750 @@
      "inspector",
      "regular"
     ]
+   },
+   "objects": {
+    "CSSAnimationStyle": {
+     "name": {
+      "optional": true,
+      "type": "string"
+     },
+     "style": {
+      "type": "CSSStyle"
+     }
+    },
+    "CSSAtRule": {
+     "name": {
+      "optional": true,
+      "type": "Value"
+     },
+     "origin": {
+      "type": "StyleSheetOrigin"
+     },
+     "style": {
+      "type": "CSSStyle"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     },
+     "subsection": {
+      "enum": [
+       "swash",
+       "annotation",
+       "ornaments",
+       "stylistic",
+       "styleset",
+       "character-variant"
+      ],
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "font-face",
+       "font-feature-values",
+       "font-palette-values",
+       "counter-style"
+      ],
+      "type": "string"
+     }
+    },
+    "CSSComputedStyleProperty": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "CSSContainerQuery": {
+     "conditionText": {
+      "type": "string"
+     },
+     "logicalAxes": {
+      "optional": true,
+      "type": "DOM.LogicalAxes"
+     },
+     "name": {
+      "optional": true,
+      "type": "string"
+     },
+     "physicalAxes": {
+      "optional": true,
+      "type": "DOM.PhysicalAxes"
+     },
+     "queriesAnchored": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "queriesScrollState": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "range": {
+      "optional": true,
+      "type": "SourceRange"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "CSSFunctionConditionNode": {
+     "children": {
+      "type": "array<CSSFunctionNode>"
+     },
+     "conditionText": {
+      "type": "string"
+     },
+     "containerQueries": {
+      "optional": true,
+      "type": "CSSContainerQuery"
+     },
+     "media": {
+      "optional": true,
+      "type": "CSSMedia"
+     },
+     "navigation": {
+      "optional": true,
+      "type": "CSSNavigation"
+     },
+     "supports": {
+      "optional": true,
+      "type": "CSSSupports"
+     }
+    },
+    "CSSFunctionNode": {
+     "condition": {
+      "optional": true,
+      "type": "CSSFunctionConditionNode"
+     },
+     "style": {
+      "optional": true,
+      "type": "CSSStyle"
+     }
+    },
+    "CSSFunctionParameter": {
+     "name": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     }
+    },
+    "CSSFunctionRule": {
+     "children": {
+      "type": "array<CSSFunctionNode>"
+     },
+     "name": {
+      "type": "Value"
+     },
+     "origin": {
+      "type": "StyleSheetOrigin"
+     },
+     "originTreeScopeNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "parameters": {
+      "type": "array<CSSFunctionParameter>"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     }
+    },
+    "CSSKeyframeRule": {
+     "keyText": {
+      "type": "Value"
+     },
+     "origin": {
+      "type": "StyleSheetOrigin"
+     },
+     "style": {
+      "type": "CSSStyle"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     }
+    },
+    "CSSKeyframesRule": {
+     "animationName": {
+      "type": "Value"
+     },
+     "keyframes": {
+      "type": "array<CSSKeyframeRule>"
+     }
+    },
+    "CSSLayer": {
+     "range": {
+      "optional": true,
+      "type": "SourceRange"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "CSSLayerData": {
+     "name": {
+      "type": "string"
+     },
+     "order": {
+      "type": "number"
+     },
+     "subLayers": {
+      "optional": true,
+      "type": "array<CSSLayerData>"
+     }
+    },
+    "CSSMedia": {
+     "mediaList": {
+      "optional": true,
+      "type": "array<MediaQuery>"
+     },
+     "range": {
+      "optional": true,
+      "type": "SourceRange"
+     },
+     "source": {
+      "enum": [
+       "mediaRule",
+       "importRule",
+       "linkedSheet",
+       "inlineSheet"
+      ],
+      "type": "string"
+     },
+     "sourceURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "CSSNavigation": {
+     "active": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "range": {
+      "optional": true,
+      "type": "SourceRange"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "CSSPositionTryRule": {
+     "active": {
+      "type": "boolean"
+     },
+     "name": {
+      "type": "Value"
+     },
+     "origin": {
+      "type": "StyleSheetOrigin"
+     },
+     "style": {
+      "type": "CSSStyle"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     }
+    },
+    "CSSProperty": {
+     "disabled": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "implicit": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "important": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "longhandProperties": {
+      "optional": true,
+      "type": "array<CSSProperty>"
+     },
+     "name": {
+      "type": "string"
+     },
+     "parsedOk": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "range": {
+      "optional": true,
+      "type": "SourceRange"
+     },
+     "text": {
+      "optional": true,
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "CSSPropertyRegistration": {
+     "inherits": {
+      "type": "boolean"
+     },
+     "initialValue": {
+      "optional": true,
+      "type": "Value"
+     },
+     "propertyName": {
+      "type": "string"
+     },
+     "syntax": {
+      "type": "string"
+     }
+    },
+    "CSSPropertyRule": {
+     "origin": {
+      "type": "StyleSheetOrigin"
+     },
+     "propertyName": {
+      "type": "Value"
+     },
+     "style": {
+      "type": "CSSStyle"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     }
+    },
+    "CSSRule": {
+     "containerQueries": {
+      "optional": true,
+      "type": "array<CSSContainerQuery>"
+     },
+     "layers": {
+      "optional": true,
+      "type": "array<CSSLayer>"
+     },
+     "media": {
+      "optional": true,
+      "type": "array<CSSMedia>"
+     },
+     "navigations": {
+      "optional": true,
+      "type": "array<CSSNavigation>"
+     },
+     "nestingSelectors": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "origin": {
+      "type": "StyleSheetOrigin"
+     },
+     "originTreeScopeNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "ruleTypes": {
+      "optional": true,
+      "type": "array<CSSRuleType>"
+     },
+     "scopes": {
+      "optional": true,
+      "type": "array<CSSScope>"
+     },
+     "selectorList": {
+      "type": "SelectorList"
+     },
+     "startingStyles": {
+      "optional": true,
+      "type": "array<CSSStartingStyle>"
+     },
+     "style": {
+      "type": "CSSStyle"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     },
+     "supports": {
+      "optional": true,
+      "type": "array<CSSSupports>"
+     }
+    },
+    "CSSScope": {
+     "range": {
+      "optional": true,
+      "type": "SourceRange"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "CSSStartingStyle": {
+     "range": {
+      "optional": true,
+      "type": "SourceRange"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     }
+    },
+    "CSSStyle": {
+     "cssProperties": {
+      "type": "array<CSSProperty>"
+     },
+     "cssText": {
+      "optional": true,
+      "type": "string"
+     },
+     "range": {
+      "optional": true,
+      "type": "SourceRange"
+     },
+     "shorthandEntries": {
+      "type": "array<ShorthandEntry>"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     }
+    },
+    "CSSStyleSheetHeader": {
+     "disabled": {
+      "type": "boolean"
+     },
+     "endColumn": {
+      "type": "number"
+     },
+     "endLine": {
+      "type": "number"
+     },
+     "frameId": {
+      "type": "Page.FrameId"
+     },
+     "hasSourceURL": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "isConstructed": {
+      "type": "boolean"
+     },
+     "isInline": {
+      "type": "boolean"
+     },
+     "isMutable": {
+      "type": "boolean"
+     },
+     "length": {
+      "type": "number"
+     },
+     "loadingFailed": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "origin": {
+      "type": "StyleSheetOrigin"
+     },
+     "ownerNode": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "sourceMapURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "sourceURL": {
+      "type": "string"
+     },
+     "startColumn": {
+      "type": "number"
+     },
+     "startLine": {
+      "type": "number"
+     },
+     "styleSheetId": {
+      "type": "DOM.StyleSheetId"
+     },
+     "title": {
+      "type": "string"
+     }
+    },
+    "CSSSupports": {
+     "active": {
+      "type": "boolean"
+     },
+     "range": {
+      "optional": true,
+      "type": "SourceRange"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "CSSTryRule": {
+     "origin": {
+      "type": "StyleSheetOrigin"
+     },
+     "style": {
+      "type": "CSSStyle"
+     },
+     "styleSheetId": {
+      "optional": true,
+      "type": "DOM.StyleSheetId"
+     }
+    },
+    "ComputedStyleExtraFields": {
+     "isAppearanceBase": {
+      "type": "boolean"
+     }
+    },
+    "FontFace": {
+     "fontDisplay": {
+      "type": "string"
+     },
+     "fontFamily": {
+      "type": "string"
+     },
+     "fontStretch": {
+      "type": "string"
+     },
+     "fontStyle": {
+      "type": "string"
+     },
+     "fontVariant": {
+      "type": "string"
+     },
+     "fontVariationAxes": {
+      "optional": true,
+      "type": "array<FontVariationAxis>"
+     },
+     "fontWeight": {
+      "type": "string"
+     },
+     "platformFontFamily": {
+      "type": "string"
+     },
+     "src": {
+      "type": "string"
+     },
+     "unicodeRange": {
+      "type": "string"
+     }
+    },
+    "FontVariationAxis": {
+     "defaultValue": {
+      "type": "number"
+     },
+     "maxValue": {
+      "type": "number"
+     },
+     "minValue": {
+      "type": "number"
+     },
+     "name": {
+      "type": "string"
+     },
+     "tag": {
+      "type": "string"
+     }
+    },
+    "InheritedAnimatedStyleEntry": {
+     "animationStyles": {
+      "optional": true,
+      "type": "array<CSSAnimationStyle>"
+     },
+     "transitionsStyle": {
+      "optional": true,
+      "type": "CSSStyle"
+     }
+    },
+    "InheritedPseudoElementMatches": {
+     "pseudoElements": {
+      "type": "array<PseudoElementMatches>"
+     }
+    },
+    "InheritedStyleEntry": {
+     "inlineStyle": {
+      "optional": true,
+      "type": "CSSStyle"
+     },
+     "matchedCSSRules": {
+      "type": "array<RuleMatch>"
+     }
+    },
+    "MediaQuery": {
+     "active": {
+      "type": "boolean"
+     },
+     "expressions": {
+      "type": "array<MediaQueryExpression>"
+     }
+    },
+    "MediaQueryExpression": {
+     "computedLength": {
+      "optional": true,
+      "type": "number"
+     },
+     "feature": {
+      "type": "string"
+     },
+     "unit": {
+      "type": "string"
+     },
+     "value": {
+      "type": "number"
+     },
+     "valueRange": {
+      "optional": true,
+      "type": "SourceRange"
+     }
+    },
+    "PlatformFontUsage": {
+     "familyName": {
+      "type": "string"
+     },
+     "glyphCount": {
+      "type": "number"
+     },
+     "isCustomFont": {
+      "type": "boolean"
+     },
+     "postScriptName": {
+      "type": "string"
+     }
+    },
+    "PseudoElementMatches": {
+     "matches": {
+      "type": "array<RuleMatch>"
+     },
+     "pseudoIdentifier": {
+      "optional": true,
+      "type": "string"
+     },
+     "pseudoType": {
+      "type": "DOM.PseudoType"
+     }
+    },
+    "RuleMatch": {
+     "matchingSelectors": {
+      "type": "array<integer>"
+     },
+     "rule": {
+      "type": "CSSRule"
+     }
+    },
+    "RuleUsage": {
+     "endOffset": {
+      "type": "number"
+     },
+     "startOffset": {
+      "type": "number"
+     },
+     "styleSheetId": {
+      "type": "DOM.StyleSheetId"
+     },
+     "used": {
+      "type": "boolean"
+     }
+    },
+    "SelectorList": {
+     "selectors": {
+      "type": "array<Value>"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "ShorthandEntry": {
+     "important": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "SourceRange": {
+     "endColumn": {
+      "type": "integer"
+     },
+     "endLine": {
+      "type": "integer"
+     },
+     "startColumn": {
+      "type": "integer"
+     },
+     "startLine": {
+      "type": "integer"
+     }
+    },
+    "Specificity": {
+     "a": {
+      "type": "integer"
+     },
+     "b": {
+      "type": "integer"
+     },
+     "c": {
+      "type": "integer"
+     }
+    },
+    "StyleDeclarationEdit": {
+     "range": {
+      "type": "SourceRange"
+     },
+     "styleSheetId": {
+      "type": "DOM.StyleSheetId"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "Value": {
+     "range": {
+      "optional": true,
+      "type": "SourceRange"
+     },
+     "specificity": {
+      "optional": true,
+      "type": "Specificity"
+     },
+     "text": {
+      "type": "string"
+     }
+    }
    }
   },
   "CacheStorage": {
@@ -2203,6 +4084,65 @@
      "opaqueResponse",
      "opaqueRedirect"
     ]
+   },
+   "objects": {
+    "Cache": {
+     "cacheId": {
+      "type": "CacheId"
+     },
+     "cacheName": {
+      "type": "string"
+     },
+     "securityOrigin": {
+      "type": "string"
+     },
+     "storageBucket": {
+      "optional": true,
+      "type": "Storage.StorageBucket"
+     },
+     "storageKey": {
+      "type": "string"
+     }
+    },
+    "CachedResponse": {
+     "body": {
+      "type": "binary"
+     }
+    },
+    "DataEntry": {
+     "requestHeaders": {
+      "type": "array<Header>"
+     },
+     "requestMethod": {
+      "type": "string"
+     },
+     "requestURL": {
+      "type": "string"
+     },
+     "responseHeaders": {
+      "type": "array<Header>"
+     },
+     "responseStatus": {
+      "type": "integer"
+     },
+     "responseStatusText": {
+      "type": "string"
+     },
+     "responseTime": {
+      "type": "number"
+     },
+     "responseType": {
+      "type": "CachedResponseType"
+     }
+    },
+    "Header": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    }
    }
   },
   "Cast": {
@@ -2253,7 +4193,21 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "Sink": {
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "session": {
+      "optional": true,
+      "type": "string"
+     }
+    }
+   }
   },
   "Console": {
    "commands": {
@@ -2270,7 +4224,52 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "ConsoleMessage": {
+     "column": {
+      "optional": true,
+      "type": "integer"
+     },
+     "level": {
+      "enum": [
+       "log",
+       "warning",
+       "error",
+       "debug",
+       "info"
+      ],
+      "type": "string"
+     },
+     "line": {
+      "optional": true,
+      "type": "integer"
+     },
+     "source": {
+      "enum": [
+       "xml",
+       "javascript",
+       "network",
+       "console-api",
+       "storage",
+       "appcache",
+       "rendering",
+       "security",
+       "other",
+       "deprecation",
+       "worker"
+      ],
+      "type": "string"
+     },
+     "text": {
+      "type": "string"
+     },
+     "url": {
+      "optional": true,
+      "type": "string"
+     }
+    }
+   }
   },
   "CrashReportContext": {
    "commands": {
@@ -2283,7 +4282,20 @@
      }
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "CrashReportContextEntry": {
+     "frameId": {
+      "type": "Page.FrameId"
+     },
+     "key": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    }
+   }
   },
   "DOM": {
    "commands": {
@@ -3140,6 +5152,235 @@
      "open",
      "closed"
     ]
+   },
+   "objects": {
+    "BackendNode": {
+     "backendNodeId": {
+      "type": "BackendNodeId"
+     },
+     "nodeName": {
+      "type": "string"
+     },
+     "nodeType": {
+      "type": "integer"
+     }
+    },
+    "BoxModel": {
+     "border": {
+      "type": "Quad"
+     },
+     "content": {
+      "type": "Quad"
+     },
+     "height": {
+      "type": "integer"
+     },
+     "margin": {
+      "type": "Quad"
+     },
+     "padding": {
+      "type": "Quad"
+     },
+     "shapeOutside": {
+      "optional": true,
+      "type": "ShapeOutsideInfo"
+     },
+     "width": {
+      "type": "integer"
+     }
+    },
+    "CSSComputedStyleProperty": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "DetachedElementInfo": {
+     "retainedNodeIds": {
+      "type": "array<NodeId>"
+     },
+     "treeNode": {
+      "type": "Node"
+     }
+    },
+    "Node": {
+     "adProvenance": {
+      "optional": true,
+      "type": "Network.AdProvenance"
+     },
+     "adoptedStyleSheets": {
+      "optional": true,
+      "type": "array<StyleSheetId>"
+     },
+     "affectedByStartingStyles": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "assignedSlot": {
+      "optional": true,
+      "type": "BackendNode"
+     },
+     "attributes": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "backendNodeId": {
+      "type": "BackendNodeId"
+     },
+     "baseURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "childNodeCount": {
+      "optional": true,
+      "type": "integer"
+     },
+     "children": {
+      "optional": true,
+      "type": "array<Node>"
+     },
+     "compatibilityMode": {
+      "optional": true,
+      "type": "CompatibilityMode"
+     },
+     "contentDocument": {
+      "optional": true,
+      "type": "Node"
+     },
+     "distributedNodes": {
+      "optional": true,
+      "type": "array<BackendNode>"
+     },
+     "documentURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "frameId": {
+      "optional": true,
+      "type": "Page.FrameId"
+     },
+     "importedDocument": {
+      "optional": true,
+      "type": "Node"
+     },
+     "internalSubset": {
+      "optional": true,
+      "type": "string"
+     },
+     "isSVG": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "isScrollable": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "localName": {
+      "type": "string"
+     },
+     "name": {
+      "optional": true,
+      "type": "string"
+     },
+     "nodeId": {
+      "type": "NodeId"
+     },
+     "nodeName": {
+      "type": "string"
+     },
+     "nodeType": {
+      "type": "integer"
+     },
+     "nodeValue": {
+      "type": "string"
+     },
+     "parentId": {
+      "optional": true,
+      "type": "NodeId"
+     },
+     "pseudoElements": {
+      "optional": true,
+      "type": "array<Node>"
+     },
+     "pseudoIdentifier": {
+      "optional": true,
+      "type": "string"
+     },
+     "pseudoType": {
+      "optional": true,
+      "type": "PseudoType"
+     },
+     "publicId": {
+      "optional": true,
+      "type": "string"
+     },
+     "shadowRootType": {
+      "optional": true,
+      "type": "ShadowRootType"
+     },
+     "shadowRoots": {
+      "optional": true,
+      "type": "array<Node>"
+     },
+     "systemId": {
+      "optional": true,
+      "type": "string"
+     },
+     "templateContent": {
+      "optional": true,
+      "type": "Node"
+     },
+     "value": {
+      "optional": true,
+      "type": "string"
+     },
+     "xmlVersion": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "RGBA": {
+     "a": {
+      "optional": true,
+      "type": "number"
+     },
+     "b": {
+      "type": "integer"
+     },
+     "g": {
+      "type": "integer"
+     },
+     "r": {
+      "type": "integer"
+     }
+    },
+    "Rect": {
+     "height": {
+      "type": "number"
+     },
+     "width": {
+      "type": "number"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     }
+    },
+    "ShapeOutsideInfo": {
+     "bounds": {
+      "type": "Quad"
+     },
+     "marginShape": {
+      "type": "array<any>"
+     },
+     "shape": {
+      "type": "array<any>"
+     }
+    }
    }
   },
   "DOMDebugger": {
@@ -3266,6 +5507,43 @@
      "attribute-modified",
      "node-removed"
     ]
+   },
+   "objects": {
+    "EventListener": {
+     "backendNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "columnNumber": {
+      "type": "integer"
+     },
+     "handler": {
+      "optional": true,
+      "type": "Runtime.RemoteObject"
+     },
+     "lineNumber": {
+      "type": "integer"
+     },
+     "once": {
+      "type": "boolean"
+     },
+     "originalHandler": {
+      "optional": true,
+      "type": "Runtime.RemoteObject"
+     },
+     "passive": {
+      "type": "boolean"
+     },
+     "scriptId": {
+      "type": "Runtime.ScriptId"
+     },
+     "type": {
+      "type": "string"
+     },
+     "useCapture": {
+      "type": "boolean"
+     }
+    }
    }
   },
   "DOMSnapshot": {
@@ -3341,7 +5619,368 @@
      }
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "ComputedStyle": {
+     "properties": {
+      "type": "array<NameValue>"
+     }
+    },
+    "DOMNode": {
+     "attributes": {
+      "optional": true,
+      "type": "array<NameValue>"
+     },
+     "backendNodeId": {
+      "type": "DOM.BackendNodeId"
+     },
+     "baseURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "childNodeIndexes": {
+      "optional": true,
+      "type": "array<integer>"
+     },
+     "contentDocumentIndex": {
+      "optional": true,
+      "type": "integer"
+     },
+     "contentLanguage": {
+      "optional": true,
+      "type": "string"
+     },
+     "currentSourceURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "documentEncoding": {
+      "optional": true,
+      "type": "string"
+     },
+     "documentURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "eventListeners": {
+      "optional": true,
+      "type": "array<DOMDebugger.EventListener>"
+     },
+     "frameId": {
+      "optional": true,
+      "type": "Page.FrameId"
+     },
+     "inputChecked": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "inputValue": {
+      "optional": true,
+      "type": "string"
+     },
+     "isClickable": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "layoutNodeIndex": {
+      "optional": true,
+      "type": "integer"
+     },
+     "nodeName": {
+      "type": "string"
+     },
+     "nodeType": {
+      "type": "integer"
+     },
+     "nodeValue": {
+      "type": "string"
+     },
+     "optionSelected": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "originURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "pseudoElementIndexes": {
+      "optional": true,
+      "type": "array<integer>"
+     },
+     "pseudoType": {
+      "optional": true,
+      "type": "DOM.PseudoType"
+     },
+     "publicId": {
+      "optional": true,
+      "type": "string"
+     },
+     "scrollOffsetX": {
+      "optional": true,
+      "type": "number"
+     },
+     "scrollOffsetY": {
+      "optional": true,
+      "type": "number"
+     },
+     "shadowRootType": {
+      "optional": true,
+      "type": "DOM.ShadowRootType"
+     },
+     "systemId": {
+      "optional": true,
+      "type": "string"
+     },
+     "textValue": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "DocumentSnapshot": {
+     "baseURL": {
+      "type": "StringIndex"
+     },
+     "contentHeight": {
+      "optional": true,
+      "type": "number"
+     },
+     "contentLanguage": {
+      "type": "StringIndex"
+     },
+     "contentWidth": {
+      "optional": true,
+      "type": "number"
+     },
+     "documentURL": {
+      "type": "StringIndex"
+     },
+     "encodingName": {
+      "type": "StringIndex"
+     },
+     "frameId": {
+      "type": "StringIndex"
+     },
+     "layout": {
+      "type": "LayoutTreeSnapshot"
+     },
+     "nodes": {
+      "type": "NodeTreeSnapshot"
+     },
+     "publicId": {
+      "type": "StringIndex"
+     },
+     "scrollOffsetX": {
+      "optional": true,
+      "type": "number"
+     },
+     "scrollOffsetY": {
+      "optional": true,
+      "type": "number"
+     },
+     "systemId": {
+      "type": "StringIndex"
+     },
+     "textBoxes": {
+      "type": "TextBoxSnapshot"
+     },
+     "title": {
+      "type": "StringIndex"
+     }
+    },
+    "InlineTextBox": {
+     "boundingBox": {
+      "type": "DOM.Rect"
+     },
+     "numCharacters": {
+      "type": "integer"
+     },
+     "startCharacterIndex": {
+      "type": "integer"
+     }
+    },
+    "LayoutTreeNode": {
+     "boundingBox": {
+      "type": "DOM.Rect"
+     },
+     "domNodeIndex": {
+      "type": "integer"
+     },
+     "inlineTextNodes": {
+      "optional": true,
+      "type": "array<InlineTextBox>"
+     },
+     "isStackingContext": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "layoutText": {
+      "optional": true,
+      "type": "string"
+     },
+     "paintOrder": {
+      "optional": true,
+      "type": "integer"
+     },
+     "styleIndex": {
+      "optional": true,
+      "type": "integer"
+     }
+    },
+    "LayoutTreeSnapshot": {
+     "blendedBackgroundColors": {
+      "optional": true,
+      "type": "array<StringIndex>"
+     },
+     "bounds": {
+      "type": "array<Rectangle>"
+     },
+     "clientRects": {
+      "optional": true,
+      "type": "array<Rectangle>"
+     },
+     "nodeIndex": {
+      "type": "array<integer>"
+     },
+     "offsetRects": {
+      "optional": true,
+      "type": "array<Rectangle>"
+     },
+     "paintOrders": {
+      "optional": true,
+      "type": "array<integer>"
+     },
+     "scrollRects": {
+      "optional": true,
+      "type": "array<Rectangle>"
+     },
+     "stackingContexts": {
+      "type": "RareBooleanData"
+     },
+     "styles": {
+      "type": "array<ArrayOfStrings>"
+     },
+     "text": {
+      "type": "array<StringIndex>"
+     },
+     "textColorOpacities": {
+      "optional": true,
+      "type": "array<number>"
+     }
+    },
+    "NameValue": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "NodeTreeSnapshot": {
+     "attributes": {
+      "optional": true,
+      "type": "array<ArrayOfStrings>"
+     },
+     "backendNodeId": {
+      "optional": true,
+      "type": "array<DOM.BackendNodeId>"
+     },
+     "contentDocumentIndex": {
+      "optional": true,
+      "type": "RareIntegerData"
+     },
+     "currentSourceURL": {
+      "optional": true,
+      "type": "RareStringData"
+     },
+     "inputChecked": {
+      "optional": true,
+      "type": "RareBooleanData"
+     },
+     "inputValue": {
+      "optional": true,
+      "type": "RareStringData"
+     },
+     "isClickable": {
+      "optional": true,
+      "type": "RareBooleanData"
+     },
+     "nodeName": {
+      "optional": true,
+      "type": "array<StringIndex>"
+     },
+     "nodeType": {
+      "optional": true,
+      "type": "array<integer>"
+     },
+     "nodeValue": {
+      "optional": true,
+      "type": "array<StringIndex>"
+     },
+     "optionSelected": {
+      "optional": true,
+      "type": "RareBooleanData"
+     },
+     "originURL": {
+      "optional": true,
+      "type": "RareStringData"
+     },
+     "parentIndex": {
+      "optional": true,
+      "type": "array<integer>"
+     },
+     "pseudoIdentifier": {
+      "optional": true,
+      "type": "RareStringData"
+     },
+     "pseudoType": {
+      "optional": true,
+      "type": "RareStringData"
+     },
+     "shadowRootType": {
+      "optional": true,
+      "type": "RareStringData"
+     },
+     "textValue": {
+      "optional": true,
+      "type": "RareStringData"
+     }
+    },
+    "RareBooleanData": {
+     "index": {
+      "type": "array<integer>"
+     }
+    },
+    "RareIntegerData": {
+     "index": {
+      "type": "array<integer>"
+     },
+     "value": {
+      "type": "array<integer>"
+     }
+    },
+    "RareStringData": {
+     "index": {
+      "type": "array<integer>"
+     },
+     "value": {
+      "type": "array<StringIndex>"
+     }
+    },
+    "TextBoxSnapshot": {
+     "bounds": {
+      "type": "array<Rectangle>"
+     },
+     "layoutIndex": {
+      "type": "array<integer>"
+     },
+     "length": {
+      "type": "array<integer>"
+     },
+     "start": {
+      "type": "array<integer>"
+     }
+    }
+   }
   },
   "DOMStorage": {
    "commands": {
@@ -3399,7 +6038,22 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "StorageId": {
+     "isLocalStorage": {
+      "type": "boolean"
+     },
+     "securityOrigin": {
+      "optional": true,
+      "type": "string"
+     },
+     "storageKey": {
+      "optional": true,
+      "type": "SerializedStorageKey"
+     }
+    }
+   }
   },
   "Debugger": {
    "commands": {
@@ -3929,6 +6583,162 @@
      "JavaScript",
      "WebAssembly"
     ]
+   },
+   "objects": {
+    "BreakLocation": {
+     "columnNumber": {
+      "optional": true,
+      "type": "integer"
+     },
+     "lineNumber": {
+      "type": "integer"
+     },
+     "scriptId": {
+      "type": "Runtime.ScriptId"
+     },
+     "type": {
+      "enum": [
+       "debuggerStatement",
+       "call",
+       "return"
+      ],
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "CallFrame": {
+     "callFrameId": {
+      "type": "CallFrameId"
+     },
+     "canBeRestarted": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "functionLocation": {
+      "optional": true,
+      "type": "Location"
+     },
+     "functionName": {
+      "type": "string"
+     },
+     "location": {
+      "type": "Location"
+     },
+     "returnValue": {
+      "optional": true,
+      "type": "Runtime.RemoteObject"
+     },
+     "scopeChain": {
+      "type": "array<Scope>"
+     },
+     "this": {
+      "type": "Runtime.RemoteObject"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "DebugSymbols": {
+     "externalURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "SourceMap",
+       "EmbeddedDWARF",
+       "ExternalDWARF"
+      ],
+      "type": "string"
+     }
+    },
+    "Location": {
+     "columnNumber": {
+      "optional": true,
+      "type": "integer"
+     },
+     "lineNumber": {
+      "type": "integer"
+     },
+     "scriptId": {
+      "type": "Runtime.ScriptId"
+     }
+    },
+    "LocationRange": {
+     "end": {
+      "type": "ScriptPosition"
+     },
+     "scriptId": {
+      "type": "Runtime.ScriptId"
+     },
+     "start": {
+      "type": "ScriptPosition"
+     }
+    },
+    "ResolvedBreakpoint": {
+     "breakpointId": {
+      "type": "BreakpointId"
+     },
+     "location": {
+      "type": "Location"
+     }
+    },
+    "Scope": {
+     "endLocation": {
+      "optional": true,
+      "type": "Location"
+     },
+     "name": {
+      "optional": true,
+      "type": "string"
+     },
+     "object": {
+      "type": "Runtime.RemoteObject"
+     },
+     "startLocation": {
+      "optional": true,
+      "type": "Location"
+     },
+     "type": {
+      "enum": [
+       "global",
+       "local",
+       "with",
+       "closure",
+       "catch",
+       "block",
+       "script",
+       "eval",
+       "module",
+       "wasm-expression-stack"
+      ],
+      "type": "string"
+     }
+    },
+    "ScriptPosition": {
+     "columnNumber": {
+      "type": "integer"
+     },
+     "lineNumber": {
+      "type": "integer"
+     }
+    },
+    "SearchMatch": {
+     "lineContent": {
+      "type": "string"
+     },
+     "lineNumber": {
+      "type": "number"
+     }
+    },
+    "WasmDisassemblyChunk": {
+     "bytecodeOffsets": {
+      "type": "array<integer>"
+     },
+     "lines": {
+      "type": "array<string>"
+     }
+    }
    }
   },
   "DeviceAccess": {
@@ -3961,7 +6771,17 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "PromptDevice": {
+     "id": {
+      "type": "DeviceId"
+     },
+     "name": {
+      "type": "string"
+     }
+    }
+   }
   },
   "DeviceOrientation": {
    "commands": {
@@ -3984,7 +6804,8 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {}
   },
   "Emulation": {
    "commands": {
@@ -4661,6 +7482,269 @@
      "pause",
      "pauseIfNetworkFetchesPending"
     ]
+   },
+   "objects": {
+    "DevicePosture": {
+     "type": {
+      "enum": [
+       "continuous",
+       "folded"
+      ],
+      "type": "string"
+     }
+    },
+    "DisplayFeature": {
+     "maskLength": {
+      "type": "integer"
+     },
+     "offset": {
+      "type": "integer"
+     },
+     "orientation": {
+      "enum": [
+       "vertical",
+       "horizontal"
+      ],
+      "type": "string"
+     }
+    },
+    "MediaFeature": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "PressureMetadata": {
+     "available": {
+      "optional": true,
+      "type": "boolean"
+     }
+    },
+    "SafeAreaInsets": {
+     "bottom": {
+      "optional": true,
+      "type": "integer"
+     },
+     "bottomMax": {
+      "optional": true,
+      "type": "integer"
+     },
+     "left": {
+      "optional": true,
+      "type": "integer"
+     },
+     "leftMax": {
+      "optional": true,
+      "type": "integer"
+     },
+     "right": {
+      "optional": true,
+      "type": "integer"
+     },
+     "rightMax": {
+      "optional": true,
+      "type": "integer"
+     },
+     "top": {
+      "optional": true,
+      "type": "integer"
+     },
+     "topMax": {
+      "optional": true,
+      "type": "integer"
+     }
+    },
+    "ScreenInfo": {
+     "availHeight": {
+      "type": "integer"
+     },
+     "availLeft": {
+      "type": "integer"
+     },
+     "availTop": {
+      "type": "integer"
+     },
+     "availWidth": {
+      "type": "integer"
+     },
+     "colorDepth": {
+      "type": "integer"
+     },
+     "devicePixelRatio": {
+      "type": "number"
+     },
+     "height": {
+      "type": "integer"
+     },
+     "id": {
+      "type": "ScreenId"
+     },
+     "isExtended": {
+      "type": "boolean"
+     },
+     "isInternal": {
+      "type": "boolean"
+     },
+     "isPrimary": {
+      "type": "boolean"
+     },
+     "label": {
+      "type": "string"
+     },
+     "left": {
+      "type": "integer"
+     },
+     "orientation": {
+      "type": "ScreenOrientation"
+     },
+     "top": {
+      "type": "integer"
+     },
+     "width": {
+      "type": "integer"
+     }
+    },
+    "ScreenOrientation": {
+     "angle": {
+      "type": "integer"
+     },
+     "type": {
+      "enum": [
+       "portraitPrimary",
+       "portraitSecondary",
+       "landscapePrimary",
+       "landscapeSecondary"
+      ],
+      "type": "string"
+     }
+    },
+    "SensorMetadata": {
+     "available": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "maximumFrequency": {
+      "optional": true,
+      "type": "number"
+     },
+     "minimumFrequency": {
+      "optional": true,
+      "type": "number"
+     }
+    },
+    "SensorReading": {
+     "quaternion": {
+      "optional": true,
+      "type": "SensorReadingQuaternion"
+     },
+     "single": {
+      "optional": true,
+      "type": "SensorReadingSingle"
+     },
+     "xyz": {
+      "optional": true,
+      "type": "SensorReadingXYZ"
+     }
+    },
+    "SensorReadingQuaternion": {
+     "w": {
+      "type": "number"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "z": {
+      "type": "number"
+     }
+    },
+    "SensorReadingSingle": {
+     "value": {
+      "type": "number"
+     }
+    },
+    "SensorReadingXYZ": {
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "z": {
+      "type": "number"
+     }
+    },
+    "UserAgentBrandVersion": {
+     "brand": {
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "UserAgentMetadata": {
+     "architecture": {
+      "type": "string"
+     },
+     "bitness": {
+      "optional": true,
+      "type": "string"
+     },
+     "brands": {
+      "optional": true,
+      "type": "array<UserAgentBrandVersion>"
+     },
+     "formFactors": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "fullVersion": {
+      "optional": true,
+      "type": "string"
+     },
+     "fullVersionList": {
+      "optional": true,
+      "type": "array<UserAgentBrandVersion>"
+     },
+     "mobile": {
+      "type": "boolean"
+     },
+     "model": {
+      "type": "string"
+     },
+     "platform": {
+      "type": "string"
+     },
+     "platformVersion": {
+      "type": "string"
+     },
+     "wow64": {
+      "optional": true,
+      "type": "boolean"
+     }
+    },
+    "WorkAreaInsets": {
+     "bottom": {
+      "optional": true,
+      "type": "integer"
+     },
+     "left": {
+      "optional": true,
+      "type": "integer"
+     },
+     "right": {
+      "optional": true,
+      "type": "integer"
+     },
+     "top": {
+      "optional": true,
+      "type": "integer"
+     }
+    }
    }
   },
   "EventBreakpoints": {
@@ -4686,7 +7770,8 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {}
   },
   "Extensions": {
    "commands": {
@@ -4799,6 +7884,25 @@
      "sync",
      "managed"
     ]
+   },
+   "objects": {
+    "ExtensionInfo": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    }
    }
   },
   "FedCm": {
@@ -4889,6 +7993,42 @@
      "SignIn",
      "SignUp"
     ]
+   },
+   "objects": {
+    "Account": {
+     "accountId": {
+      "type": "string"
+     },
+     "email": {
+      "type": "string"
+     },
+     "givenName": {
+      "type": "string"
+     },
+     "idpConfigUrl": {
+      "type": "string"
+     },
+     "idpLoginUrl": {
+      "type": "string"
+     },
+     "loginState": {
+      "type": "LoginState"
+     },
+     "name": {
+      "type": "string"
+     },
+     "pictureUrl": {
+      "type": "string"
+     },
+     "privacyPolicyUrl": {
+      "optional": true,
+      "type": "string"
+     },
+     "termsOfServiceUrl": {
+      "optional": true,
+      "type": "string"
+     }
+    }
    }
   },
   "Fetch": {
@@ -5045,6 +8185,67 @@
      "Request",
      "Response"
     ]
+   },
+   "objects": {
+    "AuthChallenge": {
+     "origin": {
+      "type": "string"
+     },
+     "realm": {
+      "type": "string"
+     },
+     "scheme": {
+      "type": "string"
+     },
+     "source": {
+      "enum": [
+       "Server",
+       "Proxy"
+      ],
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "AuthChallengeResponse": {
+     "password": {
+      "optional": true,
+      "type": "string"
+     },
+     "response": {
+      "enum": [
+       "Default",
+       "CancelAuth",
+       "ProvideCredentials"
+      ],
+      "type": "string"
+     },
+     "username": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "HeaderEntry": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "RequestPattern": {
+     "requestStage": {
+      "optional": true,
+      "type": "RequestStage"
+     },
+     "resourceType": {
+      "optional": true,
+      "type": "Network.ResourceType"
+     },
+     "urlPattern": {
+      "optional": true,
+      "type": "string"
+     }
+    }
    }
   },
   "FileSystem": {
@@ -5062,7 +8263,46 @@
      }
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "BucketFileSystemLocator": {
+     "bucketName": {
+      "optional": true,
+      "type": "string"
+     },
+     "pathComponents": {
+      "type": "array<string>"
+     },
+     "storageKey": {
+      "type": "Storage.SerializedStorageKey"
+     }
+    },
+    "Directory": {
+     "name": {
+      "type": "string"
+     },
+     "nestedDirectories": {
+      "type": "array<string>"
+     },
+     "nestedFiles": {
+      "type": "array<File>"
+     }
+    },
+    "File": {
+     "lastModified": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "name": {
+      "type": "string"
+     },
+     "size": {
+      "type": "number"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   }
   },
   "HeadlessExperimental": {
    "commands": {
@@ -5106,7 +8346,28 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "ScreenshotParams": {
+     "format": {
+      "enum": [
+       "jpeg",
+       "png",
+       "webp"
+      ],
+      "optional": true,
+      "type": "string"
+     },
+     "optimizeForSpeed": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "quality": {
+      "optional": true,
+      "type": "integer"
+     }
+    }
+   }
   },
   "HeapProfiler": {
    "commands": {
@@ -5247,7 +8508,42 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "SamplingHeapProfile": {
+     "head": {
+      "type": "SamplingHeapProfileNode"
+     },
+     "samples": {
+      "type": "array<SamplingHeapProfileSample>"
+     }
+    },
+    "SamplingHeapProfileNode": {
+     "callFrame": {
+      "type": "Runtime.CallFrame"
+     },
+     "children": {
+      "type": "array<SamplingHeapProfileNode>"
+     },
+     "id": {
+      "type": "integer"
+     },
+     "selfSize": {
+      "type": "number"
+     }
+    },
+    "SamplingHeapProfileSample": {
+     "nodeId": {
+      "type": "integer"
+     },
+     "ordinal": {
+      "type": "number"
+     },
+     "size": {
+      "type": "number"
+     }
+    }
+   }
   },
   "IO": {
    "commands": {
@@ -5299,7 +8595,8 @@
      }
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {}
   },
   "IndexedDB": {
    "commands": {
@@ -5500,7 +8797,120 @@
      }
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "DataEntry": {
+     "key": {
+      "type": "Runtime.RemoteObject"
+     },
+     "primaryKey": {
+      "type": "Runtime.RemoteObject"
+     },
+     "value": {
+      "type": "Runtime.RemoteObject"
+     }
+    },
+    "DatabaseWithObjectStores": {
+     "name": {
+      "type": "string"
+     },
+     "objectStores": {
+      "type": "array<ObjectStore>"
+     },
+     "version": {
+      "type": "number"
+     }
+    },
+    "Key": {
+     "array": {
+      "optional": true,
+      "type": "array<Key>"
+     },
+     "date": {
+      "optional": true,
+      "type": "number"
+     },
+     "number": {
+      "optional": true,
+      "type": "number"
+     },
+     "string": {
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "number",
+       "string",
+       "date",
+       "array"
+      ],
+      "type": "string"
+     }
+    },
+    "KeyPath": {
+     "array": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "string": {
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "null",
+       "string",
+       "array"
+      ],
+      "type": "string"
+     }
+    },
+    "KeyRange": {
+     "lower": {
+      "optional": true,
+      "type": "Key"
+     },
+     "lowerOpen": {
+      "type": "boolean"
+     },
+     "upper": {
+      "optional": true,
+      "type": "Key"
+     },
+     "upperOpen": {
+      "type": "boolean"
+     }
+    },
+    "ObjectStore": {
+     "autoIncrement": {
+      "type": "boolean"
+     },
+     "indexes": {
+      "type": "array<ObjectStoreIndex>"
+     },
+     "keyPath": {
+      "type": "KeyPath"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "ObjectStoreIndex": {
+     "keyPath": {
+      "type": "KeyPath"
+     },
+     "multiEntry": {
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "unique": {
+      "type": "boolean"
+     }
+    }
+   }
   },
   "Input": {
    "commands": {
@@ -5914,6 +9324,80 @@
      "back",
      "forward"
     ]
+   },
+   "objects": {
+    "DragData": {
+     "dragOperationsMask": {
+      "type": "integer"
+     },
+     "files": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "items": {
+      "type": "array<DragDataItem>"
+     }
+    },
+    "DragDataItem": {
+     "baseURL": {
+      "optional": true,
+      "type": "string"
+     },
+     "data": {
+      "type": "string"
+     },
+     "mimeType": {
+      "type": "string"
+     },
+     "title": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "TouchPoint": {
+     "force": {
+      "optional": true,
+      "type": "number"
+     },
+     "id": {
+      "optional": true,
+      "type": "number"
+     },
+     "radiusX": {
+      "optional": true,
+      "type": "number"
+     },
+     "radiusY": {
+      "optional": true,
+      "type": "number"
+     },
+     "rotationAngle": {
+      "optional": true,
+      "type": "number"
+     },
+     "tangentialPressure": {
+      "optional": true,
+      "type": "number"
+     },
+     "tiltX": {
+      "optional": true,
+      "type": "number"
+     },
+     "tiltY": {
+      "optional": true,
+      "type": "number"
+     },
+     "twist": {
+      "optional": true,
+      "type": "integer"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     }
+    }
    }
   },
   "Inspector": {
@@ -5927,7 +9411,8 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {}
   },
   "LayerTree": {
    "commands": {
@@ -6047,7 +9532,108 @@
      }
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "Layer": {
+     "anchorX": {
+      "optional": true,
+      "type": "number"
+     },
+     "anchorY": {
+      "optional": true,
+      "type": "number"
+     },
+     "anchorZ": {
+      "optional": true,
+      "type": "number"
+     },
+     "backendNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "drawsContent": {
+      "type": "boolean"
+     },
+     "height": {
+      "type": "number"
+     },
+     "invisible": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "layerId": {
+      "type": "LayerId"
+     },
+     "offsetX": {
+      "type": "number"
+     },
+     "offsetY": {
+      "type": "number"
+     },
+     "paintCount": {
+      "type": "integer"
+     },
+     "parentLayerId": {
+      "optional": true,
+      "type": "LayerId"
+     },
+     "scrollRects": {
+      "optional": true,
+      "type": "array<ScrollRect>"
+     },
+     "stickyPositionConstraint": {
+      "optional": true,
+      "type": "StickyPositionConstraint"
+     },
+     "transform": {
+      "optional": true,
+      "type": "array<number>"
+     },
+     "width": {
+      "type": "number"
+     }
+    },
+    "PictureTile": {
+     "picture": {
+      "type": "binary"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     }
+    },
+    "ScrollRect": {
+     "rect": {
+      "type": "DOM.Rect"
+     },
+     "type": {
+      "enum": [
+       "RepaintsOnScroll",
+       "TouchEventHandler",
+       "WheelEventHandler"
+      ],
+      "type": "string"
+     }
+    },
+    "StickyPositionConstraint": {
+     "containingBlockRect": {
+      "type": "DOM.Rect"
+     },
+     "nearestLayerShiftingContainingBlock": {
+      "optional": true,
+      "type": "LayerId"
+     },
+     "nearestLayerShiftingStickyBox": {
+      "optional": true,
+      "type": "LayerId"
+     },
+     "stickyBoxRect": {
+      "type": "DOM.Rect"
+     }
+    }
+   }
   },
   "Log": {
    "commands": {
@@ -6076,7 +9662,92 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "LogEntry": {
+     "args": {
+      "optional": true,
+      "type": "array<Runtime.RemoteObject>"
+     },
+     "category": {
+      "enum": [
+       "cors"
+      ],
+      "optional": true,
+      "type": "string"
+     },
+     "level": {
+      "enum": [
+       "verbose",
+       "info",
+       "warning",
+       "error"
+      ],
+      "type": "string"
+     },
+     "lineNumber": {
+      "optional": true,
+      "type": "integer"
+     },
+     "networkRequestId": {
+      "optional": true,
+      "type": "Network.RequestId"
+     },
+     "source": {
+      "enum": [
+       "xml",
+       "javascript",
+       "network",
+       "storage",
+       "appcache",
+       "rendering",
+       "security",
+       "deprecation",
+       "worker",
+       "violation",
+       "intervention",
+       "recommendation",
+       "other"
+      ],
+      "type": "string"
+     },
+     "stackTrace": {
+      "optional": true,
+      "type": "Runtime.StackTrace"
+     },
+     "text": {
+      "type": "string"
+     },
+     "timestamp": {
+      "type": "Runtime.Timestamp"
+     },
+     "url": {
+      "optional": true,
+      "type": "string"
+     },
+     "workerId": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "ViolationSetting": {
+     "name": {
+      "enum": [
+       "longTask",
+       "longLayout",
+       "blockedEvent",
+       "blockedParser",
+       "discouragedAPIUse",
+       "handler",
+       "recurringHandler"
+      ],
+      "type": "string"
+     },
+     "threshold": {
+      "type": "number"
+     }
+    }
+   }
   },
   "Media": {
    "commands": {
@@ -6089,7 +9760,73 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "Player": {
+     "domNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "playerId": {
+      "type": "PlayerId"
+     }
+    },
+    "PlayerError": {
+     "cause": {
+      "type": "array<PlayerError>"
+     },
+     "code": {
+      "type": "integer"
+     },
+     "data": {
+      "type": "object"
+     },
+     "errorType": {
+      "type": "string"
+     },
+     "stack": {
+      "type": "array<PlayerErrorSourceLocation>"
+     }
+    },
+    "PlayerErrorSourceLocation": {
+     "file": {
+      "type": "string"
+     },
+     "line": {
+      "type": "integer"
+     }
+    },
+    "PlayerEvent": {
+     "timestamp": {
+      "type": "Timestamp"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "PlayerMessage": {
+     "level": {
+      "enum": [
+       "error",
+       "warning",
+       "info",
+       "debug"
+      ],
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "PlayerProperty": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    }
+   }
   },
   "Memory": {
    "commands": {
@@ -6186,6 +9923,49 @@
      "moderate",
      "critical"
     ]
+   },
+   "objects": {
+    "DOMCounter": {
+     "count": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "Module": {
+     "baseAddress": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "size": {
+      "type": "number"
+     },
+     "uuid": {
+      "type": "string"
+     }
+    },
+    "SamplingProfile": {
+     "modules": {
+      "type": "array<Module>"
+     },
+     "samples": {
+      "type": "array<SamplingProfileNode>"
+     }
+    },
+    "SamplingProfileNode": {
+     "size": {
+      "type": "number"
+     },
+     "stack": {
+      "type": "array<string>"
+     },
+     "total": {
+      "type": "number"
+     }
+    }
    }
   },
   "Network": {
@@ -7134,6 +10914,1201 @@
      "Redemption",
      "Signing"
     ]
+   },
+   "objects": {
+    "AdAncestry": {
+     "ancestryChain": {
+      "type": "array<AdScriptIdentifier>"
+     },
+     "rootScriptFilterlistRule": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "AdProvenance": {
+     "adScriptAncestry": {
+      "optional": true,
+      "type": "AdAncestry"
+     },
+     "filterlistRule": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "AdScriptIdentifier": {
+     "debuggerId": {
+      "type": "Runtime.UniqueDebuggerId"
+     },
+     "name": {
+      "type": "string"
+     },
+     "scriptId": {
+      "type": "Runtime.ScriptId"
+     }
+    },
+    "AssociatedCookie": {
+     "blockedReasons": {
+      "type": "array<CookieBlockedReason>"
+     },
+     "cookie": {
+      "type": "Cookie"
+     },
+     "exemptionReason": {
+      "optional": true,
+      "type": "CookieExemptionReason"
+     }
+    },
+    "AuthChallenge": {
+     "origin": {
+      "type": "string"
+     },
+     "realm": {
+      "type": "string"
+     },
+     "scheme": {
+      "type": "string"
+     },
+     "source": {
+      "enum": [
+       "Server",
+       "Proxy"
+      ],
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "AuthChallengeResponse": {
+     "password": {
+      "optional": true,
+      "type": "string"
+     },
+     "response": {
+      "enum": [
+       "Default",
+       "CancelAuth",
+       "ProvideCredentials"
+      ],
+      "type": "string"
+     },
+     "username": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "BlockPattern": {
+     "block": {
+      "type": "boolean"
+     },
+     "urlPattern": {
+      "type": "string"
+     }
+    },
+    "BlockedSetCookieWithReason": {
+     "blockedReasons": {
+      "type": "array<SetCookieBlockedReason>"
+     },
+     "cookie": {
+      "optional": true,
+      "type": "Cookie"
+     },
+     "cookieLine": {
+      "type": "string"
+     }
+    },
+    "CachedResource": {
+     "bodySize": {
+      "type": "number"
+     },
+     "response": {
+      "optional": true,
+      "type": "Response"
+     },
+     "type": {
+      "type": "ResourceType"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "ChallengeEventDetails": {
+     "challenge": {
+      "type": "string"
+     },
+     "challengeResult": {
+      "enum": [
+       "Success",
+       "NoSessionId",
+       "NoSessionMatch",
+       "CantSetBoundCookie"
+      ],
+      "type": "string"
+     }
+    },
+    "ClientSecurityState": {
+     "initiatorIPAddressSpace": {
+      "type": "IPAddressSpace"
+     },
+     "initiatorIsSecureContext": {
+      "type": "boolean"
+     },
+     "localNetworkAccessRequestPolicy": {
+      "type": "LocalNetworkAccessRequestPolicy"
+     }
+    },
+    "ConnectTiming": {
+     "requestTime": {
+      "type": "number"
+     }
+    },
+    "ContentSecurityPolicyStatus": {
+     "effectiveDirectives": {
+      "type": "string"
+     },
+     "isEnforced": {
+      "type": "boolean"
+     },
+     "source": {
+      "type": "ContentSecurityPolicySource"
+     }
+    },
+    "Cookie": {
+     "domain": {
+      "type": "string"
+     },
+     "expires": {
+      "type": "number"
+     },
+     "httpOnly": {
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "partitionKey": {
+      "optional": true,
+      "type": "CookiePartitionKey"
+     },
+     "partitionKeyOpaque": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "path": {
+      "type": "string"
+     },
+     "priority": {
+      "type": "CookiePriority"
+     },
+     "sameSite": {
+      "optional": true,
+      "type": "CookieSameSite"
+     },
+     "secure": {
+      "type": "boolean"
+     },
+     "session": {
+      "type": "boolean"
+     },
+     "size": {
+      "type": "integer"
+     },
+     "sourcePort": {
+      "type": "integer"
+     },
+     "sourceScheme": {
+      "type": "CookieSourceScheme"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "CookieParam": {
+     "domain": {
+      "optional": true,
+      "type": "string"
+     },
+     "expires": {
+      "optional": true,
+      "type": "TimeSinceEpoch"
+     },
+     "httpOnly": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "partitionKey": {
+      "optional": true,
+      "type": "CookiePartitionKey"
+     },
+     "path": {
+      "optional": true,
+      "type": "string"
+     },
+     "priority": {
+      "optional": true,
+      "type": "CookiePriority"
+     },
+     "sameSite": {
+      "optional": true,
+      "type": "CookieSameSite"
+     },
+     "secure": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "sourcePort": {
+      "optional": true,
+      "type": "integer"
+     },
+     "sourceScheme": {
+      "optional": true,
+      "type": "CookieSourceScheme"
+     },
+     "url": {
+      "optional": true,
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "CookiePartitionKey": {
+     "hasCrossSiteAncestor": {
+      "type": "boolean"
+     },
+     "topLevelSite": {
+      "type": "string"
+     }
+    },
+    "CorsErrorStatus": {
+     "corsError": {
+      "type": "CorsError"
+     },
+     "failedParameter": {
+      "type": "string"
+     }
+    },
+    "CreationEventDetails": {
+     "failedRequest": {
+      "optional": true,
+      "type": "DeviceBoundSessionFailedRequest"
+     },
+     "fetchResult": {
+      "type": "DeviceBoundSessionFetchResult"
+     },
+     "newSession": {
+      "optional": true,
+      "type": "DeviceBoundSession"
+     }
+    },
+    "CrossOriginEmbedderPolicyStatus": {
+     "reportOnlyReportingEndpoint": {
+      "optional": true,
+      "type": "string"
+     },
+     "reportOnlyValue": {
+      "type": "CrossOriginEmbedderPolicyValue"
+     },
+     "reportingEndpoint": {
+      "optional": true,
+      "type": "string"
+     },
+     "value": {
+      "type": "CrossOriginEmbedderPolicyValue"
+     }
+    },
+    "CrossOriginOpenerPolicyStatus": {
+     "reportOnlyReportingEndpoint": {
+      "optional": true,
+      "type": "string"
+     },
+     "reportOnlyValue": {
+      "type": "CrossOriginOpenerPolicyValue"
+     },
+     "reportingEndpoint": {
+      "optional": true,
+      "type": "string"
+     },
+     "value": {
+      "type": "CrossOriginOpenerPolicyValue"
+     }
+    },
+    "DeviceBoundSession": {
+     "allowedRefreshInitiators": {
+      "type": "array<string>"
+     },
+     "cachedChallenge": {
+      "optional": true,
+      "type": "string"
+     },
+     "cookieCravings": {
+      "type": "array<DeviceBoundSessionCookieCraving>"
+     },
+     "expiryDate": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "inclusionRules": {
+      "type": "DeviceBoundSessionInclusionRules"
+     },
+     "key": {
+      "type": "DeviceBoundSessionKey"
+     },
+     "refreshUrl": {
+      "type": "string"
+     }
+    },
+    "DeviceBoundSessionCookieCraving": {
+     "domain": {
+      "type": "string"
+     },
+     "httpOnly": {
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "sameSite": {
+      "optional": true,
+      "type": "CookieSameSite"
+     },
+     "secure": {
+      "type": "boolean"
+     }
+    },
+    "DeviceBoundSessionFailedRequest": {
+     "netError": {
+      "optional": true,
+      "type": "string"
+     },
+     "requestUrl": {
+      "type": "string"
+     },
+     "responseError": {
+      "optional": true,
+      "type": "integer"
+     },
+     "responseErrorBody": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "DeviceBoundSessionInclusionRules": {
+     "includeSite": {
+      "type": "boolean"
+     },
+     "origin": {
+      "type": "string"
+     },
+     "urlRules": {
+      "type": "array<DeviceBoundSessionUrlRule>"
+     }
+    },
+    "DeviceBoundSessionKey": {
+     "id": {
+      "type": "string"
+     },
+     "site": {
+      "type": "string"
+     }
+    },
+    "DeviceBoundSessionUrlRule": {
+     "hostPattern": {
+      "type": "string"
+     },
+     "pathPrefix": {
+      "type": "string"
+     },
+     "ruleType": {
+      "enum": [
+       "Exclude",
+       "Include"
+      ],
+      "type": "string"
+     }
+    },
+    "DeviceBoundSessionWithUsage": {
+     "sessionKey": {
+      "type": "DeviceBoundSessionKey"
+     },
+     "usage": {
+      "enum": [
+       "NotInScope",
+       "InScopeRefreshNotYetNeeded",
+       "InScopeRefreshNotAllowed",
+       "ProactiveRefreshNotPossible",
+       "ProactiveRefreshAttempted",
+       "Deferred"
+      ],
+      "type": "string"
+     }
+    },
+    "DirectTCPSocketOptions": {
+     "dnsQueryType": {
+      "optional": true,
+      "type": "DirectSocketDnsQueryType"
+     },
+     "keepAliveDelay": {
+      "optional": true,
+      "type": "number"
+     },
+     "noDelay": {
+      "type": "boolean"
+     },
+     "receiveBufferSize": {
+      "optional": true,
+      "type": "number"
+     },
+     "sendBufferSize": {
+      "optional": true,
+      "type": "number"
+     }
+    },
+    "DirectUDPMessage": {
+     "data": {
+      "type": "binary"
+     },
+     "remoteAddr": {
+      "optional": true,
+      "type": "string"
+     },
+     "remotePort": {
+      "optional": true,
+      "type": "integer"
+     }
+    },
+    "DirectUDPSocketOptions": {
+     "dnsQueryType": {
+      "optional": true,
+      "type": "DirectSocketDnsQueryType"
+     },
+     "localAddr": {
+      "optional": true,
+      "type": "string"
+     },
+     "localPort": {
+      "optional": true,
+      "type": "integer"
+     },
+     "multicastAllowAddressSharing": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "multicastLoopback": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "multicastTimeToLive": {
+      "optional": true,
+      "type": "integer"
+     },
+     "receiveBufferSize": {
+      "optional": true,
+      "type": "number"
+     },
+     "remoteAddr": {
+      "optional": true,
+      "type": "string"
+     },
+     "remotePort": {
+      "optional": true,
+      "type": "integer"
+     },
+     "sendBufferSize": {
+      "optional": true,
+      "type": "number"
+     }
+    },
+    "ExemptedSetCookieWithReason": {
+     "cookie": {
+      "type": "Cookie"
+     },
+     "cookieLine": {
+      "type": "string"
+     },
+     "exemptionReason": {
+      "type": "CookieExemptionReason"
+     }
+    },
+    "Initiator": {
+     "columnNumber": {
+      "optional": true,
+      "type": "number"
+     },
+     "lineNumber": {
+      "optional": true,
+      "type": "number"
+     },
+     "requestId": {
+      "optional": true,
+      "type": "RequestId"
+     },
+     "stack": {
+      "optional": true,
+      "type": "Runtime.StackTrace"
+     },
+     "type": {
+      "enum": [
+       "parser",
+       "script",
+       "preload",
+       "SignedExchange",
+       "preflight",
+       "FedCM",
+       "other"
+      ],
+      "type": "string"
+     },
+     "url": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "LoadNetworkResourceOptions": {
+     "disableCache": {
+      "type": "boolean"
+     },
+     "includeCredentials": {
+      "type": "boolean"
+     }
+    },
+    "LoadNetworkResourcePageResult": {
+     "headers": {
+      "optional": true,
+      "type": "Network.Headers"
+     },
+     "httpStatusCode": {
+      "optional": true,
+      "type": "number"
+     },
+     "netError": {
+      "optional": true,
+      "type": "number"
+     },
+     "netErrorName": {
+      "optional": true,
+      "type": "string"
+     },
+     "stream": {
+      "optional": true,
+      "type": "IO.StreamHandle"
+     },
+     "success": {
+      "type": "boolean"
+     }
+    },
+    "NetworkConditions": {
+     "connectionType": {
+      "optional": true,
+      "type": "ConnectionType"
+     },
+     "downloadThroughput": {
+      "type": "number"
+     },
+     "latency": {
+      "type": "number"
+     },
+     "offline": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "packetLoss": {
+      "optional": true,
+      "type": "number"
+     },
+     "packetQueueLength": {
+      "optional": true,
+      "type": "integer"
+     },
+     "packetReordering": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "uploadThroughput": {
+      "type": "number"
+     },
+     "urlPattern": {
+      "type": "string"
+     }
+    },
+    "PostDataEntry": {
+     "bytes": {
+      "optional": true,
+      "type": "binary"
+     }
+    },
+    "RefreshEventDetails": {
+     "failedRequest": {
+      "optional": true,
+      "type": "DeviceBoundSessionFailedRequest"
+     },
+     "fetchResult": {
+      "optional": true,
+      "type": "DeviceBoundSessionFetchResult"
+     },
+     "newSession": {
+      "optional": true,
+      "type": "DeviceBoundSession"
+     },
+     "refreshResult": {
+      "enum": [
+       "Refreshed",
+       "InitializedService",
+       "Unreachable",
+       "ServerError",
+       "RefreshQuotaExceeded",
+       "FatalError",
+       "SigningQuotaExceeded",
+       "RefreshedAsWaiter",
+       "TransientSigningError"
+      ],
+      "type": "string"
+     },
+     "wasFullyProactiveRefresh": {
+      "type": "boolean"
+     }
+    },
+    "ReportingApiEndpoint": {
+     "groupName": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "ReportingApiReport": {
+     "body": {
+      "type": "object"
+     },
+     "completedAttempts": {
+      "type": "integer"
+     },
+     "depth": {
+      "type": "integer"
+     },
+     "destination": {
+      "type": "string"
+     },
+     "id": {
+      "type": "ReportId"
+     },
+     "initiatorUrl": {
+      "type": "string"
+     },
+     "status": {
+      "type": "ReportStatus"
+     },
+     "timestamp": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "type": {
+      "type": "string"
+     }
+    },
+    "Request": {
+     "hasPostData": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "headers": {
+      "type": "Headers"
+     },
+     "initialPriority": {
+      "type": "ResourcePriority"
+     },
+     "isAdRelated": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "isLinkPreload": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "isSameSite": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "method": {
+      "type": "string"
+     },
+     "mixedContentType": {
+      "optional": true,
+      "type": "Security.MixedContentType"
+     },
+     "postData": {
+      "optional": true,
+      "type": "string"
+     },
+     "postDataEntries": {
+      "optional": true,
+      "type": "array<PostDataEntry>"
+     },
+     "referrerPolicy": {
+      "enum": [
+       "unsafe-url",
+       "no-referrer-when-downgrade",
+       "no-referrer",
+       "origin",
+       "origin-when-cross-origin",
+       "same-origin",
+       "strict-origin",
+       "strict-origin-when-cross-origin"
+      ],
+      "type": "string"
+     },
+     "trustTokenParams": {
+      "optional": true,
+      "type": "TrustTokenParams"
+     },
+     "url": {
+      "type": "string"
+     },
+     "urlFragment": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "RequestPattern": {
+     "interceptionStage": {
+      "optional": true,
+      "type": "InterceptionStage"
+     },
+     "resourceType": {
+      "optional": true,
+      "type": "ResourceType"
+     },
+     "urlPattern": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "ResourceTiming": {
+     "connectEnd": {
+      "type": "number"
+     },
+     "connectStart": {
+      "type": "number"
+     },
+     "dnsEnd": {
+      "type": "number"
+     },
+     "dnsStart": {
+      "type": "number"
+     },
+     "proxyEnd": {
+      "type": "number"
+     },
+     "proxyStart": {
+      "type": "number"
+     },
+     "pushEnd": {
+      "type": "number"
+     },
+     "pushStart": {
+      "type": "number"
+     },
+     "receiveHeadersEnd": {
+      "type": "number"
+     },
+     "receiveHeadersStart": {
+      "type": "number"
+     },
+     "requestTime": {
+      "type": "number"
+     },
+     "sendEnd": {
+      "type": "number"
+     },
+     "sendStart": {
+      "type": "number"
+     },
+     "sslEnd": {
+      "type": "number"
+     },
+     "sslStart": {
+      "type": "number"
+     },
+     "workerCacheLookupStart": {
+      "optional": true,
+      "type": "number"
+     },
+     "workerFetchStart": {
+      "type": "number"
+     },
+     "workerReady": {
+      "type": "number"
+     },
+     "workerRespondWithSettled": {
+      "type": "number"
+     },
+     "workerRouterEvaluationStart": {
+      "optional": true,
+      "type": "number"
+     },
+     "workerStart": {
+      "type": "number"
+     }
+    },
+    "Response": {
+     "alternateProtocolUsage": {
+      "optional": true,
+      "type": "AlternateProtocolUsage"
+     },
+     "cacheStorageCacheName": {
+      "optional": true,
+      "type": "string"
+     },
+     "charset": {
+      "type": "string"
+     },
+     "connectionId": {
+      "type": "number"
+     },
+     "connectionReused": {
+      "type": "boolean"
+     },
+     "encodedDataLength": {
+      "type": "number"
+     },
+     "fromDiskCache": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "fromEarlyHints": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "fromPrefetchCache": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "fromServiceWorker": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "headers": {
+      "type": "Headers"
+     },
+     "headersText": {
+      "optional": true,
+      "type": "string"
+     },
+     "mimeType": {
+      "type": "string"
+     },
+     "protocol": {
+      "optional": true,
+      "type": "string"
+     },
+     "remoteIPAddress": {
+      "optional": true,
+      "type": "string"
+     },
+     "remotePort": {
+      "optional": true,
+      "type": "integer"
+     },
+     "requestHeaders": {
+      "optional": true,
+      "type": "Headers"
+     },
+     "requestHeadersText": {
+      "optional": true,
+      "type": "string"
+     },
+     "responseTime": {
+      "optional": true,
+      "type": "TimeSinceEpoch"
+     },
+     "securityDetails": {
+      "optional": true,
+      "type": "SecurityDetails"
+     },
+     "securityState": {
+      "type": "Security.SecurityState"
+     },
+     "serviceWorkerResponseSource": {
+      "optional": true,
+      "type": "ServiceWorkerResponseSource"
+     },
+     "serviceWorkerRouterInfo": {
+      "optional": true,
+      "type": "ServiceWorkerRouterInfo"
+     },
+     "status": {
+      "type": "integer"
+     },
+     "statusText": {
+      "type": "string"
+     },
+     "timing": {
+      "optional": true,
+      "type": "ResourceTiming"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "SecurityDetails": {
+     "certificateId": {
+      "type": "Security.CertificateId"
+     },
+     "certificateTransparencyCompliance": {
+      "type": "CertificateTransparencyCompliance"
+     },
+     "cipher": {
+      "type": "string"
+     },
+     "encryptedClientHello": {
+      "type": "boolean"
+     },
+     "issuer": {
+      "type": "string"
+     },
+     "keyExchange": {
+      "type": "string"
+     },
+     "keyExchangeGroup": {
+      "optional": true,
+      "type": "string"
+     },
+     "mac": {
+      "optional": true,
+      "type": "string"
+     },
+     "protocol": {
+      "type": "string"
+     },
+     "sanList": {
+      "type": "array<string>"
+     },
+     "serverSignatureAlgorithm": {
+      "optional": true,
+      "type": "integer"
+     },
+     "signedCertificateTimestampList": {
+      "type": "array<SignedCertificateTimestamp>"
+     },
+     "subjectName": {
+      "type": "string"
+     },
+     "validFrom": {
+      "type": "TimeSinceEpoch"
+     },
+     "validTo": {
+      "type": "TimeSinceEpoch"
+     }
+    },
+    "SecurityIsolationStatus": {
+     "coep": {
+      "optional": true,
+      "type": "CrossOriginEmbedderPolicyStatus"
+     },
+     "coop": {
+      "optional": true,
+      "type": "CrossOriginOpenerPolicyStatus"
+     },
+     "csp": {
+      "optional": true,
+      "type": "array<ContentSecurityPolicyStatus>"
+     }
+    },
+    "ServiceWorkerRouterInfo": {
+     "actualSourceType": {
+      "optional": true,
+      "type": "ServiceWorkerRouterSource"
+     },
+     "matchedSourceType": {
+      "optional": true,
+      "type": "ServiceWorkerRouterSource"
+     },
+     "ruleIdMatched": {
+      "optional": true,
+      "type": "integer"
+     }
+    },
+    "SignedCertificateTimestamp": {
+     "hashAlgorithm": {
+      "type": "string"
+     },
+     "logDescription": {
+      "type": "string"
+     },
+     "logId": {
+      "type": "string"
+     },
+     "origin": {
+      "type": "string"
+     },
+     "signatureAlgorithm": {
+      "type": "string"
+     },
+     "signatureData": {
+      "type": "string"
+     },
+     "status": {
+      "type": "string"
+     },
+     "timestamp": {
+      "type": "number"
+     }
+    },
+    "SignedExchangeError": {
+     "errorField": {
+      "optional": true,
+      "type": "SignedExchangeErrorField"
+     },
+     "message": {
+      "type": "string"
+     },
+     "signatureIndex": {
+      "optional": true,
+      "type": "integer"
+     }
+    },
+    "SignedExchangeHeader": {
+     "headerIntegrity": {
+      "type": "string"
+     },
+     "requestUrl": {
+      "type": "string"
+     },
+     "responseCode": {
+      "type": "integer"
+     },
+     "responseHeaders": {
+      "type": "Headers"
+     },
+     "signatures": {
+      "type": "array<SignedExchangeSignature>"
+     }
+    },
+    "SignedExchangeInfo": {
+     "errors": {
+      "optional": true,
+      "type": "array<SignedExchangeError>"
+     },
+     "hasExtraInfo": {
+      "type": "boolean"
+     },
+     "header": {
+      "optional": true,
+      "type": "SignedExchangeHeader"
+     },
+     "outerResponse": {
+      "type": "Response"
+     },
+     "securityDetails": {
+      "optional": true,
+      "type": "SecurityDetails"
+     }
+    },
+    "SignedExchangeSignature": {
+     "certSha256": {
+      "optional": true,
+      "type": "string"
+     },
+     "certUrl": {
+      "optional": true,
+      "type": "string"
+     },
+     "certificates": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "date": {
+      "type": "integer"
+     },
+     "expires": {
+      "type": "integer"
+     },
+     "integrity": {
+      "type": "string"
+     },
+     "label": {
+      "type": "string"
+     },
+     "signature": {
+      "type": "string"
+     },
+     "validityUrl": {
+      "type": "string"
+     }
+    },
+    "TerminationEventDetails": {
+     "deletionReason": {
+      "enum": [
+       "Expired",
+       "FailedToRestoreKey",
+       "FailedToUnwrapKey",
+       "StoragePartitionCleared",
+       "ClearBrowsingData",
+       "ServerRequested",
+       "InvalidSessionParams",
+       "RefreshFatalError",
+       "DevTools"
+      ],
+      "type": "string"
+     }
+    },
+    "TrustTokenParams": {
+     "issuers": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "operation": {
+      "type": "TrustTokenOperationType"
+     },
+     "refreshPolicy": {
+      "enum": [
+       "UseCached",
+       "Refresh"
+      ],
+      "type": "string"
+     }
+    },
+    "WebSocketFrame": {
+     "mask": {
+      "type": "boolean"
+     },
+     "opcode": {
+      "type": "number"
+     },
+     "payloadData": {
+      "type": "string"
+     }
+    },
+    "WebSocketRequest": {
+     "headers": {
+      "type": "Headers"
+     }
+    },
+    "WebSocketResponse": {
+     "headers": {
+      "type": "Headers"
+     },
+     "headersText": {
+      "optional": true,
+      "type": "string"
+     },
+     "requestHeaders": {
+      "optional": true,
+      "type": "Headers"
+     },
+     "requestHeadersText": {
+      "optional": true,
+      "type": "string"
+     },
+     "status": {
+      "type": "integer"
+     },
+     "statusText": {
+      "type": "string"
+     }
+    }
    }
   },
   "Overlay": {
@@ -7484,6 +12459,364 @@
      "captureAreaScreenshot",
      "none"
     ]
+   },
+   "objects": {
+    "BoxStyle": {
+     "fillColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "hatchColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     }
+    },
+    "ContainerQueryContainerHighlightConfig": {
+     "containerBorder": {
+      "optional": true,
+      "type": "LineStyle"
+     },
+     "descendantBorder": {
+      "optional": true,
+      "type": "LineStyle"
+     }
+    },
+    "ContainerQueryHighlightConfig": {
+     "containerQueryContainerHighlightConfig": {
+      "type": "ContainerQueryContainerHighlightConfig"
+     },
+     "nodeId": {
+      "type": "DOM.NodeId"
+     }
+    },
+    "FlexContainerHighlightConfig": {
+     "columnGapSpace": {
+      "optional": true,
+      "type": "BoxStyle"
+     },
+     "containerBorder": {
+      "optional": true,
+      "type": "LineStyle"
+     },
+     "crossAlignment": {
+      "optional": true,
+      "type": "LineStyle"
+     },
+     "crossDistributedSpace": {
+      "optional": true,
+      "type": "BoxStyle"
+     },
+     "itemSeparator": {
+      "optional": true,
+      "type": "LineStyle"
+     },
+     "lineSeparator": {
+      "optional": true,
+      "type": "LineStyle"
+     },
+     "mainDistributedSpace": {
+      "optional": true,
+      "type": "BoxStyle"
+     },
+     "rowGapSpace": {
+      "optional": true,
+      "type": "BoxStyle"
+     }
+    },
+    "FlexItemHighlightConfig": {
+     "baseSizeBorder": {
+      "optional": true,
+      "type": "LineStyle"
+     },
+     "baseSizeBox": {
+      "optional": true,
+      "type": "BoxStyle"
+     },
+     "flexibilityArrow": {
+      "optional": true,
+      "type": "LineStyle"
+     }
+    },
+    "FlexNodeHighlightConfig": {
+     "flexContainerHighlightConfig": {
+      "type": "FlexContainerHighlightConfig"
+     },
+     "nodeId": {
+      "type": "DOM.NodeId"
+     }
+    },
+    "GridHighlightConfig": {
+     "areaBorderColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "cellBorderColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "cellBorderDash": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "columnGapColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "columnHatchColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "columnLineColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "columnLineDash": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "gridBackgroundColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "gridBorderColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "gridBorderDash": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "rowGapColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "rowHatchColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "rowLineColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "rowLineDash": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "showAreaNames": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "showGridExtensionLines": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "showLineNames": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "showNegativeLineNumbers": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "showPositiveLineNumbers": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "showTrackSizes": {
+      "optional": true,
+      "type": "boolean"
+     }
+    },
+    "GridNodeHighlightConfig": {
+     "gridHighlightConfig": {
+      "type": "GridHighlightConfig"
+     },
+     "nodeId": {
+      "type": "DOM.NodeId"
+     }
+    },
+    "HighlightConfig": {
+     "borderColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "colorFormat": {
+      "optional": true,
+      "type": "ColorFormat"
+     },
+     "containerQueryContainerHighlightConfig": {
+      "optional": true,
+      "type": "ContainerQueryContainerHighlightConfig"
+     },
+     "contentColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "contrastAlgorithm": {
+      "optional": true,
+      "type": "ContrastAlgorithm"
+     },
+     "cssGridColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "eventTargetColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "flexContainerHighlightConfig": {
+      "optional": true,
+      "type": "FlexContainerHighlightConfig"
+     },
+     "flexItemHighlightConfig": {
+      "optional": true,
+      "type": "FlexItemHighlightConfig"
+     },
+     "gridHighlightConfig": {
+      "optional": true,
+      "type": "GridHighlightConfig"
+     },
+     "marginColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "paddingColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "shapeColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "shapeMarginColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "showAccessibilityInfo": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "showExtensionLines": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "showInfo": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "showRulers": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "showStyles": {
+      "optional": true,
+      "type": "boolean"
+     }
+    },
+    "HingeConfig": {
+     "contentColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "outlineColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "rect": {
+      "type": "DOM.Rect"
+     }
+    },
+    "InspectedElementAnchorConfig": {
+     "backendNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "nodeId": {
+      "optional": true,
+      "type": "DOM.NodeId"
+     }
+    },
+    "IsolatedElementHighlightConfig": {
+     "isolationModeHighlightConfig": {
+      "type": "IsolationModeHighlightConfig"
+     },
+     "nodeId": {
+      "type": "DOM.NodeId"
+     }
+    },
+    "IsolationModeHighlightConfig": {
+     "maskColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "resizerColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "resizerHandleColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     }
+    },
+    "LineStyle": {
+     "color": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "pattern": {
+      "enum": [
+       "dashed",
+       "dotted"
+      ],
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "ScrollSnapContainerHighlightConfig": {
+     "scrollMarginColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "scrollPaddingColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "snapAreaBorder": {
+      "optional": true,
+      "type": "LineStyle"
+     },
+     "snapportBorder": {
+      "optional": true,
+      "type": "LineStyle"
+     }
+    },
+    "ScrollSnapHighlightConfig": {
+     "nodeId": {
+      "type": "DOM.NodeId"
+     },
+     "scrollSnapContainerHighlightConfig": {
+      "type": "ScrollSnapContainerHighlightConfig"
+     }
+    },
+    "SourceOrderConfig": {
+     "childOutlineColor": {
+      "type": "DOM.RGBA"
+     },
+     "parentOutlineColor": {
+      "type": "DOM.RGBA"
+     }
+    },
+    "WindowControlsOverlayConfig": {
+     "selectedPlatform": {
+      "type": "string"
+     },
+     "showCSS": {
+      "type": "boolean"
+     },
+     "themeColor": {
+      "type": "string"
+     }
+    }
    }
   },
   "PWA": {
@@ -7584,6 +12917,27 @@
      "standalone",
      "browser"
     ]
+   },
+   "objects": {
+    "FileHandler": {
+     "accepts": {
+      "type": "array<FileHandlerAccept>"
+     },
+     "action": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     }
+    },
+    "FileHandlerAccept": {
+     "fileExtensions": {
+      "type": "array<string>"
+     },
+     "mediaType": {
+      "type": "string"
+     }
+    }
    }
   },
   "Page": {
@@ -8868,6 +14222,633 @@
      "keyword_generated",
      "other"
     ]
+   },
+   "objects": {
+    "AdFrameStatus": {
+     "adFrameType": {
+      "type": "AdFrameType"
+     },
+     "explanations": {
+      "optional": true,
+      "type": "array<AdFrameExplanation>"
+     }
+    },
+    "AppManifestError": {
+     "column": {
+      "type": "integer"
+     },
+     "critical": {
+      "type": "integer"
+     },
+     "line": {
+      "type": "integer"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "AppManifestParsedProperties": {
+     "scope": {
+      "type": "string"
+     }
+    },
+    "BackForwardCacheBlockingDetails": {
+     "columnNumber": {
+      "type": "integer"
+     },
+     "function": {
+      "optional": true,
+      "type": "string"
+     },
+     "lineNumber": {
+      "type": "integer"
+     },
+     "url": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "BackForwardCacheNotRestoredExplanation": {
+     "context": {
+      "optional": true,
+      "type": "string"
+     },
+     "details": {
+      "optional": true,
+      "type": "array<BackForwardCacheBlockingDetails>"
+     },
+     "reason": {
+      "type": "BackForwardCacheNotRestoredReason"
+     },
+     "type": {
+      "type": "BackForwardCacheNotRestoredReasonType"
+     }
+    },
+    "BackForwardCacheNotRestoredExplanationTree": {
+     "children": {
+      "type": "array<BackForwardCacheNotRestoredExplanationTree>"
+     },
+     "explanations": {
+      "type": "array<BackForwardCacheNotRestoredExplanation>"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "CompilationCacheParams": {
+     "eager": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "FileFilter": {
+     "accepts": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "name": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "FileHandler": {
+     "accepts": {
+      "optional": true,
+      "type": "array<FileFilter>"
+     },
+     "action": {
+      "type": "string"
+     },
+     "icons": {
+      "optional": true,
+      "type": "array<ImageResource>"
+     },
+     "launchType": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "FontFamilies": {
+     "cursive": {
+      "optional": true,
+      "type": "string"
+     },
+     "fantasy": {
+      "optional": true,
+      "type": "string"
+     },
+     "fixed": {
+      "optional": true,
+      "type": "string"
+     },
+     "math": {
+      "optional": true,
+      "type": "string"
+     },
+     "sansSerif": {
+      "optional": true,
+      "type": "string"
+     },
+     "serif": {
+      "optional": true,
+      "type": "string"
+     },
+     "standard": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "FontSizes": {
+     "fixed": {
+      "optional": true,
+      "type": "integer"
+     },
+     "standard": {
+      "optional": true,
+      "type": "integer"
+     }
+    },
+    "Frame": {
+     "adFrameStatus": {
+      "optional": true,
+      "type": "AdFrameStatus"
+     },
+     "crossOriginIsolatedContextType": {
+      "type": "CrossOriginIsolatedContextType"
+     },
+     "domainAndRegistry": {
+      "type": "string"
+     },
+     "gatedAPIFeatures": {
+      "type": "array<GatedAPIFeatures>"
+     },
+     "id": {
+      "type": "FrameId"
+     },
+     "loaderId": {
+      "type": "Network.LoaderId"
+     },
+     "mimeType": {
+      "type": "string"
+     },
+     "name": {
+      "optional": true,
+      "type": "string"
+     },
+     "parentId": {
+      "optional": true,
+      "type": "FrameId"
+     },
+     "secureContextType": {
+      "type": "SecureContextType"
+     },
+     "securityOrigin": {
+      "type": "string"
+     },
+     "securityOriginDetails": {
+      "optional": true,
+      "type": "SecurityOriginDetails"
+     },
+     "unreachableUrl": {
+      "optional": true,
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     },
+     "urlFragment": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "FrameResource": {
+     "canceled": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "contentSize": {
+      "optional": true,
+      "type": "number"
+     },
+     "failed": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "lastModified": {
+      "optional": true,
+      "type": "Network.TimeSinceEpoch"
+     },
+     "mimeType": {
+      "type": "string"
+     },
+     "type": {
+      "type": "Network.ResourceType"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "FrameResourceTree": {
+     "childFrames": {
+      "optional": true,
+      "type": "array<FrameResourceTree>"
+     },
+     "frame": {
+      "type": "Frame"
+     },
+     "resources": {
+      "type": "array<FrameResource>"
+     }
+    },
+    "FrameTree": {
+     "childFrames": {
+      "optional": true,
+      "type": "array<FrameTree>"
+     },
+     "frame": {
+      "type": "Frame"
+     }
+    },
+    "ImageResource": {
+     "sizes": {
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "optional": true,
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "InstallabilityError": {
+     "errorArguments": {
+      "type": "array<InstallabilityErrorArgument>"
+     },
+     "errorId": {
+      "type": "string"
+     }
+    },
+    "InstallabilityErrorArgument": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "LaunchHandler": {
+     "clientMode": {
+      "type": "string"
+     }
+    },
+    "LayoutViewport": {
+     "clientHeight": {
+      "type": "integer"
+     },
+     "clientWidth": {
+      "type": "integer"
+     },
+     "pageX": {
+      "type": "integer"
+     },
+     "pageY": {
+      "type": "integer"
+     }
+    },
+    "NavigationEntry": {
+     "id": {
+      "type": "integer"
+     },
+     "title": {
+      "type": "string"
+     },
+     "transitionType": {
+      "type": "TransitionType"
+     },
+     "url": {
+      "type": "string"
+     },
+     "userTypedURL": {
+      "type": "string"
+     }
+    },
+    "OriginTrial": {
+     "status": {
+      "type": "OriginTrialStatus"
+     },
+     "tokensWithStatus": {
+      "type": "array<OriginTrialTokenWithStatus>"
+     },
+     "trialName": {
+      "type": "string"
+     }
+    },
+    "OriginTrialToken": {
+     "expiryTime": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "isThirdParty": {
+      "type": "boolean"
+     },
+     "matchSubDomains": {
+      "type": "boolean"
+     },
+     "origin": {
+      "type": "string"
+     },
+     "trialName": {
+      "type": "string"
+     },
+     "usageRestriction": {
+      "type": "OriginTrialUsageRestriction"
+     }
+    },
+    "OriginTrialTokenWithStatus": {
+     "parsedToken": {
+      "optional": true,
+      "type": "OriginTrialToken"
+     },
+     "rawTokenText": {
+      "type": "string"
+     },
+     "status": {
+      "type": "OriginTrialTokenStatus"
+     }
+    },
+    "PermissionsPolicyBlockLocator": {
+     "blockReason": {
+      "type": "PermissionsPolicyBlockReason"
+     },
+     "frameId": {
+      "type": "FrameId"
+     }
+    },
+    "PermissionsPolicyFeatureState": {
+     "allowed": {
+      "type": "boolean"
+     },
+     "feature": {
+      "type": "PermissionsPolicyFeature"
+     },
+     "locator": {
+      "optional": true,
+      "type": "PermissionsPolicyBlockLocator"
+     }
+    },
+    "ProtocolHandler": {
+     "protocol": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "RelatedApplication": {
+     "id": {
+      "optional": true,
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "ScopeExtension": {
+     "hasOriginWildcard": {
+      "type": "boolean"
+     },
+     "origin": {
+      "type": "string"
+     }
+    },
+    "ScreencastFrameMetadata": {
+     "deviceHeight": {
+      "type": "number"
+     },
+     "deviceWidth": {
+      "type": "number"
+     },
+     "offsetTop": {
+      "type": "number"
+     },
+     "pageScaleFactor": {
+      "type": "number"
+     },
+     "scrollOffsetX": {
+      "type": "number"
+     },
+     "scrollOffsetY": {
+      "type": "number"
+     },
+     "timestamp": {
+      "optional": true,
+      "type": "Network.TimeSinceEpoch"
+     }
+    },
+    "Screenshot": {
+     "formFactor": {
+      "type": "string"
+     },
+     "image": {
+      "type": "ImageResource"
+     },
+     "label": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "ScriptFontFamilies": {
+     "fontFamilies": {
+      "type": "FontFamilies"
+     },
+     "script": {
+      "type": "string"
+     }
+    },
+    "SecurityOriginDetails": {
+     "isLocalhost": {
+      "type": "boolean"
+     }
+    },
+    "ShareTarget": {
+     "action": {
+      "type": "string"
+     },
+     "enctype": {
+      "type": "string"
+     },
+     "files": {
+      "optional": true,
+      "type": "array<FileFilter>"
+     },
+     "method": {
+      "type": "string"
+     },
+     "text": {
+      "optional": true,
+      "type": "string"
+     },
+     "title": {
+      "optional": true,
+      "type": "string"
+     },
+     "url": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "Shortcut": {
+     "name": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "Viewport": {
+     "height": {
+      "type": "number"
+     },
+     "scale": {
+      "type": "number"
+     },
+     "width": {
+      "type": "number"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     }
+    },
+    "VisualViewport": {
+     "clientHeight": {
+      "type": "number"
+     },
+     "clientWidth": {
+      "type": "number"
+     },
+     "offsetX": {
+      "type": "number"
+     },
+     "offsetY": {
+      "type": "number"
+     },
+     "pageX": {
+      "type": "number"
+     },
+     "pageY": {
+      "type": "number"
+     },
+     "scale": {
+      "type": "number"
+     },
+     "zoom": {
+      "optional": true,
+      "type": "number"
+     }
+    },
+    "WebAppManifest": {
+     "backgroundColor": {
+      "optional": true,
+      "type": "string"
+     },
+     "description": {
+      "optional": true,
+      "type": "string"
+     },
+     "dir": {
+      "optional": true,
+      "type": "string"
+     },
+     "display": {
+      "optional": true,
+      "type": "string"
+     },
+     "displayOverrides": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "fileHandlers": {
+      "optional": true,
+      "type": "array<FileHandler>"
+     },
+     "icons": {
+      "optional": true,
+      "type": "array<ImageResource>"
+     },
+     "id": {
+      "optional": true,
+      "type": "string"
+     },
+     "lang": {
+      "optional": true,
+      "type": "string"
+     },
+     "launchHandler": {
+      "optional": true,
+      "type": "LaunchHandler"
+     },
+     "name": {
+      "optional": true,
+      "type": "string"
+     },
+     "orientation": {
+      "optional": true,
+      "type": "string"
+     },
+     "preferRelatedApplications": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "protocolHandlers": {
+      "optional": true,
+      "type": "array<ProtocolHandler>"
+     },
+     "relatedApplications": {
+      "optional": true,
+      "type": "array<RelatedApplication>"
+     },
+     "scope": {
+      "optional": true,
+      "type": "string"
+     },
+     "scopeExtensions": {
+      "optional": true,
+      "type": "array<ScopeExtension>"
+     },
+     "screenshots": {
+      "optional": true,
+      "type": "array<Screenshot>"
+     },
+     "shareTarget": {
+      "optional": true,
+      "type": "ShareTarget"
+     },
+     "shortName": {
+      "optional": true,
+      "type": "string"
+     },
+     "shortcuts": {
+      "optional": true,
+      "type": "array<Shortcut>"
+     },
+     "startUrl": {
+      "optional": true,
+      "type": "string"
+     },
+     "themeColor": {
+      "optional": true,
+      "type": "string"
+     }
+    }
    }
   },
   "Performance": {
@@ -8912,7 +14893,17 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "Metric": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "number"
+     }
+    }
+   }
   },
   "PerformanceTimeline": {
    "commands": {
@@ -8925,7 +14916,84 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "LargestContentfulPaint": {
+     "elementId": {
+      "optional": true,
+      "type": "string"
+     },
+     "loadTime": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "nodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "renderTime": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "size": {
+      "type": "number"
+     },
+     "url": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "LayoutShift": {
+     "hadRecentInput": {
+      "type": "boolean"
+     },
+     "lastInputTime": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "sources": {
+      "type": "array<LayoutShiftAttribution>"
+     },
+     "value": {
+      "type": "number"
+     }
+    },
+    "LayoutShiftAttribution": {
+     "currentRect": {
+      "type": "DOM.Rect"
+     },
+     "nodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "previousRect": {
+      "type": "DOM.Rect"
+     }
+    },
+    "TimelineEvent": {
+     "duration": {
+      "optional": true,
+      "type": "number"
+     },
+     "frameId": {
+      "type": "Page.FrameId"
+     },
+     "layoutShiftDetails": {
+      "optional": true,
+      "type": "LayoutShift"
+     },
+     "lcpDetails": {
+      "optional": true,
+      "type": "LargestContentfulPaint"
+     },
+     "name": {
+      "type": "string"
+     },
+     "time": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   }
   },
   "Preload": {
    "commands": {
@@ -9076,6 +15144,86 @@
      "Blank",
      "Self"
     ]
+   },
+   "objects": {
+    "PreloadingAttemptKey": {
+     "action": {
+      "type": "SpeculationAction"
+     },
+     "formSubmission": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "loaderId": {
+      "type": "Network.LoaderId"
+     },
+     "targetHint": {
+      "optional": true,
+      "type": "SpeculationTargetHint"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "PreloadingAttemptSource": {
+     "key": {
+      "type": "PreloadingAttemptKey"
+     },
+     "nodeIds": {
+      "type": "array<DOM.BackendNodeId>"
+     },
+     "ruleSetIds": {
+      "type": "array<RuleSetId>"
+     }
+    },
+    "PrerenderMismatchedHeaders": {
+     "activationValue": {
+      "optional": true,
+      "type": "string"
+     },
+     "headerName": {
+      "type": "string"
+     },
+     "initialValue": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "RuleSet": {
+     "backendNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "errorMessage": {
+      "optional": true,
+      "type": "string"
+     },
+     "errorType": {
+      "optional": true,
+      "type": "RuleSetErrorType"
+     },
+     "id": {
+      "type": "RuleSetId"
+     },
+     "loaderId": {
+      "type": "Network.LoaderId"
+     },
+     "requestId": {
+      "optional": true,
+      "type": "Network.RequestId"
+     },
+     "sourceText": {
+      "type": "string"
+     },
+     "tag": {
+      "optional": true,
+      "type": "string"
+     },
+     "url": {
+      "optional": true,
+      "type": "string"
+     }
+    }
    }
   },
   "Profiler": {
@@ -9153,7 +15301,93 @@
      }
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "CoverageRange": {
+     "count": {
+      "type": "integer"
+     },
+     "endOffset": {
+      "type": "integer"
+     },
+     "startOffset": {
+      "type": "integer"
+     }
+    },
+    "FunctionCoverage": {
+     "functionName": {
+      "type": "string"
+     },
+     "isBlockCoverage": {
+      "type": "boolean"
+     },
+     "ranges": {
+      "type": "array<CoverageRange>"
+     }
+    },
+    "PositionTickInfo": {
+     "line": {
+      "type": "integer"
+     },
+     "ticks": {
+      "type": "integer"
+     }
+    },
+    "Profile": {
+     "endTime": {
+      "type": "number"
+     },
+     "nodes": {
+      "type": "array<ProfileNode>"
+     },
+     "samples": {
+      "optional": true,
+      "type": "array<integer>"
+     },
+     "startTime": {
+      "type": "number"
+     },
+     "timeDeltas": {
+      "optional": true,
+      "type": "array<integer>"
+     }
+    },
+    "ProfileNode": {
+     "callFrame": {
+      "type": "Runtime.CallFrame"
+     },
+     "children": {
+      "optional": true,
+      "type": "array<integer>"
+     },
+     "deoptReason": {
+      "optional": true,
+      "type": "string"
+     },
+     "hitCount": {
+      "optional": true,
+      "type": "integer"
+     },
+     "id": {
+      "type": "integer"
+     },
+     "positionTicks": {
+      "optional": true,
+      "type": "array<PositionTickInfo>"
+     }
+    },
+    "ScriptCoverage": {
+     "functions": {
+      "type": "array<FunctionCoverage>"
+     },
+     "scriptId": {
+      "type": "Runtime.ScriptId"
+     },
+     "url": {
+      "type": "string"
+     }
+    }
+   }
   },
   "Runtime": {
    "commands": {
@@ -9590,7 +15824,447 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "CallArgument": {
+     "objectId": {
+      "optional": true,
+      "type": "RemoteObjectId"
+     },
+     "unserializableValue": {
+      "optional": true,
+      "type": "UnserializableValue"
+     },
+     "value": {
+      "optional": true,
+      "type": "any"
+     }
+    },
+    "CallFrame": {
+     "columnNumber": {
+      "type": "integer"
+     },
+     "functionName": {
+      "type": "string"
+     },
+     "lineNumber": {
+      "type": "integer"
+     },
+     "scriptId": {
+      "type": "ScriptId"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "CustomPreview": {
+     "bodyGetterId": {
+      "optional": true,
+      "type": "RemoteObjectId"
+     },
+     "header": {
+      "type": "string"
+     }
+    },
+    "DeepSerializedValue": {
+     "objectId": {
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "undefined",
+       "null",
+       "string",
+       "number",
+       "boolean",
+       "bigint",
+       "regexp",
+       "date",
+       "symbol",
+       "array",
+       "object",
+       "function",
+       "map",
+       "set",
+       "weakmap",
+       "weakset",
+       "error",
+       "proxy",
+       "promise",
+       "typedarray",
+       "arraybuffer",
+       "node",
+       "window",
+       "generator"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "optional": true,
+      "type": "any"
+     },
+     "weakLocalObjectReference": {
+      "optional": true,
+      "type": "integer"
+     }
+    },
+    "EntryPreview": {
+     "key": {
+      "optional": true,
+      "type": "ObjectPreview"
+     },
+     "value": {
+      "type": "ObjectPreview"
+     }
+    },
+    "ExceptionDetails": {
+     "columnNumber": {
+      "type": "integer"
+     },
+     "exception": {
+      "optional": true,
+      "type": "RemoteObject"
+     },
+     "exceptionId": {
+      "type": "integer"
+     },
+     "exceptionMetaData": {
+      "optional": true,
+      "type": "object"
+     },
+     "executionContextId": {
+      "optional": true,
+      "type": "ExecutionContextId"
+     },
+     "lineNumber": {
+      "type": "integer"
+     },
+     "scriptId": {
+      "optional": true,
+      "type": "ScriptId"
+     },
+     "stackTrace": {
+      "optional": true,
+      "type": "StackTrace"
+     },
+     "text": {
+      "type": "string"
+     },
+     "url": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "ExecutionContextDescription": {
+     "auxData": {
+      "optional": true,
+      "type": "object"
+     },
+     "id": {
+      "type": "ExecutionContextId"
+     },
+     "name": {
+      "type": "string"
+     },
+     "origin": {
+      "type": "string"
+     },
+     "uniqueId": {
+      "type": "string"
+     }
+    },
+    "InternalPropertyDescriptor": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "optional": true,
+      "type": "RemoteObject"
+     }
+    },
+    "ObjectPreview": {
+     "description": {
+      "optional": true,
+      "type": "string"
+     },
+     "entries": {
+      "optional": true,
+      "type": "array<EntryPreview>"
+     },
+     "overflow": {
+      "type": "boolean"
+     },
+     "properties": {
+      "type": "array<PropertyPreview>"
+     },
+     "subtype": {
+      "enum": [
+       "array",
+       "null",
+       "node",
+       "regexp",
+       "date",
+       "map",
+       "set",
+       "weakmap",
+       "weakset",
+       "iterator",
+       "generator",
+       "error",
+       "proxy",
+       "promise",
+       "typedarray",
+       "arraybuffer",
+       "dataview",
+       "webassemblymemory",
+       "wasmvalue",
+       "trustedtype"
+      ],
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "object",
+       "function",
+       "undefined",
+       "string",
+       "number",
+       "boolean",
+       "symbol",
+       "bigint"
+      ],
+      "type": "string"
+     }
+    },
+    "PrivatePropertyDescriptor": {
+     "get": {
+      "optional": true,
+      "type": "RemoteObject"
+     },
+     "name": {
+      "type": "string"
+     },
+     "set": {
+      "optional": true,
+      "type": "RemoteObject"
+     },
+     "value": {
+      "optional": true,
+      "type": "RemoteObject"
+     }
+    },
+    "PropertyDescriptor": {
+     "configurable": {
+      "type": "boolean"
+     },
+     "enumerable": {
+      "type": "boolean"
+     },
+     "get": {
+      "optional": true,
+      "type": "RemoteObject"
+     },
+     "isOwn": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "set": {
+      "optional": true,
+      "type": "RemoteObject"
+     },
+     "symbol": {
+      "optional": true,
+      "type": "RemoteObject"
+     },
+     "value": {
+      "optional": true,
+      "type": "RemoteObject"
+     },
+     "wasThrown": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "writable": {
+      "optional": true,
+      "type": "boolean"
+     }
+    },
+    "PropertyPreview": {
+     "name": {
+      "type": "string"
+     },
+     "subtype": {
+      "enum": [
+       "array",
+       "null",
+       "node",
+       "regexp",
+       "date",
+       "map",
+       "set",
+       "weakmap",
+       "weakset",
+       "iterator",
+       "generator",
+       "error",
+       "proxy",
+       "promise",
+       "typedarray",
+       "arraybuffer",
+       "dataview",
+       "webassemblymemory",
+       "wasmvalue",
+       "trustedtype"
+      ],
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "object",
+       "function",
+       "undefined",
+       "string",
+       "number",
+       "boolean",
+       "symbol",
+       "accessor",
+       "bigint"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "optional": true,
+      "type": "string"
+     },
+     "valuePreview": {
+      "optional": true,
+      "type": "ObjectPreview"
+     }
+    },
+    "RemoteObject": {
+     "className": {
+      "optional": true,
+      "type": "string"
+     },
+     "customPreview": {
+      "optional": true,
+      "type": "CustomPreview"
+     },
+     "deepSerializedValue": {
+      "optional": true,
+      "type": "DeepSerializedValue"
+     },
+     "description": {
+      "optional": true,
+      "type": "string"
+     },
+     "objectId": {
+      "optional": true,
+      "type": "RemoteObjectId"
+     },
+     "preview": {
+      "optional": true,
+      "type": "ObjectPreview"
+     },
+     "subtype": {
+      "enum": [
+       "array",
+       "null",
+       "node",
+       "regexp",
+       "date",
+       "map",
+       "set",
+       "weakmap",
+       "weakset",
+       "iterator",
+       "generator",
+       "error",
+       "proxy",
+       "promise",
+       "typedarray",
+       "arraybuffer",
+       "dataview",
+       "webassemblymemory",
+       "wasmvalue",
+       "trustedtype"
+      ],
+      "optional": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "object",
+       "function",
+       "undefined",
+       "string",
+       "number",
+       "boolean",
+       "symbol",
+       "bigint"
+      ],
+      "type": "string"
+     },
+     "unserializableValue": {
+      "optional": true,
+      "type": "UnserializableValue"
+     },
+     "value": {
+      "optional": true,
+      "type": "any"
+     }
+    },
+    "SerializationOptions": {
+     "additionalParameters": {
+      "optional": true,
+      "type": "object"
+     },
+     "maxDepth": {
+      "optional": true,
+      "type": "integer"
+     },
+     "serialization": {
+      "enum": [
+       "deep",
+       "json",
+       "idOnly"
+      ],
+      "type": "string"
+     }
+    },
+    "StackTrace": {
+     "callFrames": {
+      "type": "array<CallFrame>"
+     },
+     "description": {
+      "optional": true,
+      "type": "string"
+     },
+     "parent": {
+      "optional": true,
+      "type": "StackTrace"
+     },
+     "parentId": {
+      "optional": true,
+      "type": "StackTraceId"
+     }
+    },
+    "StackTraceId": {
+     "debuggerId": {
+      "optional": true,
+      "type": "UniqueDebuggerId"
+     },
+     "id": {
+      "type": "string"
+     }
+    }
+   }
   },
   "Schema": {
    "commands": {
@@ -9603,7 +16277,17 @@
      }
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {
+    "Domain": {
+     "name": {
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    }
+   }
   },
   "Security": {
    "commands": {
@@ -9667,6 +16351,139 @@
      "info",
      "insecure-broken"
     ]
+   },
+   "objects": {
+    "CertificateSecurityState": {
+     "certificate": {
+      "type": "array<string>"
+     },
+     "certificateHasSha1Signature": {
+      "type": "boolean"
+     },
+     "certificateHasWeakSignature": {
+      "type": "boolean"
+     },
+     "certificateNetworkError": {
+      "optional": true,
+      "type": "string"
+     },
+     "cipher": {
+      "type": "string"
+     },
+     "issuer": {
+      "type": "string"
+     },
+     "keyExchange": {
+      "type": "string"
+     },
+     "keyExchangeGroup": {
+      "optional": true,
+      "type": "string"
+     },
+     "mac": {
+      "optional": true,
+      "type": "string"
+     },
+     "modernSSL": {
+      "type": "boolean"
+     },
+     "obsoleteSslCipher": {
+      "type": "boolean"
+     },
+     "obsoleteSslKeyExchange": {
+      "type": "boolean"
+     },
+     "obsoleteSslProtocol": {
+      "type": "boolean"
+     },
+     "obsoleteSslSignature": {
+      "type": "boolean"
+     },
+     "protocol": {
+      "type": "string"
+     },
+     "subjectName": {
+      "type": "string"
+     },
+     "validFrom": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "validTo": {
+      "type": "Network.TimeSinceEpoch"
+     }
+    },
+    "InsecureContentStatus": {
+     "containedMixedForm": {
+      "type": "boolean"
+     },
+     "displayedContentWithCertErrors": {
+      "type": "boolean"
+     },
+     "displayedInsecureContentStyle": {
+      "type": "SecurityState"
+     },
+     "displayedMixedContent": {
+      "type": "boolean"
+     },
+     "ranContentWithCertErrors": {
+      "type": "boolean"
+     },
+     "ranInsecureContentStyle": {
+      "type": "SecurityState"
+     },
+     "ranMixedContent": {
+      "type": "boolean"
+     }
+    },
+    "SafetyTipInfo": {
+     "safeUrl": {
+      "optional": true,
+      "type": "string"
+     },
+     "safetyTipStatus": {
+      "type": "SafetyTipStatus"
+     }
+    },
+    "SecurityStateExplanation": {
+     "certificate": {
+      "type": "array<string>"
+     },
+     "description": {
+      "type": "string"
+     },
+     "mixedContentType": {
+      "type": "MixedContentType"
+     },
+     "recommendations": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "securityState": {
+      "type": "SecurityState"
+     },
+     "summary": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string"
+     }
+    },
+    "VisibleSecurityState": {
+     "certificateSecurityState": {
+      "optional": true,
+      "type": "CertificateSecurityState"
+     },
+     "safetyTipInfo": {
+      "optional": true,
+      "type": "SafetyTipInfo"
+     },
+     "securityState": {
+      "type": "SecurityState"
+     },
+     "securityStateIssueIds": {
+      "type": "array<string>"
+     }
+    }
    }
   },
   "ServiceWorker": {
@@ -9792,6 +16609,76 @@
      "activated",
      "redundant"
     ]
+   },
+   "objects": {
+    "ServiceWorkerErrorMessage": {
+     "columnNumber": {
+      "type": "integer"
+     },
+     "errorMessage": {
+      "type": "string"
+     },
+     "lineNumber": {
+      "type": "integer"
+     },
+     "registrationId": {
+      "type": "RegistrationID"
+     },
+     "sourceURL": {
+      "type": "string"
+     },
+     "versionId": {
+      "type": "string"
+     }
+    },
+    "ServiceWorkerRegistration": {
+     "isDeleted": {
+      "type": "boolean"
+     },
+     "registrationId": {
+      "type": "RegistrationID"
+     },
+     "scopeURL": {
+      "type": "string"
+     }
+    },
+    "ServiceWorkerVersion": {
+     "controlledClients": {
+      "optional": true,
+      "type": "array<Target.TargetID>"
+     },
+     "registrationId": {
+      "type": "RegistrationID"
+     },
+     "routerRules": {
+      "optional": true,
+      "type": "string"
+     },
+     "runningStatus": {
+      "type": "ServiceWorkerVersionRunningStatus"
+     },
+     "scriptLastModified": {
+      "optional": true,
+      "type": "number"
+     },
+     "scriptResponseTime": {
+      "optional": true,
+      "type": "number"
+     },
+     "scriptURL": {
+      "type": "string"
+     },
+     "status": {
+      "type": "ServiceWorkerVersionStatus"
+     },
+     "targetId": {
+      "optional": true,
+      "type": "Target.TargetID"
+     },
+     "versionId": {
+      "type": "string"
+     }
+    }
    }
   },
   "SmartCardEmulation": {
@@ -9982,6 +16869,93 @@
      "exclusive",
      "direct"
     ]
+   },
+   "objects": {
+    "ProtocolSet": {
+     "raw": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "t0": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "t1": {
+      "optional": true,
+      "type": "boolean"
+     }
+    },
+    "ReaderStateFlags": {
+     "changed": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "empty": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "exclusive": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "ignore": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "inuse": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "mute": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "present": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "unavailable": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "unaware": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "unknown": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "unpowered": {
+      "optional": true,
+      "type": "boolean"
+     }
+    },
+    "ReaderStateIn": {
+     "currentInsertionCount": {
+      "type": "integer"
+     },
+     "currentState": {
+      "type": "ReaderStateFlags"
+     },
+     "reader": {
+      "type": "string"
+     }
+    },
+    "ReaderStateOut": {
+     "atr": {
+      "type": "binary"
+     },
+     "eventCount": {
+      "type": "integer"
+     },
+     "eventState": {
+      "type": "ReaderStateFlags"
+     },
+     "reader": {
+      "type": "string"
+     }
+    }
    }
   },
   "Storage": {
@@ -10428,6 +17402,189 @@
      "all",
      "other"
     ]
+   },
+   "objects": {
+    "RelatedWebsiteSet": {
+     "associatedSites": {
+      "type": "array<string>"
+     },
+     "primarySites": {
+      "type": "array<string>"
+     },
+     "serviceSites": {
+      "type": "array<string>"
+     }
+    },
+    "SharedStorageAccessParams": {
+     "batchSize": {
+      "optional": true,
+      "type": "integer"
+     },
+     "batchUpdateId": {
+      "optional": true,
+      "type": "string"
+     },
+     "dataOrigin": {
+      "optional": true,
+      "type": "string"
+     },
+     "ignoreIfPresent": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "keepAlive": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "key": {
+      "optional": true,
+      "type": "string"
+     },
+     "operationId": {
+      "optional": true,
+      "type": "string"
+     },
+     "operationName": {
+      "optional": true,
+      "type": "string"
+     },
+     "privateAggregationConfig": {
+      "optional": true,
+      "type": "SharedStoragePrivateAggregationConfig"
+     },
+     "scriptSourceUrl": {
+      "optional": true,
+      "type": "string"
+     },
+     "serializedData": {
+      "optional": true,
+      "type": "string"
+     },
+     "urlsWithMetadata": {
+      "optional": true,
+      "type": "array<SharedStorageUrlWithMetadata>"
+     },
+     "urnUuid": {
+      "optional": true,
+      "type": "string"
+     },
+     "value": {
+      "optional": true,
+      "type": "string"
+     },
+     "withLock": {
+      "optional": true,
+      "type": "string"
+     },
+     "workletOrdinal": {
+      "optional": true,
+      "type": "integer"
+     },
+     "workletTargetId": {
+      "optional": true,
+      "type": "Target.TargetID"
+     }
+    },
+    "SharedStorageEntry": {
+     "key": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "SharedStorageMetadata": {
+     "bytesUsed": {
+      "type": "integer"
+     },
+     "creationTime": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "length": {
+      "type": "integer"
+     },
+     "remainingBudget": {
+      "type": "number"
+     }
+    },
+    "SharedStoragePrivateAggregationConfig": {
+     "aggregationCoordinatorOrigin": {
+      "optional": true,
+      "type": "string"
+     },
+     "contextId": {
+      "optional": true,
+      "type": "string"
+     },
+     "filteringIdMaxBytes": {
+      "type": "integer"
+     },
+     "maxContributions": {
+      "optional": true,
+      "type": "integer"
+     }
+    },
+    "SharedStorageReportingMetadata": {
+     "eventType": {
+      "type": "string"
+     },
+     "reportingUrl": {
+      "type": "string"
+     }
+    },
+    "SharedStorageUrlWithMetadata": {
+     "reportingMetadata": {
+      "type": "array<SharedStorageReportingMetadata>"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "StorageBucket": {
+     "name": {
+      "optional": true,
+      "type": "string"
+     },
+     "storageKey": {
+      "type": "SerializedStorageKey"
+     }
+    },
+    "StorageBucketInfo": {
+     "bucket": {
+      "type": "StorageBucket"
+     },
+     "durability": {
+      "type": "StorageBucketsDurability"
+     },
+     "expiration": {
+      "type": "Network.TimeSinceEpoch"
+     },
+     "id": {
+      "type": "string"
+     },
+     "persistent": {
+      "type": "boolean"
+     },
+     "quota": {
+      "type": "number"
+     }
+    },
+    "TrustTokens": {
+     "count": {
+      "type": "number"
+     },
+     "issuerOrigin": {
+      "type": "string"
+     }
+    },
+    "UsageForType": {
+     "storageType": {
+      "type": "StorageType"
+     },
+     "usage": {
+      "type": "number"
+     }
+    }
    }
   },
   "SystemInfo": {
@@ -10481,6 +17638,102 @@
      "yuv422",
      "yuv444"
     ]
+   },
+   "objects": {
+    "GPUDevice": {
+     "deviceId": {
+      "type": "number"
+     },
+     "deviceString": {
+      "type": "string"
+     },
+     "driverVendor": {
+      "type": "string"
+     },
+     "driverVersion": {
+      "type": "string"
+     },
+     "revision": {
+      "optional": true,
+      "type": "number"
+     },
+     "subSysId": {
+      "optional": true,
+      "type": "number"
+     },
+     "vendorId": {
+      "type": "number"
+     },
+     "vendorString": {
+      "type": "string"
+     }
+    },
+    "GPUInfo": {
+     "auxAttributes": {
+      "optional": true,
+      "type": "object"
+     },
+     "devices": {
+      "type": "array<GPUDevice>"
+     },
+     "driverBugWorkarounds": {
+      "type": "array<string>"
+     },
+     "featureStatus": {
+      "optional": true,
+      "type": "object"
+     },
+     "videoDecoding": {
+      "type": "array<VideoDecodeAcceleratorCapability>"
+     },
+     "videoEncoding": {
+      "type": "array<VideoEncodeAcceleratorCapability>"
+     }
+    },
+    "ProcessInfo": {
+     "cpuTime": {
+      "type": "number"
+     },
+     "id": {
+      "type": "integer"
+     },
+     "type": {
+      "type": "string"
+     }
+    },
+    "Size": {
+     "height": {
+      "type": "integer"
+     },
+     "width": {
+      "type": "integer"
+     }
+    },
+    "VideoDecodeAcceleratorCapability": {
+     "maxResolution": {
+      "type": "Size"
+     },
+     "minResolution": {
+      "type": "Size"
+     },
+     "profile": {
+      "type": "string"
+     }
+    },
+    "VideoEncodeAcceleratorCapability": {
+     "maxFramerateDenominator": {
+      "type": "integer"
+     },
+     "maxFramerateNumerator": {
+      "type": "integer"
+     },
+     "maxResolution": {
+      "type": "Size"
+     },
+     "profile": {
+      "type": "string"
+     }
+    }
    }
   },
   "Target": {
@@ -10804,6 +18057,74 @@
      "maximized",
      "fullscreen"
     ]
+   },
+   "objects": {
+    "FilterEntry": {
+     "exclude": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "type": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "RemoteLocation": {
+     "host": {
+      "type": "string"
+     },
+     "port": {
+      "type": "integer"
+     }
+    },
+    "TargetInfo": {
+     "attached": {
+      "type": "boolean"
+     },
+     "browserContextId": {
+      "optional": true,
+      "type": "Browser.BrowserContextID"
+     },
+     "canAccessOpener": {
+      "type": "boolean"
+     },
+     "embedderData": {
+      "optional": true,
+      "type": "object"
+     },
+     "openerFrameId": {
+      "optional": true,
+      "type": "Page.FrameId"
+     },
+     "openerId": {
+      "optional": true,
+      "type": "TargetID"
+     },
+     "parentFrameId": {
+      "optional": true,
+      "type": "Page.FrameId"
+     },
+     "parentId": {
+      "optional": true,
+      "type": "TargetID"
+     },
+     "subtype": {
+      "optional": true,
+      "type": "string"
+     },
+     "targetId": {
+      "type": "TargetID"
+     },
+     "title": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    }
    }
   },
   "Tethering": {
@@ -10825,7 +18146,8 @@
      "returns": {}
     }
    },
-   "enums": {}
+   "enums": {},
+   "objects": {}
   },
   "Tracing": {
    "commands": {
@@ -10946,6 +18268,52 @@
      "chrome",
      "system"
     ]
+   },
+   "objects": {
+    "TraceConfig": {
+     "enableArgumentFilter": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "enableSampling": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "enableSystrace": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "excludedCategories": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "includedCategories": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "memoryDumpConfig": {
+      "optional": true,
+      "type": "MemoryDumpConfig"
+     },
+     "recordMode": {
+      "enum": [
+       "recordUntilFull",
+       "recordContinuously",
+       "recordAsMuchAsPossible",
+       "echoToConsole"
+      ],
+      "optional": true,
+      "type": "string"
+     },
+     "syntheticDelays": {
+      "optional": true,
+      "type": "array<string>"
+     },
+     "traceBufferSizeInKb": {
+      "optional": true,
+      "type": "number"
+     }
+    }
    }
   },
   "WebAudio": {
@@ -10995,6 +18363,106 @@
      "realtime",
      "offline"
     ]
+   },
+   "objects": {
+    "AudioListener": {
+     "contextId": {
+      "type": "GraphObjectId"
+     },
+     "listenerId": {
+      "type": "GraphObjectId"
+     }
+    },
+    "AudioNode": {
+     "channelCount": {
+      "type": "number"
+     },
+     "channelCountMode": {
+      "type": "ChannelCountMode"
+     },
+     "channelInterpretation": {
+      "type": "ChannelInterpretation"
+     },
+     "contextId": {
+      "type": "GraphObjectId"
+     },
+     "nodeId": {
+      "type": "GraphObjectId"
+     },
+     "nodeType": {
+      "type": "NodeType"
+     },
+     "numberOfInputs": {
+      "type": "number"
+     },
+     "numberOfOutputs": {
+      "type": "number"
+     }
+    },
+    "AudioParam": {
+     "contextId": {
+      "type": "GraphObjectId"
+     },
+     "defaultValue": {
+      "type": "number"
+     },
+     "maxValue": {
+      "type": "number"
+     },
+     "minValue": {
+      "type": "number"
+     },
+     "nodeId": {
+      "type": "GraphObjectId"
+     },
+     "paramId": {
+      "type": "GraphObjectId"
+     },
+     "paramType": {
+      "type": "ParamType"
+     },
+     "rate": {
+      "type": "AutomationRate"
+     }
+    },
+    "BaseAudioContext": {
+     "callbackBufferSize": {
+      "type": "number"
+     },
+     "contextId": {
+      "type": "GraphObjectId"
+     },
+     "contextState": {
+      "type": "ContextState"
+     },
+     "contextType": {
+      "type": "ContextType"
+     },
+     "maxOutputChannelCount": {
+      "type": "number"
+     },
+     "realtimeData": {
+      "optional": true,
+      "type": "ContextRealtimeData"
+     },
+     "sampleRate": {
+      "type": "number"
+     }
+    },
+    "ContextRealtimeData": {
+     "callbackIntervalMean": {
+      "type": "number"
+     },
+     "callbackIntervalVariance": {
+      "type": "number"
+     },
+     "currentTime": {
+      "type": "number"
+     },
+     "renderCapacity": {
+      "type": "number"
+     }
+    }
    }
   },
   "WebAuthn": {
@@ -11168,6 +18636,110 @@
      "ctap2_1",
      "ctap2_2"
     ]
+   },
+   "objects": {
+    "Credential": {
+     "backupEligibility": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "backupState": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "credentialId": {
+      "type": "binary"
+     },
+     "isResidentCredential": {
+      "type": "boolean"
+     },
+     "largeBlob": {
+      "optional": true,
+      "type": "binary"
+     },
+     "privateKey": {
+      "type": "binary"
+     },
+     "rpId": {
+      "optional": true,
+      "type": "string"
+     },
+     "signCount": {
+      "type": "integer"
+     },
+     "userDisplayName": {
+      "optional": true,
+      "type": "string"
+     },
+     "userHandle": {
+      "optional": true,
+      "type": "binary"
+     },
+     "userName": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "VirtualAuthenticatorOptions": {
+     "automaticPresenceSimulation": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "ctap2Version": {
+      "optional": true,
+      "type": "Ctap2Version"
+     },
+     "defaultBackupEligibility": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "defaultBackupState": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "hasCredBlob": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "hasHmacSecret": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "hasHmacSecretMc": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "hasLargeBlob": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "hasMinPinLength": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "hasPrf": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "hasResidentKey": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "hasUserVerification": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "isUserVerified": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "protocol": {
+      "type": "AuthenticatorProtocol"
+     },
+     "transport": {
+      "type": "AuthenticatorTransport"
+     }
+    }
    }
   },
   "WebMCP": {
@@ -11213,6 +18785,57 @@
      "Canceled",
      "Error"
     ]
+   },
+   "objects": {
+    "Annotation": {
+     "autosubmit": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "readOnly": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "untrustedContent": {
+      "optional": true,
+      "type": "boolean"
+     }
+    },
+    "RemovedTool": {
+     "frameId": {
+      "type": "Page.FrameId"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "Tool": {
+     "annotations": {
+      "optional": true,
+      "type": "Annotation"
+     },
+     "backendNodeId": {
+      "optional": true,
+      "type": "DOM.BackendNodeId"
+     },
+     "description": {
+      "type": "string"
+     },
+     "frameId": {
+      "type": "Page.FrameId"
+     },
+     "inputSchema": {
+      "optional": true,
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "stackTrace": {
+      "optional": true,
+      "type": "Runtime.StackTrace"
+     }
+    }
    }
   }
  },

@@ -35,7 +35,12 @@ let
     }
     // lib.mapAttrs' (
       entity: vault: lib.nameValuePair "${entity}-sessions" "protonpass://${vault}"
-    ) config.proton.sessionVaults;
+    ) config.proton.sessionVaults
+    # Each entity's own vault, beside its logins: what only its controller
+    # opens (passkeys), never an agent.
+    // lib.mapAttrs' (
+      entity: e: lib.nameValuePair "${entity}-logins" "protonpass://${e.vault}"
+    ) config.identity.checked.entities;
 
     profiles = config.secrets.profiles;
   };

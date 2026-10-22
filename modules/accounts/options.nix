@@ -127,6 +127,22 @@ let
               domains, so a login always says whose it is.
             '';
           };
+          passkey = mkOption {
+            type = types.nullOr (
+              types.submodule {
+                options.rpId = mkOption {
+                  type = types.strMatching "([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}";
+                  description = "The site's WebAuthn relying party id, as its registration reported it.";
+                };
+              }
+            );
+            default = null;
+            description = ''
+              The account's passkey, held by the browser engine's authenticator
+              and kept in its owner's vault (modules/browser): signing in then
+              needs no code. Only on a plan with the passkeys capability.
+            '';
+          };
         };
       };
     }

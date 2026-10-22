@@ -210,6 +210,31 @@ let
       "role"
     ];
     "Accessibility.getFullAXTree" = [ ];
+    "WebAuthn.enable" = [ "enableUI" ];
+    "WebAuthn.addVirtualAuthenticator" = [ "options" ];
+    "WebAuthn.addCredential" = [
+      "authenticatorId"
+      "credential"
+    ];
+    "WebAuthn.getCredentials" = [ "authenticatorId" ];
+  };
+  # The fields of the protocol's object types the engine sets or reads.
+  cdpObjects = {
+    "WebAuthn.VirtualAuthenticatorOptions" = [
+      "protocol"
+      "ctap2Version"
+      "transport"
+      "hasResidentKey"
+      "hasUserVerification"
+      "isUserVerified"
+      "automaticPresenceSimulation"
+    ];
+    "WebAuthn.Credential" = [
+      "rpId"
+      "credentialId"
+      "privateKey"
+      "userHandle"
+    ];
   };
   protocol = (lib.importJSON ../catalog/_json/cdp.json).domains;
   cdpProblems = lib.concatLists (
@@ -224,10 +249,30 @@ let
       else
         map (p: "${call}: has no parameter ${p}") (lib.filter (p: !(command.params ? ${p})) params)
     ) cdpCalls
+    ++ lib.mapAttrsToList (
+      object: fields:
+      let
+        parts = lib.splitString "." object;
+        known = protocol.${lib.head parts}.objects.${lib.last parts} or null;
+      in
+      if known == null then
+        [ "${object}: not in the pinned Chromium's protocol" ]
+      else
+        map (f: "${object}: has no field ${f}") (lib.filter (f: !(known ? ${f})) fields)
+    ) cdpObjects
   );
 
-  accounts = lib.mapAttrs (_: a: {
+  passkeyAccounts = lib.filterAttrs (_: a: a.login.passkey != null) config.accounts.held;
+  accounts = lib.mapAttrs (name: a: {
     inherit (a) provider;
+    passkey =
+      if a.login.passkey == null then
+        null
+      else
+        {
+          inherit (a.login.passkey) rpId;
+          profile = "passkey-${name}";
+        };
     login = {
       inherit (entities.${a.owner}) vault;
       inherit (a.login) item email;
@@ -241,102 +286,141 @@ in
     description = "Per provider, the flows its module declares.";
   };
 
-  # Every flow is an action like any other wrapper's.
-  config.governance.actions = lib.mapAttrs (
-    provider:
-    lib.mapAttrs (
-      name: f: {
-        inherit (f) effect description;
-        command = "browser ${provider}:${name}";
+  # An account's passkey lives in its owner's own vault, which no agent
+  # token opens, and only on a plan that has passkeys.
+  config = {
+    secrets.profiles = lib.mapAttrs' (
+      name: a:
+      lib.nameValuePair "passkey-${name}" {
+        defaults.providers = [ "${a.owner}-logins" ];
+        PASSKEY =
+          import ../_lib/secret.nix "Passkey for ${name}, held by the browser engine (credential JSON)"
+            "passkey-${name}"
+          // {
+            required = false;
+          };
       }
-    )
-  ) config.browser.flows;
+    ) passkeyAccounts;
+    accounts.demands = lib.mapAttrsToList (name: _: {
+      account = name;
+      capability = "passkeys";
+      need = true;
+      why = "accounts.held.${name}.login.passkey: the browser signs in with a passkey";
+    }) passkeyAccounts;
 
-  config.perSystem =
-    { pkgs, config, ... }:
-    let
-      flowsJson = pkgs.writeText "browser-flows.json" (builtins.toJSON rendered);
-      # A declared font set: with none, Chromium dies rendering a form.
-      fonts = pkgs.makeFontsConf { fontDirectories = [ pkgs.dejavu_fonts ]; };
-      accountsJson = pkgs.writeText "browser-accounts.json" (builtins.toJSON accounts);
-    in
-    {
-      packages.browser-run =
-        assert lib.assertMsg (cdpProblems == [ ]) (
-          "modules/browser: DevTools calls the pinned Chromium does not have:\n"
-          + lib.concatStringsSep "\n" cdpProblems
-        );
-        pkgs.rustPlatform.buildRustPackage {
-          pname = "browser-run";
-          version = "0.1.0";
-          src = ./_src;
-          cargoLock.lockFile = ./_src/Cargo.lock;
-          meta.mainProgram = "browser";
+    # Every flow is an action like any other wrapper's.
+    governance.actions = lib.mapAttrs (
+      provider:
+      lib.mapAttrs (
+        name: f: {
+          inherit (f) effect description;
+          command = "browser ${provider}:${name}";
+        }
+      )
+    ) config.browser.flows;
+
+    perSystem =
+      { pkgs, config, ... }:
+      let
+        flowsJson = pkgs.writeText "browser-flows.json" (builtins.toJSON rendered);
+        # A declared font set: with none, Chromium dies rendering a form.
+        fonts = pkgs.makeFontsConf { fontDirectories = [ pkgs.dejavu_fonts ]; };
+        accountsJson = pkgs.writeText "browser-accounts.json" (builtins.toJSON accounts);
+      in
+      {
+        packages.browser-run =
+          assert lib.assertMsg (cdpProblems == [ ]) (
+            "modules/browser: DevTools calls the pinned Chromium does not have:\n"
+            + lib.concatStringsSep "\n" cdpProblems
+          );
+          pkgs.rustPlatform.buildRustPackage {
+            pname = "browser-run";
+            version = "0.1.0";
+            src = ./_src;
+            cargoLock.lockFile = ./_src/Cargo.lock;
+            meta.mainProgram = "browser";
+          };
+
+        packages.browser = pkgs.writeShellApplication {
+          name = "browser";
+          runtimeInputs = [
+            config.packages.browser-run
+            config.packages.pass-cli
+            config.packages.secretspec
+            config.packages.governance-authorize
+            pkgs.jq
+            pkgs.coreutils
+          ];
+          text = builtins.seq top.accounts.checked ''
+            export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+            usage="usage: browser --account A <provider>:<flow>; flows: $(jq -r 'keys | join(", ")' ${flowsJson})"
+            [ "''${1:-}" = --account ] || { echo "$usage" >&2; exit 2; }
+            account=''${2:?$usage} action=''${3:?$usage}
+            flow=$(jq -c --arg f "$action" '.[$f] // empty' ${flowsJson})
+            [ -n "$flow" ] || { echo "no flow $action; $usage" >&2; exit 2; }
+            held=$(jq -c --arg a "$account" '.[$a] // empty' ${accountsJson})
+            [ -n "$held" ] || { echo "no account $account" >&2; exit 2; }
+            [ "$(jq -r .provider <<<"$held")" = "$(jq -r .provider <<<"$flow")" ] ||
+              { echo "$action is not for $account's provider" >&2; exit 2; }
+            governance-authorize "$action" "$account"
+
+            dir=$(mktemp -d)
+            chmod 700 "$dir"
+            trap 'rm -rf "$dir"' EXIT
+            jq --arg a "$account" --argjson h "$held" \
+              '.flow + {account: $a, login: $h.login} + (if $h.passkey then {passkey: $h.passkey} else {} end)' \
+              <<<"$flow" >"$dir/flow.json"
+            mkdir "$dir/profile"
+            [ "$(id -u)" != 0 ] || export BROWSER_NO_SANDBOX=1
+            FONTCONFIG_FILE=${fonts} BROWSER_SECRETSPEC_FILE=${config.packages.secretspec-toml} BROWSER_CHROMIUM=${lib.getExe pkgs.chromium} BROWSER_PROFILE=$dir/profile \
+              browser "$dir/flow.json"
+          '';
         };
 
-      packages.browser = pkgs.writeShellApplication {
-        name = "browser";
-        runtimeInputs = [
-          config.packages.browser-run
-          config.packages.pass-cli
-          config.packages.governance-authorize
-          pkgs.jq
-          pkgs.coreutils
-        ];
-        text = builtins.seq top.accounts.checked ''
-          export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
-          usage="usage: browser --account A <provider>:<flow>; flows: $(jq -r 'keys | join(", ")' ${flowsJson})"
-          [ "''${1:-}" = --account ] || { echo "$usage" >&2; exit 2; }
-          account=''${2:?$usage} action=''${3:?$usage}
-          flow=$(jq -c --arg f "$action" '.[$f] // empty' ${flowsJson})
-          [ -n "$flow" ] || { echo "no flow $action; $usage" >&2; exit 2; }
-          held=$(jq -c --arg a "$account" '.[$a] // empty' ${accountsJson})
-          [ -n "$held" ] || { echo "no account $account" >&2; exit 2; }
-          [ "$(jq -r .provider <<<"$held")" = "$(jq -r .provider <<<"$flow")" ] ||
-            { echo "$action is not for $account's provider" >&2; exit 2; }
-          governance-authorize "$action" "$account"
-
-          dir=$(mktemp -d)
-          chmod 700 "$dir"
-          trap 'rm -rf "$dir"' EXIT
-          jq --arg a "$account" --argjson h "$held" '.flow + {account: $a, login: $h.login}' <<<"$flow" >"$dir/flow.json"
-          mkdir "$dir/profile"
-          [ "$(id -u)" != 0 ] || export BROWSER_NO_SANDBOX=1
-          FONTCONFIG_FILE=${fonts} BROWSER_CHROMIUM=${lib.getExe pkgs.chromium} BROWSER_PROFILE=$dir/profile \
-            browser "$dir/flow.json"
-        '';
-      };
-
-      # browser-run against a page of its own on the loopback: it finds by
-      # role and by CSS, fills, clicks, waits for an approval and reads the
-      # page back; and every declared flow passes its types.
-      checks.browser =
-        pkgs.runCommand "browser-check"
-          {
-            nativeBuildInputs = [
-              config.packages.browser-run
-              pkgs.python3
-              pkgs.jq
-            ];
-          }
-          ''
-            export HOME=$TMPDIR FONTCONFIG_FILE=${fonts} BROWSER_NO_SANDBOX=1 BROWSER_CHROMIUM=${lib.getExe pkgs.chromium}
-            # Every raw protocol call in the source is one cdpCalls declares.
-            grep -oh 'method: "[A-Za-z]*\.[A-Za-z]*"' ${./_src/src}/*.rs | cut -d'"' -f2 | sort -u |
-              while read -r m; do
-                jq -e --arg m "$m" 'has($m)' ${pkgs.writeText "cdp-calls.json" (builtins.toJSON cdpCalls)} >/dev/null ||
-                  { echo "$m is called in _src but not declared in cdpCalls" >&2; exit 1; }
+        # browser-run against a page of its own on the loopback: it finds by
+        # role and by CSS, fills, clicks, waits for an approval and reads the
+        # page back; and every declared flow passes its types.
+        checks.browser =
+          pkgs.runCommand "browser-check"
+            {
+              nativeBuildInputs = [
+                config.packages.browser-run
+                pkgs.python3
+                pkgs.jq
+              ];
+            }
+            ''
+              export HOME=$TMPDIR FONTCONFIG_FILE=${fonts} BROWSER_NO_SANDBOX=1 BROWSER_CHROMIUM=${lib.getExe pkgs.chromium}
+              # Every raw protocol call in the source is one cdpCalls declares.
+              grep -oh 'method: "[A-Za-z]*\.[A-Za-z]*"' ${./_src/src}/*.rs | cut -d'"' -f2 | sort -u |
+                while read -r m; do
+                  jq -e --arg m "$m" 'has($m)' ${pkgs.writeText "cdp-calls.json" (builtins.toJSON cdpCalls)} >/dev/null ||
+                    { echo "$m is called in _src but not declared in cdpCalls" >&2; exit 1; }
+                done
+              cp ${./_test/page.html} page.html
+              python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1 &
+              sed s/PORT/8765/g ${./_test/flow.json} > flow.json
+              mkdir profile
+              BROWSER_PROFILE=$PWD/profile browser flow.json > snapshot.txt
+              grep -q 'button     "Invite member"' snapshot.txt
+              ! grep -q 'finance@' snapshot.txt
+              jq -c 'to_entries[] | .value.flow + {account: "check", login: {vault: "v", item: "i", email: "a@b.c"}}' ${flowsJson} |
+                while read -r f; do echo "$f" > one.json; browser --check one.json; done
+              # A passkey registered in one browser signs in from a fresh one,
+              # through the secretspec path (a stand-in here keeps it in a file).
+              mkdir -p bin store
+              cp ${./_test/secretspec} bin/secretspec
+              cp ${./_test/passkey.html} passkey.html
+              python3 -m http.server 8766 --bind 127.0.0.1 >/dev/null 2>&1 &
+              for phase in register signin; do
+                sed s/PORT/8766/g ${./_test}/passkey-$phase.json > $phase.json
+                mkdir profile-$phase
+                PATH=$PWD/bin:$PATH SECRETSPEC_STUB_DIR=$PWD/store BROWSER_SECRETSPEC_FILE=/dev/null \
+                  BROWSER_PROFILE=$PWD/profile-$phase browser $phase.json
               done
-            cp ${./_test/page.html} page.html
-            python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1 &
-            sed s/PORT/8765/g ${./_test/flow.json} > flow.json
-            mkdir profile
-            BROWSER_PROFILE=$PWD/profile browser flow.json > snapshot.txt
-            grep -q 'button     "Invite member"' snapshot.txt
-            ! grep -q 'finance@' snapshot.txt
-            jq -c 'to_entries[] | .value.flow + {account: "check", login: {vault: "v", item: "i", email: "a@b.c"}}' ${flowsJson} |
-              while read -r f; do echo "$f" > one.json; browser --check one.json; done
-            cp snapshot.txt $out
-          '';
-    };
+              jq -e '.[0].rpId == "localhost" and (.[0].privateKey | length > 0)' store/PASSKEY >/dev/null
+              cp snapshot.txt $out
+            '';
+      };
+  };
 }
