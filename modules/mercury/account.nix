@@ -156,7 +156,7 @@
         # Its own Mercury user, not the person's: a company's bank login says
         # whose it is.
         login = {
-          item = "app.mercury.com";
+          item = "Mercury - Jingzo LLC";
           email = "finance@jingzo.org";
         };
       };
