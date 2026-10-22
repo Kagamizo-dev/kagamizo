@@ -249,8 +249,13 @@ around.
   `mcp-connector` client for AI clients with manual OAuth settings, not a
   loopback redirect for a CLI. `northwest login` registers its own client
   when the identity server allows dynamic registration and otherwise falls
-  back to `mcp-connector`; whether either accepts a 127.0.0.1 redirect is
-  untested until the first login.
+  back to `mcp-connector`. Tried on 2026-10-22 for `northwest-qsearch`:
+  registration is refused (403) and `mcp-connector` rejects a 127.0.0.1
+  redirect ("Invalid parameter: redirect_uri"), so `northwest login` cannot
+  sign in. The documented path is Northwest as a custom connector in Claude
+  (claude.ai/customize/connectors), signed in there; a session started after
+  that reaches its tools directly. Closing this for the CLI needs a client
+  from Northwest that admits a loopback redirect.
 - **Credit bureaus** (`modules/experian`): no bureau has an API for your own
   file, so moving Experian's email to automations@mirazo.org, alerts and
   freezes are its web settings. A freeze at each of the three bureaus is the

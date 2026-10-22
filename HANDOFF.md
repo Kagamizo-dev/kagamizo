@@ -60,8 +60,8 @@ root session (`cloudflare-login`, a device code, 5 minutes) is only needed for
 |---|---|---|---|
 | Legal | planned, Wyoming, EIN none | active; state, date, EIN unknown | natural |
 | Domain | kagamizo.com, mail live | jingzo.org, mail live | mirazo.org, mail live (zach@, automations@; more as Pass aliases) |
-| Registered agent | northwest-kagamizo, planned (login item ready) | northwest-qsearch, active, not signed in yet | — |
-| Bank | mercury, planned (needs the LLC and EIN) | mercury-qsearch, active, no session or cards here yet | — |
+| Registered agent | northwest-kagamizo, planned (login item ready) | northwest-qsearch, active; the CLI cannot sign in (see Next 4) | — |
+| Bank | mercury, planned (needs the LLC and EIN) | mercury-qsearch, active, signed in (session in QSearch-LLC-Sessions); checking and savings at $0, no cards | — |
 | Brokerage | — | — | public, active; personal secret missing (a Gap) |
 | Credit | — (a D-U-N-S number once the EIN exists) | — (D-U-N-S) | experian, active; its email to move to automations@mirazo.org |
 | Other | github active; hetzner, openrouter planned | arxiv-qsearch planned (paused) | proton, cloudflare active |
@@ -73,13 +73,10 @@ root vault.
 
 ## Next, in this order
 
-1. **Mercury, solid first.** Kagamizo's own Mercury waits on formation and the
-   EIN (days to weeks), but QSearch's account exists today. Make
-   `mercury-session` per account, like `northwest` (one profile per held
-   Mercury account, its session in the owner's sessions vault), sign
-   `mercury-qsearch` in, and give its swarms read grants (`cards-funds`,
-   `cards-spend`). Decide with the owner whether vendor cards come from
-   QSearch's account until Kagamizo's opens, or wait.
+1. **Mercury.** Done for QSearch: one session per account, `mercury-qsearch`
+   signed in on 2026-10-22, its swarms' read grants in place. Open with the
+   owner: QSearch's account holds $0, so vendor cards from it would need
+   funding first; otherwise they wait for Kagamizo's account.
 2. **Public.** Its personal secret is made once in Public's settings (a Gap);
    then `brokerage summary` works for the owner. No swarm gets it: the secret
    trades as well as reads.
@@ -87,12 +84,15 @@ root vault.
    top-up and management key in its dashboard (Gaps), then `openrouter apply`
    mints the five capped keys (host, fleet, one per identity's swarms). The
    card for it comes from step 1.
-4. **Northwest.** `northwest login` for `northwest-qsearch` (one approval
-   link), then `northwest catalog > modules/northwest/_json/tools.json` and type
-   every new tool's effect in `modules/northwest/tools.nix`. Read QSearch's
-   state, formation date and EIN status off `get_company_details_tool` into
-   `modules/identity/qsearch.nix`. Kagamizo's formation order follows once its
-   own Northwest account exists.
+4. **Northwest.** `northwest login` cannot sign in: dynamic registration is
+   refused (403) and `mcp-connector` rejects a 127.0.0.1 redirect (a Gap).
+   Northwest's documented path is a custom connector in Claude
+   (claude.ai/customize/connectors); a session started after it is added
+   reaches the tools directly. Then: the server's tools/list into
+   `modules/northwest/_json/tools.json`, every new tool's effect in
+   `modules/northwest/tools.nix`, and QSearch's state, formation date and
+   EIN status off `get_company_details_tool` into
+   `modules/identity/qsearch.nix`.
 5. **Agents to work.** With models (3) and accounts (1, 4) in place, run the
    swarms (`nix run .#orca-swarm -- <name>`) and start assigning work. The
    always-on host (Hetzner: Open WebUI, OpenCode, Proton Bridge) is the
@@ -171,13 +171,13 @@ declared strategy; `checks.trading-backtest` proves the engine trades end to
 end. Brokerages are backends (`trading.backends`), Public first, at stage
 `backtest`. Next:
 
-1. **The Public adapter**, ours (NautilusTrader has none): an instrument
-   provider (`instruments get`), a data client (quotes and bars, polled), an
-   execution client (preflight, place, replace, cancel, order status), on the
-   generated client in the pinned publicdotcom-cli. Paper first, against
-   Public's preflight, which places nothing.
-2. **`trade bars`**: Public's `historicdata bars` into the CSV backtests read,
-   through `brokerage` so it is authorized.
+1. **The Public adapter**, ours (NautilusTrader has none): paper is in
+   (`modules/trading/_public.py`: token, bars, preflight; `trade paper`), and
+   `checks.trading-backtest` drives it against a stand-in. Its first real run
+   waits on Public's personal secret (Next 2). Placing, replacing, cancelling
+   and order status come with live (3).
+2. **`trade bars`**: in; Public's bars into the backtest CSV, through
+   governance-authorize under the public profile.
 3. **Live** as a `trading` governance action with effect spend: only a
    controller places orders; agents backtest and paper-trade.
 4. **The account question for the legal swarm**: Public now opens business
