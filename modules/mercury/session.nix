@@ -62,6 +62,9 @@ in
         withSession = pkgs.writeText "mercury-with-session.sh" ''
           mercury_home=$(mktemp -d)
           chmod 700 "$mercury_home"
+          # pass-cli finds its session under the caller's HOME, so saving
+          # runs there, not in the private one.
+          caller_home=$HOME caller_config=''${XDG_CONFIG_HOME:-}
           export HOME=$mercury_home XDG_CONFIG_HOME=$mercury_home/.config DBUS_SESSION_BUS_ADDRESS=disabled:
           mkdir -p "$XDG_CONFIG_HOME/mercury"
           creds=$XDG_CONFIG_HOME/mercury/credentials.json
@@ -72,7 +75,7 @@ in
           unset MERCURY_SESSION
           mercury_save() {
             if [ -s "$creds" ]; then
-              secretspec set MERCURY_SESSION --file ${spec} --profile "''${MERCURY_PROFILE:?}" \
+              HOME=$caller_home XDG_CONFIG_HOME=$caller_config secretspec set MERCURY_SESSION --file ${spec} --profile "''${MERCURY_PROFILE:?}" \
                 --from-file "$creds" --reason "mercury: save the refreshed session" >/dev/null
             fi
             rm -rf "$mercury_home"
