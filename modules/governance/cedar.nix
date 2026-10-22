@@ -109,7 +109,10 @@ let
     forbid (principal, action, resource is ${ns}::Account)
     unless {
       resource.owner.domains.contains(resource.loginDomain) &&
-      context has login && context.login == resource.login
+      (
+        (context has login && context.login == resource.login) ||
+        (principal is ${ns}::Person && action in ${act "move-login"})
+      )
     };
 
     @id("agents-serve-one-entity")
@@ -195,6 +198,7 @@ let
     "spend"
     "destroy"
     "session"
+    "move-login"
   ];
   withActions = lib.filterAttrs (_: a: cfg.actions ? ${a.provider}) accounts;
   tests = lib.filter (t: t != null) (
@@ -259,11 +263,22 @@ let
           testAs (_: context) "${person} may not act on ${acc} ${why}" (ref "Person" person) x.id acc "deny" [
             "logins-say-whose-they-are"
           ];
+        fix = firstOf a.provider "move-login";
       in
       lib.optionals (x != null) [
         (deny { } "when Proton Pass has no login for it")
         (deny { login = "someone@example.com"; } "when its login in Proton Pass is another address")
       ]
+      # Moving the login onto the declared address is the one way out.
+      ++ lib.optional (fix != null) (
+        testAs (_: { login = "someone@example.com"; })
+          "${person} may move ${acc}'s login from another address"
+          (ref "Person" person)
+          fix.id
+          acc
+          "allow"
+          [ "controllers" ]
+      )
     ) withActions
   );
 in

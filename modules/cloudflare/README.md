@@ -68,7 +68,7 @@ vault can be which:
 
 | Vault | Holds | Must be |
 | --- | --- | --- |
-| `Zachariah-Root` | your own logins; no Cloudflare credential (the root is your OAuth session) | a person's vault |
+| `Mirazo-Root` | your own logins; no Cloudflare credential (the root is your OAuth session) | a person's vault |
 | `Kagamizo-LLC` | Kagamizo's own credentials: its GitHub organization, its logins | an LLC's or nonprofit's vault |
 | `Kagamizo-CI` | `ci-apply` token | CI only |
 | `Kagamizo-Agents` | `agent-readonly` token, OpenRouter key | agents only |
@@ -181,7 +181,7 @@ Your part is approvals only: a link for Cloudflare, a link for Proton Pass.
 1. **Sign in.** `cloudflare-login` and `pass-cli login`, each a link you
    approve on your phone.
 2. **Proton.** `proton apply` creates `Kagamizo-State` and the three agents in
-   `agents.nix`, stores each agent token in `Zachariah-Root` (profile
+   `agents.nix`, stores each agent token in `Mirazo-Root` (profile
    `proton-agents`) and grants the declared roles.
 3. **Cloudflare.** `bootstrap apply` generates the state passphrase into
    `Kagamizo-State` and mints `ci-apply` and `agent-readonly` into their
@@ -278,7 +278,7 @@ around.
   file, so moving Experian's email to automations@mirazo.org, alerts and
   freezes are its web settings. A freeze at each of the three bureaus is the
   standing recommendation.
-- **Public's personal secret** (`Zachariah-Root/public-personal-secret`) is
+- **Public's personal secret** (`Mirazo-Root/public-personal-secret`) is
   made in its settings, and funding Public has no API at all: deposits are
   started from Public's side.
 - **`mail login` is refused by Proton's API** (Invalid section name, code

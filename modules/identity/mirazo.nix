@@ -14,7 +14,7 @@
     entities.mirazo = {
       legalName = "Zachariah";
       kind = "person";
-      vault = "Zachariah-Root";
+      vault = "Mirazo-Root";
       legal = {
         status = "natural";
         ein = "not-applicable";

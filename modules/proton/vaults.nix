@@ -82,7 +82,7 @@ in
       # agent token can never read the others; the OpenTofu state sits in a
       # vault both open, at the roles in agents.nix.
       infraVaults = {
-        root = "Zachariah-Root";
+        root = "Mirazo-Root";
         entity = "Kagamizo-LLC";
         ci = "Kagamizo-CI";
         agents = "Kagamizo-Agents";

@@ -46,7 +46,7 @@
       status = "active";
       login.item = "Experian";
       # The login as it is to be, with its email moved to
-      # automations@mirazo.org. Its item already exists in Zachariah-Root,
+      # automations@mirazo.org. Its item already exists in Mirazo-Root,
       # titled "Experian" (made by hand before this repo), so `signup
       # prepare` is not run for it: that would make a second one.
       signup = {

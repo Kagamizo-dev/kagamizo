@@ -6,7 +6,9 @@
 #       always controls their own)
 #   governance.actions.<provider>.<tool> = { effect; description; }
 #       every operation a wrapper exposes, typed by what it does: read,
-#       write, spend, destroy, or session (signing in)
+#       write, spend, destroy, session (signing in), or move-login (moving an
+#       account's login onto its declared address: the one kind of action
+#       the login rule lets a controller run on a mismatched account)
 #   governance.agents.<name> = { serves; purpose; personas; grants; }
 #       an agent identity: one Proton Pass agent token, one Cedar principal,
 #       serving exactly one entity, holding only the grants listed
@@ -29,6 +31,7 @@ let
     "spend"
     "destroy"
     "session"
+    "move-login"
   ];
   cfg = config.governance;
 

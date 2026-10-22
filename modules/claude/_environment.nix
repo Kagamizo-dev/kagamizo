@@ -127,6 +127,58 @@ in
           "wyobiz.wyo.gov"
         ];
       };
+      # What each provider's web app loads to sign in and work, found by
+      # loading its sign-in page and keeping every refused host that is the
+      # app itself (scripts, its API, its sign-in, its captcha); analytics
+      # and trackers are left out. For the browser flows (modules/browser).
+      browser = {
+        reason = "Provider web apps the browser flows drive (modules/browser)";
+        hosts = [
+          # Mercury's web app scripts
+          "cdn.mercury.com"
+          # Public's web app: its API and the identity check at sign-in
+          "plat.public.com"
+          "prod-api.154310543964.hellopublic.com"
+          "ingestion.dv.socure.io"
+          # Cloudflare's dashboard sign-in captcha (Turnstile)
+          "challenges.cloudflare.com"
+          # OpenRouter's sign-in (Clerk)
+          "clerk.openrouter.ai"
+          # Northwest's client portal
+          "accounts.northwestregisteredagent.com"
+          # GitHub's web assets (organization creation is web-only)
+          "github.githubassets.com"
+          "api.github.com"
+          # Experian: the credit file's login, its email and freezes
+          "usa.experian.com"
+          # Substack: research publishing
+          "substack.com"
+          # arXiv's web assets
+          "static.arxiv.org"
+        ];
+      };
+      # The legal corpus (modules/legal): primary sources, mirrored with
+      # their versions so every citation points at a fixed text.
+      legal = {
+        reason = "US and international primary law, IRS guidance, case law (modules/legal)";
+        hosts = [
+          "www.ecfr.gov"
+          "uscode.house.gov"
+          "www.govinfo.gov"
+          "api.govinfo.gov"
+          "www.federalregister.gov"
+          "api.congress.gov"
+          "www.irs.gov"
+          "www.courtlistener.com"
+          "www.ustaxcourt.gov"
+          "wyoleg.gov"
+          "sos.wyo.gov"
+          "www.sec.gov"
+          "data.sec.gov"
+          "eur-lex.europa.eu"
+          "www.legislation.gov.uk"
+        ];
+      };
       # Checking that published records resolve, after an infra apply.
       dns = {
         reason = "DNS-over-HTTPS lookups to verify published records";

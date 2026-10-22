@@ -8,45 +8,9 @@ its items are done.
 ## A new cloud environment
 
 Network access: **Custom**, with "Also include default list of common package
-managers" ticked, and these allowed domains (`nix build
-.#claude-allowed-domains` prints the current list):
-
-```
-*.cachix.org
-*.ghcr.io
-*.interactivebrokers.com
-*.proton.me
-accounts.hetzner.com
-api.cloudflare.com
-api.hetzner.cloud
-api.ibkr.com
-api.mercury.com
-api.public.com
-app.mercury.com
-arxiv.org
-blog.arxiv.org
-cloudflare-dns.com
-dash.cloudflare.com
-dns.google
-docs.hetzner.cloud
-docs.hetzner.com
-docs.mercury.com
-export.arxiv.org
-ghcr.io
-id.northwestregisteredagent.com
-info.arxiv.org
-mcp.northwestregisteredagent.com
-mercury.com
-models.dev
-oauth2.mercury.com
-opencode.ai
-openrouter.ai
-proton.me
-public.com
-vault-api.mercury.com
-www.northwestregisteredagent.com
-wyobiz.wyo.gov
-```
+managers" ticked, and the allowed domains `nix build .#claude-allowed-domains`
+prints (declared in `modules/claude/_environment.nix`, one group per purpose:
+providers' APIs, the browser flows' web apps, the legal corpus).
 
 Then sign the session in: `pass-cli login` (an approval link). Cloudflare's
 root session (`cloudflare-login`, a device code, 5 minutes) is only needed for
@@ -57,10 +21,12 @@ root session (`cloudflare-login`, a device code, 5 minutes) is only needed for
 Three identities, each named after its domain: **Mirazo** (Zachariah, the
 person, mirazo.org), **Jingzo** (QSearch LLC on paper: the EIN, Northwest,
 the state; jingzo.org) and **Kagamizo** (Kagamizo LLC, kagamizo.com). The
-entity ids are `mirazo`, `jingzo`, `kagamizo`. Proton Pass's vaults and
-agent tokens still carry the old names (Zachariah-Root, QSearch-LLC,
-`swarm-*-qsearch`, `swarm-*-zachariah`): renaming them is a Proton Pass
-change, waiting on the owner's go.
+entity ids are `mirazo`, `jingzo`, `kagamizo`. Proton Pass's vaults carry the
+new names (Mirazo-Root, Jingzo-LLC and their -Sessions vaults), and the
+swarms' agents are `swarm-*-jingzo` and `swarm-*-mirazo`. The six old agents
+(`swarm-*-qsearch`, `swarm-*-zachariah`) and their token items in
+Mirazo-Root are still there, unused: deleting them was refused by the
+session's permission check, and they expire on 2026-11-21.
 
 ## Where each identity stands
 
@@ -72,7 +38,7 @@ holds every login against Proton Pass.
 | Legal | planned, Wyoming, EIN none | active; state, date, EIN unknown | natural |
 | Domain | kagamizo.com, mail live | jingzo.org, mail live | mirazo.org, mail live (zach@, automations@; more as Pass aliases) |
 | Registered agent | northwest-kagamizo, planned | northwest-jingzo, active; login on qsearchllc_wy@outlook.com; CLI cannot sign in | — |
-| Bank | mercury, planned (needs the LLC and EIN) | mercury-jingzo, active, not signed in; holds the $5; login is the person's passmail alias | mercury-mirazo, active, signed in (Zachariah-Root-Sessions), $0; login a passmail alias |
+| Bank | mercury, planned (needs the LLC and EIN) | mercury-jingzo, active, not signed in; holds the $5; login is the person's passmail alias | mercury-mirazo, active, signed in (Mirazo-Root-Sessions), $0; login a passmail alias |
 | Brokerage | — (none needed) | public-jingzo, active; login on the outlook address; its API not relied on (terms) | public-mirazo, active; no login item in Pass; personal secret missing |
 | Credit | — (D-U-N-S once the EIN exists) | — (D-U-N-S) | experian, active; login still zachary.oshodi@outlook.com |
 | Other | github active; hetzner, openrouter planned | arxiv-jingzo planned (paused; likely self-hosted papers and Substack instead) | proton, cloudflare active; both log in as zachariah.oshodi@protonmail.com |
