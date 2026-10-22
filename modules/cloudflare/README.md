@@ -225,7 +225,7 @@ around.
   the formation and EIN orders are placed through Northwest's MCP server and
   paid by a pay link texted to you. It is formed in Wyoming
   (`identity.entities.kagamizo.legal.jurisdiction`).
-- **arXiv** (`arxiv-qsearch`): registration is a web form, and a first
+- **arXiv** (`arxiv-jingzo`): registration is a web form, and a first
   submission needs a personal endorsement from an established author in the
   field; arXiv has no submission API. It signs up as research@jingzo.org once
   that domain's mail is live.
@@ -249,13 +249,25 @@ around.
   `mcp-connector` client for AI clients with manual OAuth settings, not a
   loopback redirect for a CLI. `northwest login` registers its own client
   when the identity server allows dynamic registration and otherwise falls
-  back to `mcp-connector`. Tried on 2026-10-22 for `northwest-qsearch`:
+  back to `mcp-connector`. Tried on 2026-10-22 for `northwest-jingzo`:
   registration is refused (403) and `mcp-connector` rejects a 127.0.0.1
   redirect ("Invalid parameter: redirect_uri"), so `northwest login` cannot
   sign in. The documented path is Northwest as a custom connector in Claude
   (claude.ai/customize/connectors), signed in there; a session started after
   that reaches its tools directly. Closing this for the CLI needs a client
   from Northwest that admits a loopback redirect.
+- **Logins on their owner's domain.** Every account signs in with an
+  address on its owner's domain (`accounts.held.<a>.login`), and
+  governance-authorize refuses any account whose Proton Pass login says
+  otherwise. `nix run .#identity-audit` lists them. Moving a login's address
+  is each provider's own account settings (Mercury, Northwest, Public,
+  Cloudflare, Experian; Proton signs in with any of its addresses), and a
+  company's Mercury login is its own Mercury user, invited in Mercury's team
+  settings. Proton Pass's item is updated after, to match. The personal
+  Public account has no login item in Proton Pass at all yet.
+- **Agents and logins**: an agent's Proton Pass token opens only its
+  entity's sessions vault, not the login items, so governance-authorize
+  denies every agent until an audit record it can read exists.
 - **Credit bureaus** (`modules/experian`): no bureau has an API for your own
   file, so moving Experian's email to automations@mirazo.org, alerts and
   freezes are its web settings. A freeze at each of the three bureaus is the
@@ -312,7 +324,7 @@ swarms per entity (legal, accounting, governance) run agency-agents personas
 as OpenCode subagents:
 
 ```bash
-nix run .#orca-swarm -- legal-qsearch
+nix run .#orca-swarm -- legal-jingzo
 ```
 
 The base policies hold whatever the grants say: an agent never spends,

@@ -43,8 +43,13 @@
     held.proton = {
       provider = "proton";
       plan = "unlimited";
-      owner = "zachariah";
+      owner = "mirazo";
       status = "active";
+      # Proton signs in with any address of the account, the domain's too.
+      login = {
+        item = "Proton";
+        email = "zach@mirazo.org";
+      };
     };
   };
 }

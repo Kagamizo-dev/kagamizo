@@ -1,4 +1,4 @@
-# Public: the brokerage, yours personally (its API is for personal,
+# Public: the brokerages, yours and Jingzo's (its API is for personal,
 # non-commercial use). Its API trades and reads; it moves no money in or out,
 # so funding it stays a Gap.
 {
@@ -54,11 +54,63 @@
       };
     };
 
-    held.public = {
+    # A business account of a single-owner LLC. Its API is not relied on
+    # until Public says its API terms (personal, non-commercial) cover one.
+    plans.public.business = {
+      checked = "2026-10-22";
+      capabilities = {
+        tradingApi = {
+          value = false;
+          source = "https://public.com/api/docs";
+        };
+        personalSecrets = {
+          value = false;
+          source = "https://public.com/api/docs";
+        };
+        transfersApi = {
+          value = false;
+          source = "https://public.com/api/docs";
+        };
+        historyApi = {
+          value = false;
+          source = "https://public.com/api/docs";
+        };
+        scopedSecrets = {
+          value = false;
+          source = "https://public.com/api/docs/templates/get-access-token";
+        };
+        documentsApi = {
+          value = false;
+          source = "https://public.com/api/docs";
+        };
+      };
+    };
+
+    # Yours: the portfolio and retirement accounts, the one `brokerage` and
+    # `trade` act on.
+    held.public-mirazo = {
       provider = "public";
       plan = "individual";
-      owner = "zachariah";
+      owner = "mirazo";
       status = "active";
+      login = {
+        item = "Public";
+        email = "finance@mirazo.org";
+      };
+    };
+
+    # Jingzo's research and trading account, a business account of QSearch
+    # LLC. Nothing acts on it yet: Public's API terms are for personal use,
+    # and nothing found says they cover a business account (HANDOFF.md).
+    held.public-jingzo = {
+      provider = "public";
+      plan = "business";
+      owner = "jingzo";
+      status = "active";
+      login = {
+        item = "public.com";
+        email = "finance@jingzo.org";
+      };
     };
   };
 }

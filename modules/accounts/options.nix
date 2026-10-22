@@ -7,7 +7,8 @@
 #   accounts.capabilities.<provider>  the provider's closed capability set
 #   accounts.plans.<provider>.<plan>  what a plan includes
 #   accounts.held.<name>              the accounts that exist or are planned,
-#                                     each on one declared plan
+#                                     each on one declared plan, signed in
+#                                     with an address on its owner's domain
 #
 # This module only types and checks them: each provider's module (proton,
 # cloudflare, github, hetzner, openrouter, ...) declares its own.
@@ -85,7 +86,7 @@ let
   );
 
   held = types.submodule (
-    { config, ... }:
+    { name, config, ... }:
     {
       options = {
         provider = mkOption { type = types.enum providers; };
@@ -107,6 +108,25 @@ let
           type = types.nullOr signup;
           default = null;
           description = "How the account is created, for `signup`.";
+        };
+        # Proton Pass is the authority on who signs in where: the login item
+        # is what `identity-audit` and governance-authorize read (its address
+        # only, never the password), and it must say this address.
+        login = {
+          item = mkOption {
+            type = types.str;
+            default = name;
+            description = "Title of the account's login item in its owner's vault.";
+          };
+          email = mkOption {
+            type = types.nullOr (types.strMatching "[a-z0-9._+-]+@[a-z0-9.-]+");
+            default = if config.signup == null then null else config.signup.email;
+            defaultText = "signup.email";
+            description = ''
+              The address the account signs in with: on one of its owner's
+              domains, so a login always says whose it is.
+            '';
+          };
         };
       };
     }
@@ -181,9 +201,34 @@ let
       )
     ) cfg.held
   );
+  # Every login is on its owner's domain, and two accounts never share one.
+  domainsOf =
+    e: lib.attrNames (lib.filterAttrs (_: d: d.entity == e) config.identity.checked.domains);
+  loginProblems =
+    lib.concatLists (
+      lib.mapAttrsToList (
+        name: a:
+        if a.login.email == null then
+          [ "accounts.held.${name}.login.email: say which address the account signs in with" ]
+        else
+          lib.optional (!lib.elem (lib.last (lib.splitString "@" a.login.email)) (domainsOf a.owner))
+            "accounts.held.${name}.login.email: ${a.login.email} is not on ${a.owner}'s domains (${lib.concatStringsSep ", " (domainsOf a.owner)})"
+      ) cfg.held
+    )
+    ++
+      lib.mapAttrsToList
+        (key: names: "accounts.held: ${lib.concatStringsSep ", " names} share the login ${key}")
+        (
+          lib.filterAttrs (_: ns: lib.length ns > 1) (
+            lib.groupBy' (ns: n: ns ++ [ n ]) [ ] (
+              n: "${cfg.held.${n}.provider}:${cfg.held.${n}.login.email}"
+            ) (lib.attrNames (lib.filterAttrs (_: a: a.login.email != null) cfg.held))
+          )
+        );
   problems =
     planProblems
     ++ signupProblems
+    ++ loginProblems
     ++ lib.concatMap (
       d:
       let

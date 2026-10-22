@@ -37,8 +37,8 @@ let
 in
 {
   governance.controllers = {
-    kagamizo = [ "zachariah" ];
-    qsearch = [ "zachariah" ];
+    kagamizo = [ "mirazo" ];
+    jingzo = [ "mirazo" ];
   };
 
   # Public's personal secret trades as well as reads, so no swarm holds it:
@@ -46,37 +46,37 @@ in
 
   governance.agents = lib.mkMerge [
     (swarm "kagamizo")
-    (swarm "qsearch")
-    (swarm "zachariah")
+    (swarm "jingzo")
+    (swarm "mirazo")
     {
-      legal-qsearch.grants = [
+      legal-jingzo.grants = [
         {
-          account = "northwest-qsearch";
+          account = "northwest-jingzo";
           effects = [ "read" ];
           why = "filing status, annual report due dates, documents served";
         }
       ];
-      accounting-qsearch.grants = [
+      accounting-jingzo.grants = [
         {
-          account = "northwest-qsearch";
+          account = "northwest-jingzo";
           effects = [ "read" ];
           why = "Northwest invoices and refunds, for the books";
         }
         {
-          account = "mercury-qsearch";
+          account = "mercury-jingzo";
           effects = [ "read" ];
           why = "balances and card spend, for the books";
         }
       ];
       # Reads only: changing the company's record stays with its controller.
-      governance-qsearch.grants = [
+      governance-jingzo.grants = [
         {
-          account = "northwest-qsearch";
+          account = "northwest-jingzo";
           effects = [ "read" ];
           why = "company records and registered agent services";
         }
         {
-          account = "mercury-qsearch";
+          account = "mercury-jingzo";
           effects = [ "read" ];
           why = "what the bank holds and what the cards spend, against their limits";
         }

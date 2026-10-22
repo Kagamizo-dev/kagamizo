@@ -61,7 +61,7 @@ in
           done
           action=$(IFS=-; echo "''${words[*]:0:2}")
           [ "''${words[0]:-}" = summary ] && action=summary
-          governance-authorize "public:''${action:-none}" public
+          governance-authorize "public:''${action:-none}" public-mirazo
           exec secretspec run --file ${config.packages.secretspec-toml} --profile public \
             --reason "brokerage $*" -- ${run}/bin/brokerage-run "$@"
         '';

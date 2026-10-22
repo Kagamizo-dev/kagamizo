@@ -42,7 +42,7 @@ in
 {
   governance.problems = missing;
 
-  # Home is the entity's sessions vault and nothing else: a QSearch swarm
+  # Home is the entity's sessions vault and nothing else: a Jingzo swarm
   # cannot open a Kagamizo vault, not even the shared agents one.
   proton.agents = lib.mapAttrs' (
     name: a:

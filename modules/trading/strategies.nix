@@ -115,7 +115,7 @@ in
     # only until the adapter exists and the account question is settled
     # (HANDOFF.md).
     trading.backends.public = {
-      account = "public";
+      account = "public-mirazo";
       adapter = "public";
     };
 
@@ -161,8 +161,8 @@ in
             case "''${1:-}" in
               bars | paper)
                 export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
-                governance-authorize public:historicdata-bars public
-                [ "$1" = bars ] || governance-authorize public:order-preflight-single public
+                governance-authorize public:historicdata-bars ${top.trading.backends.public.account}
+                [ "$1" = bars ] || governance-authorize public:order-preflight-single ${top.trading.backends.public.account}
                 exec secretspec run --file ${config.packages.secretspec-toml} --profile public \
                   --reason "trade $*" -- trade-run "$@"
                 ;;

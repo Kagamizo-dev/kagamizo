@@ -17,6 +17,13 @@
 # controller may do anything to their entity's accounts; an agent never
 # spends, destroys or signs in, and never reaches an account outside the
 # entity it serves. Grants are the only permits an agent ever gets.
+#
+# Proton Pass is the authority on logins: governance-authorize reads the
+# account's login item (the address it signs in with, never the password)
+# into the request's context, and nothing is allowed on an account whose
+# login is missing, differs from the declared one, or is not on its owner's
+# domain. An agent's token opens no login items, so it is denied until an
+# audit it can read exists (a Gap).
 { lib, config, ... }:
 let
   cfg = config.governance;
@@ -26,6 +33,14 @@ let
   accounts = config.accounts.held;
   # A person is a legal identity like any company, and controls their own.
   controllers = n: lib.unique (lib.optional (people ? ${n}) n ++ cfg.controllers.${n} or [ ]);
+  domainsOf =
+    e: lib.attrNames (lib.filterAttrs (_: d: d.entity == e) config.identity.checked.domains);
+  domainOf = email: lib.last (lib.splitString "@" email);
+  # What governance-authorize reads from Proton Pass for each account.
+  logins = lib.mapAttrs (_: a: {
+    vault = entities.${a.owner}.vault;
+    inherit (a.login) item email;
+  }) accounts;
   root = lib.head (
     lib.attrNames (lib.filterAttrs (_: e: e.vault == config.proton.infraVaults.root) people)
   );
@@ -59,8 +74,8 @@ let
   schema = ''
     namespace ${ns} {
       entity Person;
-      entity Entity { kind: String, controllers: Set<Person> };
-      entity Account in [Entity] { owner: Entity, provider: String };
+      entity Entity { kind: String, controllers: Set<Person>, domains: Set<String> };
+      entity Account in [Entity] { owner: Entity, provider: String, login: String, loginDomain: String };
       entity Agent { serves: Entity, purpose: String };
 
       action ${lib.concatMapStringsSep ", " str cfg.effects};
@@ -73,7 +88,7 @@ let
     ${
       lib.concatMapStrings (a: ''
         action ${str a.id} in [${str "${a.provider}:${a.effect}"}]
-          appliesTo { principal: [Person, Agent], resource: [Account] };
+          appliesTo { principal: [Person, Agent], resource: [Account], context: { login?: String } };
       '') actionList
     }}
   '';
@@ -89,6 +104,13 @@ let
       action in [${lib.concatMapStringsSep ", " act neverEffects}],
       resource
     );
+
+    @id("logins-say-whose-they-are")
+    forbid (principal, action, resource is ${ns}::Account)
+    unless {
+      resource.owner.domains.contains(resource.loginDomain) &&
+      context has login && context.login == resource.login
+    };
 
     @id("agents-serve-one-entity")
     forbid (principal is ${ns}::Agent, action, resource is ${ns}::Account)
@@ -128,6 +150,7 @@ let
       attrs = {
         inherit (e) kind;
         controllers = map (uid "Person") (controllers n);
+        domains = domainsOf n;
       };
       parents = [ ];
     }) entities
@@ -136,6 +159,8 @@ let
       attrs = {
         owner = uid "Entity" a.owner;
         inherit (a) provider;
+        login = a.login.email;
+        loginDomain = domainOf a.login.email;
       };
       parents = [ (uid "Entity" a.owner).__entity ];
     }) accounts
@@ -152,14 +177,17 @@ let
   # grant allows, and every base rule denies, for one action of each kind.
   # `reason` is the policies that decide it: a test fails if the right
   # answer comes from the wrong rule.
-  test = name: principal: action: account: decision: reason: {
+  test = testAs (account: {
+    login = accounts.${account}.login.email;
+  });
+  testAs = context: name: principal: action: account: decision: reason: {
     inherit name decision reason;
     num_errors = 0;
     request = {
       inherit principal;
       action = "${ns}::Action::${str action}";
       resource = ref "Account" account;
-      context = { };
+      context = context account;
     };
     entities = entityJson;
   };
@@ -219,17 +247,37 @@ let
       ) cfg.agents
     )
   );
+  # A login Proton Pass does not confirm denies even the controller.
+  loginTests = lib.concatLists (
+    lib.mapAttrsToList (
+      acc: a:
+      let
+        x = lib.findFirst (x: x.provider == a.provider) null actionList;
+        person = lib.head (controllers a.owner);
+        deny =
+          context: why:
+          testAs (_: context) "${person} may not act on ${acc} ${why}" (ref "Person" person) x.id acc "deny" [
+            "logins-say-whose-they-are"
+          ];
+      in
+      lib.optionals (x != null) [
+        (deny { } "when Proton Pass has no login for it")
+        (deny { login = "someone@example.com"; } "when its login in Proton Pass is another address")
+      ]
+    ) withActions
+  );
 in
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
     let
+      loginsJson = pkgs.writeText "logins.json" (builtins.toJSON logins);
       policy = pkgs.runCommand "governance-policy" { } ''
         mkdir $out
         cp ${pkgs.writeText "schema.cedarschema" schema} $out/schema.cedarschema
         cat ${pkgs.writeText "base.cedar" base} ${pkgs.writeText "grants.cedar" grants} > $out/policies.cedar
         cp ${pkgs.writeText "entities.json" (builtins.toJSON entityJson)} $out/entities.json
-        cp ${pkgs.writeText "tests.json" (builtins.toJSON tests)} $out/tests.json
+        cp ${pkgs.writeText "tests.json" (builtins.toJSON (tests ++ loginTests))} $out/tests.json
       '';
     in
     {
@@ -237,10 +285,30 @@ in
 
       packages.governance-authorize = pkgs.writeShellApplication {
         name = "governance-authorize";
-        runtimeInputs = [ pkgs.cedar ];
+        runtimeInputs = [
+          pkgs.cedar
+          pkgs.jq
+          config.packages.pass-login
+        ];
         text = ''
           action=''${1:?usage: governance-authorize ACTION ACCOUNT}
           account=''${2:?usage: governance-authorize ACTION ACCOUNT}
+          export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+
+          # The account's login as Proton Pass has it: its addresses only
+          # (username, when it is one, and email), never the password.
+          vault=$(jq -r --arg a "$account" '.[$a].vault // empty' ${loginsJson})
+          item=$(jq -r --arg a "$account" '.[$a].item // empty' ${loginsJson})
+          declared=$(jq -r --arg a "$account" '.[$a].email // empty' ${loginsJson})
+          seen=
+          [ -z "$vault" ] || seen=$(pass-login "$vault" "$item")
+          context=$(mktemp)
+          trap 'rm -f "$context"' EXIT
+          if [ -n "$seen" ] && [ "$(wc -l <<<"$seen")" = 1 ]; then
+            jq -n --arg l "$seen" '{login: $l}' >"$context"
+          else
+            echo '{}' >"$context"
+          fi
           who=''${KAGAMIZO_PRINCIPAL:-person:${root}}
           case "$who" in
             agent:*) principal="${ns}::Agent::\"''${who#agent:}\"" ;;
@@ -249,10 +317,15 @@ in
           esac
           if cedar authorize --schema ${policy}/schema.cedarschema --policies ${policy}/policies.cedar \
             --entities ${policy}/entities.json --principal "$principal" \
-            --action "${ns}::Action::\"$action\"" --resource "${ns}::Account::\"$account\"" >/dev/null; then
+            --action "${ns}::Action::\"$action\"" --resource "${ns}::Account::\"$account\"" \
+            --context "$context" >/dev/null; then
             exit 0
           fi
           echo "governance: $who may not $action on $account (modules/governance)" >&2
+          if [ "$seen" != "$declared" ]; then
+            echo "governance: its login in Proton Pass ($vault / $item) is ''${seen:-missing or unreadable}, not $declared" | tr '\n' ' ' >&2
+            echo >&2
+          fi
           exit 1
         '';
       };

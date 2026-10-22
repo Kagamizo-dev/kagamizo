@@ -94,12 +94,16 @@
       };
     };
 
-    # QSearch's, already open: its registered agent and filings.
-    held.northwest-qsearch = {
+    # Jingzo's (QSearch LLC), already open: its registered agent and filings.
+    held.northwest-jingzo = {
       provider = "northwest";
       plan = "registered-agent";
-      owner = "qsearch";
+      owner = "jingzo";
       status = "active";
+      login = {
+        item = "NorthwestRegisteredAgent";
+        email = "legal@jingzo.org";
+      };
     };
   };
 }

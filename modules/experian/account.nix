@@ -42,8 +42,9 @@
     held.experian = {
       provider = "experian";
       plan = "free";
-      owner = "zachariah";
+      owner = "mirazo";
       status = "active";
+      login.item = "Experian";
       # The login as it is to be, with its email moved to
       # automations@mirazo.org. Its item already exists in Zachariah-Root,
       # titled "Experian" (made by hand before this repo), so `signup

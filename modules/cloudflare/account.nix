@@ -68,8 +68,12 @@
     held.cloudflare = {
       provider = "cloudflare";
       plan = "free";
-      owner = "zachariah";
+      owner = "mirazo";
       status = "active";
+      login = {
+        item = "Cloudflare";
+        email = "zach@mirazo.org";
+      };
     };
   };
 }

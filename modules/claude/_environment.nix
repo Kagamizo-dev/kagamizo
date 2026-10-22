@@ -103,7 +103,7 @@ in
         ];
       };
       arxiv = {
-        reason = "QSearch's and Zachariah's research: the query API (modules/arxiv, paused)";
+        reason = "Jingzo's and Mirazo's research: the query API (modules/arxiv, paused)";
         hosts = [
           "arxiv.org"
           "export.arxiv.org"

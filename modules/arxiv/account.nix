@@ -1,4 +1,4 @@
-# arXiv: where QSearch publishes. Its query API is open and read-only;
+# arXiv: where Jingzo publishes. Its query API is open and read-only;
 # submitting is a web form, and a new author needs a personal endorsement
 # from an established author in the field (arXiv staff cannot give one).
 {
@@ -36,14 +36,15 @@
 
     # Organization "QSearch LLC". The verification mail goes to
     # research@jingzo.org, so it waits on jingzo.org's mail being live.
-    held.arxiv-qsearch = {
+    held.arxiv-jingzo = {
       provider = "arxiv";
       plan = "author";
-      owner = "qsearch";
+      owner = "jingzo";
       status = "planned";
+      login.item = "arxiv-qsearch";
       signup = {
         url = "https://arxiv.org/user/register";
-        handle = "qsearch";
+        handle = "jingzo";
         email = "research@jingzo.org";
         credential = "password";
         findings = [

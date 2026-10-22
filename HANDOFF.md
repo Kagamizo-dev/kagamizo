@@ -52,19 +52,35 @@ Then sign the session in: `pass-cli login` (an approval link). Cloudflare's
 root session (`cloudflare-login`, a device code, 5 minutes) is only needed for
 `registrar` and `bootstrap`; DNS applies run on the stored CI token.
 
+## Names
+
+Three identities, each named after its domain: **Mirazo** (Zachariah, the
+person, mirazo.org), **Jingzo** (QSearch LLC on paper: the EIN, Northwest,
+the state; jingzo.org) and **Kagamizo** (Kagamizo LLC, kagamizo.com). The
+entity ids are `mirazo`, `jingzo`, `kagamizo`. Proton Pass's vaults and
+agent tokens still carry the old names (Zachariah-Root, QSearch-LLC,
+`swarm-*-qsearch`, `swarm-*-zachariah`): renaming them is a Proton Pass
+change, waiting on the owner's go.
+
 ## Where each identity stands
 
-`nix run .#identity-status` prints this live.
+`nix run .#identity-status` prints this live; `nix run .#identity-audit`
+holds every login against Proton Pass.
 
-| | Kagamizo LLC | QSearch LLC | Zachariah (person) |
+| | Kagamizo LLC | Jingzo (QSearch LLC) | Mirazo (Zachariah) |
 |---|---|---|---|
 | Legal | planned, Wyoming, EIN none | active; state, date, EIN unknown | natural |
 | Domain | kagamizo.com, mail live | jingzo.org, mail live | mirazo.org, mail live (zach@, automations@; more as Pass aliases) |
-| Registered agent | northwest-kagamizo, planned (login item ready) | northwest-qsearch, active; the CLI cannot sign in (see Next 4) | — |
-| Bank | mercury, planned (needs the LLC and EIN) | mercury-qsearch, active, signed in (session in QSearch-LLC-Sessions); checking and savings at $0, no cards | — |
-| Brokerage | — | — | public, active; personal secret missing (a Gap) |
-| Credit | — (a D-U-N-S number once the EIN exists) | — (D-U-N-S) | experian, active; its email to move to automations@mirazo.org |
-| Other | github active; hetzner, openrouter planned | arxiv-qsearch planned (paused) | proton, cloudflare active |
+| Registered agent | northwest-kagamizo, planned | northwest-jingzo, active; login on qsearchllc_wy@outlook.com; CLI cannot sign in | — |
+| Bank | mercury, planned (needs the LLC and EIN) | mercury-jingzo, active, not signed in; holds the $5; login is the person's passmail alias | mercury-mirazo, active, signed in (Zachariah-Root-Sessions), $0; login a passmail alias |
+| Brokerage | — (none needed) | public-jingzo, active; login on the outlook address; its API not relied on (terms) | public-mirazo, active; no login item in Pass; personal secret missing |
+| Credit | — (D-U-N-S once the EIN exists) | — (D-U-N-S) | experian, active; login still zachary.oshodi@outlook.com |
+| Other | github active; hetzner, openrouter planned | arxiv-jingzo planned (paused; likely self-hosted papers and Substack instead) | proton, cloudflare active; both log in as zachariah.oshodi@protonmail.com |
+
+Every login in Jingzo's vault is on qsearchllc_wy@outlook.com, and the
+vault holds logins no account declares yet: Email (that outlook address),
+IBKR (two), Github, Gitea, Arxiv. Kagamizo's holds Proton and
+MirrorConsulting, also undeclared.
 
 Proton's plan is full: 3 of 3 custom domains, 15 of 15 addresses; any further
 address is a Proton Pass alias. Proton Pass has every entity's vault plus a `<Vault>-Sessions` vault each, and
@@ -73,37 +89,41 @@ root vault.
 
 ## Next, in this order
 
-1. **Mercury.** Done for QSearch: one session per account, `mercury-qsearch`
-   signed in on 2026-10-22, its swarms' read grants in place. Open with the
-   owner: QSearch's account holds $0, so vendor cards from it would need
-   funding first; otherwise they wait for Kagamizo's account.
-2. **Public.** Its personal secret is made once in Public's settings (a Gap);
-   then `brokerage summary` works for the owner. No swarm gets it: the secret
-   trades as well as reads.
-3. **OpenRouter.** Sign up as dev@kagamizo.com (login item ready), first
-   top-up and management key in its dashboard (Gaps), then `openrouter apply`
-   mints the five capped keys (host, fleet, one per identity's swarms). The
-   card for it comes from step 1.
-4. **Northwest.** `northwest login` cannot sign in: dynamic registration is
+1. **Logins onto their domains.** governance-authorize now refuses any
+   account whose Proton Pass login is not its declared address on its
+   owner's domain, the card included (the owner's call). Per account, the
+   provider's email moves (its settings, a Gap), then the Pass item is
+   updated to match, then `identity-audit` shows ok. First: Jingzo's own
+   Mercury user on finance@jingzo.org, then `mercury-session --account
+   mercury-jingzo login`.
+2. **The $5 OpenRouter card** from mercury-jingzo once it is signed in:
+   `mercury.account` to mercury-jingzo and the OpenRouter card at $5
+   (both waiting on the owner: which entity owns OpenRouter, since the card
+   is Jingzo's and the account is declared Kagamizo's).
+3. **Proton Pass renames** (vaults, agent tokens) to the new names, on the
+   owner's go; then `proton plan` shows nothing to do.
+4. **Public.** public-mirazo's login item and personal secret (Gaps); then
+   `brokerage summary`. public-jingzo waits on the API terms question.
+5. **OpenRouter.** Signup, first top-up and management key (Gaps), then
+   `openrouter apply` mints the capped keys.
+6. **Northwest.** `northwest login` cannot sign in: dynamic registration is
    refused (403) and `mcp-connector` rejects a 127.0.0.1 redirect (a Gap).
    Northwest's documented path is a custom connector in Claude
    (claude.ai/customize/connectors); a session started after it is added
    reaches the tools directly. Then: the server's tools/list into
    `modules/northwest/_json/tools.json`, every new tool's effect in
-   `modules/northwest/tools.nix`, and QSearch's state, formation date and
+   `modules/northwest/tools.nix`, and Jingzo's state, formation date and
    EIN status off `get_company_details_tool` into
-   `modules/identity/qsearch.nix`.
-5. **Agents to work.** With models (3) and accounts (1, 4) in place, run the
-   swarms (`nix run .#orca-swarm -- <name>`) and start assigning work. The
-   always-on host (Hetzner: Open WebUI, OpenCode, Proton Bridge) is the
-   previous session's tasks 4 and 5.
-6. **The PR** from this branch into `main`, once the owner asks; the branch
-   is green (`nix flake check`, everything but the VM and image builds run
-   here).
+   `modules/identity/jingzo.nix`.
+7. **The host** (Hetzner: Open WebUI, OpenCode, Proton Bridge on a private
+   domain), then the swarms at work. Agents are denied by the login rule
+   until they can read an audit record (a Gap).
+8. **The PR** from this branch into `main`, once the owner asks.
 
 ## Paused
 
-arXiv (`arxiv-qsearch`, planned, login item ready): paused by the owner.
+arXiv (`arxiv-jingzo`, planned, login item ready): paused; the owner leans
+toward self-hosted papers, GitHub and Substack instead.
 
 ## How much of each lifecycle is CLI
 

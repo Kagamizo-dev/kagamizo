@@ -54,7 +54,7 @@ modules/
 ├─ northwest/     registered agent and filings over its MCP server; `northwest`
 ├─ governance/    controllers, typed actions, agents; Cedar; `orca-swarm`
 ├─ trading/       NautilusTrader 1.231, brokerages as backends, strategies; `trade`
-├─ arxiv/         QSearch's author account (planned)
+├─ arxiv/         Jingzo's author account (paused)
 ├─ public/        the brokerage: CLI, account; `brokerage`
 ├─ catalog/       what each pinned tool can do (_json/), and its extractors
 ├─ claude/        cloud session tools and network allowlist
@@ -167,6 +167,18 @@ item. Moving money still asks for a tap in the Mercury app.
 
 `nix run .#brokerage -- summary` reads Public (accounts, portfolio); any other
 arguments go to Public's own CLI, with its secret from Proton Pass.
+
+## Logins: Proton Pass is the authority
+
+Every account signs in with an address on its owner's domain: you
+(Mirazo, mirazo.org), Jingzo (QSearch LLC on paper, jingzo.org) and
+Kagamizo (kagamizo.com). Each account declares its login item and that
+address (`accounts.held.<a>.login`); evaluation fails if the address is on
+anyone else's domain. Before any action, `governance-authorize` reads the
+login item's addresses (never its password) from Proton Pass, and the Cedar
+policy `logins-say-whose-they-are` denies the action unless Proton Pass says
+exactly the declared address. `nix run .#identity-audit` shows every
+account's standing and any login in a company's vault no account declares.
 
 ## Checks
 

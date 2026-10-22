@@ -1,11 +1,12 @@
-# QSearch LLC, the research arm; kept separate from Kagamizo while the two run
-# separate business operations. Its domain is the Mandarin for "mirror"
+# Jingzo, the research arm: QSearch LLC on paper (the EIN, Northwest, the
+# state's records), Jingzo everywhere else, after its domain. Kept separate
+# from Kagamizo while the two run separate business operations. Its domain is the Mandarin for "mirror"
 # (镜 jìng, 镜子 jìngzi, 镜像 jìngxiàng, 明镜 míngjìng "bright mirror") with
 # Kagamizo's -zo: jingzo.org, since jingzo.com was taken. Role mailboxes,
 # as on kagamizo.com; which service uses which lives in Proton Pass.
 {
   identity = {
-    entities.qsearch = {
+    entities.jingzo = {
       legalName = "QSearch LLC";
       kind = "llc";
       vault = "QSearch-LLC";
@@ -13,13 +14,13 @@
       # records (`northwest call get_company_details_tool`) and written here.
       legal = {
         status = "active";
-        registeredAgent = "northwest-qsearch";
+        registeredAgent = "northwest-jingzo";
         ein = "unknown";
       };
     };
 
     domains."jingzo.org" = {
-      entity = "qsearch";
+      entity = "jingzo";
       zoneId = "6e79f3b9333039e6e843b08a75475174";
       registrar = "cloudflare";
       registration = {
