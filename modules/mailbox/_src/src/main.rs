@@ -265,7 +265,7 @@ fn login() -> Result<()> {
                 2 => {
                     // Bridge prints the challenge's address on its own line.
                     bridge.wait(&["https://"], 30)?;
-                    let url = format!("https://{}", bridge.line(30)?.trim());
+                    let url = bridge.line(30)?.trim().to_owned();
                     eprintln!("mailbox: Proton asks for a human verification: {url}");
                     ask("press Enter here once it is done")?;
                     bridge.send("")?;
