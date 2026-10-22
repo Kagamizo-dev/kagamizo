@@ -15,7 +15,12 @@
 #                                     parameters, returns) and enum of the
 #                                     pinned Chromium, asked of Chromium itself
 #
-# ../_lib/cli.nix types every invocation in this repo against them. Bumping a
+# ../_lib/cli.nix types every invocation in this repo against them, and
+# `checks.catalog-coverage` holds every raw call (shell lines, Rust's
+# Command::new) to the same catalogs; its report, per module, is
+#
+#   nix build .#catalog-coverage && cat result
+# Bumping a
 # tool changes its catalog, so a version bump arrives as a reviewable diff;
 # `nix flake check` fails until the committed catalogs match the pinned tools:
 #
@@ -100,9 +105,14 @@
           path = gh;
         }
       ];
+      coverage = pkgs.runCommand "catalog-coverage" { } ''
+        ${python} ${./_extract/coverage.py} ${self}/modules ${self}/modules/catalog/_json $out
+      '';
     in
     {
+      checks.catalog-coverage = coverage;
       packages = {
+        catalog-coverage = coverage;
         catalog = catalogs;
         catalog-update = pkgs.writeShellApplication {
           name = "catalog-update";
