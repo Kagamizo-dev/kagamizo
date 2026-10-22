@@ -49,10 +49,9 @@ in
       {
         do = "fill";
         target = email;
-        value = {
-          from = "pass";
-          field = "username";
-        };
+        # The declared address, which governance-authorize has just held
+        # to the login item's; the item's username may be no address at all.
+        value.from = "declared";
       }
       {
         do = "fill";
