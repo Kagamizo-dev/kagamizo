@@ -137,29 +137,66 @@ in
         reason = "Provider web apps the browser flows drive (modules/browser)";
         hosts = [
           # Mercury's web app: its scripts, its API, the device check its
-          # sign-in posts to (refused on a submitted sign-in, 2026-10-22)
+          # sign-in posts to (refused on a submitted sign-in, 2026-10-22),
+          # and the asset and loader hosts its scripts name
           "cdn.mercury.com"
+          "acdn.mercury.com"
+          "ldr.mercury.com"
           "backend.mercury.com"
           "fp.mercury.com"
           # Public's web app: its API and the identity check at sign-in
           "plat.public.com"
-          "prod-api.154310543964.hellopublic.com"
+          "*.hellopublic.com"
+          "network.dv.socure.io"
           "ingestion.dv.socure.io"
+          "ingestion.dv.socure.us"
           # Cloudflare's dashboard sign-in captcha (Turnstile)
           "challenges.cloudflare.com"
-          # OpenRouter's sign-in (Clerk)
+          # OpenRouter's sign-in (Clerk, and its bot protection)
           "clerk.openrouter.ai"
-          # Northwest's client portal
+          "cdn.protect.clerk.com"
+          # OpenRouter's credit top-up (Stripe's checkout)
+          "js.stripe.com"
+          "api.stripe.com"
+          "m.stripe.network"
+          "hooks.stripe.com"
+          "checkout.stripe.com"
+          # Northwest's client portal and the frontend it loads
           "accounts.northwestregisteredagent.com"
-          # GitHub's web assets (organization creation is web-only)
+          "ct-frontend.corporatetools.com"
+          # GitHub's web assets (organization creation is web-only), its
+          # signup captcha and avatars
           "github.githubassets.com"
           "api.github.com"
-          # Experian: the credit file's login, its email and freezes
+          "octocaptcha.com"
+          "avatars.githubusercontent.com"
+          # Experian: the credit file's login, its email and freezes, and the
+          # captcha its sign-in shows
           "usa.experian.com"
-          # Substack: research publishing
+          "hcaptcha.com"
+          "*.hcaptcha.com"
+          # Hetzner's Cloud Console (its sign-in is behind a proof-of-work page)
+          "console.hetzner.cloud"
+          "console.hetzner.com"
+          # Gitea: the hosted account Jingzo's vault holds a login for
+          "gitea.com"
+          # Substack: research publishing, and its assets
           "substack.com"
+          "substackcdn.com"
           # arXiv's web assets
           "static.arxiv.org"
+        ];
+      };
+      # Moving a login off qsearchllc_wy@outlook.com confirms at that
+      # address, so the flows read its mailbox until it is retired last.
+      outlook = {
+        reason = "The outlook mailbox the old logins confirm at (modules/browser)";
+        hosts = [
+          "login.live.com"
+          "account.live.com"
+          "outlook.live.com"
+          "login.microsoftonline.com"
+          "outlook.office365.com"
         ];
       };
       # The legal corpus (modules/legal): primary sources, mirrored with
