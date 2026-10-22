@@ -8,6 +8,9 @@ let
   hosts = [
     "app.mercury.com"
     "mercury.com"
+    # The CLI's OAuth approval (`mercury-session login`), opened in the
+    # same signed-in browser so its 127.0.0.1 callback lands here
+    "oauth2.mercury.com"
   ];
   email = {
     by = "role";
