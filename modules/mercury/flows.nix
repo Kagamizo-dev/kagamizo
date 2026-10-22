@@ -19,6 +19,13 @@ let
   };
 in
 {
+  # Its device check and other confirmations, read by `mailbox link`
+  # (modules/mailbox); the link's path is written once one has been seen.
+  mailbox.senders.mercury = {
+    from = [ "mercury.com" ];
+    inherit hosts;
+  };
+
   browser.flows.mercury.survey = {
     effect = "move-login";
     description = "The sign-in page's controls, by role and name";

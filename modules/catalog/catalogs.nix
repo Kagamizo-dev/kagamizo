@@ -11,6 +11,9 @@
 #                                     from its pinned Go source
 #   _json/public.json               every public command, argument and
 #                                     option, from its click tree
+#   _json/bridge.json               Proton Mail Bridge's flags and every
+#                                     command of its CLI, from its pinned
+#                                     source
 #   _json/cdp.json                  every DevTools Protocol command (its
 #                                     parameters, returns) and enum of the
 #                                     pinned Chromium, asked of Chromium itself
@@ -75,7 +78,15 @@
         ${python} ${./_extract/cdp.py} ${pkgs.lib.getExe pkgs.chromium} $out
       '';
 
+      bridge = pkgs.runCommand "bridge.json" { } ''
+        ${python} ${./_extract/bridge.py} ${pkgs.protonmail-bridge.src} $out
+      '';
+
       catalogs = pkgs.linkFarm "catalog" [
+        {
+          name = "bridge.json";
+          path = bridge;
+        }
         {
           name = "cdp.json";
           path = cdp;

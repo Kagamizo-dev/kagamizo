@@ -90,25 +90,35 @@ def shell_calls(path, text, tools):
 
 
 def rust_calls(path, text, tools):
-    """A Rust file that runs a tool: its command word pairs and its options,
-    as string literals, all held to the commands the file names."""
+    """A Rust file that runs a tool: each `Command::new("tool")` call's
+    string literals up to where it runs, its command word pairs and
+    options. A call whose arguments come from a helper (`.args(args)`) has
+    none of its own; then the file's literals are what it is given."""
     for tool, cat in tools.items():
-        if f'Command::new("{tool}")' not in text:
+        marker = f'Command::new("{tool}")'
+        spans = []
+        for m in re.finditer(re.escape(marker), text):
+            end = re.search(r"\.(output|spawn|status)\(\)", text[m.end():])
+            spans.append(text[m.end(): m.end() + end.start()] if end else text[m.end():])
+        if not spans:
             continue
-        literals = re.findall(r'"([a-z][a-z0-9-]*)",\s*"([a-z][a-z0-9-]*)"', text)
-        commands = sorted(
-            {f"{a} {b}" for a, b in literals if f"{a} {b}" in cat["commands"]}
-        )
-        options = sorted(set(re.findall(r'"--([a-z][a-z0-9-]*)"', text)))
-        if not commands:
-            yield tool, None, options, path, "(no command found)"
-            continue
-        allowed = set().union(*(options_of(cat, c) for c in commands))
-        for c in commands:
-            yield tool, c, [], path, c
-        for o in options:
-            if o not in allowed:
-                yield tool, commands[0], [o], path, "(options of " + ", ".join(commands) + ")"
+        if all(not re.search(r'"[a-z-]', span) for span in spans):
+            spans = [text]
+        for span in spans:
+            literals = re.findall(r'"([a-z][a-z0-9-]*)",\s*"([a-z][a-z0-9-]*)"', span)
+            commands = sorted(
+                {f"{a} {b}" for a, b in literals if f"{a} {b}" in cat["commands"]}
+            )
+            options = sorted(set(re.findall(r'"--([a-z][a-z0-9-]*)"', span)))
+            if not commands:
+                yield tool, None, options, path, "(no command found)"
+                continue
+            allowed = set().union(*(options_of(cat, c) for c in commands))
+            for c in commands:
+                yield tool, c, [], path, c
+            for o in options:
+                if o not in allowed:
+                    yield tool, commands[0], [o], path, "(options of " + ", ".join(commands) + ")"
 
 
 def main(modules_dir, catalog_dir, out):
