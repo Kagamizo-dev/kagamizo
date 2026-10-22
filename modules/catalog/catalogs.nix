@@ -11,6 +11,9 @@
 #                                     from its pinned Go source
 #   _json/public.json               every public command, argument and
 #                                     option, from its click tree
+#   _json/cdp.json                  every DevTools Protocol command (its
+#                                     parameters, returns) and enum of the
+#                                     pinned Chromium, asked of Chromium itself
 #
 # ../_lib/cli.nix types every invocation in this repo against them. Bumping a
 # tool changes its catalog, so a version bump arrives as a reviewable diff;
@@ -61,7 +64,17 @@
         }/bin/python3 -I ${./_extract/public.py} $out
       '';
 
+      # Chromium serves the protocol it speaks; ask the pinned one.
+      cdp = pkgs.runCommand "cdp.json" { } ''
+        export HOME=$TMPDIR FONTCONFIG_FILE=${pkgs.makeFontsConf { fontDirectories = [ ]; }}
+        ${python} ${./_extract/cdp.py} ${pkgs.lib.getExe pkgs.chromium} $out
+      '';
+
       catalogs = pkgs.linkFarm "catalog" [
+        {
+          name = "cdp.json";
+          path = cdp;
+        }
         {
           name = "mercury.json";
           path = mercury;

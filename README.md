@@ -53,6 +53,7 @@ modules/
 ├─ mercury/       the bank: CLI, account, one capped virtual card per vendor; `cards`
 ├─ northwest/     registered agent and filings over its MCP server; `northwest`
 ├─ governance/    controllers, typed actions, agents; Cedar; `orca-swarm`
+├─ browser/       typed web flows in Rust over the DevTools Protocol; `browser`
 ├─ trading/       NautilusTrader 1.231, brokerages as backends, strategies; `trade`
 ├─ arxiv/         Jingzo's author account (paused)
 ├─ public/        the brokerage: CLI, account; `brokerage`

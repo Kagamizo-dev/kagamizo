@@ -265,6 +265,12 @@ around.
   company's Mercury login is its own Mercury user, invited in Mercury's team
   settings. Proton Pass's item is updated after, to match. The personal
   Public account has no login item in Proton Pass at all yet.
+- **Browser flows** (`modules/browser`): what a provider has no API for
+  runs as a typed flow, stopping only for your approval. Two things wait on
+  you: the session's network allowlist must add `cdn.mercury.com` (Mercury's
+  web app loads its scripts from there), and a flow that moves an account's
+  login has to be allowed by the login rule, which today refuses every
+  action on a mismatched account.
 - **Agents and logins**: an agent's Proton Pass token opens only its
   entity's sessions vault, not the login items, so governance-authorize
   denies every agent until an audit record it can read exists.
