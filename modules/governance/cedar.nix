@@ -227,12 +227,7 @@ let
     )
     ++ lib.concatLists (
       lib.mapAttrsToList (
-        name: agent:
-        let
-          me = ref "Agent" name;
-          granted = acc: e: lib.any (g: g.account == acc && lib.elem e g.effects) agent.grants;
-          never = e: lib.optional (lib.elem e neverEffects) "agents-never-spend-destroy-or-sign-in";
-        in
+        name: _:
         lib.concatLists (
           lib.mapAttrsToList (
             acc: a:
@@ -241,23 +236,71 @@ let
               let
                 x = firstOf a.provider e;
               in
-              if x == null then
-                null
-              else if a.owner != agent.serves then
-                test "${name} may not ${e} ${acc}, ${a.owner}'s" me x.id acc "deny" (
-                  [ "agents-serve-one-entity" ] ++ never e
-                )
-              else if never e != [ ] then
-                test "${name} may never ${e} on ${acc}" me x.id acc "deny" (never e)
-              else
-                test "${name} ${if granted acc e then "may" else "may not"} ${e} ${acc}" me x.id acc (
-                  if granted acc e then "allow" else "deny"
-                ) (lib.optional (granted acc e) "grant:${name}:${acc}")
+              if x == null then null else agentTest name acc e x.id
             ) cfg.effects
           ) withActions
         )
       ) cfg.agents
     )
+  );
+  # What an agent gets for one action on one account: another entity's
+  # account and the never-effects deny, a grant allows, the rest denies.
+  agentTest =
+    name: acc: e: id:
+    let
+      agent = cfg.agents.${name};
+      a = accounts.${acc};
+      me = ref "Agent" name;
+      granted = lib.any (g: g.account == acc && lib.elem e g.effects) agent.grants;
+      never = lib.optional (lib.elem e neverEffects) "agents-never-spend-destroy-or-sign-in";
+      what = if id == (firstOf a.provider e).id then e else id;
+    in
+    if a.owner != agent.serves then
+      test "${name} may not ${what} ${acc}, ${a.owner}'s" me id acc "deny" (
+        [ "agents-serve-one-entity" ] ++ never
+      )
+    else if never != [ ] then
+      test "${name} may never ${what} on ${acc}" me id acc "deny" never
+    else
+      test "${name} ${if granted then "may" else "may not"} ${what} ${acc}" me id acc (
+        if granted then "allow" else "deny"
+      ) (lib.optional granted "grant:${name}:${acc}");
+  # Every browser flow, on every account of its provider: each controller
+  # may run it, a move-login flow even while the login is still another
+  # address, and each agent gets what its effect and grants say.
+  flowTests = lib.concatLists (
+    lib.mapAttrsToList (
+      provider: flows:
+      lib.concatLists (
+        lib.mapAttrsToList (
+          flow: f:
+          let
+            id = toolId provider flow;
+          in
+          lib.concatLists (
+            lib.mapAttrsToList (
+              acc: a:
+              lib.concatMap (
+                person:
+                [
+                  (test "${person} may run ${id} on ${acc}" (ref "Person" person) id acc "allow" [ "controllers" ])
+                ]
+                ++ lib.optional (f.effect == "move-login") (
+                  testAs (_: { login = "someone@example.com"; })
+                    "${person} may run ${id} on ${acc} while its login is another address"
+                    (ref "Person" person)
+                    id
+                    acc
+                    "allow"
+                    [ "controllers" ]
+                )
+              ) (controllers a.owner)
+              ++ lib.mapAttrsToList (name: _: agentTest name acc f.effect id) cfg.agents
+            ) (lib.filterAttrs (_: a: a.provider == provider) accounts)
+          )
+        ) flows
+      )
+    ) config.browser.flows
   );
   # A login Proton Pass does not confirm denies even the controller.
   loginTests = lib.concatLists (
@@ -300,7 +343,9 @@ in
         cp ${pkgs.writeText "schema.cedarschema" schema} $out/schema.cedarschema
         cat ${pkgs.writeText "base.cedar" base} ${pkgs.writeText "grants.cedar" grants} > $out/policies.cedar
         cp ${pkgs.writeText "entities.json" (builtins.toJSON entityJson)} $out/entities.json
-        cp ${pkgs.writeText "tests.json" (builtins.toJSON (tests ++ loginTests))} $out/tests.json
+        cp ${
+          pkgs.writeText "tests.json" (builtins.toJSON (tests ++ loginTests ++ flowTests))
+        } $out/tests.json
       '';
     in
     {
