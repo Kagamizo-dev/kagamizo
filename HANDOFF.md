@@ -113,6 +113,26 @@ root vault.
   snapshot printed a field's typed value (never now; the check asserts
   it); the wrapper's cleanup raced Chromium and failed good runs.
 
+## Where the 2026-10-22 second session left it
+
+- The allowlist above is applied (every host checked through the proxy)
+  and declared in `modules/claude/_environment.nix`.
+- Epic 0: Cedar tests for every browser flow (`checks.governance-cedar`,
+  414 pass); `checks.catalog-coverage` holds every raw call to a cataloged
+  CLI against its catalog, with a per-module report
+  (`nix build .#catalog-coverage`). Still open: host maps from submitted
+  sign-ins.
+- Epic 1 is blocked: `mercury:invite-own-user` on mercury-jingzo reached
+  Mercury and was refused with "That password isn't right." The login item
+  `Jingzo-LLC/app.mercury.com` holds a password Mercury no longer takes (or
+  an address that is not the account's). Not retried, to avoid a lockout.
+  The proposed way out is a `mercury:reset-password` flow ("Forgot
+  password?") whose new password is generated into the item, with the reset
+  mail read by epic 3's Bridge reader; it waits on the owner's go-ahead.
+- The engine reports a flow "done" even when its sign-in was refused:
+  `invite-own-user` needs a `wait-url` off `/login` after "Log in", written
+  once a signed-in URL has been seen.
+
 ## The allowlist to apply (one change, all of it)
 
 Found on 2026-10-22 by loading every provider's sign-in page in the pinned
