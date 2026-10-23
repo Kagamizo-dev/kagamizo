@@ -110,6 +110,17 @@ impl ProtonKey {
     }
 }
 
+/// Where the authenticator's counter starts. A site keeps the highest
+/// counter it has seen and refuses one that is not higher (a cloned key);
+/// the engine's authenticator lives one run, so its count starts each time
+/// from the current Unix time, which every later run exceeds.
+fn sign_count(stored: Option<u32>) -> u32 {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs());
+    u32::try_from(now).unwrap_or(u32::MAX).max(stored.unwrap_or(0))
+}
+
 /// One `passkeys[].content` as a WebAuthn.Credential for its rpId.
 pub fn credential(content: &[u8]) -> Result<(String, Value)> {
     let outer: Serialized = rmp_serde::from_slice(content).context("not Proton's passkey format")?;
@@ -138,7 +149,7 @@ pub fn credential(content: &[u8]) -> Result<(String, Value)> {
         "isResidentCredential": true,
         "rpId": key.rp_id,
         "privateKey": STANDARD.encode(der.as_bytes()),
-        "signCount": key.counter.unwrap_or(0),
+        "signCount": sign_count(key.counter),
     });
     if let Some(handle) = &key.user_handle {
         credential["userHandle"] = json!(STANDARD.encode(handle));
@@ -224,6 +235,8 @@ mod tests {
         assert_eq!(c["userHandle"], "CQ==");
         assert_eq!(c["isResidentCredential"], true);
         assert!(c["privateKey"].as_str().unwrap().len() > 100);
+        // Above every count an earlier run could have reached.
+        assert!(c["signCount"].as_u64().unwrap() > 1_790_000_000);
     }
 
     #[test]
