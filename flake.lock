@@ -218,7 +218,25 @@
           "nixos-raspberrypi",
           "nixpkgs"
         ],
-        "publicdotcom-cli": "publicdotcom-cli"
+        "publicdotcom-cli": "publicdotcom-cli",
+        "secretspec-src": "secretspec-src"
+      }
+    },
+    "secretspec-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790467357,
+        "narHash": "sha256-jWs/9DMlB7m8XPgbq3EsflgW3DyJK7OvIXhDcl0+syc=",
+        "ref": "refs/tags/v0.21.1",
+        "rev": "5a8927d2b800c604fee72970ffbd137c57820fd5",
+        "revCount": 1398,
+        "type": "git",
+        "url": "https://github.com/cachix/secretspec"
+      },
+      "original": {
+        "ref": "refs/tags/v0.21.1",
+        "type": "git",
+        "url": "https://github.com/cachix/secretspec"
       }
     }
   },

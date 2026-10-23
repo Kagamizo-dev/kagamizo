@@ -1,6 +1,7 @@
 # pass-cli and secretspec, pinned to releases newer than nixpkgs carries:
 # pass-cli 2.1+ for agent tokens, secretspec 0.19+ for current pass-cli.
 # Hashes match each project's published .sha256 file.
+{ inputs, ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -18,15 +19,23 @@
         installPhase = "install -Dm755 $src $out/bin/pass-cli";
       };
 
-      # Static musl build, so nothing to patch.
-      secretspec = pkgs.stdenvNoCC.mkDerivation rec {
+      # From its tagged source, patched: its Proton Pass provider passes item
+      # and share ids as separate arguments, and an id starting with '-'
+      # (they are URL-safe base64) reads to pass-cli as a flag, so writing a
+      # secret that already exists failed.
+      secretspec = pkgs.rustPlatform.buildRustPackage {
         pname = "secretspec";
         version = "0.21.1";
-        src = pkgs.fetchurl {
-          url = "https://github.com/cachix/secretspec/releases/download/v${version}/secretspec-x86_64-unknown-linux-musl.tar.xz";
-          hash = "sha256-R1EEG3A1hozqQZdKv+utinLruARukRUXnCwfquNWkek=";
-        };
-        installPhase = "install -Dm755 -t $out/bin secretspec";
+        src = inputs.secretspec-src;
+        patches = [ ./_patches/secretspec-ids-as-values.patch ];
+        cargoLock.lockFile = "${inputs.secretspec-src}/Cargo.lock";
+        cargoBuildFlags = [
+          "-p"
+          "secretspec"
+        ];
+        # Its tests reach real providers.
+        doCheck = false;
+        meta.mainProgram = "secretspec";
       };
     in
     {

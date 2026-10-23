@@ -17,6 +17,11 @@
 
     # Banking and brokerage CLIs, built from their pinned release sources with
     # this flake's nixpkgs (modules/mercury, modules/public).
+    # Built from source to carry ./modules/proton/_patches (modules/proton/tools.nix).
+    secretspec-src = {
+      url = "git+https://github.com/cachix/secretspec?ref=refs/tags/v0.21.1";
+      flake = false;
+    };
     mercury-cli = {
       url = "git+https://github.com/MercuryTechnologies/mercury-cli?ref=refs/tags/v0.11.8";
       flake = false;
