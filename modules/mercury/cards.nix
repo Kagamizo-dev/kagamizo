@@ -2,7 +2,9 @@
 # vendor, with a spend limit per interval. A vendor's module declares its own
 # card (mercury.cards.<vendor>), so the limit sits next to what it pays for.
 #
-#   cards [--account A] <command>, on mercury.account unless named:
+#   cards [--account A] <command>, on mercury.account unless named; each
+#   command touches only the cards declared on that account
+#   (mercury.cards.<vendor>.account, mercury.account by default):
 #
 #   cards plan              declared cards against the live ones
 #   cards spend [YYYY-MM]   each card's spend this month against its limit
@@ -38,6 +40,13 @@ let
     fx = inputs.nix-effects.lib;
   };
   catalog = (lib.importJSON ../catalog/_json/mercury.json).commands;
+  mercuryAccounts = lib.filterAttrs (_: a: a.provider == "mercury") config.accounts.held;
+  # Each account the declared cards are issued on, and the vault its
+  # revealed cards go to (its owner's).
+  cardAccounts = lib.unique (map (c: c.account) (lib.attrValues cfg.cards));
+  vaults = lib.genAttrs cardAccounts (
+    a: config.identity.checked.entities.${config.accounts.held.${a}.owner}.vault
+  );
 
   card = types.submodule {
     options = {
@@ -60,6 +69,12 @@ let
         default = "debit";
       };
       why = mkOption { type = types.str; };
+      account = mkOption {
+        type = types.enum (lib.attrNames mercuryAccounts);
+        default = config.mercury.account;
+        defaultText = "mercury.account";
+        description = "The held Mercury account the card is issued on and draws from.";
+      };
     };
   };
   cards = lib.mapAttrs (name: c: c // { nickname = "kagamizo/${name}"; }) cfg.cards;
@@ -86,26 +101,31 @@ in
     };
   };
 
-  config.accounts.demands = lib.optionals (cfg.cards != { }) [
-    {
-      inherit (cfg) account;
-      capability = "virtualCards";
-      need = true;
-      why = "mercury.cards (${lib.concatStringsSep ", " (lib.attrNames cfg.cards)})";
-    }
-    {
-      inherit (cfg) account;
-      capability = "cardSpendLimits";
-      need = true;
-      why = "mercury.cards.*.limitUsd";
-    }
-  ];
+  config.accounts.demands = lib.concatMap (
+    account:
+    let
+      on = lib.attrNames (lib.filterAttrs (_: c: c.account == account) cfg.cards);
+    in
+    [
+      {
+        inherit account;
+        capability = "virtualCards";
+        need = true;
+        why = "mercury.cards (${lib.concatStringsSep ", " on})";
+      }
+      {
+        inherit account;
+        capability = "cardSpendLimits";
+        need = true;
+        why = "mercury.cards.{${lib.concatStringsSep "," on}}.limitUsd";
+      }
+    ]
+  ) cardAccounts;
 
   config.perSystem =
     { pkgs, config, ... }:
     let
       spec = config.packages.secretspec-toml;
-      vault = top.identity.checked.entities.${top.accounts.held.${cfg.account}.owner}.vault;
 
       run = pkgs.writeShellApplication {
         name = "cards-run";
@@ -121,8 +141,10 @@ in
           . ${config.packages.mercury-with-session}
           creds=$XDG_CONFIG_HOME/mercury/credentials.json
           [ -s "$creds" ] || { echo "cards: no Mercury session; run mercury-session --account <account> login" >&2; exit 1; }
-          cards=${lib.escapeShellArg (builtins.toJSON cards)}
-          vault=${lib.escapeShellArg vault}
+          # Only the cards declared on the account this runs for.
+          account=''${CARDS_ACCOUNT:?}
+          cards=$(jq -c --arg a "$account" 'with_entries(select(.value.account == $a))' <<<${lib.escapeShellArg (builtins.toJSON cards)})
+          vault=$(jq -r --arg a "$account" '.[$a] // empty' <<<${lib.escapeShellArg (builtins.toJSON vaults)})
           usage="usage: cards <plan|spend [YYYY-MM]|funds|apply [--prune]|freeze <name>|unfreeze <name>>"
 
           # Each line of jsonl output is a card, or a page holding cards.
@@ -325,12 +347,14 @@ in
           . ${config.packages.mercury-pick-account}
           case "''${1:-}" in
             apply | unfreeze)
-              [ "$account" = ${cfg.account} ] || {
-                echo "cards: the declared cards draw on ${cfg.account}, not $account" >&2
+              card_accounts=(${lib.concatStringsSep " " cardAccounts})
+              [[ " ''${card_accounts[*]} " == *" $account "* ]] || {
+                echo "cards: no card is declared on $account (declared on: ''${card_accounts[*]})" >&2
                 exit 1
               }
               ;;
           esac
+          export CARDS_ACCOUNT=$account
           case "''${1:-}" in
             apply) if [ "''${2:-}" = --prune ]; then action=cards-prune; else action=cards-apply; fi ;;
             plan | spend | funds | freeze | unfreeze) action=cards-$1 ;;
