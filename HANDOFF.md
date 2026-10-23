@@ -129,6 +129,11 @@ root vault.
   Jingzo-LLC-Sessions. Mercury's OAuth page was driven by hand through
   explore steps (account picker "QSearchLLC finance@jingzo.org", security
   key, "Authorize"): make `mercury-session login` run it as a flow.
+- `mercury-cli`: the whole official CLI (71 commands of v0.11.8, the latest
+  tag), each with a declared effect in `modules/mercury/commands.nix` (5
+  excluded: login, logout, status, upgrade, onboarding apply); evaluation
+  fails if the pinned CLI has a command with no effect. Cedar now tests
+  every action of every provider (6126 tests). Read live for mercury-jingzo.
 - Epic 3 done: `modules/mailbox` (Bridge 3.24.2 headless, its vault and
   key in Mirazo-Root-Sessions, signed in as zach@mirazo.org; the Proton
   item's username and email were set to it with the owner's OK). The

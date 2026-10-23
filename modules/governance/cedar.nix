@@ -265,6 +265,27 @@ let
       test "${name} ${if granted then "may" else "may not"} ${what} ${acc}" me id acc (
         if granted then "allow" else "deny"
       ) (lib.optional granted "grant:${name}:${acc}");
+  # Every action of every provider, on every account of that provider: its
+  # controllers may run it, and each agent gets what its effect and grants
+  # say. Browser flows are tested below, with their move-login case.
+  flowIds = lib.concatLists (
+    lib.mapAttrsToList (p: fs: map (f: toolId p f) (lib.attrNames fs)) config.browser.flows
+  );
+  actionTests = lib.concatMap (
+    x:
+    lib.optionals (!(lib.elem x.id flowIds)) (
+      lib.concatLists (
+        lib.mapAttrsToList (
+          acc: a:
+          map (
+            person:
+            test "${person} may run ${x.id} on ${acc}" (ref "Person" person) x.id acc "allow" [ "controllers" ]
+          ) (controllers a.owner)
+          ++ lib.mapAttrsToList (name: _: agentTest name acc x.effect x.id) cfg.agents
+        ) (lib.filterAttrs (_: a: a.provider == x.provider) accounts)
+      )
+    )
+  ) actionList;
   # Every browser flow, on every account of its provider: each controller
   # may run it, a move-login flow even while the login is still another
   # address, and each agent gets what its effect and grants say.
@@ -344,7 +365,7 @@ in
         cat ${pkgs.writeText "base.cedar" base} ${pkgs.writeText "grants.cedar" grants} > $out/policies.cedar
         cp ${pkgs.writeText "entities.json" (builtins.toJSON entityJson)} $out/entities.json
         cp ${
-          pkgs.writeText "tests.json" (builtins.toJSON (tests ++ loginTests ++ flowTests))
+          pkgs.writeText "tests.json" (builtins.toJSON (tests ++ loginTests ++ flowTests ++ actionTests))
         } $out/tests.json
       '';
     in

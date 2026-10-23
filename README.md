@@ -50,7 +50,10 @@ modules/
 ├─ github/        the organization and its repos; `github-bootstrap`
 ├─ hetzner/       account and secrets (the host comes next)
 ├─ openrouter/    account, models, capped keys and card; `openrouter`, `orca-fleet`
-├─ mercury/       the bank: CLI, account, one capped virtual card per vendor; `cards`
+├─ mercury/       the bank: its official CLI, every command governed
+│                 (`mercury-cli`), one capped virtual card per vendor; `cards`
+├─ mailbox/       confirmation mail through Proton Mail Bridge; `mailbox`
+├─ runtime/       the host boundary and the declared environment wrappers run in
 ├─ northwest/     registered agent and filings over its MCP server; `northwest`
 ├─ governance/    controllers, typed actions, agents; Cedar; `orca-swarm`
 ├─ browser/       typed web flows in Rust over the DevTools Protocol; `browser`
@@ -165,6 +168,11 @@ is the sum of its key caps, Cloudflare's the registrar budget), and
 `nix run .#cards -- plan|apply` issues, re-limits, freezes or cancels them.
 Where Mercury reveals a card, its details go straight into a Proton Pass card
 item. Moving money still asks for a tap in the Mercury app.
+
+`nix run .#mercury-cli -- --account mercury-jingzo <command>` runs any command
+of Mercury's official CLI (pinned, every one typed by what it does to the
+account in `modules/mercury/commands.nix`), after governance allows it,
+with the account's session from Proton Pass.
 
 `nix run .#brokerage -- summary` reads Public (accounts, portfolio); any other
 arguments go to Public's own CLI, with its secret from Proton Pass.
