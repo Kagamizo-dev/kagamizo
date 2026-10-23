@@ -142,71 +142,85 @@ in
           meta.mainProgram = "mailbox";
         };
         # Bridge finds its keychain by the name `pass` on its PATH.
+        frozen = import ../_lib/frozen.nix {
+          inherit lib pkgs;
+          inherit (top) runtime;
+        };
+        inner = config.packages.mailbox-inner;
         keychain = pkgs.runCommand "mailbox-keychain" { } ''
           mkdir -p $out/bin
           ln -s ${run}/bin/mailbox-keychain $out/bin/pass
         '';
       in
       {
-        packages.mailbox-run =
-          assert lib.assertMsg (bridgeProblems == [ ]) (
-            "modules/mailbox: calls the pinned Bridge does not have:\n"
-            + lib.concatStringsSep "\n" bridgeProblems
-          );
-          run;
+        packages = {
+          mailbox-run =
+            assert lib.assertMsg (bridgeProblems == [ ]) (
+              "modules/mailbox: calls the pinned Bridge does not have:\n"
+              + lib.concatStringsSep "\n" bridgeProblems
+            );
+            run;
 
-        packages.mailbox = pkgs.writeShellApplication {
-          name = "mailbox";
-          runtimeInputs = [
-            run
-            config.packages.pass-cli
-            config.packages.secretspec
-            config.packages.governance-authorize
-            pkgs.jq
-            pkgs.coreutils
-          ];
-          text = builtins.seq top.accounts.checked ''
-            export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
-            usage="usage: mailbox login | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
-            governance-authorize proton:bridge proton
-            args=()
-            case "''${1:-}" in
-              login) args=(login) ;;
-              link)
-                [ "''${2:-}" = --account ] || { echo "$usage" >&2; exit 2; }
-                account=''${3:?$usage}
-                shift 3
-                held=$(jq -c --arg a "$account" '.[$a] // empty' ${accountsJson})
-                [ -n "$held" ] || { echo "no declared confirmation mail for $account; $usage" >&2; exit 2; }
-                governance-authorize "$(jq -r .provider <<<"$held"):confirmation-mail" "$account"
-                args=(link --to "$(jq -r .to <<<"$held")")
-                while read -r d; do args+=(--from "$d"); done < <(jq -r '.from[]' <<<"$held")
-                while read -r h; do args+=(--host "$h"); done < <(jq -r '.hosts[]' <<<"$held")
-                path=$(jq -r '.path // empty' <<<"$held")
-                [ -z "$path" ] || args+=(--path "$path")
-                while [ $# -gt 0 ]; do
-                  case $1 in
-                    --since | --wait) args+=("$1" "''${2:?$1 needs minutes}"); shift 2 ;;
-                    *) echo "$usage" >&2; exit 2 ;;
-                  esac
-                done
-                ;;
-              *) echo "$usage" >&2; exit 2 ;;
-            esac
+          # In the declared environment only (../runtime, ../_lib/frozen.nix).
+          mailbox = frozen {
+            name = "mailbox";
+            program = lib.getExe inner;
+            packages = [ ];
+          };
 
-            private=$(mktemp -d)
-            chmod 700 "$private"
-            trap 'rm -rf "$private"' EXIT
-            MAILBOX_PRIVATE=$private \
-              MAILBOX_BRIDGE=${lib.getExe pkgs.protonmail-bridge} \
-              MAILBOX_KEYCHAIN_DIR=${keychain}/bin \
-              MAILBOX_SECRETSPEC_FILE=${config.packages.secretspec-toml} \
-              MAILBOX_PROFILE=${profile} \
-              MAILBOX_LOGIN_VAULT=${lib.escapeShellArg entities.${proton.owner}.vault} \
-              MAILBOX_LOGIN_ITEM=${lib.escapeShellArg proton.login.item} \
-              MAILBOX_LOGIN=${proton.login.email} \
-              mailbox "''${args[@]}"
-          '';
+          mailbox-inner = pkgs.writeShellApplication {
+            name = "mailbox";
+            runtimeInputs = [
+              run
+              config.packages.pass-cli
+              config.packages.secretspec
+              config.packages.governance-authorize
+              pkgs.jq
+              pkgs.coreutils
+            ];
+            text = builtins.seq top.accounts.checked ''
+              usage="usage: mailbox login | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
+              governance-authorize proton:bridge proton
+              args=()
+              case "''${1:-}" in
+                login) args=(login) ;;
+                link)
+                  [ "''${2:-}" = --account ] || { echo "$usage" >&2; exit 2; }
+                  account=''${3:?$usage}
+                  shift 3
+                  held=$(jq -c --arg a "$account" '.[$a] // empty' ${accountsJson})
+                  [ -n "$held" ] || { echo "no declared confirmation mail for $account; $usage" >&2; exit 2; }
+                  governance-authorize "$(jq -r .provider <<<"$held"):confirmation-mail" "$account"
+                  args=(link --to "$(jq -r .to <<<"$held")")
+                  while read -r d; do args+=(--from "$d"); done < <(jq -r '.from[]' <<<"$held")
+                  while read -r h; do args+=(--host "$h"); done < <(jq -r '.hosts[]' <<<"$held")
+                  path=$(jq -r '.path // empty' <<<"$held")
+                  [ -z "$path" ] || args+=(--path "$path")
+                  while [ $# -gt 0 ]; do
+                    case $1 in
+                      --since | --wait) args+=("$1" "''${2:?$1 needs minutes}"); shift 2 ;;
+                      *) echo "$usage" >&2; exit 2 ;;
+                    esac
+                  done
+                  ;;
+                *) echo "$usage" >&2; exit 2 ;;
+              esac
+
+              private=$(mktemp -d)
+              chmod 700 "$private"
+              trap 'rm -rf "$private"' EXIT
+              MAILBOX_PRIVATE=$private \
+                MAILBOX_BRIDGE=${lib.getExe pkgs.protonmail-bridge} \
+                MAILBOX_KEYCHAIN_DIR=${keychain}/bin \
+                MAILBOX_SECRETSPEC_FILE=${config.packages.secretspec-toml} \
+                MAILBOX_PROFILE=${profile} \
+                MAILBOX_LOGIN_VAULT=${lib.escapeShellArg entities.${proton.owner}.vault} \
+                MAILBOX_LOGIN_ITEM=${lib.escapeShellArg proton.login.item} \
+                MAILBOX_LOGIN=${proton.login.email} \
+                MAILBOX_HOST_VARS=${lib.escapeShellArg (lib.concatStringsSep " " top.runtime.host.passThrough)} \
+                mailbox "''${args[@]}"
+            '';
+          };
         };
 
         # The keychain stand-in through every call Bridge's keychain makes,
@@ -238,14 +252,18 @@ in
                   jq -e --arg f "$f" 'index($f) != null' ${pkgs.writeText "bridge-flags.json" (builtins.toJSON bridgeFlags)} >/dev/null ||
                     { echo "the driver starts Bridge with --$f, undeclared in bridgeFlags" >&2; exit 1; }
                 done
-              export PASSWORD_STORE_DIR=$TMPDIR/store SECRETSPEC_STUB_DIR=$TMPDIR/pp MAILBOX_PRIVATE=$TMPDIR/private
-              export MAILBOX_SECRETSPEC_FILE=/dev/null MAILBOX_PROFILE=${profile} MAILBOX_CALLER_HOME=$TMPDIR
-              # Bridge's children see its private folders; secretspec must not.
-              export XDG_DATA_HOME=$TMPDIR/bridge-data MAILBOX_CALLER_XDG_DATA_HOME=$TMPDIR/caller-data
-              export EXPECT_XDG_DATA_HOME=$TMPDIR/caller-data
-              mkdir -p $PASSWORD_STORE_DIR $SECRETSPEC_STUB_DIR $MAILBOX_PRIVATE $TMPDIR/bin
+              export PASSWORD_STORE_DIR=$TMPDIR/store MAILBOX_PRIVATE=$TMPDIR/private
+              export MAILBOX_SECRETSPEC_FILE=/dev/null MAILBOX_PROFILE=${profile}
+              mkdir -p $PASSWORD_STORE_DIR $TMPDIR/pp $MAILBOX_PRIVATE $TMPDIR/bin
               cp ${./_test/secretspec} $TMPDIR/bin/secretspec
-              export PATH=$TMPDIR/bin:$PATH
+              # Under Bridge the stand-in sees Bridge's folders; its
+              # secretspec gets the caller's declared environment and nothing
+              # else (the stand-in secretspec fails on Bridge's XDG data).
+              export MAILBOX_UNDER_BRIDGE=1 XDG_DATA_HOME=$TMPDIR/bridge-data
+              export MAILBOX_CALLER_VARS="PATH XDG_DATA_HOME SECRETSPEC_STUB_DIR EXPECT_XDG_DATA_HOME"
+              export MAILBOX_CALLER_PATH=$TMPDIR/bin:$PATH MAILBOX_CALLER_XDG_DATA_HOME=$TMPDIR/caller-data
+              export MAILBOX_CALLER_SECRETSPEC_STUB_DIR=$TMPDIR/pp MAILBOX_CALLER_EXPECT_XDG_DATA_HOME=$TMPDIR/caller-data
+              SECRETSPEC_STUB_DIR=$TMPDIR/pp
               b64() { printf %s "$1" | base64 -w0 | tr '+/' '-_'; }
               key=docker-credential-helpers/$(b64 protonmail/bridge-v3/users/bridge-vault-key)
               check=docker-credential-helpers/$(b64 bridge/check)

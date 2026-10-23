@@ -12,15 +12,6 @@ use zeroize::Zeroizing;
 
 const FOLDER: &str = "docker-credential-helpers";
 
-/// The XDG folders Bridge is given privately and secretspec needs as the
-/// caller's.
-pub const XDG: [&str; 4] = [
-    "XDG_CONFIG_HOME",
-    "XDG_DATA_HOME",
-    "XDG_CACHE_HOME",
-    "XDG_STATE_HOME",
-];
-
 /// Where Docker's pass helper keeps a server URL's entry: its folder, and
 /// the folder plus its one username.
 pub fn entry(url: &str, user: &str) -> (String, String) {
@@ -53,12 +44,17 @@ fn var(name: &str) -> Result<String> {
     std::env::var(name).with_context(|| format!("{name} is not set"))
 }
 
-/// `secretspec get NAME`, empty when nothing is stored yet.
+/// `secretspec get NAME`, empty when nothing is stored yet; any other
+/// failure (no Proton Pass session, say) is an error, never "nothing".
 pub fn get(name: &str, reason: &str) -> Result<Zeroizing<String>> {
-    match run(&["get", name, "--reason", reason]) {
-        Ok(v) => Ok(v),
-        Err(_) => Ok(Zeroizing::new(String::new())),
+    let (ok, out, err) = output(&["get", name, "--reason", reason])?;
+    if ok {
+        return Ok(out);
     }
+    if err.contains("not found") {
+        return Ok(Zeroizing::new(String::new()));
+    }
+    bail!("secretspec get {name} failed")
 }
 
 /// `secretspec set NAME`, the value through a file in the private directory.
@@ -71,10 +67,26 @@ pub fn set(name: &str, value: &str, reason: &str) -> Result<()> {
     result.map(|_| ())
 }
 
-/// secretspec as the caller, whose HOME holds the Proton Pass session; the
-/// driver runs Bridge, and so this, under a private HOME.
-fn run(args: &[&str]) -> Result<Zeroizing<String>> {
+/// The declared environment's variable names (runtime.caller, PATH and the
+/// host's pass-through ones), as modules/_lib/frozen.nix sets FROZEN_VARS.
+pub fn frozen_vars() -> Result<Vec<String>> {
+    Ok(var("FROZEN_VARS")?.split_whitespace().map(str::to_owned).collect())
+}
+
+/// secretspec in the caller's declared environment, where pass-cli finds its
+/// session. The driver runs in it already; under Bridge (the keychain
+/// stand-in) the environment is Bridge's, and the caller's comes as
+/// MAILBOX_CALLER_<NAME>, so it is set from those and nothing else.
+fn command(args: &[&str]) -> Result<Command> {
     let mut cmd = Command::new("secretspec");
+    if std::env::var_os("MAILBOX_UNDER_BRIDGE").is_some() {
+        cmd.env_clear();
+        for name in var("MAILBOX_CALLER_VARS")?.split_whitespace() {
+            if let Ok(v) = std::env::var(format!("MAILBOX_CALLER_{name}")) {
+                cmd.env(name, v);
+            }
+        }
+    }
     cmd.args(args)
         .args([
             "--file",
@@ -82,21 +94,22 @@ fn run(args: &[&str]) -> Result<Zeroizing<String>> {
             "--profile",
             &var("MAILBOX_PROFILE")?,
         ])
-        .env("HOME", var("MAILBOX_CALLER_HOME")?)
         .stdin(Stdio::null())
-        .stderr(Stdio::null());
-    // pass-cli keeps its session under the caller's XDG data folder, so
-    // every XDG folder is the caller's, not Bridge's private one.
-    for name in XDG {
-        match std::env::var(format!("MAILBOX_CALLER_{name}")) {
-            Ok(v) if !v.is_empty() => cmd.env(name, v),
-            _ => cmd.env_remove(name),
-        };
-    }
-    let out = cmd.output().context("running secretspec")?;
-    let text = Zeroizing::new(String::from_utf8(out.stdout).context("secretspec output is not UTF-8")?);
-    if !out.status.success() {
+        .stderr(Stdio::piped());
+    Ok(cmd)
+}
+
+fn run(args: &[&str]) -> Result<Zeroizing<String>> {
+    let (ok, out, _) = output(args)?;
+    if !ok {
         bail!("secretspec {} {} failed", args[0], args[1]);
     }
-    Ok(text)
+    Ok(out)
+}
+
+/// Whether it succeeded, its stdout, and its stderr (messages, no values).
+fn output(args: &[&str]) -> Result<(bool, Zeroizing<String>, String)> {
+    let out = command(args)?.output().context("running secretspec")?;
+    let text = Zeroizing::new(String::from_utf8(out.stdout).context("secretspec output is not UTF-8")?);
+    Ok((out.status.success(), text, String::from_utf8_lossy(&out.stderr).into_owned()))
 }

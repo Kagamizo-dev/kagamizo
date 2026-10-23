@@ -24,7 +24,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use anyhow::{bail, Context, Result};
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
-use mailbox::{get, marker, set, vault_key, XDG};
+use mailbox::{frozen_vars, get, marker, set, vault_key};
 use zeroize::Zeroizing;
 
 fn var(name: &str) -> Result<String> {
@@ -96,21 +96,38 @@ struct Bridge {
 
 impl Bridge {
     fn start(home: &Home) -> Result<Self> {
-        let path = format!("{}:{}", var("MAILBOX_KEYCHAIN_DIR")?, var("PATH")?);
+        // Bridge's environment, all of it: its private folders, the
+        // keychain stand-in as the only thing on its PATH, the host's
+        // proxy and CA, and the caller's declared environment handed on
+        // for the stand-in's secretspec. Nothing is inherited.
         let mut cmd = Command::new(var("MAILBOX_BRIDGE")?);
-        for name in XDG {
-            cmd.env(format!("MAILBOX_CALLER_{name}"), std::env::var(name).unwrap_or_default());
+        cmd.env_clear();
+        let names = frozen_vars()?;
+        for name in &names {
+            if let Ok(v) = std::env::var(name) {
+                cmd.env(format!("MAILBOX_CALLER_{name}"), v);
+            }
+        }
+        for name in var("MAILBOX_HOST_VARS")?.split_whitespace() {
+            if let Ok(v) = std::env::var(name) {
+                cmd.env(name, v);
+            }
+        }
+        for name in ["MAILBOX_PRIVATE", "MAILBOX_SECRETSPEC_FILE", "MAILBOX_PROFILE"] {
+            cmd.env(name, var(name)?);
         }
         let mut child = cmd
             .arg("--cli")
+            .env("MAILBOX_UNDER_BRIDGE", "1")
+            .env("MAILBOX_CALLER_VARS", names.join(" "))
             .env("HOME", &home.home)
             .env("XDG_CONFIG_HOME", home.home.join(".config"))
             .env("XDG_DATA_HOME", home.home.join(".local/share"))
             .env("XDG_CACHE_HOME", home.home.join(".cache"))
             .env("XDG_STATE_HOME", home.home.join(".local/state"))
             .env("PASSWORD_STORE_DIR", &home.store)
-            .env("PATH", path)
-            .env("MAILBOX_CALLER_HOME", var("HOME")?)
+            .env("PATH", var("MAILBOX_KEYCHAIN_DIR")?)
+            .env("LANG", "C.UTF-8")
             .env("DBUS_SESSION_BUS_ADDRESS", "disabled:")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
