@@ -37,6 +37,8 @@ in
         runtimeInputs = [
           config.packages.pass-cli
           pkgs.jq
+          pkgs.coreutils
+          pkgs.gnugrep
         ];
         text = ''
           export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}

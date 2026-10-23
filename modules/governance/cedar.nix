@@ -356,6 +356,7 @@ in
         runtimeInputs = [
           pkgs.cedar
           pkgs.jq
+          pkgs.coreutils
           config.packages.pass-login
         ];
         text = ''
