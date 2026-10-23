@@ -62,15 +62,32 @@ pub async fn start(page: &Page, store: &PasskeyStore, login: &Login) -> Result<A
             found
         }
     };
-    for credential in credentials
+    // One credential per id: an authenticator refuses a second with the
+    // same id. A refused one is reported, never its key.
+    let mut seen = std::collections::HashSet::new();
+    let ours: Vec<Value> = credentials
         .into_iter()
         .filter(|c| c["rpId"] == store.rp_id.as_str())
-    {
-        page.execute(Raw::new(
-            "WebAuthn.addCredential",
-            json!({ "authenticatorId": id, "credential": credential }),
-        ))
-        .await?;
+        .filter(|c| seen.insert(c["credentialId"].to_string()))
+        .collect();
+    let mut added = 0;
+    for credential in &ours {
+        match page
+            .execute(Raw::new(
+                "WebAuthn.addCredential",
+                json!({ "authenticatorId": id, "credential": credential }),
+            ))
+            .await
+        {
+            Ok(_) => added += 1,
+            Err(e) => eprintln!("browser: a passkey for {} was refused: {e}", store.rp_id),
+        }
+    }
+    if !ours.is_empty() {
+        eprintln!("browser: {added} of {} passkeys for {} loaded", ours.len(), store.rp_id);
+        if added == 0 {
+            bail!("no passkey for {} could be loaded", store.rp_id);
+        }
     }
     Ok(Authenticator { id })
 }
