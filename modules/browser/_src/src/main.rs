@@ -124,6 +124,25 @@ async fn bounded(
         })?
 }
 
+/// Selects what the focused field holds, so the text typed next replaces it
+/// (a site may pre-fill a remembered login): Chromium's own selectAll
+/// editing command, sent with the key press that triggers it.
+async fn select_all(page: &Page) -> Result<()> {
+    for kind in ["keyDown", "keyUp"] {
+        let mut params = serde_json::json!({
+            "type": kind,
+            "key": "a",
+            "code": "KeyA",
+            "modifiers": 2,
+        });
+        if kind == "keyDown" {
+            params["commands"] = serde_json::json!(["selectAll"]);
+        }
+        page.execute(Raw::new("Input.dispatchKeyEvent", params)).await?;
+    }
+    Ok(())
+}
+
 /// A one-time code into its field: letters and digits only.
 async fn type_code(flow: &Flow, page: &Page, target: &Target, line: &str) -> Result<()> {
     stay(flow, page).await?;
@@ -134,6 +153,7 @@ async fn type_code(flow: &Flow, page: &Page, target: &Target, line: &str) -> Res
     }
     page.execute(FocusParams::builder().backend_node_id(node).build())
         .await?;
+    select_all(page).await?;
     page.execute(InsertTextParams::new(code)).await?;
     Ok(())
 }
@@ -217,6 +237,7 @@ async fn one(
                     .with_context(|| format!("step {n}"))?;
                 page.execute(FocusParams::builder().backend_node_id(node).build())
                     .await?;
+                select_all(page).await?;
                 page.execute(InsertTextParams::new(text.as_str())).await?;
             }
             Step::Click { target } => {

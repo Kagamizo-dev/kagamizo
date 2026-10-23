@@ -79,11 +79,14 @@ pub async fn passkeys(login: &Login, rp_id: &str) -> Result<Vec<Zeroizing<Vec<u8
     ])
     .await?;
     let json: serde_json::Value = serde_json::from_str(&out).context("pass-cli item view")?;
-    let found = json
+    let mut found = json
         .pointer("/item/content/content/Login/passkeys")
         .and_then(|p| p.as_array())
         .cloned()
         .unwrap_or_default();
+    // Newest first: an authenticator keeps one resident passkey per user,
+    // and the latest one saved is the one a site last registered.
+    found.sort_by_key(|p| std::cmp::Reverse(p["create_time"].as_u64().unwrap_or(0)));
     Ok(found
         .iter()
         .filter(|p| p["rp_id"] == rp_id)

@@ -1,8 +1,10 @@
 <!doctype html>
 <title>Sign in</title>
 <h1>Sign in</h1>
-<form onsubmit="event.preventDefault(); document.getElementById('done').hidden = false; history.pushState({}, '', '/done');">
-  <label>Email <input id="email" type="email"></label>
+<!-- The email box comes pre-filled, as a site that remembers a login does:
+     a fill must replace it, so only the exact address signs in. -->
+<form onsubmit="event.preventDefault(); if (document.getElementById('email').value !== 'finance@jingzo.org') return; document.getElementById('done').hidden = false; history.pushState({}, '', '/done');">
+  <label>Email <input id="email" type="email" value="remembered@example.com"></label>
   <label>Password <input id="password" type="password"></label>
   <button type="submit">Continue</button>
 </form>

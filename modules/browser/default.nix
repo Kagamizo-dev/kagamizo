@@ -204,6 +204,14 @@ let
     "DOM.scrollIntoViewIfNeeded" = [ "backendNodeId" ];
     "DOM.getBoxModel" = [ "backendNodeId" ];
     "Input.insertText" = [ "text" ];
+    # selectAll before a fill, so typed text replaces what a field holds
+    "Input.dispatchKeyEvent" = [
+      "type"
+      "key"
+      "code"
+      "modifiers"
+      "commands"
+    ];
     "Input.dispatchMouseEvent" = [
       "type"
       "x"
@@ -404,7 +412,7 @@ in
             ''
               export HOME=$TMPDIR FONTCONFIG_FILE=${fonts} BROWSER_NO_SANDBOX=1 BROWSER_CHROMIUM=${lib.getExe pkgs.chromium}
               # Every raw protocol call in the source is one cdpCalls declares.
-              grep -oh 'method: "[A-Za-z]*\.[A-Za-z]*"' ${./_src/src}/*.rs | cut -d'"' -f2 | sort -u |
+              grep -ohE '(method: |Raw::new\()"[A-Za-z]*\.[A-Za-z]*"' ${./_src/src}/*.rs | cut -d'"' -f2 | sort -u |
                 while read -r m; do
                   jq -e --arg m "$m" 'has($m)' ${pkgs.writeText "cdp-calls.json" (builtins.toJSON cdpCalls)} >/dev/null ||
                     { echo "$m is called in _src but not declared in cdpCalls" >&2; exit 1; }
