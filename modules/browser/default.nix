@@ -411,6 +411,8 @@ in
                 done
               cp ${./_test/page.html} page.html
               python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1 &
+              listening() { python3 -c "import socket,sys; socket.create_connection(('127.0.0.1', int(sys.argv[1])), 1)" "$1" 2>/dev/null; }
+              for _ in $(seq 100); do listening 8765 && break; sleep 0.1; done
               sed s/PORT/8765/g ${./_test/flow.json} > flow.json
               mkdir profile
               BROWSER_PROFILE=$PWD/profile browser flow.json > snapshot.txt
@@ -425,6 +427,7 @@ in
               cp ${./_test/secretspec} bin/secretspec
               cp ${./_test/passkey.html} passkey.html
               python3 -m http.server 8766 --bind 127.0.0.1 >/dev/null 2>&1 &
+              for _ in $(seq 100); do listening 8766 && break; sleep 0.1; done
               for phase in register signin; do
                 sed s/PORT/8766/g ${./_test}/passkey-$phase.json > $phase.json
                 mkdir profile-$phase
