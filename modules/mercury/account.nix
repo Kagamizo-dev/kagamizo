@@ -158,6 +158,12 @@
         login = {
           item = "Mercury";
           email = "finance@jingzo.org";
+          # Registered from the owner's phone into the login item (two, both
+          # for finance@jingzo.org); the engine signs in with them.
+          passkey = {
+            rpId = "mercury.com";
+            source = "login-item";
+          };
         };
       };
 

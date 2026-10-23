@@ -239,8 +239,10 @@ let
     "WebAuthn.Credential" = [
       "rpId"
       "credentialId"
+      "isResidentCredential"
       "privateKey"
       "userHandle"
+      "signCount"
     ];
   };
   protocol = (lib.importJSON ../catalog/_json/cdp.json).domains;
@@ -270,6 +272,9 @@ let
   );
 
   passkeyAccounts = lib.filterAttrs (_: a: a.login.passkey != null) config.accounts.held;
+  # Only a passkey the engine registered needs a secret of its own; one in
+  # the login item is read from there.
+  enginePasskeys = lib.filterAttrs (_: a: a.login.passkey.source == "engine") passkeyAccounts;
   accounts = lib.mapAttrs (name: a: {
     inherit (a) provider;
     passkey =
@@ -277,7 +282,7 @@ let
         null
       else
         {
-          inherit (a.login.passkey) rpId;
+          inherit (a.login.passkey) rpId source;
           profile = "passkey-${name}";
         };
     login = {
@@ -307,7 +312,7 @@ in
             required = false;
           };
       }
-    ) passkeyAccounts;
+    ) enginePasskeys;
     accounts.demands = lib.mapAttrsToList (name: _: {
       account = name;
       capability = "passkeys";

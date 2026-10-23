@@ -11,7 +11,7 @@ use serde_json::{json, Value};
 use tokio::process::Command;
 use zeroize::Zeroizing;
 
-use crate::flow::PasskeyStore;
+use crate::flow::{Login, PasskeySource, PasskeyStore};
 use crate::Raw;
 
 pub struct Authenticator {
@@ -20,7 +20,7 @@ pub struct Authenticator {
 
 /// A platform authenticator with resident keys and user verification, as a
 /// phone's or a laptop's is; it answers every request without a prompt.
-pub async fn start(page: &Page, store: &PasskeyStore) -> Result<Authenticator> {
+pub async fn start(page: &Page, store: &PasskeyStore, login: &Login) -> Result<Authenticator> {
     page.execute(Raw::new("WebAuthn.enable", json!({ "enableUI": false })))
         .await?;
     let added = page
@@ -41,19 +41,36 @@ pub async fn start(page: &Page, store: &PasskeyStore) -> Result<Authenticator> {
         .as_str()
         .context("no authenticator id")?
         .to_owned();
-    if let Some(stored) = get(store).await? {
-        let credentials: Vec<Value> =
-            serde_json::from_str(&stored).context("the stored passkey is not a credential list")?;
-        for credential in credentials
-            .into_iter()
-            .filter(|c| c["rpId"] == store.rp_id.as_str())
-        {
-            page.execute(Raw::new(
-                "WebAuthn.addCredential",
-                json!({ "authenticatorId": id, "credential": credential }),
-            ))
-            .await?;
+    let credentials: Vec<Value> = match store.source {
+        PasskeySource::Engine => match get(store).await? {
+            Some(stored) => serde_json::from_str(&stored)
+                .context("the stored passkey is not a credential list")?,
+            None => vec![],
+        },
+        // Every passkey the login item holds for the site; the site's own
+        // request picks the one it knows.
+        PasskeySource::LoginItem => {
+            let mut found = vec![];
+            for content in crate::pass::passkeys(login, &store.rp_id).await? {
+                let (_, credential) = crate::proton_passkey::credential(&content)
+                    .context("the login item's passkey")?;
+                found.push(credential);
+            }
+            if found.is_empty() {
+                bail!("the login item has no passkey for {}", store.rp_id);
+            }
+            found
         }
+    };
+    for credential in credentials
+        .into_iter()
+        .filter(|c| c["rpId"] == store.rp_id.as_str())
+    {
+        page.execute(Raw::new(
+            "WebAuthn.addCredential",
+            json!({ "authenticatorId": id, "credential": credential }),
+        ))
+        .await?;
     }
     Ok(Authenticator { id })
 }

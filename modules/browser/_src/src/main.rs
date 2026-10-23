@@ -8,6 +8,7 @@
 mod flow;
 mod pass;
 mod passkey;
+mod proton_passkey;
 
 use std::time::{Duration, Instant};
 
@@ -78,7 +79,7 @@ async fn main() -> Result<()> {
 async fn run(flow: &Flow, page: &Page) -> Result<()> {
     let authenticator = match &flow.passkey {
         Some(store) => Some(
-            passkey::start(page, store)
+            passkey::start(page, store, &flow.login)
                 .await
                 .context("the passkey authenticator")?,
         ),

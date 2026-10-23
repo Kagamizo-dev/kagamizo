@@ -63,6 +63,42 @@ async fn item_id(login: &Login) -> Result<String> {
     }
 }
 
+/// The passkeys' contents in the login item that Proton Pass saved for this
+/// relying party (`passkeys[].content`, Proton's own format), in memory only.
+pub async fn passkeys(login: &Login, rp_id: &str) -> Result<Vec<Zeroizing<Vec<u8>>>> {
+    let id = item_id(login).await?;
+    let out = pass_cli(&[
+        "item",
+        "view",
+        "--vault-name",
+        login.vault.as_str(),
+        "--item-id",
+        id.as_str(),
+        "--output",
+        "json",
+    ])
+    .await?;
+    let json: serde_json::Value = serde_json::from_str(&out).context("pass-cli item view")?;
+    let found = json
+        .pointer("/item/content/content/Login/passkeys")
+        .and_then(|p| p.as_array())
+        .cloned()
+        .unwrap_or_default();
+    Ok(found
+        .iter()
+        .filter(|p| p["rp_id"] == rp_id)
+        .filter_map(|p| p["content"].as_array())
+        .map(|bytes| {
+            Zeroizing::new(
+                bytes
+                    .iter()
+                    .filter_map(|b| b.as_u64().map(|b| b as u8))
+                    .collect(),
+            )
+        })
+        .collect())
+}
+
 pub async fn read(login: &Login, field: PassField) -> Result<Zeroizing<String>> {
     let id = item_id(login).await?;
     let base = [

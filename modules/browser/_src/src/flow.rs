@@ -39,6 +39,19 @@ pub struct PasskeyStore {
     pub rp_id: String,
     /// The secretspec profile whose PASSKEY holds the credential.
     pub profile: String,
+    /// Where it is kept: the engine's own secret, or the login item.
+    #[serde(default)]
+    pub source: PasskeySource,
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum PasskeySource {
+    /// Registered by the engine, kept in its PASSKEY secret.
+    #[default]
+    Engine,
+    /// Saved by Proton Pass into the account's login item.
+    LoginItem,
 }
 
 #[derive(Debug, Deserialize)]

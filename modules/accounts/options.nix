@@ -134,6 +134,19 @@ let
                   type = types.strMatching "([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}";
                   description = "The site's WebAuthn relying party id, as its registration reported it.";
                 };
+                options.source = mkOption {
+                  type = types.enum [
+                    "engine"
+                    "login-item"
+                  ];
+                  default = "engine";
+                  description = ''
+                    Where the passkey is kept: "engine", registered by the
+                    browser engine and kept in its own secret; "login-item",
+                    saved by Proton Pass on the owner's device into the
+                    account's login item, which the engine reads.
+                  '';
+                };
               }
             );
             default = null;
