@@ -21,7 +21,7 @@ The network allowlist now has every host in HANDOFF.md's "The allowlist to apply
 
 Start by signing the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login` and send me the approval link. Run no other pass-cli command until it returns.
 
-Then work the Roadmap from epic 0 (validate before acting), then epic 1 (Mercury: explore the signed-in pages with mercury:invite-own-user, invite finance@jingzo.org, register its passkey, sign mercury-jingzo in and send me the Mercury link), and on down.
+Then roll the frozen environment out to every wrapper and add the Cedar closure policy (HANDOFF.md, "Where the 2026-10-23 session left it"), give mercury-jingzo an engine-held passkey of its own, then work the Roadmap from epic 2 on down.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, all in the one modules tree. End the session with the full allowlist (if it changed) and the updated start message, each ready to paste.
 ```
@@ -113,25 +113,46 @@ root vault.
   snapshot printed a field's typed value (never now; the check asserts
   it); the wrapper's cleanup raced Chromium and failed good runs.
 
-## Where the 2026-10-22 second session left it
+## Where the 2026-10-23 session left it
 
-- The allowlist above is applied (every host checked through the proxy)
-  and declared in `modules/claude/_environment.nix`.
-- Epic 0: Cedar tests for every browser flow (`checks.governance-cedar`,
-  414 pass); `checks.catalog-coverage` holds every raw call to a cataloged
-  CLI against its catalog, with a per-module report
-  (`nix build .#catalog-coverage`). Still open: host maps from submitted
-  sign-ins.
-- Epic 1 is blocked: `mercury:invite-own-user` on mercury-jingzo reached
-  Mercury and was refused with "That password isn't right." The login item
-  `Jingzo-LLC/app.mercury.com` holds a password Mercury no longer takes (or
-  an address that is not the account's). Not retried, to avoid a lockout.
-  The proposed way out is a `mercury:reset-password` flow ("Forgot
-  password?") whose new password is generated into the item, with the reset
-  mail read by epic 3's Bridge reader; it waits on the owner's go-ahead.
-- The engine reports a flow "done" even when its sign-in was refused:
-  `invite-own-user` needs a `wait-url` off `/login` after "Log in", written
-  once a signed-in URL has been seen.
+- The allowlist from 2026-10-22 is applied and declared
+  (`modules/claude/_environment.nix`); no new host was needed since.
+- Epic 0: Cedar tests for every browser flow; `checks.catalog-coverage`
+  (raw calls held to the catalogs, per-module report); Bridge cataloged
+  from its pinned source (`modules/catalog/_json/bridge.json`). Still
+  open: host maps from submitted sign-ins.
+- Epic 1 done another way: the owner moved mercury-jingzo's login to
+  finance@jingzo.org and saved two passkeys from the phone into
+  `Jingzo-LLC / Mercury`. `mercury:passkey-sign-in` signs in with them (no
+  password, no code; `login.passkey.source = "login-item"`), and
+  `mercury-session --account mercury-jingzo` is signed in, its session in
+  Jingzo-LLC-Sessions. Mercury's OAuth page was driven by hand through
+  explore steps (account picker "QSearchLLC finance@jingzo.org", security
+  key, "Authorize"): make `mercury-session login` run it as a flow.
+- Epic 3 done: `modules/mailbox` (Bridge 3.24.2 headless, its vault and
+  key in Mirazo-Root-Sessions, signed in as zach@mirazo.org; the Proton
+  item's username and email were set to it with the owner's OK). The
+  Mercury sender's link path is not mapped yet (`mailbox.senders.mercury
+  .path`): the next device-check mail maps it.
+- New: `modules/runtime` and `modules/_lib/frozen.nix`. The owner's rule
+  is that nothing lives outside a Nix declaration: every wrapper runs from
+  `env -i` with only declared variables (mailbox does; roll out to every
+  wrapper next), and a Cedar policy will deny any action not running from
+  its declared closure. The cloud container is an untrusted host; the
+  Hetzner host becomes the first fully declared NixOS target.
+- secretspec is built from its v0.21.1 tag with a patch
+  (`modules/proton/_patches`): it gave pass-cli ids starting with '-' as
+  separate arguments, so overwriting any secret failed. Worth sending
+  upstream.
+- **Passkey counter**: the engine's authenticator starts a loaded passkey's
+  counter at the current Unix time, so Mercury now holds a counter far above
+  what Proton Pass on the phone will send for the same passkey: the
+  phone's passkey sign-in to Mercury (Jingzo) is likely refused from now
+  on. The fix is for the engine to register a passkey of its own (source
+  "engine"), and the phone to keep its own; until then the phone signs in
+  with password and code.
+- Cloudflare and Experian logins still use the old addresses; each needs
+  its email changed at the provider first (a flow, now that mail is read).
 
 ## The allowlist to apply (one change, all of it)
 
