@@ -4,9 +4,15 @@
   # Pinned by flake.lock. Upstream follows the stable nixos-26.05 channel, so
   # the base only moves when `nix flake update` is run on purpose.
   inputs = {
-    nixos-raspberrypi.url = "git+https://github.com/nvmd/nixos-raspberrypi?ref=main";
-    # The images' nixpkgs, shared by everything else in the flake.
-    nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
+    # The newest stable NixOS, shared by everything in the flake (the Pi's
+    # flake follows it too): `nix flake update nixpkgs` moves it along the
+    # nixos-26.05 branch, on purpose. A shallow git fetch, since this
+    # session's proxy refuses GitHub's source archives.
+    nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-26.05&shallow=1";
+    nixos-raspberrypi = {
+      url = "git+https://github.com/nvmd/nixos-raspberrypi?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Dendritic layout: every file under ./modules is a flake-parts module.
     flake-parts = {

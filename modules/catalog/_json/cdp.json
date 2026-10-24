@@ -379,10 +379,33 @@
        "type": "AdMetrics"
       }
      }
+    },
+    "getAdScripts": {
+     "params": {},
+     "returns": {
+      "newScripts": {
+       "type": "array<AdScript>"
+      }
+     }
     }
    },
    "enums": {},
    "objects": {
+    "AdFrameData": {
+     "cpuTime": {
+      "type": "number"
+     },
+     "frameId": {
+      "type": "Page.FrameId"
+     },
+     "initialOrigin": {
+      "optional": true,
+      "type": "string"
+     },
+     "networkBytes": {
+      "type": "number"
+     }
+    },
     "AdMetrics": {
      "averageViewportAdCount": {
       "type": "number"
@@ -390,17 +413,31 @@
      "averageViewportAdDensityByArea": {
       "type": "number"
      },
+     "removeAdFrames": {
+      "type": "array<Page.FrameId>"
+     },
      "totalAdCpuTime": {
       "type": "number"
      },
      "totalAdNetworkBytes": {
       "type": "number"
      },
+     "updateAdFrames": {
+      "type": "array<AdFrameData>"
+     },
      "viewportAdCount": {
       "type": "integer"
      },
      "viewportAdDensityByArea": {
       "type": "integer"
+     }
+    },
+    "AdScript": {
+     "provenance": {
+      "type": "Network.AdProvenance"
+     },
+     "scriptId": {
+      "type": "Runtime.ScriptId"
      }
     }
    }
@@ -675,29 +712,6 @@
     }
    },
    "enums": {
-    "AttributionReportingIssueType": [
-     "PermissionPolicyDisabled",
-     "UntrustworthyReportingOrigin",
-     "InsecureContext",
-     "InvalidHeader",
-     "InvalidRegisterTriggerHeader",
-     "SourceAndTriggerHeaders",
-     "SourceIgnored",
-     "TriggerIgnored",
-     "OsSourceIgnored",
-     "OsTriggerIgnored",
-     "InvalidRegisterOsSourceHeader",
-     "InvalidRegisterOsTriggerHeader",
-     "WebAndOsHeaders",
-     "NoWebOrOsSupport",
-     "NavigationRegistrationWithoutTransientUserActivation",
-     "InvalidInfoHeader",
-     "NoRegisterSourceHeader",
-     "NoRegisterTriggerHeader",
-     "NoRegisterOsSourceHeader",
-     "NoRegisterOsTriggerHeader",
-     "NavigationRegistrationUniqueScopeAlreadySet"
-    ],
     "BlockedByResponseReason": [
      "CoepFrameResourceNeedsCoepHeader",
      "CoopSandboxedIFrameCannotNavigateToCoopPage",
@@ -718,7 +732,10 @@
      "ItemNotInnerList",
      "InvalidAllowlistItemType",
      "ReportingEndpointNotToken",
-     "InvalidUrlPattern"
+     "InvalidUrlPattern",
+     "IFrameAttributeLoosensEmbeddingRequirement",
+     "InvalidAllowConnectionAllowlistFrom",
+     "EmbeddingRequirementNotSatisfied"
     ],
     "ContentSecurityPolicyViolationType": [
      "kInlineViolation",
@@ -803,6 +820,7 @@
      "JwksHttpNotFound",
      "JwksInvalidResponse",
      "TokenVerificationSdJwtUnsupportedHeaderAlg",
+     "TokenVerificationSdJwtInvalidTyp",
      "TokenVerificationSdJwtMissingIss",
      "TokenVerificationSdJwtMissingIat",
      "TokenVerificationSdJwtMissingCnf",
@@ -824,13 +842,15 @@
      "TokenVerificationKbInvalidNonce",
      "TokenVerificationKbInvalidSdHash",
      "TokenVerificationKbMissingCnf",
-     "TokenVerificationKbSignatureFailed"
+     "TokenVerificationKbSignatureFailed",
+     "CrossOriginIframeNotSupported"
     ],
     "FederatedAuthRequestIssueReason": [
      "ShouldEmbargo",
      "TooManyRequests",
      "WellKnownHttpNotFound",
      "WellKnownNoResponse",
+     "WellKnownBlockedByConnectionAllowlist",
      "WellKnownInvalidResponse",
      "WellKnownListEmpty",
      "WellKnownInvalidContentType",
@@ -838,6 +858,7 @@
      "WellKnownTooBig",
      "ConfigHttpNotFound",
      "ConfigNoResponse",
+     "ConfigBlockedByConnectionAllowlist",
      "ConfigInvalidResponse",
      "ConfigInvalidContentType",
      "IdpNotPotentiallyTrustworthy",
@@ -847,11 +868,13 @@
      "InvalidSigninResponse",
      "AccountsHttpNotFound",
      "AccountsNoResponse",
+     "AccountsBlockedByConnectionAllowlist",
      "AccountsInvalidResponse",
      "AccountsListEmpty",
      "AccountsInvalidContentType",
      "IdTokenHttpNotFound",
      "IdTokenNoResponse",
+     "IdTokenBlockedByConnectionAllowlist",
      "IdTokenInvalidResponse",
      "IdTokenIdpErrorResponse",
      "IdTokenCrossSiteIdpErrorResponse",
@@ -868,7 +891,8 @@
      "TypeNotMatching",
      "UiDismissedNoEmbargo",
      "CorsError",
-     "SuppressedBySegmentationPlatform"
+     "SuppressedBySegmentationPlatform",
+     "PopupBlockedByConnectionAllowlist"
     ],
     "FederatedAuthUserInfoRequestIssueReason": [
      "NotSameOrigin",
@@ -926,7 +950,6 @@
      "ContentSecurityPolicyIssue",
      "SharedArrayBufferIssue",
      "CorsIssue",
-     "AttributionReportingIssue",
      "QuirksModeIssue",
      "PartitioningBlobURLIssue",
      "NavigatorUserAgentIssue",
@@ -948,7 +971,9 @@
      "PermissionElementIssue",
      "PerformanceIssue",
      "SelectivePermissionsInterventionIssue",
-     "EmailVerificationRequestIssue"
+     "EmailVerificationRequestIssue",
+     "LazyLoadImageIssue",
+     "WebInstallIssue"
     ],
     "MixedContentResolutionStatus": [
      "MixedContentBlocked",
@@ -956,7 +981,6 @@
      "MixedContentWarning"
     ],
     "MixedContentResourceType": [
-     "AttributionSrc",
      "Audio",
      "Beacon",
      "CSPReport",
@@ -1014,7 +1038,9 @@
      "LowContrast",
      "FontSizeTooSmall",
      "FontSizeTooLarge",
-     "InvalidSizeValue"
+     "InvalidSizeValue",
+     "NonSecureContext",
+     "MissingTransientUserActivation"
     ],
     "PropertyRuleIssueReason": [
      "InvalidSyntax",
@@ -1095,6 +1121,13 @@
      "BlockedFrameNavigation",
      "BlockedSubresource",
      "NoisedCanvasReadback"
+    ],
+    "WebInstallIssueReason": [
+     "ManifestParsingOrNetworkError",
+     "StartUrlInvalid",
+     "ManifestMissingNameOrShortName",
+     "ManifestMissingId",
+     "NoManifest"
     ]
    },
    "objects": {
@@ -1121,23 +1154,6 @@
      },
      "url": {
       "type": "string"
-     }
-    },
-    "AttributionReportingIssueDetails": {
-     "invalidParameter": {
-      "optional": true,
-      "type": "string"
-     },
-     "request": {
-      "optional": true,
-      "type": "AffectedRequest"
-     },
-     "violatingNodeId": {
-      "optional": true,
-      "type": "DOM.BackendNodeId"
-     },
-     "violationType": {
-      "type": "AttributionReportingIssueType"
      }
     },
     "BlockedByResponseIssueDetails": {
@@ -1384,10 +1400,6 @@
      }
     },
     "InspectorIssueDetails": {
-     "attributionReportingIssueDetails": {
-      "optional": true,
-      "type": "AttributionReportingIssueDetails"
-     },
      "blockedByResponseIssueDetails": {
       "optional": true,
       "type": "BlockedByResponseIssueDetails"
@@ -1448,6 +1460,10 @@
       "optional": true,
       "type": "HeavyAdIssueDetails"
      },
+     "lazyLoadImageIssueDetails": {
+      "optional": true,
+      "type": "LazyLoadImageIssueDetails"
+     },
      "mixedContentIssueDetails": {
       "optional": true,
       "type": "MixedContentIssueDetails"
@@ -1503,6 +1519,21 @@
      "userReidentificationIssueDetails": {
       "optional": true,
       "type": "UserReidentificationIssueDetails"
+     },
+     "webInstallIssueDetails": {
+      "optional": true,
+      "type": "WebInstallIssueDetails"
+     }
+    },
+    "LazyLoadImageIssueDetails": {
+     "frameId": {
+      "type": "Page.FrameId"
+     },
+     "nodeId": {
+      "type": "DOM.BackendNodeId"
+     },
+     "url": {
+      "type": "string"
      }
     },
     "MixedContentIssueDetails": {
@@ -1707,6 +1738,15 @@
      },
      "type": {
       "type": "UserReidentificationIssueType"
+     }
+    },
+    "WebInstallIssueDetails": {
+     "manifestUrl": {
+      "optional": true,
+      "type": "string"
+     },
+     "reason": {
+      "type": "WebInstallIssueReason"
      }
     }
    }
@@ -2197,19 +2237,10 @@
   },
   "Browser": {
    "commands": {
-    "addPrivacySandboxCoordinatorKeyConfig": {
+    "addMockCamera": {
+     "experimental": true,
      "params": {
-      "api": {
-       "type": "PrivacySandboxAPI"
-      },
-      "browserContextId": {
-       "optional": true,
-       "type": "BrowserContextID"
-      },
-      "coordinatorOrigin": {
-       "type": "string"
-      },
-      "keyConfig": {
+      "deviceId": {
        "type": "string"
       }
      },
@@ -2265,6 +2296,15 @@
      "returns": {
       "arguments": {
        "type": "array<string>"
+      }
+     }
+    },
+    "getGlobalPrivacyControl": {
+     "experimental": true,
+     "params": {},
+     "returns": {
+      "gpc": {
+       "type": "boolean"
       }
      }
     },
@@ -2438,6 +2478,19 @@
      },
      "returns": {}
     },
+    "setGlobalPrivacyControl": {
+     "experimental": true,
+     "params": {
+      "gpc": {
+       "type": "boolean"
+      }
+     },
+     "returns": {
+      "gpc": {
+       "type": "boolean"
+      }
+     }
+    },
     "setPermission": {
      "experimental": true,
      "params": {
@@ -2526,10 +2579,6 @@
      "webAppInstallation",
      "webPrinting",
      "windowManagement"
-    ],
-    "PrivacySandboxAPI": [
-     "BiddingAndAuctionServices",
-     "TrustedKeyValue"
     ],
     "WindowState": [
      "normal",
@@ -3959,6 +4008,24 @@
      },
      "c": {
       "type": "integer"
+     },
+     "components": {
+      "optional": true,
+      "type": "array<SpecificityComponent>"
+     }
+    },
+    "SpecificityComponent": {
+     "a": {
+      "type": "integer"
+     },
+     "b": {
+      "type": "integer"
+     },
+     "c": {
+      "type": "integer"
+     },
+     "text": {
+      "type": "string"
      }
     },
     "StyleDeclarationEdit": {
@@ -4299,6 +4366,11 @@
   },
   "DOM": {
    "commands": {
+    "clearTextMarkers": {
+     "experimental": true,
+     "params": {},
+     "returns": {}
+    },
     "collectClassNamesFromSubtree": {
      "experimental": true,
      "params": {
@@ -4404,11 +4476,27 @@
      },
      "returns": {}
     },
+    "forceShowInterest": {
+     "experimental": true,
+     "params": {
+      "enable": {
+       "type": "boolean"
+      },
+      "nodeId": {
+       "type": "NodeId"
+      }
+     },
+     "returns": {}
+    },
     "forceShowPopover": {
      "experimental": true,
      "params": {
       "enable": {
        "type": "boolean"
+      },
+      "invokerNodeId": {
+       "optional": true,
+       "type": "BackendNodeId"
       },
       "nodeId": {
        "type": "NodeId"
@@ -4618,6 +4706,19 @@
       "nodeId": {
        "optional": true,
        "type": "NodeId"
+      }
+     }
+    },
+    "getImplicitAnchorCandidates": {
+     "experimental": true,
+     "params": {
+      "nodeId": {
+       "type": "NodeId"
+      }
+     },
+     "returns": {
+      "backendNodeIds": {
+       "type": "array<BackendNodeId>"
       }
      }
     },
@@ -5078,6 +5179,37 @@
      },
      "returns": {}
     },
+    "setTextMarker": {
+     "experimental": true,
+     "params": {
+      "backendNodeId": {
+       "optional": true,
+       "type": "BackendNodeId"
+      },
+      "end": {
+       "type": "integer"
+      },
+      "nodeId": {
+       "optional": true,
+       "type": "NodeId"
+      },
+      "objectId": {
+       "optional": true,
+       "type": "Runtime.RemoteObjectId"
+      },
+      "start": {
+       "type": "integer"
+      },
+      "type": {
+       "enum": [
+        "spelling",
+        "grammar"
+       ],
+       "type": "string"
+      }
+     },
+     "returns": {}
+    },
     "undo": {
      "experimental": true,
      "params": {},
@@ -5140,8 +5272,11 @@
      "file-selector-button",
      "details-content",
      "picker",
+     "select-listbox",
      "permission-icon",
-     "overscroll-area-parent"
+     "overscroll-area-parent",
+     "overscroll-backdrop",
+     "skeleton"
     ],
     "ScrollOrientation": [
      "horizontal",
@@ -6137,6 +6272,10 @@
        "optional": true,
        "type": "boolean"
       },
+      "scopeNumber": {
+       "optional": true,
+       "type": "integer"
+      },
       "silent": {
        "optional": true,
        "type": "boolean"
@@ -6477,6 +6616,7 @@
      "returns": {}
     },
     "setScriptSource": {
+     "deprecated": true,
      "params": {
       "allowTopFrameEditing": {
        "optional": true,
@@ -6684,6 +6824,10 @@
      }
     },
     "Scope": {
+     "empty": {
+      "optional": true,
+      "type": "boolean"
+     },
      "endLocation": {
       "optional": true,
       "type": "Location"
@@ -6805,6 +6949,39 @@
     }
    },
    "enums": {},
+   "objects": {}
+  },
+  "DigitalCredentials": {
+   "commands": {
+    "setVirtualWalletBehavior": {
+     "params": {
+      "action": {
+       "type": "VirtualWalletAction"
+      },
+      "frameId": {
+       "optional": true,
+       "type": "Page.FrameId"
+      },
+      "protocol": {
+       "optional": true,
+       "type": "string"
+      },
+      "response": {
+       "optional": true,
+       "type": "object"
+      }
+     },
+     "returns": {}
+    }
+   },
+   "enums": {
+    "VirtualWalletAction": [
+     "respond",
+     "decline",
+     "wait",
+     "clear"
+    ]
+   },
    "objects": {}
   },
   "Emulation": {
@@ -6941,6 +7118,23 @@
      },
      "returns": {}
     },
+    "setCPUPerformanceOverride": {
+     "experimental": true,
+     "params": {
+      "performanceTier": {
+       "enum": [
+        "unknown",
+        "low",
+        "mid",
+        "high",
+        "ultra"
+       ],
+       "optional": true,
+       "type": "string"
+      }
+     },
+     "returns": {}
+    },
     "setCPUThrottlingRate": {
      "params": {
       "rate": {
@@ -7030,6 +7224,14 @@
       "viewport": {
        "optional": true,
        "type": "Page.Viewport"
+      },
+      "viewportMeta": {
+       "enum": [
+        "enable",
+        "default"
+       ],
+       "optional": true,
+       "type": "string"
       },
       "width": {
        "type": "integer"
@@ -7356,6 +7558,16 @@
       "userAgentMetadata": {
        "optional": true,
        "type": "UserAgentMetadata"
+      }
+     },
+     "returns": {}
+    },
+    "setVirtualKeyboardGeometryOverride": {
+     "experimental": true,
+     "params": {
+      "keyboardRect": {
+       "optional": true,
+       "type": "DOM.Rect"
       }
      },
      "returns": {}
@@ -9997,11 +10209,6 @@
       }
      }
     },
-    "clearAcceptedEncodingsOverride": {
-     "experimental": true,
-     "params": {},
-     "returns": {}
-    },
     "clearBrowserCache": {
      "params": {},
      "returns": {}
@@ -10020,44 +10227,6 @@
       "maxTotalBufferSize": {
        "optional": true,
        "type": "integer"
-      }
-     },
-     "returns": {}
-    },
-    "continueInterceptedRequest": {
-     "deprecated": true,
-     "experimental": true,
-     "params": {
-      "authChallengeResponse": {
-       "optional": true,
-       "type": "AuthChallengeResponse"
-      },
-      "errorReason": {
-       "optional": true,
-       "type": "ErrorReason"
-      },
-      "headers": {
-       "optional": true,
-       "type": "Headers"
-      },
-      "interceptionId": {
-       "type": "InterceptionId"
-      },
-      "method": {
-       "optional": true,
-       "type": "string"
-      },
-      "postData": {
-       "optional": true,
-       "type": "string"
-      },
-      "rawResponse": {
-       "optional": true,
-       "type": "binary"
-      },
-      "url": {
-       "optional": true,
-       "type": "string"
       }
      },
      "returns": {}
@@ -10275,22 +10444,6 @@
       }
      }
     },
-    "getResponseBodyForInterception": {
-     "experimental": true,
-     "params": {
-      "interceptionId": {
-       "type": "InterceptionId"
-      }
-     },
-     "returns": {
-      "base64Encoded": {
-       "type": "boolean"
-      },
-      "body": {
-       "type": "string"
-      }
-     }
-    },
     "getSecurityIsolationStatus": {
      "experimental": true,
      "params": {
@@ -10379,15 +10532,6 @@
        "type": "array<Debugger.SearchMatch>"
       }
      }
-    },
-    "setAcceptedEncodings": {
-     "experimental": true,
-     "params": {
-      "encodings": {
-       "type": "array<ContentEncoding>"
-      }
-     },
-     "returns": {}
     },
     "setAttachDebugStack": {
      "experimental": true,
@@ -10512,16 +10656,6 @@
      },
      "returns": {}
     },
-    "setRequestInterception": {
-     "deprecated": true,
-     "experimental": true,
-     "params": {
-      "patterns": {
-       "type": "array<RequestPattern>"
-      }
-     },
-     "returns": {}
-    },
     "setUserAgentOverride": {
      "params": {
       "acceptLanguage": {
@@ -10552,19 +10686,6 @@
      "returns": {
       "bufferedData": {
        "type": "binary"
-      }
-     }
-    },
-    "takeResponseBodyForInterceptionAsStream": {
-     "experimental": true,
-     "params": {
-      "interceptionId": {
-       "type": "InterceptionId"
-      }
-     },
-     "returns": {
-      "stream": {
-       "type": "IO.StreamHandle"
       }
      }
     }
@@ -10614,12 +10735,6 @@
      "wimax",
      "other"
     ],
-    "ContentEncoding": [
-     "deflate",
-     "gzip",
-     "br",
-     "zstd"
-    ],
     "ContentSecurityPolicySource": [
      "HTTP",
      "Meta"
@@ -10647,10 +10762,6 @@
     "CookieExemptionReason": [
      "None",
      "UserSetting",
-     "TPCDMetadata",
-     "TPCDDeprecationTrial",
-     "TopLevelTPCDDeprecationTrial",
-     "TPCDHeuristics",
      "EnterprisePolicy",
      "StorageAccess",
      "TopLevelStorageAccess",
@@ -10718,7 +10829,8 @@
     ],
     "DeviceBoundSessionFetchResult": [
      "Success",
-     "KeyError",
+     "SigningKeyGenerationError",
+     "AttestationKeyGenerationError",
      "SigningError",
      "TransientSigningError",
      "ServerRequestedTermination",
@@ -10786,7 +10898,12 @@
      "InvalidFederatedSessionProviderFailedToRestoreKey",
      "FailedToUnwrapKey",
      "SessionDeletedDuringRefresh",
-     "CrossOriginRegistrationSiteNotIncluded"
+     "CrossOriginRegistrationSiteNotIncluded",
+     "InvalidPreProvisionedKeyInitiatorMissing",
+     "PreProvisionedKeyAccessNotGranted",
+     "PreProvisionedKeyNotFound",
+     "AttestationCertificationError",
+     "AttestationSigningError"
     ],
     "DirectSocketDnsQueryType": [
      "ipv4",
@@ -10813,10 +10930,6 @@
      "Local",
      "Public",
      "Unknown"
-    ],
-    "InterceptionStage": [
-     "Request",
-     "HeadersReceived"
     ],
     "LocalNetworkAccessRequestPolicy": [
      "Allow",
@@ -11559,11 +11672,11 @@
        "InitializedService",
        "Unreachable",
        "ServerError",
-       "RefreshQuotaExceeded",
        "FatalError",
        "SigningQuotaExceeded",
        "RefreshedAsWaiter",
-       "TransientSigningError"
+       "TransientSigningError",
+       "InScopeRefreshNotYetNeeded"
       ],
       "type": "string"
      },
@@ -11667,20 +11780,6 @@
       "type": "string"
      },
      "urlFragment": {
-      "optional": true,
-      "type": "string"
-     }
-    },
-    "RequestPattern": {
-     "interceptionStage": {
-      "optional": true,
-      "type": "InterceptionStage"
-     },
-     "resourceType": {
-      "optional": true,
-      "type": "ResourceType"
-     },
-     "urlPattern": {
       "optional": true,
       "type": "string"
      }
@@ -12049,7 +12148,8 @@
        "ServerRequested",
        "InvalidSessionParams",
        "RefreshFatalError",
-       "DevTools"
+       "DevTools",
+       "Replaced"
       ],
       "type": "string"
      }
@@ -12324,6 +12424,15 @@
      },
      "returns": {}
     },
+    "setShowDisplayCutout": {
+     "params": {
+      "displayCutoutConfig": {
+       "optional": true,
+       "type": "DisplayCutoutConfig"
+      }
+     },
+     "returns": {}
+    },
     "setShowFPSCounter": {
      "params": {
       "show": {
@@ -12453,6 +12562,12 @@
      "aaa",
      "apca"
     ],
+    "DisplayCutoutShape": [
+     "pill",
+     "notch",
+     "circle",
+     "rectangle"
+    ],
     "InspectMode": [
      "searchForNode",
      "searchForUAShadowDOM",
@@ -12487,6 +12602,42 @@
      },
      "nodeId": {
       "type": "DOM.NodeId"
+     }
+    },
+    "DisplayCutoutConfig": {
+     "borderRadius": {
+      "optional": true,
+      "type": "integer"
+     },
+     "contentColor": {
+      "optional": true,
+      "type": "DOM.RGBA"
+     },
+     "cx": {
+      "optional": true,
+      "type": "integer"
+     },
+     "cy": {
+      "optional": true,
+      "type": "integer"
+     },
+     "lowerRadius": {
+      "optional": true,
+      "type": "integer"
+     },
+     "radius": {
+      "optional": true,
+      "type": "integer"
+     },
+     "rect": {
+      "type": "DOM.Rect"
+     },
+     "shape": {
+      "type": "DisplayCutoutShape"
+     },
+     "upperRadius": {
+      "optional": true,
+      "type": "integer"
      }
     },
     "FlexContainerHighlightConfig": {
@@ -13084,6 +13235,10 @@
     },
     "createIsolatedWorld": {
      "params": {
+      "contentSecurityPolicy": {
+       "optional": true,
+       "type": "string"
+      },
       "frameId": {
        "type": "FrameId"
       },
@@ -13799,6 +13954,32 @@
      },
      "returns": {}
     },
+    "startScreenRecording": {
+     "experimental": true,
+     "params": {
+      "audio": {
+       "optional": true,
+       "type": "boolean"
+      },
+      "frameRate": {
+       "optional": true,
+       "type": "integer"
+      },
+      "maxHeight": {
+       "optional": true,
+       "type": "integer"
+      },
+      "maxWidth": {
+       "optional": true,
+       "type": "integer"
+      }
+     },
+     "returns": {
+      "stream": {
+       "type": "IO.StreamHandle"
+      }
+     }
+    },
     "startScreencast": {
      "experimental": true,
      "params": {
@@ -13814,6 +13995,10 @@
        "optional": true,
        "type": "string"
       },
+      "maxFramesInFlight": {
+       "optional": true,
+       "type": "integer"
+      },
       "maxHeight": {
        "optional": true,
        "type": "integer"
@@ -13825,6 +14010,10 @@
       "quality": {
        "optional": true,
        "type": "integer"
+      },
+      "sendLastFrame": {
+       "optional": true,
+       "type": "boolean"
       }
      },
      "returns": {}
@@ -13832,6 +14021,15 @@
     "stopLoading": {
      "params": {},
      "returns": {}
+    },
+    "stopScreenRecording": {
+     "experimental": true,
+     "params": {},
+     "returns": {
+      "stream": {
+       "type": "IO.StreamHandle"
+      }
+     }
     },
     "stopScreencast": {
      "experimental": true,
@@ -13999,6 +14197,7 @@
      "EmbedderExtensionMessagingForOpenPort",
      "EmbedderExtensionSentMessageToCachedFrame",
      "EmbedderExtensionFrame",
+     "EmbedderPrivilegedWebContents",
      "RequestedByWebViewClient",
      "PostMessageByWebViewClient",
      "CacheControlNoStoreDeviceBoundSessionTerminated",
@@ -14084,7 +14283,6 @@
      "all-screens-capture",
      "ambient-light-sensor",
      "aria-notify",
-     "attribution-reporting",
      "autofill",
      "autoplay",
      "bluetooth",
@@ -14127,7 +14325,6 @@
      "digital-credentials-get",
      "direct-sockets",
      "direct-sockets-multicast",
-     "direct-sockets-private",
      "display-capture",
      "document-domain",
      "encrypted-media",
@@ -14139,11 +14336,11 @@
      "gamepad",
      "geolocation",
      "gyroscope",
+     "haptics",
      "hid",
      "identity-credentials-get",
      "idle-detection",
      "interest-cohort",
-     "join-ad-interest-group",
      "keyboard-map",
      "language-detector",
      "language-model",
@@ -14160,14 +14357,11 @@
      "otp-credentials",
      "payment",
      "picture-in-picture",
-     "private-aggregation",
      "private-state-token-issuance",
      "private-state-token-redemption",
      "publickey-credentials-create",
      "publickey-credentials-get",
-     "record-ad-auction-events",
      "rewriter",
-     "run-ad-auction",
      "screen-wake-lock",
      "serial",
      "shared-storage",
@@ -14185,6 +14379,7 @@
      "usb-unrestricted",
      "vertical-scroll",
      "web-app-installation",
+     "webnn",
      "web-printing",
      "web-share",
      "window-management",
@@ -14321,10 +14516,6 @@
      },
      "action": {
       "type": "string"
-     },
-     "icons": {
-      "optional": true,
-      "type": "array<ImageResource>"
      },
      "launchType": {
       "type": "string"
@@ -15021,7 +15212,9 @@
      "PrefetchIneligibleRetryAfter",
      "PrefetchIsPrivacyDecoy",
      "PrefetchIsStale",
+     "PrefetchNotEligibleBlockedByConnectionAllowlist",
      "PrefetchNotEligibleBrowserContextOffTheRecord",
+     "PrefetchNotEligibleCrossOrigin",
      "PrefetchNotEligibleDataSaverEnabled",
      "PrefetchNotEligibleExistingProxy",
      "PrefetchNotEligibleHostIsNonUnique",
@@ -16019,6 +16212,7 @@
        "dataview",
        "webassemblymemory",
        "wasmvalue",
+       "deferredmodule",
        "trustedtype"
       ],
       "optional": true,
@@ -16119,6 +16313,7 @@
        "dataview",
        "webassemblymemory",
        "wasmvalue",
+       "deferredmodule",
        "trustedtype"
       ],
       "optional": true,
@@ -16193,6 +16388,7 @@
        "dataview",
        "webassemblymemory",
        "wasmvalue",
+       "deferredmodule",
        "trustedtype"
       ],
       "optional": true,
@@ -16595,6 +16791,14 @@
     }
    },
    "enums": {
+    "ServiceWorkerRouterSourceType": [
+     "cache",
+     "fetchEvent",
+     "network",
+     "raceNetworkAndFetchHandler",
+     "raceNetworkAndCache",
+     "sourceDict"
+    ],
     "ServiceWorkerVersionRunningStatus": [
      "stopped",
      "starting",
@@ -16642,6 +16846,61 @@
       "type": "string"
      }
     },
+    "ServiceWorkerRouterCondition": {
+     "not": {
+      "optional": true,
+      "type": "ServiceWorkerRouterCondition"
+     },
+     "or": {
+      "optional": true,
+      "type": "array<ServiceWorkerRouterCondition>"
+     },
+     "requestDestination": {
+      "optional": true,
+      "type": "string"
+     },
+     "requestMethod": {
+      "optional": true,
+      "type": "string"
+     },
+     "requestMode": {
+      "optional": true,
+      "type": "string"
+     },
+     "runningStatus": {
+      "optional": true,
+      "type": "ServiceWorkerVersionRunningStatus"
+     },
+     "urlPattern": {
+      "optional": true,
+      "type": "string"
+     }
+    },
+    "ServiceWorkerRouterRule": {
+     "condition": {
+      "type": "ServiceWorkerRouterCondition"
+     },
+     "id": {
+      "type": "integer"
+     },
+     "source": {
+      "type": "ServiceWorkerRouterSource"
+     }
+    },
+    "ServiceWorkerRouterSource": {
+     "sourceDict": {
+      "optional": true,
+      "type": "ServiceWorkerRouterSourceDict"
+     },
+     "type": {
+      "type": "ServiceWorkerRouterSourceType"
+     }
+    },
+    "ServiceWorkerRouterSourceDict": {
+     "cacheName": {
+      "type": "string"
+     }
+    },
     "ServiceWorkerVersion": {
      "controlledClients": {
       "optional": true,
@@ -16674,6 +16933,10 @@
      "targetId": {
       "optional": true,
       "type": "Target.TargetID"
+     },
+     "typedRouterRules": {
+      "optional": true,
+      "type": "array<ServiceWorkerRouterRule>"
      },
      "versionId": {
       "type": "string"
@@ -16991,15 +17254,6 @@
      },
      "returns": {}
     },
-    "clearSharedStorageEntries": {
-     "experimental": true,
-     "params": {
-      "ownerOrigin": {
-       "type": "string"
-      }
-     },
-     "returns": {}
-    },
     "clearTrustTokens": {
      "experimental": true,
      "params": {
@@ -17012,18 +17266,6 @@
        "type": "boolean"
       }
      }
-    },
-    "deleteSharedStorageEntry": {
-     "experimental": true,
-     "params": {
-      "key": {
-       "type": "string"
-      },
-      "ownerOrigin": {
-       "type": "string"
-      }
-     },
-     "returns": {}
     },
     "deleteStorageBucket": {
      "experimental": true,
@@ -17047,54 +17289,12 @@
       }
      }
     },
-    "getInterestGroupDetails": {
-     "experimental": true,
-     "params": {
-      "name": {
-       "type": "string"
-      },
-      "ownerOrigin": {
-       "type": "string"
-      }
-     },
-     "returns": {
-      "details": {
-       "type": "object"
-      }
-     }
-    },
     "getRelatedWebsiteSets": {
      "experimental": true,
      "params": {},
      "returns": {
       "sets": {
        "type": "array<RelatedWebsiteSet>"
-      }
-     }
-    },
-    "getSharedStorageEntries": {
-     "experimental": true,
-     "params": {
-      "ownerOrigin": {
-       "type": "string"
-      }
-     },
-     "returns": {
-      "entries": {
-       "type": "array<SharedStorageEntry>"
-      }
-     }
-    },
-    "getSharedStorageMetadata": {
-     "experimental": true,
-     "params": {
-      "ownerOrigin": {
-       "type": "string"
-      }
-     },
-     "returns": {
-      "metadata": {
-       "type": "SharedStorageMetadata"
       }
      }
     },
@@ -17168,15 +17368,6 @@
      },
      "returns": {}
     },
-    "resetSharedStorageBudget": {
-     "experimental": true,
-     "params": {
-      "ownerOrigin": {
-       "type": "string"
-      }
-     },
-     "returns": {}
-    },
     "runBounceTrackingMitigations": {
      "experimental": true,
      "params": {},
@@ -17194,66 +17385,6 @@
       },
       "cookies": {
        "type": "array<Network.CookieParam>"
-      }
-     },
-     "returns": {}
-    },
-    "setInterestGroupAuctionTracking": {
-     "experimental": true,
-     "params": {
-      "enable": {
-       "type": "boolean"
-      }
-     },
-     "returns": {}
-    },
-    "setInterestGroupTracking": {
-     "experimental": true,
-     "params": {
-      "enable": {
-       "type": "boolean"
-      }
-     },
-     "returns": {}
-    },
-    "setProtectedAudienceKAnonymity": {
-     "params": {
-      "hashes": {
-       "type": "array<binary>"
-      },
-      "name": {
-       "type": "string"
-      },
-      "owner": {
-       "type": "string"
-      }
-     },
-     "returns": {}
-    },
-    "setSharedStorageEntry": {
-     "experimental": true,
-     "params": {
-      "ignoreIfPresent": {
-       "optional": true,
-       "type": "boolean"
-      },
-      "key": {
-       "type": "string"
-      },
-      "ownerOrigin": {
-       "type": "string"
-      },
-      "value": {
-       "type": "string"
-      }
-     },
-     "returns": {}
-    },
-    "setSharedStorageTracking": {
-     "experimental": true,
-     "params": {
-      "enable": {
-       "type": "boolean"
       }
      },
      "returns": {}
@@ -17336,53 +17467,6 @@
     }
    },
    "enums": {
-    "InterestGroupAccessType": [
-     "join",
-     "leave",
-     "update",
-     "loaded",
-     "bid",
-     "win",
-     "additionalBid",
-     "additionalBidWin",
-     "topLevelBid",
-     "topLevelAdditionalBid",
-     "clear"
-    ],
-    "InterestGroupAuctionEventType": [
-     "started",
-     "configResolved"
-    ],
-    "InterestGroupAuctionFetchType": [
-     "bidderJs",
-     "bidderWasm",
-     "sellerJs",
-     "bidderTrustedSignals",
-     "sellerTrustedSignals"
-    ],
-    "SharedStorageAccessMethod": [
-     "addModule",
-     "createWorklet",
-     "selectURL",
-     "run",
-     "batchUpdate",
-     "set",
-     "append",
-     "delete",
-     "clear",
-     "get",
-     "keys",
-     "values",
-     "entries",
-     "length",
-     "remainingBudget"
-    ],
-    "SharedStorageAccessScope": [
-     "window",
-     "sharedStorageWorklet",
-     "protectedAudienceWorklet",
-     "header"
-    ],
     "StorageBucketsDurability": [
      "relaxed",
      "strict"
@@ -17396,8 +17480,6 @@
      "websql",
      "service_workers",
      "cache_storage",
-     "interest_groups",
-     "shared_storage",
      "storage_buckets",
      "all",
      "other"
@@ -17413,131 +17495,6 @@
      },
      "serviceSites": {
       "type": "array<string>"
-     }
-    },
-    "SharedStorageAccessParams": {
-     "batchSize": {
-      "optional": true,
-      "type": "integer"
-     },
-     "batchUpdateId": {
-      "optional": true,
-      "type": "string"
-     },
-     "dataOrigin": {
-      "optional": true,
-      "type": "string"
-     },
-     "ignoreIfPresent": {
-      "optional": true,
-      "type": "boolean"
-     },
-     "keepAlive": {
-      "optional": true,
-      "type": "boolean"
-     },
-     "key": {
-      "optional": true,
-      "type": "string"
-     },
-     "operationId": {
-      "optional": true,
-      "type": "string"
-     },
-     "operationName": {
-      "optional": true,
-      "type": "string"
-     },
-     "privateAggregationConfig": {
-      "optional": true,
-      "type": "SharedStoragePrivateAggregationConfig"
-     },
-     "scriptSourceUrl": {
-      "optional": true,
-      "type": "string"
-     },
-     "serializedData": {
-      "optional": true,
-      "type": "string"
-     },
-     "urlsWithMetadata": {
-      "optional": true,
-      "type": "array<SharedStorageUrlWithMetadata>"
-     },
-     "urnUuid": {
-      "optional": true,
-      "type": "string"
-     },
-     "value": {
-      "optional": true,
-      "type": "string"
-     },
-     "withLock": {
-      "optional": true,
-      "type": "string"
-     },
-     "workletOrdinal": {
-      "optional": true,
-      "type": "integer"
-     },
-     "workletTargetId": {
-      "optional": true,
-      "type": "Target.TargetID"
-     }
-    },
-    "SharedStorageEntry": {
-     "key": {
-      "type": "string"
-     },
-     "value": {
-      "type": "string"
-     }
-    },
-    "SharedStorageMetadata": {
-     "bytesUsed": {
-      "type": "integer"
-     },
-     "creationTime": {
-      "type": "Network.TimeSinceEpoch"
-     },
-     "length": {
-      "type": "integer"
-     },
-     "remainingBudget": {
-      "type": "number"
-     }
-    },
-    "SharedStoragePrivateAggregationConfig": {
-     "aggregationCoordinatorOrigin": {
-      "optional": true,
-      "type": "string"
-     },
-     "contextId": {
-      "optional": true,
-      "type": "string"
-     },
-     "filteringIdMaxBytes": {
-      "type": "integer"
-     },
-     "maxContributions": {
-      "optional": true,
-      "type": "integer"
-     }
-    },
-    "SharedStorageReportingMetadata": {
-     "eventType": {
-      "type": "string"
-     },
-     "reportingUrl": {
-      "type": "string"
-     }
-    },
-    "SharedStorageUrlWithMetadata": {
-     "reportingMetadata": {
-      "type": "array<SharedStorageReportingMetadata>"
-     },
-     "url": {
-      "type": "string"
      }
     },
     "StorageBucket": {
@@ -18221,6 +18178,14 @@
        "optional": true,
        "type": "binary"
       },
+      "screenshotMaxCount": {
+       "optional": true,
+       "type": "integer"
+      },
+      "screenshotMaxSize": {
+       "optional": true,
+       "type": "integer"
+      },
       "streamCompression": {
        "optional": true,
        "type": "StreamCompression"
@@ -18445,6 +18410,9 @@
       "optional": true,
       "type": "ContextRealtimeData"
      },
+     "renderQuantumSize": {
+      "type": "number"
+     },
      "sampleRate": {
       "type": "number"
      }
@@ -18570,6 +18538,10 @@
     },
     "setCredentialProperties": {
      "params": {
+      "activeCmtgKeyIndex": {
+       "optional": true,
+       "type": "integer"
+      },
       "authenticatorId": {
        "type": "AuthenticatorId"
       },
@@ -18583,6 +18555,14 @@
       },
       "credentialId": {
        "type": "binary"
+      },
+      "generateCmtgKeyOnNextOperation": {
+       "optional": true,
+       "type": "boolean"
+      },
+      "signCount": {
+       "optional": true,
+       "type": "number"
       }
      },
      "returns": {}
@@ -18629,6 +18609,8 @@
      "nfc",
      "ble",
      "cable",
+     "hybrid",
+     "smart-card",
      "internal"
     ],
     "Ctap2Version": [
@@ -18639,6 +18621,10 @@
    },
    "objects": {
     "Credential": {
+     "activeCmtgKeyIndex": {
+      "optional": true,
+      "type": "integer"
+     },
      "backupEligibility": {
       "optional": true,
       "type": "boolean"
@@ -18647,8 +18633,16 @@
       "optional": true,
       "type": "boolean"
      },
+     "cmtgKeys": {
+      "optional": true,
+      "type": "array<binary>"
+     },
      "credentialId": {
       "type": "binary"
+     },
+     "generateCmtgKeyOnNextOperation": {
+      "optional": true,
+      "type": "boolean"
      },
      "isResidentCredential": {
       "type": "boolean"
@@ -18665,7 +18659,7 @@
       "type": "string"
      },
      "signCount": {
-      "type": "integer"
+      "type": "number"
      },
      "userDisplayName": {
       "optional": true,
@@ -18694,6 +18688,10 @@
       "type": "boolean"
      },
      "defaultBackupState": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "hasCmtgKey": {
       "optional": true,
       "type": "boolean"
      },
@@ -18789,6 +18787,10 @@
    "objects": {
     "Annotation": {
      "autosubmit": {
+      "optional": true,
+      "type": "boolean"
+     },
+     "consequential": {
       "optional": true,
       "type": "boolean"
      },

@@ -177,7 +177,9 @@
         "argononed": "argononed",
         "flake-compat": "flake-compat",
         "nixos-images": "nixos-images",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1785596452,
@@ -196,18 +198,19 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1784856561,
-        "narHash": "sha256-J+Bx1Z6Oeoj2FgnBhRMKyUhhtDoOpTgXYaVLZpDjW4A=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "597283ad8aa0b331c788e97c4c262d58877074ef",
-        "type": "github"
+        "lastModified": 1792615934,
+        "narHash": "sha256-MlvRfa1O5Cqc2/a+gG+l9TSuowEoCKCmrJ1d9oAVm0I=",
+        "ref": "nixos-26.05",
+        "rev": "da6dc0e7b26060f2f71ce3ef7088fb56ee44fa36",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/NixOS/nixpkgs"
       },
       "original": {
-        "owner": "NixOS",
         "ref": "nixos-26.05",
-        "repo": "nixpkgs",
-        "type": "github"
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/NixOS/nixpkgs"
       }
     },
     "publicdotcom-cli": {
@@ -253,10 +256,7 @@
         "mercury-cli": "mercury-cli",
         "nix-effects": "nix-effects",
         "nixos-raspberrypi": "nixos-raspberrypi",
-        "nixpkgs": [
-          "nixos-raspberrypi",
-          "nixpkgs"
-        ],
+        "nixpkgs": "nixpkgs",
         "publicdotcom-cli": "publicdotcom-cli",
         "rea": "rea",
         "secretspec-src": "secretspec-src"

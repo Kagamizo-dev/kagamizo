@@ -17,11 +17,11 @@ Start message for the next session:
 ```
 Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; HANDOFF.md's "The owner's standing decisions" holds what I've already decided, and its Roadmap is the order of work.
 
-The network allowlist now has every host in HANDOFF.md's "The allowlist to apply": add them to modules/claude/_environment.nix first.
+The network allowlist now has every host in HANDOFF.md's "The allowlist to apply" (Hugging Face, www.hetzner.com): add them to modules/claude/_environment.nix first.
 
 Start by signing the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login` and send me the approval link. Run no other pass-cli command until it returns.
 
-Then roll the frozen environment out to every wrapper and add the Cedar closure policy (HANDOFF.md, "Where the 2026-10-23 session left it"), give mercury-jingzo an engine-held passkey of its own, then work the Roadmap from epic 2 on down.
+Then, from HANDOFF.md's "Where the 2026-10-23 session left it": apply the Hetzner host once I say go, add the Hugging Face hosts to modules/claude/_environment.nix and pin the DeepSeek Flash model I choose on the machine I choose, move tokens to Proton Pass API-token items with a Cedar credential hierarchy, and roll the frozen environment out to every wrapper.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, all in the one modules tree. End the session with the full allowlist (if it changed) and the updated start message, each ready to paste.
 ```
@@ -158,6 +158,26 @@ root vault.
   source; its catalog (`catalog/_json/rea.json`: 207 MCP tools in 18
   families, 153 CLI commands) is checked in. Not yet wrapped in Cedar or
   used on a site.
+- Hetzner (2026-10-24): `modules/hetzner/host.nix` (jingzo-host: disko,
+  no SSH server, follows the repository on a timer; a kexec installer that
+  partitions and installs it) and `infra.nix` (`hetzner-infra plan|apply`:
+  a fixed IPv4, a closed firewall and a cpx11 in fsn1, OpenTofu state
+  encrypted in Jingzo-LLC-Sessions; it reads Hetzner's live prices and
+  refused ash at $21.09; fsn1 plans at $6.59 against $7). Planned, not
+  applied: the owner paused it to settle the NixOS pin and model hosting.
+  The installer's initrd is ~555 MB on a 2 GB server: untested.
+- nixpkgs is pinned directly to the newest stable branch, nixos-26.05
+  (da6dc0e, 2026-10-21), the Pi flake following it; cdp.json and gh.json
+  moved with it (Chromium 155).
+- Model hosting (DeepSeek Flash-class, quantized, from Hugging Face) needs
+  far more than the $7 host: tens of GB of RAM or a GPU. Pinning is ready
+  to design (repo, commit, each file's SHA-256, like the Hetzner spec);
+  serving by llama.cpp from nixpkgs. Waiting on the allowlist above and the
+  owner's choice of machine and budget.
+- Proton Pass: the owner wants tokens in its API-token custom items
+  (hidden field), not notes; secretspec reads notes only, so the repo's
+  secrets get a declared kind and a reader for those items, and Cedar a
+  credential hierarchy. Not started.
 - Epic 3 done: `modules/mailbox` (Bridge 3.24.2 headless, its vault and
   key in Mirazo-Root-Sessions, signed in as zach@mirazo.org; the Proton
   item's username and email were set to it with the owner's OK). The
@@ -185,29 +205,14 @@ root vault.
 
 ## The allowlist to apply (one change, all of it)
 
-Found on 2026-10-22 by loading every provider's sign-in page in the pinned
-Chromium, recording every host it contacted (net log) and every host its
-scripts name, and keeping the app's own hosts, its sign-in, its captcha and
-payment where a flow pays (analytics, ads and Chromium's own calls left
-out). `modules/claude/_environment.nix` already has the first two; the rest
-go in once applied (the session may not widen its own allowlist).
+The 2026-10-22 hosts are applied and declared. To apply next, for pinning
+and fetching models from Hugging Face (the session may not widen its own
+allowlist; they go into `modules/claude/_environment.nix` once applied):
 
 | For | Hosts |
 |---|---|
-| Mercury's web app | `backend.mercury.com`, `fp.mercury.com`, `acdn.mercury.com`, `ldr.mercury.com` |
-| Public's web app | `*.hellopublic.com`, `network.dv.socure.io`, `ingestion.dv.socure.us` |
-| OpenRouter sign-in and top-up | `cdn.protect.clerk.com`, `js.stripe.com`, `api.stripe.com`, `m.stripe.network`, `hooks.stripe.com`, `checkout.stripe.com` |
-| Northwest's portal | `ct-frontend.corporatetools.com` |
-| GitHub's web flows | `octocaptcha.com`, `avatars.githubusercontent.com` |
-| Experian's sign-in | `hcaptcha.com`, `*.hcaptcha.com` |
-| Hetzner's console | `console.hetzner.cloud`, `console.hetzner.com` |
-| Gitea, Substack | `gitea.com`, `substackcdn.com` |
-| The outlook mailbox (moving a login confirms at the old address) | `login.live.com`, `account.live.com`, `outlook.live.com`, `login.microsoftonline.com`, `outlook.office365.com` |
-
-Already covered: Proton (`*.proton.me`, Bridge included), IBKR
-(`*.interactivebrokers.com`), Cloudflare's Turnstile, R2
-(`*.r2.cloudflarestorage.com`, in the defaults). Hosts seen only after a
-sign-in are found by the flows' explore runs; each is added the same way.
+| Hugging Face: its API, model files and their CDNs | `huggingface.co`, `*.huggingface.co`, `*.hf.co` |
+| Hetzner's marketing site (its price list, besides `GET /pricing`) | `www.hetzner.com` |
 
 ## Roadmap
 
