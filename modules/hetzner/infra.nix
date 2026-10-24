@@ -64,7 +64,6 @@ let
         name = "${cfg.host.name}-ipv4";
         type = "ipv4";
         location = cfg.host.location;
-        assignee_type = "server";
         auto_delete = false;
         delete_protection = true;
         labels.owner = top.accounts.held.hetzner.owner;
