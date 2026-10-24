@@ -17,6 +17,11 @@
 
     # Banking and brokerage CLIs, built from their pinned release sources with
     # this flake's nixpkgs (modules/mercury, modules/public).
+    # Declared disk layouts (modules/hetzner/host.nix).
+    disko = {
+      url = "git+https://github.com/nix-community/disko?ref=refs/tags/v1.13.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # REA, reverse engineering for agents (modules/rea): the digital twin of
     # whatever a browser flow drives.
     rea = {

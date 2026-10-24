@@ -34,6 +34,27 @@
         "type": "github"
       }
     },
+    "disko": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1768920986,
+        "narHash": "sha256-CNzzBsRhq7gg4BMBuTDObiWDH/rFYHEuDRVOwCcwXw4=",
+        "ref": "refs/tags/v1.13.0",
+        "rev": "de5708739256238fb912c62f03988815db89ec9a",
+        "revCount": 1312,
+        "type": "git",
+        "url": "https://github.com/nix-community/disko"
+      },
+      "original": {
+        "ref": "refs/tags/v1.13.0",
+        "type": "git",
+        "url": "https://github.com/nix-community/disko"
+      }
+    },
     "flake-compat": {
       "locked": {
         "lastModified": 1767039857,
@@ -226,6 +247,7 @@
     "root": {
       "inputs": {
         "agency-agents": "agency-agents",
+        "disko": "disko",
         "flake-parts": "flake-parts",
         "import-tree": "import-tree",
         "mercury-cli": "mercury-cli",
