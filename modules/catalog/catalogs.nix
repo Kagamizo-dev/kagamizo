@@ -17,6 +17,12 @@
 #   _json/bridge.json               Proton Mail Bridge's flags and every
 #                                     command of its CLI, from its pinned
 #                                     source
+#   _json/hetzner-api.json          Hetzner Cloud's API from its OpenAPI
+#                                     spec (pinned by hash): every operation,
+#                                     its parameters, body and response fields
+#   _json/hcloud.json               every hcloud command and option
+#   _json/hetzner-provider.json     every resource and data source of the
+#                                     pinned OpenTofu hcloud provider
 #   _json/rea.json                  REA's MCP tools (by family) and CLI
 #                                     commands, generated from its pinned
 #                                     source (modules/rea)
@@ -70,6 +76,30 @@
         ${python} ${./_extract/mercury.py} ${inputs.mercury-cli} $out
       '';
 
+      # Hetzner Cloud's API from its published OpenAPI spec, pinned by hash: a
+      # changed spec fails the fetch until the hash (and the catalog) move.
+      hetzner-api = pkgs.runCommand "hetzner-api.json" { } ''
+        ${python} ${./_extract/hetzner_api.py} ${
+          pkgs.fetchurl {
+            url = "https://docs.hetzner.cloud/cloud.spec.json";
+            hash = "sha256-D39Tih12DS4Jo0ozq0Eanim1IQJyGixJhqr1HNsYjF0=";
+          }
+        } $out
+      '';
+
+      hcloud = pkgs.runCommand "hcloud.json" { } ''
+        export TMPDIR
+        ${python} ${./_extract/hcloud.py} ${config.packages.hcloud}/bin/hcloud $out
+      '';
+
+      hetzner-provider = pkgs.runCommand "hetzner-provider.json" { } ''
+        export HOME=$TMPDIR
+        echo '{"terraform":{"required_providers":{"hcloud":{"source":"hetznercloud/hcloud"}}}}' > main.tf.json
+        ${config.packages.tofu-hetzner}/bin/tofu init -backend=false -input=false >/dev/null
+        ${config.packages.tofu-hetzner}/bin/tofu providers schema -json > schema.json
+        ${python} ${./_extract/tofu.py} schema.json $out
+      '';
+
       # Mercury's API surface from the Go SDK the CLI pins (its go.mod), and
       # each CLI command's endpoints from the CLI's own handlers.
       mercury-api = pkgs.runCommand "mercury-api.json" { } ''
@@ -116,6 +146,18 @@
         {
           name = "rea.json";
           path = config.packages.rea-catalog;
+        }
+        {
+          name = "hetzner-api.json";
+          path = hetzner-api;
+        }
+        {
+          name = "hcloud.json";
+          path = hcloud;
+        }
+        {
+          name = "hetzner-provider.json";
+          path = hetzner-provider;
         }
         {
           name = "public.json";
