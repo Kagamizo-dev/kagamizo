@@ -126,8 +126,11 @@ in
         "hel1"
         "sin"
       ];
-      default = "ash";
-      description = "Where the server and its address live (cpx11 and IPv4 are priced the same everywhere).";
+      # On Hetzner's prices of 2026-10-24, cpx11 is $5.99 a month in fsn1,
+      # nbg1 and hel1 and $20.49 in ash; only the EU fits the $7 budget, and
+      # the plan checks the live price either way.
+      default = "fsn1";
+      description = "Where the server and its address live; prices differ by location.";
     };
     bootstrapImage = mkOption {
       type = types.str;
