@@ -9,6 +9,9 @@
 #   _json/gh.json                   every gh command, argument and option
 #   _json/mercury.json              every mercury command and option, read
 #                                     from its pinned Go source
+#   _json/mercury-api.json          Mercury's API as the pinned Go SDK has
+#                                     it: every endpoint, type, field, enum,
+#                                     and the endpoints each command calls
 #   _json/public.json               every public command, argument and
 #                                     option, from its click tree
 #   _json/bridge.json               Proton Mail Bridge's flags and every
@@ -64,6 +67,14 @@
         ${python} ${./_extract/mercury.py} ${inputs.mercury-cli} $out
       '';
 
+      # Mercury's API surface from the Go SDK the CLI pins (its go.mod), and
+      # each CLI command's endpoints from the CLI's own handlers.
+      mercury-api = pkgs.runCommand "mercury-api.json" { } ''
+        ${python} ${./_extract/mercury_api.py} \
+          ${config.packages.mercury.goModules}/github.com/MercuryTechnologies/mercury-go \
+          ${inputs.mercury-cli} ${self}/modules/catalog/_json/mercury.json $out
+      '';
+
       # Walks the CLI's own click tree: its help is a drawn TUI too.
       public = pkgs.runCommand "public.json" { } ''
         export HOME=$TMPDIR
@@ -94,6 +105,10 @@
         {
           name = "mercury.json";
           path = mercury;
+        }
+        {
+          name = "mercury-api.json";
+          path = mercury-api;
         }
         {
           name = "public.json";

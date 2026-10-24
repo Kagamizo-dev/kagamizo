@@ -355,6 +355,22 @@ in
               ;;
           esac
           export CARDS_ACCOUNT=$account
+          # Never a call the session is not known to be allowed
+          # (./authorization.nix).
+          case "''${1:-}" in
+            apply) needs=("cards create" "cards update") ;;
+            freeze) needs=("cards freeze") ;;
+            unfreeze) needs=("cards unfreeze") ;;
+            *) needs=() ;;
+          esac
+          [ "''${1:-}" != apply ] || [ "''${2:-}" != --prune ] || needs+=("cards cancel")
+          for c in "''${needs[@]}"; do
+            why=$(jq -r --arg c "$c" '.[$c] // empty' ${pkgs.writeText "mercury-blocked.json" (builtins.toJSON top.mercury.blocked)})
+            if [ -n "$why" ]; then
+              echo "cards: $1 needs mercury $c, refused: $why" >&2
+              exit 3
+            fi
+          done
           case "''${1:-}" in
             apply) if [ "''${2:-}" = --prune ]; then action=cards-prune; else action=cards-apply; fi ;;
             plan | spend | funds | freeze | unfreeze) action=cards-$1 ;;

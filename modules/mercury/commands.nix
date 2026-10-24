@@ -5,7 +5,9 @@
 #
 #   nix run .#mercury-cli -- --account A <command> [options]
 #
-# asks governance-authorize for `mercury:cli-<command>` on A, restores A's
+# refuses a command whose endpoints the session is not known to be allowed
+# (./authorization.nix), asks governance-authorize for
+# `mercury:cli-<command>` on A, restores A's
 # session from Proton Pass, runs the official CLI and stores the refreshed
 # session back. Spending and destroying are the controller's alone (Cedar's
 # base policy); Mercury itself still asks for a tap in its app to move money.
@@ -54,8 +56,6 @@ let
     "users list"
     "webhooks get"
     "webhooks list"
-    # Checks a webhook signature against the account's secret.
-    "webhooks verify"
   ];
   write = [
     "categories create"
@@ -74,6 +74,8 @@ let
     "transactions update"
     "webhooks create"
     "webhooks update"
+    # POST /webhooks/{id}/verify: has Mercury send the endpoint a test event.
+    "webhooks verify"
     # Stops a card spending.
     "cards freeze"
   ];
@@ -169,6 +171,7 @@ in
       { pkgs, config, ... }:
       let
         spec = config.packages.secretspec-toml;
+        blockedJson = pkgs.writeText "mercury-blocked.json" (builtins.toJSON cfg.blocked);
         commandsJson = pkgs.writeText "mercury-commands.json" (
           builtins.toJSON (lib.mapAttrs (c: _: slug c) cfg.commands)
         );
@@ -220,6 +223,14 @@ in
               [ -z "$action" ] || break
             done
             [ -n "$action" ] || { echo "mercury-cli: no declared command in: $*; $usage" >&2; exit 2; }
+            # Never a call the session is not known to be allowed
+            # (./authorization.nix).
+            command=$(jq -r --arg a "$action" 'to_entries[] | select(.value == $a) | .key' ${commandsJson})
+            why=$(jq -r --arg c "$command" '.[$c] // empty' ${blockedJson})
+            if [ -n "$why" ]; then
+              echo "mercury-cli: $command is refused: $why" >&2
+              exit 3
+            fi
             governance-authorize "mercury:$action" "$account"
             exec secretspec run --file ${spec} --profile "$MERCURY_PROFILE" \
               --reason "mercury-cli $action ($account)" -- ${lib.getExe run} "$@"
