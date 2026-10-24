@@ -85,8 +85,10 @@ root vault.
 - Signups and card minting are the owner's (2026-10-24): the repo
   prepares a signup's login item (`signup prepare`) and declares a card
   as minted (`mercury.cards.<v>.nickname`), and `cards apply` is refused.
-  Jingzo's Hetzner account is active with the owner's $5/month virtual
-  card ••7138 ("Hetzner").
+  Jingzo's Hetzner account (project "Default") is active and paid by the
+  owner's Capital One virtual card locked to Hetzner, at a $7/month budget
+  (`hetzner.payment`, `hetzner.monthlyBudgetUsd`); Mercury's "Hetzner"
+  card ••7138 is no longer its payment.
 - Ask before anything that spends money or applies infrastructure, unless
   the owner already said go. Already approved: the R2 build cache; the
   `move-login` exception; the Proton Pass renames (done); the $5 OpenRouter
