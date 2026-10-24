@@ -17,6 +17,12 @@
 
     # Banking and brokerage CLIs, built from their pinned release sources with
     # this flake's nixpkgs (modules/mercury, modules/public).
+    # REA, reverse engineering for agents (modules/rea): the digital twin of
+    # whatever a browser flow drives.
+    rea = {
+      url = "git+https://github.com/morluto/rea?ref=refs/tags/rea-agents-6.7.0";
+      flake = false;
+    };
     # Built from source to carry ./modules/proton/_patches (modules/proton/tools.nix).
     secretspec-src = {
       url = "git+https://github.com/cachix/secretspec?ref=refs/tags/v0.21.1";

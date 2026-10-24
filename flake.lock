@@ -206,6 +206,23 @@
         "url": "https://github.com/PublicDotCom/publicdotcom-cli"
       }
     },
+    "rea": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792309245,
+        "narHash": "sha256-+tMug63XOX/2hZN/ShmST3BtLtucWh/X6EKexEClD8s=",
+        "ref": "refs/tags/rea-agents-6.7.0",
+        "rev": "27dc42d10249f0410904a75c0997842eb03b931c",
+        "revCount": 3697,
+        "type": "git",
+        "url": "https://github.com/morluto/rea"
+      },
+      "original": {
+        "ref": "refs/tags/rea-agents-6.7.0",
+        "type": "git",
+        "url": "https://github.com/morluto/rea"
+      }
+    },
     "root": {
       "inputs": {
         "agency-agents": "agency-agents",
@@ -219,6 +236,7 @@
           "nixpkgs"
         ],
         "publicdotcom-cli": "publicdotcom-cli",
+        "rea": "rea",
         "secretspec-src": "secretspec-src"
       }
     },

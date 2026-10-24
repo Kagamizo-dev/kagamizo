@@ -134,6 +134,23 @@ root vault.
   excluded: login, logout, status, upgrade, onboarding apply); evaluation
   fails if the pinned CLI has a command with no effect. Cedar now tests
   every action of every provider (6126 tests). Read live for mercury-jingzo.
+- The owner's pattern for every tool: map its full typed surface from the
+  pinned thing first, then wrap it in Rust, Cedar, Lean 4 where a property
+  is worth proving, and Nix. The browser only for sign-in and what has no
+  API; each browser use backed by a REA model of the site. No account
+  action before the surface is twinned.
+- Mercury's twin: `catalog/_json/mercury-api.json` (from the pinned Go
+  SDK) and `mercury/authorization.nix` (what the CLI's OAuth session may
+  call, with evidence). Card management is in no documented tier for it,
+  and POST /cards was refused (tokenNotAuthorized), so the $5 OpenRouter
+  card (approved, declared on mercury-jingzo) is not issued. The ways to
+  it: a Custom token with card scopes, which needs a fixed IP allow-list
+  (the Hetzner host), or Mercury confirming what OAuth `write` covers.
+  `mercury-cli` and `cards` are still shell; they become one Rust program.
+- REA (`modules/rea`, morluto/rea at rea-agents-6.7.0) is built from
+  source; its catalog (`catalog/_json/rea.json`: 207 MCP tools in 18
+  families, 153 CLI commands) is checked in. Not yet wrapped in Cedar or
+  used on a site.
 - Epic 3 done: `modules/mailbox` (Bridge 3.24.2 headless, its vault and
   key in Mirazo-Root-Sessions, signed in as zach@mirazo.org; the Proton
   item's username and email were set to it with the owner's OK). The

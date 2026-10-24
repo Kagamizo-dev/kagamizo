@@ -17,6 +17,9 @@
 #   _json/bridge.json               Proton Mail Bridge's flags and every
 #                                     command of its CLI, from its pinned
 #                                     source
+#   _json/rea.json                  REA's MCP tools (by family) and CLI
+#                                     commands, generated from its pinned
+#                                     source (modules/rea)
 #   _json/cdp.json                  every DevTools Protocol command (its
 #                                     parameters, returns) and enum of the
 #                                     pinned Chromium, asked of Chromium itself
@@ -109,6 +112,10 @@
         {
           name = "mercury-api.json";
           path = mercury-api;
+        }
+        {
+          name = "rea.json";
+          path = config.packages.rea-catalog;
         }
         {
           name = "public.json";
