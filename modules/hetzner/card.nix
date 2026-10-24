@@ -7,5 +7,7 @@
     interval = "monthly";
     why = "the declared host and its primary IPv4 (hetzner.monthlyBudgetUsd)";
     account = "mercury-jingzo";
+    # Minted by the owner (2026-10-24), ••7138.
+    nickname = "Hetzner";
   };
 }

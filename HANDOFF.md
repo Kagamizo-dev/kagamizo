@@ -82,6 +82,11 @@ root vault.
   exception, since a session cannot change its own (it may not edit the
   declaration either until the owner has applied it); the hosts to apply
   next are listed below.
+- Signups and card minting are the owner's (2026-10-24): the repo
+  prepares a signup's login item (`signup prepare`) and declares a card
+  as minted (`mercury.cards.<v>.nickname`), and `cards apply` is refused.
+  Jingzo's Hetzner account is active with the owner's $5/month virtual
+  card ••7138 ("Hetzner").
 - Ask before anything that spends money or applies infrastructure, unless
   the owner already said go. Already approved: the R2 build cache; the
   `move-login` exception; the Proton Pass renames (done); the $5 OpenRouter

@@ -9,8 +9,8 @@
 #   cards plan              declared cards against the live ones
 #   cards spend [YYYY-MM]   each card's spend this month against its limit
 #   cards funds             the balances the cards draw from
-#   cards apply [--prune]   issue missing cards, correct limits; --prune
-#                           cancels kagamizo/ cards no longer declared (final)
+#   cards apply [--prune]   refused: the owner mints and cancels cards
+#                           (2026-10-24); plan reports what differs
 #   cards freeze <name>     stop a card at once; `unfreeze` restores it
 #   cards unfreeze <name>
 #
@@ -69,6 +69,11 @@ let
         default = "debit";
       };
       why = mkOption { type = types.str; };
+      nickname = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "The card's nickname in Mercury, as the owner minted it; null is kagamizo/<vendor>.";
+      };
       account = mkOption {
         type = types.enum (lib.attrNames mercuryAccounts);
         default = config.mercury.account;
@@ -77,7 +82,9 @@ let
       };
     };
   };
-  cards = lib.mapAttrs (name: c: c // { nickname = "kagamizo/${name}"; }) cfg.cards;
+  cards = lib.mapAttrs (
+    name: c: c // { nickname = if c.nickname == null then "kagamizo/${name}" else c.nickname; }
+  ) cfg.cards;
 in
 {
   options.mercury = {
@@ -148,14 +155,15 @@ in
           usage="usage: cards <plan|spend [YYYY-MM]|funds|apply [--prune]|freeze <name>|unfreeze <name>>"
 
           # Each line of jsonl output is a card, or a page holding cards.
+          declared=$cards
           live() {
             ${
               cli.mercury "cards list" {
                 type = [ "virtual" ];
                 format = "jsonl";
               }
-            } | jq -s '[.[] | if has("cards") then .cards[] else . end
-              | select((.nickname // "") | startswith("kagamizo/"))
+            } | jq -s --argjson declared "$declared" '[.[] | if has("cards") then .cards[] else . end
+              | select((.nickname // "") as $n | $n | startswith("kagamizo/") or ([$declared[].nickname] | index($n)))
               | select(.status != "cancelled")]'
           }
           one() { # jq filter over a list -> a single id, or fail naming what
@@ -223,7 +231,7 @@ in
                 cents=$(jq '.limitUsd * 100' <<<"$c")
                 interval=$(jq -r .interval <<<"$c")
                 if [ -z "$have" ]; then
-                  echo "+ issue   $name: \$$(jq -r .limitUsd <<<"$c")/$interval ($(jq -r .why <<<"$c"))"
+                  echo "+ to mint $name (the owner): \$$(jq -r .limitUsd <<<"$c")/$interval ($(jq -r .why <<<"$c"))"
                   [ "$1" = apply ] || continue
                   new=$(${
                     cli.mercury "cards create" {
@@ -345,6 +353,12 @@ in
           account= # set by the sourced picker
           # shellcheck source=/dev/null
           . ${config.packages.mercury-pick-account}
+          # The owner mints and cancels cards (2026-10-24); the repo declares
+          # them and checks them.
+          if [ "''${1:-}" = apply ]; then
+            echo "cards: apply is refused: the owner mints and cancels cards (2026-10-24); cards plan checks them" >&2
+            exit 3
+          fi
           case "''${1:-}" in
             apply | unfreeze)
               card_accounts=(${lib.concatStringsSep " " cardAccounts})

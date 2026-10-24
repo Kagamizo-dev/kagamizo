@@ -33,7 +33,7 @@
       provider = "hetzner";
       plan = "cloud";
       owner = "jingzo";
-      status = "planned";
+      status = "active";
       signup = {
         url = "https://accounts.hetzner.com/signUp";
         handle = "jingzo";

@@ -6,7 +6,10 @@ Everything is declarative Nix: images, infrastructure, accounts, identities,
 secrets references, roles. An account change is an infra change and goes
 through code like anything else.
 
-The owner's only manual action is approving 2FA (a link, a push, a code).
+The owner's only manual actions are approving 2FA (a link, a push, a code)
+and, by their decision of 2026-10-24, signing up for accounts and minting or
+cancelling payment cards; the repo then declares what they made and checks
+it (`signup plan`, `cards plan`).
 Never hand them a form, a dashboard click-path, a value to copy, or a command
 to run. If a step cannot be automated yet, it is a gap: say so plainly, list
 it under "Gaps" in `modules/cloudflare/README.md`, and work toward closing it.
