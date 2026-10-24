@@ -26,16 +26,18 @@
       };
     };
 
-    # The always-on host for chat and code (modules/kagamizo-host).
+    # The declared host (./host.nix): the one fixed address the write-scoped
+    # tokens (Mercury's) are allowed from. Jingzo's, the owner's call
+    # (2026-10-24): it exists, and it owns the bank account the host serves.
     held.hetzner = {
       provider = "hetzner";
       plan = "cloud";
-      owner = "kagamizo";
+      owner = "jingzo";
       status = "planned";
       signup = {
         url = "https://accounts.hetzner.com/signUp";
-        handle = "kagamizo";
-        email = "admin@kagamizo.com";
+        handle = "jingzo";
+        email = "admin@jingzo.org";
         credential = "password";
         findings = [
           {
