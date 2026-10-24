@@ -1,6 +1,6 @@
 name: github-bootstrap
 
-# Applies parts/github to GitHub (see parts/github/bootstrap.nix). Cloud
+# Applies modules/github to GitHub (see modules/github/bootstrap.nix). Cloud
 # sessions cannot reach organization APIs, so this runs here. It starts when
 # .github/github-bootstrap.request changes, and waits for two approvals it
 # prints in the log: a Proton Pass link and a GitHub device code.

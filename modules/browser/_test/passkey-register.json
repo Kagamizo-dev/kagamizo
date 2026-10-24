@@ -1,0 +1,12 @@
+{
+  "action": "test:passkey-register",
+  "account": "test",
+  "hosts": ["localhost"],
+  "login": { "vault": "none", "item": "none", "email": "finance@jingzo.org" },
+  "passkey": { "rpId": "localhost", "profile": "passkey-test" },
+  "steps": [
+    { "do": "goto", "url": "http://localhost:PORT/passkey.html" },
+    { "do": "click", "target": { "by": "role", "role": "button", "name": "Register passkey" } },
+    { "do": "wait-for", "target": { "by": "role", "role": "heading", "name": "Registered" }, "seconds": 10 },{"do":"passkey-save"}
+  ]
+}

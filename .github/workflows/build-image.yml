@@ -3,7 +3,7 @@ name: build-image
 on:
   push:
     branches: [main]
-    paths-ignore: ["README.md", "tests/**"]
+    paths-ignore: ["README.md", "modules/*/_test.nix"]
   workflow_dispatch:
 
 permissions: {}

@@ -4,16 +4,56 @@
   # Pinned by flake.lock. Upstream follows the stable nixos-26.05 channel, so
   # the base only moves when `nix flake update` is run on purpose.
   inputs = {
-    nixos-raspberrypi.url = "git+https://github.com/nvmd/nixos-raspberrypi?ref=main";
-    # The images' nixpkgs, shared by everything else in the flake.
-    nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
+    # The newest stable NixOS, shared by everything in the flake (the Pi's
+    # flake follows it too): `nix flake update nixpkgs` moves it along the
+    # nixos-26.05 branch, on purpose. A shallow git fetch, since this
+    # session's proxy refuses GitHub's source archives.
+    nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-26.05&shallow=1";
+    nixos-raspberrypi = {
+      url = "git+https://github.com/nvmd/nixos-raspberrypi?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    # Dendritic layout: every file under ./parts is a flake-parts module.
+    # Dendritic layout: every file under ./modules is a flake-parts module.
     flake-parts = {
       url = "git+https://github.com/hercules-ci/flake-parts?ref=main";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
     import-tree.url = "git+https://github.com/vic/import-tree?ref=main";
+
+    # Banking and brokerage CLIs, built from their pinned release sources with
+    # this flake's nixpkgs (modules/mercury, modules/public).
+    # Declared disk layouts (modules/hetzner/host.nix).
+    disko = {
+      url = "git+https://github.com/nix-community/disko?ref=refs/tags/v1.13.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # REA, reverse engineering for agents (modules/rea): the digital twin of
+    # whatever a browser flow drives.
+    rea = {
+      url = "git+https://github.com/morluto/rea?ref=refs/tags/rea-agents-6.7.0";
+      flake = false;
+    };
+    # Built from source to carry ./modules/proton/_patches (modules/proton/tools.nix).
+    secretspec-src = {
+      url = "git+https://github.com/cachix/secretspec?ref=refs/tags/v0.21.1";
+      flake = false;
+    };
+    mercury-cli = {
+      url = "git+https://github.com/MercuryTechnologies/mercury-cli?ref=refs/tags/v0.11.8";
+      flake = false;
+    };
+    publicdotcom-cli = {
+      url = "git+https://github.com/PublicDotCom/publicdotcom-cli?ref=refs/tags/v1.3.7";
+      flake = false;
+    };
+
+    # Agent personas for the Orca swarms (modules/governance), MIT; pinned
+    # to a commit since the repository has no releases.
+    agency-agents = {
+      url = "git+https://github.com/msitarzewski/agency-agents?ref=main&rev=4e3ac3ca6604c75113f52c695dbddcc7af928b46";
+      flake = false;
+    };
 
     # Typed declarations: refinement and dependent types checked at eval time.
     nix-effects = {
@@ -31,5 +71,5 @@
     ];
   };
 
-  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./parts);
+  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }

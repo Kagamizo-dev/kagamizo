@@ -1,0 +1,6280 @@
+{
+ "commands": {
+  "all": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for all",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud all [command]"
+  },
+  "all list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "paid": {
+     "description": "Only list resources that cost money (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud all list [options]"
+  },
+  "certificate": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for certificate",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud certificate [command]"
+  },
+  "certificate add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud certificate add-label [--overwrite] <certificate> <label>..."
+  },
+  "certificate create": {
+   "group": false,
+   "options": {
+    "cert-file": {
+     "description": "File containing the PEM encoded certificate (required if type is uploaded)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "domain": {
+     "description": "One or more domains the Certificate is valid for.",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "key-file": {
+     "description": "File containing the PEM encoded private key for the certificate (required if type is uploaded)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "name": {
+     "description": "Certificate name (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "type": {
+     "description": "Type of Certificate to create. Valid choices: uploaded, managed (default \"uploaded\")",
+     "oneOf": null,
+     "short": "t",
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud certificate create [options] --name <name> (--type managed --domain <domain> | --type uploaded --cert-file <file> --key-file <file>)"
+  },
+  "certificate delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud certificate delete <certificate>..."
+  },
+  "certificate describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud certificate describe [options] <certificate>"
+  },
+  "certificate list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud certificate list [options]"
+  },
+  "certificate retry": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for retry",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud certificate retry <certificate>"
+  },
+  "certificate update": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Certificate Name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud certificate update [options] <certificate>"
+  },
+  "config": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for config",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud config [command]"
+  },
+  "config add": {
+   "group": false,
+   "options": {
+    "global": {
+     "description": "Set the value globally (for all contexts) (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for add",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud config add <key> <value>..."
+  },
+  "config get": {
+   "group": false,
+   "options": {
+    "allow-sensitive": {
+     "description": "Allow showing sensitive values (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "global": {
+     "description": "Get the value globally (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for get",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud config get <key>"
+  },
+  "config list": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Also show default values (true, false)",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "allow-sensitive": {
+     "description": "Allow showing sensitive values (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "global": {
+     "description": "Only show global values (true, false)",
+     "oneOf": null,
+     "short": "g",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud config list"
+  },
+  "config remove": {
+   "group": false,
+   "options": {
+    "global": {
+     "description": "Remove the value(s) globally (for all contexts) (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud config remove <key> <value>..."
+  },
+  "config set": {
+   "group": false,
+   "options": {
+    "global": {
+     "description": "Set the value globally (for all contexts) (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for set",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud config set <key> <value>..."
+  },
+  "config unset": {
+   "group": false,
+   "options": {
+    "global": {
+     "description": "Unset the value globally (for all contexts) (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for unset",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud config unset <key>"
+  },
+  "context": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for context",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud context [command]"
+  },
+  "context active": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for active",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud context active"
+  },
+  "context create": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "token-from-env": {
+     "description": "If true, the HCLOUD_TOKEN from the environment will be used without asking",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud context create [--token-from-env] <name>"
+  },
+  "context delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud context delete <context>"
+  },
+  "context list": {
+   "group": false,
+   "options": {
+    "allow-sensitive": {
+     "description": "Allow showing sensitive values in JSON/YAML output (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud context list [options]"
+  },
+  "context rename": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for rename",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud context rename <context> <name>"
+  },
+  "context unset": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for unset",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud context unset"
+  },
+  "context use": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for use",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud context use <context>"
+  },
+  "datacenter": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for datacenter",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud datacenter [command]"
+  },
+  "datacenter describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud datacenter describe [options] <datacenter>"
+  },
+  "datacenter list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud datacenter list [options]"
+  },
+  "firewall": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for firewall",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud firewall [command]"
+  },
+  "firewall add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud firewall add-label [--overwrite] <firewall> <label>..."
+  },
+  "firewall add-rule": {
+   "group": false,
+   "options": {
+    "description": {
+     "description": "Description of the Firewall rule",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "destination-ips": {
+     "description": "Destination IPs (CIDR Notation) (required when direction is out)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "direction": {
+     "description": "Direction (in, out) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for add-rule",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "port": {
+     "description": "Port to which traffic will be allowed, only applicable for protocols TCP and UDP, you can specify port ranges, sample: 80-85",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "protocol": {
+     "description": "Protocol (icmp, esp, gre, udp or tcp) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "source-ips": {
+     "description": "Source IPs (CIDR Notation) (required when direction is in)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud firewall add-rule [options] (--direction in --source-ips <ips> | --direction out --destination-ips <ips>) (--protocol <tcp|udp> --port <port> | --protocol <icmp|esp|gre>) <firewall>"
+  },
+  "firewall apply-to-resource": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for apply-to-resource",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label-selector": {
+     "description": "Label Selector",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "server": {
+     "description": "Server name of ID (required when type is server)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "type": {
+     "description": "Resource Type (server, label_selector) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud firewall apply-to-resource (--type server --server <server> | --type label_selector --label-selector <label-selector>) <firewall>"
+  },
+  "firewall create": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "name": {
+     "description": "Name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "rules-file": {
+     "description": "JSON file containing your routes (use - to read from stdin). The structure of the file needs to be the same as within the API: https://docs.hetzner.cloud/reference/cloud#firewalls-get-a-firewall",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud firewall create [options] --name <name>"
+  },
+  "firewall delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud firewall delete <firewall>..."
+  },
+  "firewall delete-rule": {
+   "group": false,
+   "options": {
+    "description": {
+     "description": "Description of the Firewall rule",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "destination-ips": {
+     "description": "Destination IPs (CIDR Notation) (required when direction is out)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "direction": {
+     "description": "Direction (in, out) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for delete-rule",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "port": {
+     "description": "Port to which traffic will be allowed, only applicable for protocols TCP and UDP",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "protocol": {
+     "description": "Protocol (icmp, esp, gre, udp or tcp) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "source-ips": {
+     "description": "Source IPs (CIDR Notation) (required when direction is in)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud firewall delete-rule [options] (--direction in --source-ips <ips> | --direction out --destination-ips <ips>) (--protocol <tcp|udp> --port <port> | --protocol <icmp|esp|gre>) <firewall>"
+  },
+  "firewall describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud firewall describe [options] <firewall>"
+  },
+  "firewall list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud firewall list [options]"
+  },
+  "firewall remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud firewall remove-label <firewall> (--all | <label>...)"
+  },
+  "firewall replace-rules": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for replace-rules",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "rules-file": {
+     "description": "JSON file containing your routes (use - to read from stdin). The structure of the file needs to be the same as within the API: https://docs.hetzner.cloud/reference/cloud#firewalls-get-a-firewall",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud firewall replace-rules --rules-file <file> <firewall>"
+  },
+  "firewall update": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Firewall name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud firewall update [options] <firewall>"
+  },
+  "floating-ip": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for floating-ip",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud floating-ip [command]"
+  },
+  "floating-ip add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud floating-ip add-label [--overwrite] <floating-ip> <label>..."
+  },
+  "floating-ip assign": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for assign",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud floating-ip assign <floating-ip> <server>"
+  },
+  "floating-ip create": {
+   "group": false,
+   "options": {
+    "description": {
+     "description": "Description",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "enable-protection": {
+     "description": "Enable protection (delete) (default: none)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "home-location": {
+     "description": "Home Location",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "name": {
+     "description": "Name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "server": {
+     "description": "Server to assign Floating IP to",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "type": {
+     "description": "Type (ipv4 or ipv6) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud floating-ip create [options] --type <ipv4|ipv6> (--home-location <location> | --server <server>)"
+  },
+  "floating-ip delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud floating-ip delete <floating-ip>..."
+  },
+  "floating-ip describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud floating-ip describe [options] <floating-ip>"
+  },
+  "floating-ip enable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud floating-ip enable-protection <floating-ip> delete"
+  },
+  "floating-ip list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud floating-ip list [options]"
+  },
+  "floating-ip remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud floating-ip remove-label <floating-ip> (--all | <label>...)"
+  },
+  "floating-ip set-rdns": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for set-rdns",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "hostname": {
+     "description": "Hostname to set as a reverse DNS PTR entry",
+     "oneOf": null,
+     "short": "r",
+     "type": "string",
+     "value": true
+    },
+    "ip": {
+     "description": "IP address for which the reverse DNS entry should be set",
+     "oneOf": null,
+     "short": "i",
+     "type": "ip",
+     "value": true
+    },
+    "reset": {
+     "description": "Reset the reverse DNS entry to the default value (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud floating-ip set-rdns [--ip <ip>] (--hostname <hostname> | --reset) <floating-ip>"
+  },
+  "floating-ip unassign": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for unassign",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud floating-ip unassign <floating-ip>"
+  },
+  "floating-ip update": {
+   "group": false,
+   "options": {
+    "description": {
+     "description": "Floating IP description",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Floating IP name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud floating-ip update [options] <floating-ip>"
+  },
+  "image": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for image",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud image [command]"
+  },
+  "image add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud image add-label [--overwrite] <image> <label>..."
+  },
+  "image delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud image delete <image>..."
+  },
+  "image describe": {
+   "group": false,
+   "options": {
+    "architecture": {
+     "description": "architecture of the Image, default is x86 (default \"x86\")",
+     "oneOf": null,
+     "short": "a",
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud image describe [options] <image>"
+  },
+  "image enable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud image enable-protection <image> delete"
+  },
+  "image list": {
+   "group": false,
+   "options": {
+    "architecture": {
+     "description": "Only show Images of given architecture: x86|arm",
+     "oneOf": null,
+     "short": "a",
+     "type": "strings",
+     "value": true
+    },
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    },
+    "type": {
+     "description": "Only show Images of given type: system|app|snapshot|backup",
+     "oneOf": null,
+     "short": "t",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud image list [options]"
+  },
+  "image remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud image remove-label <image> (--all | <label>...)"
+  },
+  "image update": {
+   "group": false,
+   "options": {
+    "description": {
+     "description": "Image description",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "type": {
+     "description": "Image type",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud image update [options] <image>"
+  },
+  "iso": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for iso",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud iso [command]"
+  },
+  "iso describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud iso describe [options] <iso>"
+  },
+  "iso list": {
+   "group": false,
+   "options": {
+    "architecture": {
+     "description": "Only show Images of given architecture: x86|arm",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "include-architecture-wildcard": {
+     "description": "Include ISOs with unknown architecture, only required if you want so show custom ISOs and still filter for architecture. (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    },
+    "type": {
+     "description": "Types to include (public, private) (default [public,private])",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud iso list [options]"
+  },
+  "load-balancer": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for load-balancer",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer [command]"
+  },
+  "load-balancer add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer add-label [--overwrite] <load-balancer> <label>..."
+  },
+  "load-balancer add-service": {
+   "group": false,
+   "options": {
+    "destination-port": {
+     "description": "Destination port of the service on the targets",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "health-check-http-domain": {
+     "description": "The domain we request when performing a http health check",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "health-check-http-path": {
+     "description": "The path we request when performing a http health check",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "health-check-http-response": {
+     "description": "The response we expect to determine a target as healthy",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "health-check-http-status-codes": {
+     "description": "List of status codes we expect to determine a target as healthy",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "health-check-http-tls": {
+     "description": "Determine if the health check should verify if the target answers with a valid TLS certificate (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "health-check-interval": {
+     "description": "The interval the health check is performed (default 15s)",
+     "oneOf": null,
+     "short": null,
+     "type": "duration",
+     "value": true
+    },
+    "health-check-port": {
+     "description": "The port the health check is performed over",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "health-check-protocol": {
+     "description": "The protocol the health check is performed over",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "health-check-retries": {
+     "description": "Number of retries after a health check is marked as failed (default 3)",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "health-check-timeout": {
+     "description": "The timeout after a health check is marked as failed (default 10s)",
+     "oneOf": null,
+     "short": null,
+     "type": "duration",
+     "value": true
+    },
+    "help": {
+     "description": "help for add-service",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "http-certificates": {
+     "description": "IDs or names of Certificates which should be attached to this Load Balancer",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "http-cookie-lifetime": {
+     "description": "Sticky Sessions: Lifetime of the cookie",
+     "oneOf": null,
+     "short": null,
+     "type": "duration",
+     "value": true
+    },
+    "http-cookie-name": {
+     "description": "Sticky Sessions: Cookie Name we set",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "http-redirect-http": {
+     "description": "Redirect all traffic on port 80 to port 443 (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "http-sticky-sessions": {
+     "description": "Enable Sticky Sessions (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "listen-port": {
+     "description": "Listen port of the service",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "protocol": {
+     "description": "Protocol of the service (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "proxy-protocol": {
+     "description": "Enable proxyprotocol (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer add-service [options] (--protocol http | --protocol tcp --listen-port <1-65535> --destination-port <1-65535> | --protocol https --http-certificates <ids>) <load-balancer>"
+  },
+  "load-balancer add-target": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-target",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ip": {
+     "description": "Use the passed IP address as target",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "label-selector": {
+     "description": "Label Selector",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "server": {
+     "description": "Name or ID of the server",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "use-private-ip": {
+     "description": "Determine if the Load Balancer should connect to the target via the network (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer add-target [options] (--server <server> | --label-selector <label-selector> | --ip <ip>) <load-balancer>"
+  },
+  "load-balancer attach-to-network": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for attach-to-network",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ip": {
+     "description": "IP address to assign to the Load Balancer (auto-assigned if omitted)",
+     "oneOf": null,
+     "short": null,
+     "type": "ip",
+     "value": true
+    },
+    "ip-range": {
+     "description": "IP range in CIDR block notation of the subnet to attach to (auto-assigned if omitted)",
+     "oneOf": null,
+     "short": null,
+     "type": "ipNet",
+     "value": true
+    },
+    "network": {
+     "description": "Network (ID or name) (required)",
+     "oneOf": null,
+     "short": "n",
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud load-balancer attach-to-network [--ip <ip>] --network <network> <load-balancer>"
+  },
+  "load-balancer change-algorithm": {
+   "group": false,
+   "options": {
+    "algorithm-type": {
+     "description": "New Load Balancer algorithm (round_robin, least_connections) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for change-algorithm",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer change-algorithm --algorithm-type <round_robin|least_connections> <load-balancer>"
+  },
+  "load-balancer change-type": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for change-type",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer change-type <load-balancer> <load-balancer-type>"
+  },
+  "load-balancer create": {
+   "group": false,
+   "options": {
+    "algorithm-type": {
+     "description": "Algorithm Type name (round_robin or least_connections)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "enable-protection": {
+     "description": "Enable protection (delete) (default: none)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "location": {
+     "description": "Location (ID or name)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "name": {
+     "description": "Load Balancer name (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "network": {
+     "description": "Name or ID of the Network the Load Balancer should be attached to on creation",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "network-zone": {
+     "description": "Network Zone",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "type": {
+     "description": "Load Balancer Type (ID or name) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud load-balancer create [options] --name <name> --type <type>"
+  },
+  "load-balancer delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer delete <load-balancer>..."
+  },
+  "load-balancer delete-service": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete-service",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "listen-port": {
+     "description": "The listen port of the service you want to delete (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    }
+   },
+   "usage": "hcloud load-balancer delete-service --listen-port <1-65535> <load-balancer>"
+  },
+  "load-balancer describe": {
+   "group": false,
+   "options": {
+    "expand-targets": {
+     "description": "Expand all label_selector targets (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud load-balancer describe [options] <load-balancer>"
+  },
+  "load-balancer detach-from-network": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for detach-from-network",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "network": {
+     "description": "Network (ID or name) (required)",
+     "oneOf": null,
+     "short": "n",
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud load-balancer detach-from-network --network <network> <load-balancer>"
+  },
+  "load-balancer disable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for disable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer disable-protection <load-balancer> delete"
+  },
+  "load-balancer enable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer enable-protection <load-balancer> delete"
+  },
+  "load-balancer enable-public-interface": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-public-interface",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer enable-public-interface <load-balancer>"
+  },
+  "load-balancer list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud load-balancer list [options]"
+  },
+  "load-balancer metrics": {
+   "group": false,
+   "options": {
+    "end": {
+     "description": "ISO 8601 timestamp",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for metrics",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "start": {
+     "description": "ISO 8601 timestamp",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "type": {
+     "description": "Types of metrics you want to show",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud load-balancer metrics [options] (--type <open_connections|connections_per_second|requests_per_second|bandwidth>)... <load-balancer>"
+  },
+  "load-balancer remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer remove-label <load-balancer> (--all | <label>...)"
+  },
+  "load-balancer remove-target": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for remove-target",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ip": {
+     "description": "IP address of an IP target",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "label-selector": {
+     "description": "Label Selector",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "server": {
+     "description": "Name or ID of the server",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud load-balancer remove-target [options] <load-balancer>"
+  },
+  "load-balancer set-rdns": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for set-rdns",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "hostname": {
+     "description": "Hostname to set as a reverse DNS PTR entry",
+     "oneOf": null,
+     "short": "r",
+     "type": "string",
+     "value": true
+    },
+    "ip": {
+     "description": "IP address for which the reverse DNS entry should be set",
+     "oneOf": null,
+     "short": "i",
+     "type": "ip",
+     "value": true
+    },
+    "reset": {
+     "description": "Reset the reverse DNS entry to the default value (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer set-rdns [--ip <ip>] (--hostname <hostname> | --reset) <load-balancer>"
+  },
+  "load-balancer update": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Load Balancer name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud load-balancer update [options] <load-balancer>"
+  },
+  "load-balancer update-service": {
+   "group": false,
+   "options": {
+    "destination-port": {
+     "description": "Destination port of the service on the targets",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "health-check-http-domain": {
+     "description": "The domain we request when performing a http health check",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "health-check-http-path": {
+     "description": "The path we request when performing a http health check",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "health-check-http-response": {
+     "description": "The response we expect to determine a target as healthy",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "health-check-http-status-codes": {
+     "description": "List of status codes we expect to determine a target as healthy",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "health-check-http-tls": {
+     "description": "Determine if the health check should verify if the target answers with a valid TLS certificate (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "health-check-interval": {
+     "description": "The interval the health check is performed (default 15s)",
+     "oneOf": null,
+     "short": null,
+     "type": "duration",
+     "value": true
+    },
+    "health-check-port": {
+     "description": "The port the health check is performed over",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "health-check-protocol": {
+     "description": "The protocol the health check is performed over",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "health-check-retries": {
+     "description": "Number of retries after a health check is marked as failed (default 3)",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "health-check-timeout": {
+     "description": "The timeout after a health check is marked as failed (default 10s)",
+     "oneOf": null,
+     "short": null,
+     "type": "duration",
+     "value": true
+    },
+    "help": {
+     "description": "help for update-service",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "http-certificates": {
+     "description": "IDs or names of Certificates which should be attached to this Load Balancer",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "http-cookie-lifetime": {
+     "description": "Sticky Sessions: Lifetime of the cookie",
+     "oneOf": null,
+     "short": null,
+     "type": "duration",
+     "value": true
+    },
+    "http-cookie-name": {
+     "description": "Sticky Sessions: Cookie Name which will be set",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "http-redirect-http": {
+     "description": "Enable or disable redirect all traffic on port 80 to port 443 (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "http-sticky-sessions": {
+     "description": "Enable or disable (with --http-sticky-sessions=false) Sticky Sessions (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "listen-port": {
+     "description": "The listen port of the service that you want to update (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "protocol": {
+     "description": "The protocol to use for load balancing traffic",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "proxy-protocol": {
+     "description": "Enable or disable (with --proxy-protocol=false) Proxy Protocol (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud load-balancer update-service [options] --listen-port <1-65535> <load-balancer>"
+  },
+  "location": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for location",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud location [command]"
+  },
+  "location describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud location describe [options] <location>"
+  },
+  "location list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud location list [options]"
+  },
+  "network": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for network",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud network [command]"
+  },
+  "network add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud network add-label [--overwrite] <network> <label>..."
+  },
+  "network add-route": {
+   "group": false,
+   "options": {
+    "destination": {
+     "description": "Destination Network or host (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "ipNet",
+     "value": true
+    },
+    "gateway": {
+     "description": "Gateway IP address (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "ip",
+     "value": true
+    },
+    "help": {
+     "description": "help for add-route",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud network add-route --destination <destination> --gateway <ip> <network>"
+  },
+  "network add-subnet": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-subnet",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ip-range": {
+     "description": "Range to allocate IPs from",
+     "oneOf": null,
+     "short": null,
+     "type": "ipNet",
+     "value": true
+    },
+    "network-zone": {
+     "description": "Name of Network zone (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "type": {
+     "description": "Type of subnet (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "vswitch-id": {
+     "description": "ID of the vSwitch",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    }
+   },
+   "usage": "hcloud network add-subnet [options] --type <cloud|server|vswitch> --network-zone <zone> <network>"
+  },
+  "network change-ip-range": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for change-ip-range",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ip-range": {
+     "description": "New IP range (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "ipNet",
+     "value": true
+    }
+   },
+   "usage": "hcloud network change-ip-range --ip-range <ip-range> <network>"
+  },
+  "network create": {
+   "group": false,
+   "options": {
+    "enable-protection": {
+     "description": "Enable protection (delete) (default: none)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "expose-routes-to-vswitch": {
+     "description": "Expose routes from this Network to the vSwitch connection. It only takes effect if a vSwitch connection is active. (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ip-range": {
+     "description": "Network IP range (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "ipNet",
+     "value": true
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "name": {
+     "description": "Network name (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud network create [options] --name <name> --ip-range <ip-range>"
+  },
+  "network delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud network delete <network>..."
+  },
+  "network describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud network describe [options] <network>"
+  },
+  "network disable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for disable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud network disable-protection <network> delete"
+  },
+  "network enable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud network enable-protection <network> delete"
+  },
+  "network list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud network list [options]"
+  },
+  "network remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud network remove-label <network> (--all | <label>...)"
+  },
+  "network remove-route": {
+   "group": false,
+   "options": {
+    "destination": {
+     "description": "Destination Network or host (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "ipNet",
+     "value": true
+    },
+    "gateway": {
+     "description": "Gateway IP address (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "ip",
+     "value": true
+    },
+    "help": {
+     "description": "help for remove-route",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud network remove-route --destination <destination> --gateway <ip> <network>"
+  },
+  "network remove-subnet": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for remove-subnet",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ip-range": {
+     "description": "Subnet IP range (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "ipNet",
+     "value": true
+    }
+   },
+   "usage": "hcloud network remove-subnet --ip-range <ip-range> <network>"
+  },
+  "network update": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Network name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud network update [options] <network>"
+  },
+  "placement-group": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for placement-group",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud placement-group [command]"
+  },
+  "placement-group add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud placement-group add-label [--overwrite] <placement-group> <label>..."
+  },
+  "placement-group create": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "name": {
+     "description": "Name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "type": {
+     "description": "Type of the Placement Group",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud placement-group create [options] --name <name> --type <type>"
+  },
+  "placement-group delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud placement-group delete <placement-group>..."
+  },
+  "placement-group describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud placement-group describe [options] <placement-group>"
+  },
+  "placement-group list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud placement-group list [options]"
+  },
+  "placement-group update": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Placement Group name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud placement-group update [options] <placement-group>"
+  },
+  "primary-ip": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for primary-ip",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud primary-ip [command]"
+  },
+  "primary-ip add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud primary-ip add-label [--overwrite] <primary-ip> <label>..."
+  },
+  "primary-ip assign": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for assign",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "server": {
+     "description": "Name or ID of the Server",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud primary-ip assign --server <server> <primary-ip>"
+  },
+  "primary-ip create": {
+   "group": false,
+   "options": {
+    "assignee-id": {
+     "description": "Assignee (usually a Server) to assign Primary IP to",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "assignee-type": {
+     "description": "Assignee Type to assign Primary IP to (default: server) (default \"server\")",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "auto-delete": {
+     "description": "Delete Primary IP if assigned resource is deleted (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "datacenter": {
+     "description": "Datacenter (name) (deprecated)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "enable-protection": {
+     "description": "Enable protection (delete) (default: none)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "location": {
+     "description": "Location (ID or name) of Primary IP",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "name": {
+     "description": "Name (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "type": {
+     "description": "Type (ipv4 or ipv6) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud primary-ip create [options] --type <ipv4|ipv6> --name <name>"
+  },
+  "primary-ip delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud primary-ip delete <primary-ip>..."
+  },
+  "primary-ip describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud primary-ip describe [options] <primary-ip>"
+  },
+  "primary-ip enable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud primary-ip enable-protection <primary-ip> [delete]"
+  },
+  "primary-ip list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud primary-ip list [options]"
+  },
+  "primary-ip remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud primary-ip remove-label <primary-ip> (--all | <label>...)"
+  },
+  "primary-ip set-rdns": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for set-rdns",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "hostname": {
+     "description": "Hostname to set as a reverse DNS PTR entry",
+     "oneOf": null,
+     "short": "r",
+     "type": "string",
+     "value": true
+    },
+    "ip": {
+     "description": "IP address for which the reverse DNS entry should be set",
+     "oneOf": null,
+     "short": "i",
+     "type": "ip",
+     "value": true
+    },
+    "reset": {
+     "description": "Reset the reverse DNS entry to the default value (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud primary-ip set-rdns [--ip <ip>] (--hostname <hostname> | --reset) <primary-ip>"
+  },
+  "primary-ip unassign": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for unassign",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud primary-ip unassign <primary-ip>"
+  },
+  "primary-ip update": {
+   "group": false,
+   "options": {
+    "auto-delete": {
+     "description": "Delete this Primary IP when the resource it is assigned to is deleted (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Primary IP name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud primary-ip update [options] <primary-ip>"
+  },
+  "server": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for server",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server [command]"
+  },
+  "server add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server add-label [--overwrite] <server> <label>..."
+  },
+  "server add-to-placement-group": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-to-placement-group",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "placement-group": {
+     "description": "Placement Group (ID or name) (required)",
+     "oneOf": null,
+     "short": "g",
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud server add-to-placement-group --placement-group <placement-group> <server>"
+  },
+  "server attach-iso": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for attach-iso",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server attach-iso <server> <iso>"
+  },
+  "server attach-to-network": {
+   "group": false,
+   "options": {
+    "alias-ips": {
+     "description": "Additional IP addresses to be assigned to the Server (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "ipSlice",
+     "value": true
+    },
+    "help": {
+     "description": "help for attach-to-network",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ip": {
+     "description": "IP address to assign to the Server (auto-assigned if omitted)",
+     "oneOf": null,
+     "short": null,
+     "type": "ip",
+     "value": true
+    },
+    "ip-range": {
+     "description": "IP range in CIDR block notation of the subnet to attach to (auto-assigned if omitted)",
+     "oneOf": null,
+     "short": null,
+     "type": "ipNet",
+     "value": true
+    },
+    "network": {
+     "description": "Network (ID or name) (required)",
+     "oneOf": null,
+     "short": "n",
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud server attach-to-network [options] --network <network> <server>"
+  },
+  "server change-alias-ips": {
+   "group": false,
+   "options": {
+    "alias-ips": {
+     "description": "New alias IPs",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "clear": {
+     "description": "Remove all alias IPs",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for change-alias-ips",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "network": {
+     "description": "Network (ID or name) (required)",
+     "oneOf": null,
+     "short": "n",
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud server change-alias-ips [options] --network <network> <server>"
+  },
+  "server change-type": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for change-type",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "keep-disk": {
+     "description": "Keep disk size of current Server Type. This enables downgrading the server. (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server change-type [--keep-disk] <server> <server-type>"
+  },
+  "server create": {
+   "group": false,
+   "options": {
+    "allow-deprecated-image": {
+     "description": "Enable the use of deprecated Images (default: false) (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "automount": {
+     "description": "Automount Volumes after attach (default: false) (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "datacenter": {
+     "description": "Datacenter (ID or name) (deprecated)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "enable-backup": {
+     "description": "Enable automatic backups (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "enable-protection": {
+     "description": "Enable protection (delete, rebuild) (default: none)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "firewall": {
+     "description": "ID or name of Firewall to attach the Server to (can be specified multiple times)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "image": {
+     "description": "Image (ID or name) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "location": {
+     "description": "Location (ID or name)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "name": {
+     "description": "Server name (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "network": {
+     "description": "ID or name of Network to attach the Server to (can be specified multiple times)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "placement-group": {
+     "description": "Placement Group (ID of name)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "primary-ipv4": {
+     "description": "Primary IPv4 (ID of name)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "primary-ipv6": {
+     "description": "Primary IPv6 (ID of name)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "ssh-key": {
+     "description": "ID or name of SSH Key to inject (can be specified multiple times)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "start-after-create": {
+     "description": "Start Server right after creation (true, false) (default true)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "type": {
+     "description": "Server Type (ID or name) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "user-data-from-file": {
+     "description": "Read user data from specified file (use - to read from stdin)",
+     "oneOf": null,
+     "short": null,
+     "type": "stringArray",
+     "value": true
+    },
+    "volume": {
+     "description": "ID or name of Volume to attach (can be specified multiple times)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "without-ipv4": {
+     "description": "Creates the Server without an IPv4 (default: false) (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "without-ipv6": {
+     "description": "Creates the Server without an IPv6 (default: false) (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server create [options] --name <name> --type <server-type> --image <image>"
+  },
+  "server create-image": {
+   "group": false,
+   "options": {
+    "description": {
+     "description": "Image description",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for create-image",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "type": {
+     "description": "Image type (backup, snapshot) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud server create-image [options] --type <snapshot|backup> <server>"
+  },
+  "server delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server delete <server>..."
+  },
+  "server describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud server describe [options] <server>"
+  },
+  "server detach-from-network": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for detach-from-network",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "network": {
+     "description": "Network (ID or name) (required)",
+     "oneOf": null,
+     "short": "n",
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud server detach-from-network --network <network> <server>"
+  },
+  "server detach-iso": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for detach-iso",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server detach-iso <server>"
+  },
+  "server disable-backup": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for disable-backup",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server disable-backup <server>"
+  },
+  "server disable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for disable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server disable-protection <server> (delete|rebuild)..."
+  },
+  "server disable-rescue": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for disable-rescue",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server disable-rescue <server>"
+  },
+  "server enable-backup": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-backup",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "window": {
+     "description": "(deprecated) The time window for the daily backup to run. All times are in UTC. 22-02 means that the backup will be started between 10 PM and 2 AM.",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud server enable-backup <server>"
+  },
+  "server enable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server enable-protection <server> (delete|rebuild)..."
+  },
+  "server enable-rescue": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-rescue",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ssh-key": {
+     "description": "ID or name of SSH Key to inject (can be specified multiple times)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "type": {
+     "description": "Rescue type (default \"linux64\")",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud server enable-rescue [options] <server>"
+  },
+  "server ip": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for ip",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ipv6": {
+     "description": "Print the first address of the Server's Primary IPv6 network",
+     "oneOf": null,
+     "short": "6",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server ip [--ipv6] <server>"
+  },
+  "server list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    },
+    "status": {
+     "description": "Only Servers with one of these statuses are displayed",
+     "oneOf": [
+      "these statuses are displayed"
+     ],
+     "short": null,
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud server list [options]"
+  },
+  "server metrics": {
+   "group": false,
+   "options": {
+    "end": {
+     "description": "ISO 8601 timestamp",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for metrics",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "start": {
+     "description": "ISO 8601 timestamp",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "type": {
+     "description": "Types of metrics you want to show",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud server metrics [options] (--type <cpu|disk|network>)... <server>"
+  },
+  "server poweroff": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for poweroff",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server poweroff <server>"
+  },
+  "server poweron": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for poweron",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server poweron <server>"
+  },
+  "server reboot": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for reboot",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server reboot <server>"
+  },
+  "server rebuild": {
+   "group": false,
+   "options": {
+    "allow-deprecated-image": {
+     "description": "Enable the use of deprecated images (default: false) (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for rebuild",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "image": {
+     "description": "ID or name of Image to rebuild from (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "user-data-from-file": {
+     "description": "Read user data from specified file (use - to read from stdin)",
+     "oneOf": null,
+     "short": null,
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud server rebuild [options] --image <image> <server>"
+  },
+  "server remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server remove-label <server> (--all | <label>...)"
+  },
+  "server request-console": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for request-console",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud server request-console [options] <server>"
+  },
+  "server reset": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for reset",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server reset [options] <server>"
+  },
+  "server reset-password": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for reset-password",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud server reset-password [options] <server>"
+  },
+  "server set-rdns": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for set-rdns",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "hostname": {
+     "description": "Hostname to set as a reverse DNS PTR entry",
+     "oneOf": null,
+     "short": "r",
+     "type": "string",
+     "value": true
+    },
+    "ip": {
+     "description": "IP address for which the reverse DNS entry should be set",
+     "oneOf": null,
+     "short": "i",
+     "type": "ip",
+     "value": true
+    },
+    "reset": {
+     "description": "Reset the reverse DNS entry to the default value (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server set-rdns [--ip <ip>] (--hostname <hostname> | --reset) <server>"
+  },
+  "server shutdown": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for shutdown",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "wait": {
+     "description": "Wait for the Server to shut down before exiting (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "wait-timeout": {
+     "description": "Timeout for waiting for off state after shutdown (default 30s)",
+     "oneOf": null,
+     "short": null,
+     "type": "duration",
+     "value": true
+    }
+   },
+   "usage": "hcloud server shutdown [options] <server>"
+  },
+  "server ssh": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for ssh",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ipv6": {
+     "description": "Establish SSH connection to IPv6 address (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "port": {
+     "description": "Port for SSH connection (default 22)",
+     "oneOf": null,
+     "short": "p",
+     "type": "int",
+     "value": true
+    },
+    "user": {
+     "description": "Username for SSH connection (default \"root\")",
+     "oneOf": null,
+     "short": "u",
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud server ssh [options] <server> [--] [ssh options] [command [argument...]]"
+  },
+  "server update": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Server name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud server update [options] <server>"
+  },
+  "server-type": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for server-type",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud server-type [command]"
+  },
+  "server-type describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud server-type describe [options] <server-type>"
+  },
+  "server-type list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud server-type list [options]"
+  },
+  "ssh-key": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for ssh-key",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud ssh-key [command]"
+  },
+  "ssh-key add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud ssh-key add-label [--overwrite] <ssh-key> <label>..."
+  },
+  "ssh-key create": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "name": {
+     "description": "Key name (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "public-key": {
+     "description": "Public key",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "public-key-from-file": {
+     "description": "Path to file containing public key",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud ssh-key create [options] --name <name> (--public-key <key> | --public-key-from-file <file>)"
+  },
+  "ssh-key delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud ssh-key delete <ssh-key>..."
+  },
+  "ssh-key describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud ssh-key describe [options] <ssh-key>"
+  },
+  "ssh-key list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud ssh-key list [options]"
+  },
+  "ssh-key update": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "SSH Key name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud ssh-key update [options] <ssh-key>"
+  },
+  "storage-box": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for storage-box",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box [command]"
+  },
+  "storage-box add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box add-label [--overwrite] <storage-box> <label>..."
+  },
+  "storage-box change-type": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for change-type",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box change-type <storage-box> <storage-box-type>"
+  },
+  "storage-box create": {
+   "group": false,
+   "options": {
+    "enable-protection": {
+     "description": "Enable protection (delete) (default: none)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "enable-samba": {
+     "description": "Whether the Samba subsystem should be enabled (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "enable-ssh": {
+     "description": "Whether the SSH subsystem should be enabled (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "enable-webdav": {
+     "description": "Whether the WebDAV subsystem should be enabled (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "enable-zfs": {
+     "description": "Whether the ZFS Snapshot folder should be visible (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "location": {
+     "description": "Location (ID or name) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "name": {
+     "description": "Storage Box name (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "password": {
+     "description": "The password that will be set for this Storage Box (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "reachable-externally": {
+     "description": "Whether the Storage Box should be accessible from outside the Hetzner network (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "ssh-key": {
+     "description": "SSH public keys in OpenSSH format or as the ID or name of an existing SSH key",
+     "oneOf": null,
+     "short": null,
+     "type": "stringArray",
+     "value": true
+    },
+    "type": {
+     "description": "Storage Box Type (ID or name) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box create [options] --name <name> --type <type> --location <location> --password <password>"
+  },
+  "storage-box delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box delete <storage-box>..."
+  },
+  "storage-box describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box describe [options] <storage-box>"
+  },
+  "storage-box disable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for disable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box disable-protection <storage-box> delete"
+  },
+  "storage-box disable-snapshot-plan": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for disable-snapshot-plan",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box disable-snapshot-plan <storage-box>"
+  },
+  "storage-box enable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box enable-protection <storage-box> delete"
+  },
+  "storage-box enable-snapshot-plan": {
+   "group": false,
+   "options": {
+    "day-of-month": {
+     "description": "Day of the month the Snapshot Plan should be executed on. Not specified means every day",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "day-of-week": {
+     "description": "Day of the week the Snapshot Plan should be executed on. Not specified means every day",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for enable-snapshot-plan",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "hour": {
+     "description": "Hour the Snapshot Plan should be executed on (UTC)",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "max-snapshots": {
+     "description": "Maximum amount of Snapshots that should be created by this Snapshot Plan",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "minute": {
+     "description": "Minute the Snapshot Plan should be executed on (UTC)",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box enable-snapshot-plan [options] <storage-box>"
+  },
+  "storage-box folders": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for folders",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "path": {
+     "description": "Relative path for which the listing is to be made",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box folders <storage-box>"
+  },
+  "storage-box list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box list [options]"
+  },
+  "storage-box remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box remove-label <storage-box> (--all | <label>...)"
+  },
+  "storage-box reset-password": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for reset-password",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "password": {
+     "description": "New password for the Storage Box",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box reset-password --password <password> <storage-box>"
+  },
+  "storage-box rollback-snapshot": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for rollback-snapshot",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "snapshot": {
+     "description": "The name or ID of the snapshot to roll back to",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box rollback-snapshot --snapshot <snapshot> <storage-box>"
+  },
+  "storage-box snapshot": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for snapshot",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box snapshot [command]"
+  },
+  "storage-box snapshot add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box snapshot add-label [--overwrite] <storage-box> <snapshot> <label>..."
+  },
+  "storage-box snapshot create": {
+   "group": false,
+   "options": {
+    "description": {
+     "description": "Description of the Storage Box Snapshot",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box snapshot create [--description <description>] <storage-box>"
+  },
+  "storage-box snapshot delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box snapshot delete <storage-box> <snapshot>..."
+  },
+  "storage-box snapshot describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box snapshot describe [options] <storage-box> <snapshot>"
+  },
+  "storage-box snapshot list": {
+   "group": false,
+   "options": {
+    "automatic": {
+     "description": "Only show automatic snapshots (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box snapshot list [options] <storage-box>"
+  },
+  "storage-box snapshot update": {
+   "group": false,
+   "options": {
+    "description": {
+     "description": "Description of the Storage Box Snapshot",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box snapshot update [options] <storage-box> <snapshot>"
+  },
+  "storage-box subaccount": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for subaccount",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box subaccount [command]"
+  },
+  "storage-box subaccount change-home-directory": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for change-home-directory",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "home-directory": {
+     "description": "Home directory of the Subaccount. Will be created if it doesn't exist yet",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box subaccount change-home-directory --home-directory <home-directory> <storage-box> <subaccount>"
+  },
+  "storage-box subaccount create": {
+   "group": false,
+   "options": {
+    "description": {
+     "description": "Description for the Subaccount",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "enable-samba": {
+     "description": "Whether the Samba subsystem should be enabled (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "enable-ssh": {
+     "description": "Whether the SSH subsystem should be enabled (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "enable-webdav": {
+     "description": "Whether the WebDAV subsystem should be enabled (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "home-directory": {
+     "description": "Home directory for the Subaccount (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "name": {
+     "description": "Name for the Subaccount",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "password": {
+     "description": "Password for the Subaccount (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "reachable-externally": {
+     "description": "Whether the Storage Box should be accessible from outside the Hetzner network (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "readonly": {
+     "description": "Whether the Subaccount should be read-only (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box subaccount create [options] --password <password> --home-directory <home-directory> <storage-box>"
+  },
+  "storage-box subaccount delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box subaccount delete <storage-box> <subaccount>..."
+  },
+  "storage-box subaccount describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box subaccount describe [options] <storage-box> <subaccount>"
+  },
+  "storage-box subaccount list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box subaccount list [options] <storage-box>"
+  },
+  "storage-box subaccount reset-password": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for reset-password",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "password": {
+     "description": "New password for the Storage Box Subaccount",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box subaccount reset-password --password <password> <storage-box> <subaccount>"
+  },
+  "storage-box subaccount update": {
+   "group": false,
+   "options": {
+    "description": {
+     "description": "Description of the Storage Box Subaccount",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Name of the Storage Box Subaccount",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box subaccount update [options] <storage-box> <subaccount>"
+  },
+  "storage-box update": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Storage Box name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box update [options] <storage-box>"
+  },
+  "storage-box-type": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for storage-box-type",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud storage-box-type [command]"
+  },
+  "storage-box-type describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box-type describe [options] <storage-box-type>"
+  },
+  "storage-box-type list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud storage-box-type list [options]"
+  },
+  "version": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for version",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "long": {
+     "description": "Print more version information (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud version"
+  },
+  "volume": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for volume",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud volume [command]"
+  },
+  "volume add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud volume add-label [--overwrite] <volume> <label>..."
+  },
+  "volume attach": {
+   "group": false,
+   "options": {
+    "automount": {
+     "description": "Automount Volume after attach (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for attach",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "server": {
+     "description": "Server (ID or name) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud volume attach [--automount] --server <server> <volume>"
+  },
+  "volume create": {
+   "group": false,
+   "options": {
+    "automount": {
+     "description": "Automount Volume after attach (Server must be provided) (true, false)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    },
+    "enable-protection": {
+     "description": "Enable protection (delete) (default: none)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "format": {
+     "description": "Format Volume after creation (ext4 or xfs)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "location": {
+     "description": "Location (ID or name)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "name": {
+     "description": "Volume name (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "server": {
+     "description": "Server (ID or name)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "size": {
+     "description": "Size (GB) (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    }
+   },
+   "usage": "hcloud volume create [options] --name <name> --size <size>"
+  },
+  "volume delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud volume delete <volume>..."
+  },
+  "volume describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud volume describe [options] <volume>"
+  },
+  "volume detach": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for detach",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud volume detach <volume>"
+  },
+  "volume enable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud volume enable-protection <volume> delete"
+  },
+  "volume list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud volume list [options]"
+  },
+  "volume remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud volume remove-label <volume> (--all | <label>...)"
+  },
+  "volume resize": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for resize",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "size": {
+     "description": "New size (GB) of the Volume (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    }
+   },
+   "usage": "hcloud volume resize --size <size> <volume>"
+  },
+  "volume update": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for update",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "name": {
+     "description": "Volume name",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud volume update [options] <volume>"
+  },
+  "zone": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for zone",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone [command]"
+  },
+  "zone add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone add-label [--overwrite] <zone> <label>..."
+  },
+  "zone add-records": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-records",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "record": {
+     "description": "List of records (can be specified multiple times, conflicts with --records-file)",
+     "oneOf": null,
+     "short": null,
+     "type": "stringArray",
+     "value": true
+    },
+    "records-file": {
+     "description": "JSON file containing the records (conflicts with --record)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "ttl": {
+     "description": "Time To Live (TTL) of the Zone RRSet",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone add-records (--record <value>... | --records-file <file>) <zone> <name> <type>"
+  },
+  "zone change-ttl": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for change-ttl",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ttl": {
+     "description": "Default Time To Live (TTL) of the Zone (required) (default 3600)",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone change-ttl --ttl <ttl> <zone>"
+  },
+  "zone create": {
+   "group": false,
+   "options": {
+    "enable-protection": {
+     "description": "Enable protection (delete) (default: none)",
+     "oneOf": null,
+     "short": null,
+     "type": "strings",
+     "value": true
+    },
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "mode": {
+     "description": "Mode of the Zone (primary, secondary) (default \"primary\")",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "name": {
+     "description": "Zone name (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "primary-nameservers-file": {
+     "description": "JSON file containing the new primary nameservers. (See 'hcloud zone change-primary-nameservers -h' for help)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "ttl": {
+     "description": "Default Time To Live (TTL) of the Zone",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "zonefile": {
+     "description": "Zone file in BIND (RFC 1034/1035) format (use - to read from stdin)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone create [options] --name <name> [--mode secondary --primary-nameservers <file>]"
+  },
+  "zone delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone delete <zone>..."
+  },
+  "zone describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone describe [options] <zone>"
+  },
+  "zone disable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for disable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone disable-protection <zone> delete"
+  },
+  "zone enable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone enable-protection <zone> delete"
+  },
+  "zone export-zonefile": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for export-zonefile",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone export-zonefile [options] <zone>"
+  },
+  "zone import-zonefile": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for import-zonefile",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "zonefile": {
+     "description": "Zone file in BIND (RFC 1034/1035) format (use - to read from stdin)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone import-zonefile --zonefile <file> <zone>"
+  },
+  "zone list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "mode": {
+     "description": "Only Zones with this mode are displayed",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone list [options]"
+  },
+  "zone remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone remove-label <zone> (--all | <label>...)"
+  },
+  "zone remove-records": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for remove-records",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "record": {
+     "description": "List of records (can be specified multiple times, conflicts with --records-file)",
+     "oneOf": null,
+     "short": null,
+     "type": "stringArray",
+     "value": true
+    },
+    "records-file": {
+     "description": "JSON file containing the records (conflicts with --record)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone remove-records (--record <value>... | --records-file <file>) <zone> <name> <type>"
+  },
+  "zone rrset": {
+   "group": true,
+   "options": {
+    "help": {
+     "description": "help for rrset",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone rrset [command]"
+  },
+  "zone rrset add-label": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "overwrite": {
+     "description": "Overwrite label if it exists already (true, false)",
+     "oneOf": null,
+     "short": "o",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone rrset add-label [--overwrite] <zone> <name> <type> <label>..."
+  },
+  "zone rrset add-records": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for add-records",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "record": {
+     "description": "List of records (can be specified multiple times, conflicts with --records-file)",
+     "oneOf": null,
+     "short": null,
+     "type": "stringArray",
+     "value": true
+    },
+    "records-file": {
+     "description": "JSON file containing the records (conflicts with --record)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "ttl": {
+     "description": "Time To Live (TTL) of the Zone RRSet",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone rrset add-records (--record <value>... | --records-file <file>) <zone> <name> <type>"
+  },
+  "zone rrset change-ttl": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for change-ttl",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "ttl": {
+     "description": "Time To Live (TTL) of the Zone RRSet (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "unset": {
+     "description": "Unset the Time To Live of Zone RRSet (use the Zone default TTL instead)",
+     "oneOf": null,
+     "short": null,
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone rrset change-ttl (--ttl <ttl> | --unset) <zone> <name> <type>"
+  },
+  "zone rrset create": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for create",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "label": {
+     "description": "User-defined labels ('key=value') (can be specified multiple times) (default [])",
+     "oneOf": null,
+     "short": null,
+     "type": "stringToString",
+     "value": true
+    },
+    "name": {
+     "description": "Name of the Zone RRSet (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "output": {
+     "description": "output options: json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "record": {
+     "description": "List of records (can be specified multiple times, conflicts with --records-file)",
+     "oneOf": null,
+     "short": null,
+     "type": "stringArray",
+     "value": true
+    },
+    "records-file": {
+     "description": "JSON file containing the records (conflicts with --record)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    },
+    "ttl": {
+     "description": "Time To Live (TTL) of the RRSet",
+     "oneOf": null,
+     "short": null,
+     "type": "int",
+     "value": true
+    },
+    "type": {
+     "description": "Type of the Zone RRSet (required)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone rrset create [options] --name <name> --type <A|AAAA|CAA|CNAME|DS|HINFO|HTTPS|MX|NS|PTR|RP|SOA|SRV|SVCB|TLSA|TXT> (--record <record>... | --records-file <file>) <zone>"
+  },
+  "zone rrset delete": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for delete",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone rrset delete <zone> <name> <type>"
+  },
+  "zone rrset describe": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for describe",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: json|yaml|format",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone rrset describe [options] <zone> <name> <type>"
+  },
+  "zone rrset enable-protection": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for enable-protection",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone rrset enable-protection <zone> <name> <type> change"
+  },
+  "zone rrset list": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for list",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "output": {
+     "description": "output options: noheader|columns=...|json|yaml",
+     "oneOf": null,
+     "short": "o",
+     "type": "stringArray",
+     "value": true
+    },
+    "selector": {
+     "description": "Selector to filter by labels",
+     "oneOf": null,
+     "short": "l",
+     "type": "string",
+     "value": true
+    },
+    "sort": {
+     "description": "Determine the sorting of the result",
+     "oneOf": null,
+     "short": "s",
+     "type": "strings",
+     "value": true
+    },
+    "type": {
+     "description": "Only Zone RRSets with one of these types are displayed",
+     "oneOf": [
+      "these types are displayed"
+     ],
+     "short": null,
+     "type": "strings",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone rrset list [options] <zone>"
+  },
+  "zone rrset remove-label": {
+   "group": false,
+   "options": {
+    "all": {
+     "description": "Remove all labels",
+     "oneOf": null,
+     "short": "a",
+     "type": null,
+     "value": false
+    },
+    "help": {
+     "description": "help for remove-label",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    }
+   },
+   "usage": "hcloud zone rrset remove-label <zone> <name> <type> (--all | <label>...)"
+  },
+  "zone rrset remove-records": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for remove-records",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "record": {
+     "description": "List of records (can be specified multiple times, conflicts with --records-file)",
+     "oneOf": null,
+     "short": null,
+     "type": "stringArray",
+     "value": true
+    },
+    "records-file": {
+     "description": "JSON file containing the records (conflicts with --record)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone rrset remove-records (--record <value>... | --records-file <file>) <zone> <name> <type>"
+  },
+  "zone rrset set-records": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for set-records",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "record": {
+     "description": "List of records (can be specified multiple times, conflicts with --records-file)",
+     "oneOf": null,
+     "short": null,
+     "type": "stringArray",
+     "value": true
+    },
+    "records-file": {
+     "description": "JSON file containing the records (conflicts with --record)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone rrset set-records (--record <value>... | --records-file <file>) <zone> <name> <type>"
+  },
+  "zone set-records": {
+   "group": false,
+   "options": {
+    "help": {
+     "description": "help for set-records",
+     "oneOf": null,
+     "short": "h",
+     "type": null,
+     "value": false
+    },
+    "record": {
+     "description": "List of records (can be specified multiple times, conflicts with --records-file)",
+     "oneOf": null,
+     "short": null,
+     "type": "stringArray",
+     "value": true
+    },
+    "records-file": {
+     "description": "JSON file containing the records (conflicts with --record)",
+     "oneOf": null,
+     "short": null,
+     "type": "string",
+     "value": true
+    }
+   },
+   "usage": "hcloud zone set-records (--record <value>... | --records-file <file>) <zone> <name> <type>"
+  }
+ },
+ "global": {
+  "config": {
+   "description": "Config file path (default \"~/.config/hcloud/cli.toml\")",
+   "oneOf": null,
+   "short": null,
+   "type": "string",
+   "value": true
+  },
+  "context": {
+   "description": "Currently active context",
+   "oneOf": null,
+   "short": null,
+   "type": "string",
+   "value": true
+  },
+  "debug": {
+   "description": "Enable debug output",
+   "oneOf": null,
+   "short": null,
+   "type": null,
+   "value": false
+  },
+  "debug-file": {
+   "description": "File to write debug output to",
+   "oneOf": null,
+   "short": null,
+   "type": "string",
+   "value": true
+  },
+  "endpoint": {
+   "description": "Hetzner Cloud API endpoint (default \"https://api.hetzner.cloud/v1\")",
+   "oneOf": null,
+   "short": null,
+   "type": "string",
+   "value": true
+  },
+  "hetzner-endpoint": {
+   "description": "Hetzner API endpoint (default \"https://api.hetzner.com/v1\")",
+   "oneOf": null,
+   "short": null,
+   "type": "string",
+   "value": true
+  },
+  "no-experimental-warnings": {
+   "description": "If true, experimental warnings are not shown",
+   "oneOf": null,
+   "short": null,
+   "type": null,
+   "value": false
+  },
+  "poll-interval": {
+   "description": "Interval at which to poll information, for example action progress (default 500ms)",
+   "oneOf": null,
+   "short": null,
+   "type": "duration",
+   "value": true
+  },
+  "quiet": {
+   "description": "If true, only print error messages",
+   "oneOf": null,
+   "short": null,
+   "type": null,
+   "value": false
+  }
+ }
+}

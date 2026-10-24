@@ -1,5 +1,23 @@
 {
   "nodes": {
+    "agency-agents": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792428454,
+        "narHash": "sha256-KAtwMQYlKDRdbG+gSNpEbIjd5YJAKSx7nDzbaXU09jo=",
+        "ref": "main",
+        "rev": "4e3ac3ca6604c75113f52c695dbddcc7af928b46",
+        "revCount": 837,
+        "type": "git",
+        "url": "https://github.com/msitarzewski/agency-agents"
+      },
+      "original": {
+        "ref": "main",
+        "rev": "4e3ac3ca6604c75113f52c695dbddcc7af928b46",
+        "type": "git",
+        "url": "https://github.com/msitarzewski/agency-agents"
+      }
+    },
     "argononed": {
       "flake": false,
       "locked": {
@@ -14,6 +32,27 @@
         "owner": "nvmd",
         "repo": "argononed",
         "type": "github"
+      }
+    },
+    "disko": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1768920986,
+        "narHash": "sha256-CNzzBsRhq7gg4BMBuTDObiWDH/rFYHEuDRVOwCcwXw4=",
+        "ref": "refs/tags/v1.13.0",
+        "rev": "de5708739256238fb912c62f03988815db89ec9a",
+        "revCount": 1312,
+        "type": "git",
+        "url": "https://github.com/nix-community/disko"
+      },
+      "original": {
+        "ref": "refs/tags/v1.13.0",
+        "type": "git",
+        "url": "https://github.com/nix-community/disko"
       }
     },
     "flake-compat": {
@@ -66,6 +105,23 @@
         "ref": "main",
         "type": "git",
         "url": "https://github.com/vic/import-tree"
+      }
+    },
+    "mercury-cli": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786509855,
+        "narHash": "sha256-yCnBNeMy157m1ShcIGNAx626uCPLLLugUty0miYouao=",
+        "ref": "refs/tags/v0.11.8",
+        "rev": "25cc254e78eddfbbd4f13cfc90a0beca930a2c0e",
+        "revCount": 343,
+        "type": "git",
+        "url": "https://github.com/MercuryTechnologies/mercury-cli"
+      },
+      "original": {
+        "ref": "refs/tags/v0.11.8",
+        "type": "git",
+        "url": "https://github.com/MercuryTechnologies/mercury-cli"
       }
     },
     "nix-effects": {
@@ -121,7 +177,9 @@
         "argononed": "argononed",
         "flake-compat": "flake-compat",
         "nixos-images": "nixos-images",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1785596452,
@@ -140,30 +198,85 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1784856561,
-        "narHash": "sha256-J+Bx1Z6Oeoj2FgnBhRMKyUhhtDoOpTgXYaVLZpDjW4A=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "597283ad8aa0b331c788e97c4c262d58877074ef",
-        "type": "github"
+        "lastModified": 1792615934,
+        "narHash": "sha256-MlvRfa1O5Cqc2/a+gG+l9TSuowEoCKCmrJ1d9oAVm0I=",
+        "ref": "nixos-26.05",
+        "rev": "da6dc0e7b26060f2f71ce3ef7088fb56ee44fa36",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/NixOS/nixpkgs"
       },
       "original": {
-        "owner": "NixOS",
         "ref": "nixos-26.05",
-        "repo": "nixpkgs",
-        "type": "github"
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/NixOS/nixpkgs"
+      }
+    },
+    "publicdotcom-cli": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791558761,
+        "narHash": "sha256-HkG8A7aLtCNgmH+KI7UiHrQGlHqxhe1zS7uCS4vHDCw=",
+        "ref": "refs/tags/v1.3.7",
+        "rev": "bac3f08ca76a3794b610bcda9b217d15e895365b",
+        "revCount": 34,
+        "type": "git",
+        "url": "https://github.com/PublicDotCom/publicdotcom-cli"
+      },
+      "original": {
+        "ref": "refs/tags/v1.3.7",
+        "type": "git",
+        "url": "https://github.com/PublicDotCom/publicdotcom-cli"
+      }
+    },
+    "rea": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792309245,
+        "narHash": "sha256-+tMug63XOX/2hZN/ShmST3BtLtucWh/X6EKexEClD8s=",
+        "ref": "refs/tags/rea-agents-6.7.0",
+        "rev": "27dc42d10249f0410904a75c0997842eb03b931c",
+        "revCount": 3697,
+        "type": "git",
+        "url": "https://github.com/morluto/rea"
+      },
+      "original": {
+        "ref": "refs/tags/rea-agents-6.7.0",
+        "type": "git",
+        "url": "https://github.com/morluto/rea"
       }
     },
     "root": {
       "inputs": {
+        "agency-agents": "agency-agents",
+        "disko": "disko",
         "flake-parts": "flake-parts",
         "import-tree": "import-tree",
+        "mercury-cli": "mercury-cli",
         "nix-effects": "nix-effects",
         "nixos-raspberrypi": "nixos-raspberrypi",
-        "nixpkgs": [
-          "nixos-raspberrypi",
-          "nixpkgs"
-        ]
+        "nixpkgs": "nixpkgs",
+        "publicdotcom-cli": "publicdotcom-cli",
+        "rea": "rea",
+        "secretspec-src": "secretspec-src"
+      }
+    },
+    "secretspec-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790467357,
+        "narHash": "sha256-jWs/9DMlB7m8XPgbq3EsflgW3DyJK7OvIXhDcl0+syc=",
+        "ref": "refs/tags/v0.21.1",
+        "rev": "5a8927d2b800c604fee72970ffbd137c57820fd5",
+        "revCount": 1398,
+        "type": "git",
+        "url": "https://github.com/cachix/secretspec"
+      },
+      "original": {
+        "ref": "refs/tags/v0.21.1",
+        "type": "git",
+        "url": "https://github.com/cachix/secretspec"
       }
     }
   },

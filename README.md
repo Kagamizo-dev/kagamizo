@@ -9,15 +9,63 @@ vaults, the GitHub organization and every account they run on. Stable
 
 | Device | Directory | Arch | Image | Status |
 |---|---|---|---|---|
-| Lenovo Yoga C940-14IIL | `devices/yoga-c940` | x86_64 | live USB ISO, niri desktop | active |
-| Raspberry Pi 5 | `devices/rpi5` | aarch64 | SD card image, headless | paused |
+| Lenovo Yoga C940-14IIL | `modules/yoga-c940` | x86_64 | live USB ISO, niri desktop | active |
+| Raspberry Pi 5 | `modules/rpi5` | aarch64 | SD card image, headless | paused |
 
-Shared building blocks live in `profiles/` (tmux, Proton Pass CLI, niri desktop,
-a welcome screen). A device is a directory under `devices/` that pulls in the
-profiles it wants and adds its own hardware settings (firmware, kernel params).
-To add a device: copy a directory under `devices/`, register it in
-`nixosConfigurations` in `parts/images/images.nix`, and add a pipeline like
+Shared building blocks are modules too (`tmux`, `tools`, `desktop`, `welcome`,
+`setup`), each exporting a `nixosModules.<name>`. A device module assembles the
+ones it wants and adds its own hardware settings (firmware, kernel params). To
+add a device: copy `modules/yoga-c940`, and add a pipeline like
 `.github/workflows/yoga-c940.yml`.
+
+## Layout
+
+Everything is a module under `modules/`, loaded by
+[import-tree](https://github.com/vic/import-tree) into
+[flake-parts](https://flake.parts) (the dendritic pattern). A module is one
+self-contained unit: it declares its own account, plan and capabilities, its
+secrets (`secrets.profiles`, merged into `secretspec.toml`), its packages,
+checks and deployment targets, and keeps its own files.
+
+- Every `.nix` file in `modules/` is a flake-parts module.
+- Anything under a path starting with `_` is not: NixOS modules (`_nixos.nix`),
+  VM tests (`_test.nix`), assets (`_assets/`), scripts (`_scripts/`), catalogs
+  (`_json/`), OpenTofu layers (`_zones.nix`).
+- `modules/_lib/` holds what modules share: `cli.nix` (every CLI call typed
+  against the catalogs), `types.nix` (nix-effects types), `secret.nix`.
+
+At the top level there is only the flake, the generated `secretspec.toml`
+(secretspec reads it from there), the docs and `.github/`.
+
+```
+modules/
+├─ _lib/          cli.nix, types.nix, secret.nix
+├─ core/          systems, formatter
+├─ accounts/      the account, plan and capability types; `signup`
+├─ identity/      legal identities (people and companies), domains, mailboxes,
+│                 the standard account slots; `identity-status`
+├─ proton/        vaults, agent tokens, `proton`; renders secretspec.toml
+├─ proton-mail/   custom domains and addresses (Go, on go-proton-api); `mail`
+├─ cloudflare/    account, tokens, `bootstrap`, `infra` (OpenTofu), `registrar`
+├─ github/        the organization and its repos; `github-bootstrap`
+├─ hetzner/       account and secrets (the host comes next)
+├─ openrouter/    account, models, capped keys and card; `openrouter`, `orca-fleet`
+├─ mercury/       the bank: its official CLI, every command governed
+│                 (`mercury-cli`), one capped virtual card per vendor; `cards`
+├─ mailbox/       confirmation mail through Proton Mail Bridge; `mailbox`
+├─ runtime/       the host boundary and the declared environment wrappers run in
+├─ northwest/     registered agent and filings over its MCP server; `northwest`
+├─ governance/    controllers, typed actions, agents; Cedar; `orca-swarm`
+├─ browser/       typed web flows in Rust over the DevTools Protocol; `browser`
+├─ trading/       NautilusTrader 1.231, brokerages as backends, strategies; `trade`
+├─ arxiv/         Jingzo's author account (paused)
+├─ public/        the brokerage: CLI, account; `brokerage`
+├─ catalog/       what each pinned tool can do (_json/), and its extractors
+├─ claude/        cloud session tools and network allowlist
+├─ repo/          commit convention, lint
+├─ tmux/ tools/ desktop/ welcome/ setup/   shared NixOS modules
+└─ rpi5/ yoga-c940/                        devices: configs, images, checks
+```
 
 ## One branch, release tags as channels
 
@@ -71,7 +119,7 @@ Secrets only ever live in memory; nothing is written to the USB stick.
 The session never mounts the laptop's internal disk automatically, so Windows is left
 alone as long as you don't mount or write to it yourself.
 
-Wallpaper: `profiles/wallpaper/japan-countryside-4k.png` (drawn by `scripts/make-wallpaper.py`), set at startup by `swaybg`
+Wallpaper: `modules/desktop/_assets/wallpaper/japan-countryside-4k.png` (drawn by `_assets/make-wallpaper.py`), set at startup by `swaybg`
 (niri draws no wallpaper itself). To change it, replace that file (keep it a PNG under
 ~8 MB; the build checks) and push to `main`.
 
@@ -91,7 +139,7 @@ auto-login on the console straight into tmux.
 ## tmux and Proton Pass
 
 Prefix is `Ctrl-a`. `prefix ?` opens a fuzzy-searchable list of every key binding;
-`prefix Space` opens a grouped quick menu. Edit `profiles/tmux.nix`.
+`prefix Space` opens a grouped quick menu. Edit `modules/tmux/_nixos.nix`.
 
 `pass-cli login` prints a URL to open on your phone. The CLI keeps its key in the
 kernel keyring (RAM, cleared on reboot). It needs a Proton plan that includes the
@@ -103,14 +151,43 @@ CLI (Pass Plus/Family/Professional or a bundle). If keyring errors appear:
 The Cloudflare account is declared in Nix and applied by OpenTofu: PRs get a
 read-only plan, merging applies it. Secrets live in Proton Pass and are named in
 `secretspec.toml`. Setup and the token model:
-[parts/cloudflare/README.md](parts/cloudflare/README.md).
+[modules/cloudflare/README.md](modules/cloudflare/README.md).
 
 ## Identity: domains, mailboxes, vaults, accounts
 
 Kagamizo's domains, their mailboxes, the Cloudflare and GitHub accounts and the
-Proton Pass vaults are declared under `parts/` and type-checked with
+Proton Pass vaults are declared under `modules/` and type-checked with
 nix-effects. The GitHub organization is applied by the `github-bootstrap`
-workflow (`parts/github`).
+workflow (`modules/github`).
+
+## Money: one capped card per vendor
+
+Nothing is paid with a long-lived card. Each vendor's module declares its own
+Mercury virtual card with a spend limit (`mercury.cards.<vendor>`: OpenRouter's
+is the sum of its key caps, Cloudflare's the registrar budget), and
+`nix run .#cards -- plan|apply` issues, re-limits, freezes or cancels them.
+Where Mercury reveals a card, its details go straight into a Proton Pass card
+item. Moving money still asks for a tap in the Mercury app.
+
+`nix run .#mercury-cli -- --account mercury-jingzo <command>` runs any command
+of Mercury's official CLI (pinned, every one typed by what it does to the
+account in `modules/mercury/commands.nix`), after governance allows it,
+with the account's session from Proton Pass.
+
+`nix run .#brokerage -- summary` reads Public (accounts, portfolio); any other
+arguments go to Public's own CLI, with its secret from Proton Pass.
+
+## Logins: Proton Pass is the authority
+
+Every account signs in with an address on its owner's domain: you
+(Mirazo, mirazo.org), Jingzo (QSearch LLC on paper, jingzo.org) and
+Kagamizo (kagamizo.com). Each account declares its login item and that
+address (`accounts.held.<a>.login`); evaluation fails if the address is on
+anyone else's domain. Before any action, `governance-authorize` reads the
+login item's addresses (never its password) from Proton Pass, and the Cedar
+policy `logins-say-whose-they-are` denies the action unless Proton Pass says
+exactly the declared address. `nix run .#identity-audit` shows every
+account's standing and any login in a company's vault no account declares.
 
 ## Checks
 

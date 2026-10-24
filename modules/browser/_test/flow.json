@@ -1,0 +1,15 @@
+{
+  "action": "test:sign-in",
+  "account": "test",
+  "hosts": ["127.0.0.1"],
+  "login": { "vault": "none", "item": "none", "email": "finance@jingzo.org" },
+  "steps": [
+    { "do": "goto", "url": "http://127.0.0.1:PORT/page.html" },
+    { "do": "fill", "target": { "by": "role", "role": "textbox", "name": "Email" }, "value": { "from": "declared" } },
+    { "do": "fill", "target": { "by": "css", "css": "#password" }, "value": { "from": "text", "text": "not-a-secret" } },
+    { "do": "click", "target": { "by": "role", "role": "button", "name": "Continue" } },
+    { "do": "approve", "prompt": "approve the sign-in", "until": { "when": "url-prefix", "prefix": "http://127.0.0.1:PORT/done" }, "minutes": 1 },
+    { "do": "wait-for", "target": { "by": "role", "role": "button", "name": "Invite member" }, "seconds": 5 },
+    { "do": "snapshot", "text": true }
+  ]
+}

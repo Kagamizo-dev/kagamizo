@@ -1,0 +1,892 @@
+{
+ "commands": {
+  "accounts clear-default": {
+   "args": [],
+   "options": {}
+  },
+  "accounts get-default": {
+   "args": [],
+   "options": {}
+  },
+  "accounts list": {
+   "args": [],
+   "options": {}
+  },
+  "accounts set-default": {
+   "args": [
+    {
+     "name": "account-id",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {}
+  },
+  "auth login": {
+   "args": [],
+   "options": {
+    "print-token": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "secret": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "store-secret": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "validity-minutes": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    }
+   }
+  },
+  "auth logout": {
+   "args": [],
+   "options": {
+    "all": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "auth refresh": {
+   "args": [],
+   "options": {
+    "print-token": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "secret": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "store-secret": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "validity-minutes": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    }
+   }
+  },
+  "auth status": {
+   "args": [],
+   "options": {}
+  },
+  "event-contracts categories": {
+   "args": [],
+   "options": {}
+  },
+  "event-contracts details": {
+   "args": [
+    {
+     "name": "event-symbol",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {
+    "all-outcomes": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "event-contracts summary": {
+   "args": [],
+   "options": {
+    "category": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "created-within-days": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "event-symbol": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "frequency": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "include-resolved": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "next-token": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "resolution-end": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "resolution-start": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "sort": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "subcategory": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "historicdata bars": {
+   "args": [
+    {
+     "name": "security-type",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    },
+    {
+     "name": "symbol",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    },
+    {
+     "name": "period",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {
+    "aggregation": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "ipo-date": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "purchase-date": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "historicdata event-contract-bars": {
+   "args": [
+    {
+     "name": "event-id",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    },
+    {
+     "name": "period",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {
+    "symbol": {
+     "multiple": true,
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "history list": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "end": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "next-token": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "page-size": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "start": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "instruments bonds": {
+   "args": [],
+   "options": {
+    "bond-status": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "bond-type": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "callable": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "coupon-frequency": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "issuer": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "issuer-symbol": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "liquidity-rating": {
+     "multiple": true,
+     "required": false,
+     "type": "number"
+    },
+    "max-coupon": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "max-current-yield": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "max-liquidity-rating": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "max-maturity-date": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "max-par-value": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "min-coupon": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "min-current-yield": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "min-liquidity-rating": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "min-maturity-date": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "min-par-value": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "page-number": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "page-size": {
+     "multiple": false,
+     "required": false,
+     "type": "number"
+    },
+    "partial-par": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "perpetual": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "rating": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "rating-category": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "sort-direction": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "sort-property": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "sp-creditwatch": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "sp-outlook": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "treasury-subtype": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "instruments get": {
+   "args": [
+    {
+     "name": "symbol",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    },
+    {
+     "name": "security-type",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {}
+  },
+  "instruments list": {
+   "args": [],
+   "options": {
+    "fractional-trading-filter": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "option-spread-trading-filter": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "option-trading-filter": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "trading-filter": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    },
+    "type-filter": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "market bond-details": {
+   "args": [
+    {
+     "name": "symbol",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "market option-chain": {
+   "args": [
+    {
+     "name": "symbol",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    },
+    {
+     "name": "expiration-date",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "type": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "market option-expirations": {
+   "args": [
+    {
+     "name": "symbol",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "type": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "market quotes": {
+   "args": [
+    {
+     "name": "symbols",
+     "required": true,
+     "type": "string",
+     "variadic": true
+    }
+   ],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "type": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "options greeks": {
+   "args": [
+    {
+     "name": "osi-symbols",
+     "required": true,
+     "type": "string",
+     "variadic": true
+    }
+   ],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "options strategy-quote": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "file": {
+     "multiple": false,
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "order cancel": {
+   "args": [
+    {
+     "name": "order-id",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "yes": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "order get": {
+   "args": [
+    {
+     "name": "order-id",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "order get-v2": {
+   "args": [
+    {
+     "name": "order-id",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "order place": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "file": {
+     "multiple": false,
+     "required": true,
+     "type": "string"
+    },
+    "order-class": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "stop-loss-limit": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "stop-loss-stop": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "take-profit-limit": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "yes": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "order place-multileg": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "file": {
+     "multiple": false,
+     "required": true,
+     "type": "string"
+    },
+    "yes": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "order preflight-multi": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "file": {
+     "multiple": false,
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "order preflight-single": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "file": {
+     "multiple": false,
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "order replace": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "amount": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "file": {
+     "multiple": false,
+     "required": true,
+     "type": "string"
+    },
+    "quantity": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "yes": {
+     "multiple": false,
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "order search": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "created-after": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "created-before": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "open-close": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "security-type": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "side": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "status": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "symbol": {
+     "multiple": true,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "portfolio show": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "taxlots csv": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "output": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "taxlots list": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "taxlots symbol": {
+   "args": [
+    {
+     "name": "symbol",
+     "required": true,
+     "type": "string",
+     "variadic": false
+    }
+   ],
+   "options": {
+    "account-id": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    },
+    "price": {
+     "multiple": false,
+     "required": false,
+     "type": "string"
+    }
+   }
+  }
+ },
+ "global": {
+  "auto-refresh": {
+   "multiple": false,
+   "required": false,
+   "type": "boolean"
+  },
+  "base-url": {
+   "multiple": false,
+   "required": false,
+   "type": "string"
+  },
+  "json": {
+   "multiple": false,
+   "required": false,
+   "type": "boolean"
+  },
+  "refresh-skew-seconds": {
+   "multiple": false,
+   "required": false,
+   "type": "number"
+  },
+  "refresh-validity-minutes": {
+   "multiple": false,
+   "required": false,
+   "type": "number"
+  },
+  "timeout": {
+   "multiple": false,
+   "required": false,
+   "type": "number"
+  },
+  "token": {
+   "multiple": false,
+   "required": false,
+   "type": "string"
+  },
+  "version": {
+   "multiple": false,
+   "required": false,
+   "type": "boolean"
+  }
+ }
+}

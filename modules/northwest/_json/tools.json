@@ -1,0 +1,655 @@
+{
+  "_source": "130 of the 131 tools named on https://www.northwestregisteredagent.com/ai/mcp/tools (as of October 2026), read through search results on 2026-10-21, not from the server; one phone tool is unnamed. `northwest catalog` replaces this with the server's own tools/list.",
+  "tools": [
+    {
+      "name": "activate_email_hosting_addon_tool",
+      "group": "email",
+      "description": "Activate the email hosting add-on"
+    },
+    {
+      "name": "activate_monitoring_service_tool",
+      "group": "services",
+      "description": "Start Brand Protection"
+    },
+    {
+      "name": "activate_website_hosting_addon_tool",
+      "group": "hosting",
+      "description": "Activate website hosting (voucher)"
+    },
+    {
+      "name": "add_amendment_filing_to_cart_tool",
+      "group": "cart",
+      "description": "Put an amendment in the cart"
+    },
+    {
+      "name": "add_document_plan_upgrade_to_cart_tool",
+      "group": "documents",
+      "description": "Put a document plan upgrade in the cart"
+    },
+    {
+      "name": "add_domain_renewal_to_cart_tool",
+      "group": "domains",
+      "description": "Put a domain renewal in the cart"
+    },
+    {
+      "name": "add_domain_transfer_to_cart_tool",
+      "group": "domains",
+      "description": "Put a domain transfer in the cart"
+    },
+    {
+      "name": "add_ein_to_cart_tool",
+      "group": "cart",
+      "description": "Put an EIN filing in the cart (an SSN flag only)"
+    },
+    {
+      "name": "add_email_hosting_to_cart_tool",
+      "group": "email",
+      "description": "Put email hosting in the cart"
+    },
+    {
+      "name": "add_formation_to_cart_tool",
+      "group": "cart",
+      "description": "Put a formation in the cart"
+    },
+    {
+      "name": "add_mail_plan_to_cart_tool",
+      "group": "services",
+      "description": "Put a mail plan in the cart"
+    },
+    {
+      "name": "add_new_domain_to_cart_tool",
+      "group": "domains",
+      "description": "Put a new domain in the cart"
+    },
+    {
+      "name": "add_phone_service_to_cart_tool",
+      "group": "phone",
+      "description": "Put phone service in the cart"
+    },
+    {
+      "name": "add_product_to_cart_tool",
+      "group": "cart",
+      "description": "Put a catalog product or filing in the cart"
+    },
+    {
+      "name": "add_ra_service_to_cart",
+      "group": "services",
+      "description": "Registered agent service in a new state, in the cart"
+    },
+    {
+      "name": "apply_filing_field_suggestions_tool",
+      "group": "forms",
+      "description": "Fill an open filing form (never SSN, dates or signatures)"
+    },
+    {
+      "name": "apply_service_field_suggestions_tool",
+      "group": "forms",
+      "description": "Fill an open service form"
+    },
+    {
+      "name": "cancel_service_tool",
+      "group": "services",
+      "description": "Cancel a service (irreversible; reason and typed name)"
+    },
+    {
+      "name": "change_email_hosting_plan_tool",
+      "group": "email",
+      "description": "Change the email hosting plan"
+    },
+    {
+      "name": "change_email_inbox_password_tool",
+      "group": "email",
+      "description": "Change an inbox's password"
+    },
+    {
+      "name": "change_phone_service_plan_tool",
+      "group": "phone",
+      "description": "Change the phone plan"
+    },
+    {
+      "name": "check_webmail_server_reachability_tool",
+      "group": "email",
+      "description": "Whether webmail is reachable"
+    },
+    {
+      "name": "checkout_cart_invoice_only_tool",
+      "group": "cart",
+      "description": "Check out as an invoice and texted pay link"
+    },
+    {
+      "name": "checkout_cart_tool",
+      "group": "cart",
+      "description": "Check out with the saved method"
+    },
+    {
+      "name": "company_entity_catalog_tool",
+      "group": "account",
+      "description": "Entity types and each state's allowed name suffixes"
+    },
+    {
+      "name": "create_company_tool",
+      "group": "account",
+      "description": "Add a company record with a domestic registration; files nothing with the state"
+    },
+    {
+      "name": "create_document_request_tool",
+      "group": "documents",
+      "description": "Order a mailed copy (charges the saved method)"
+    },
+    {
+      "name": "create_document_unlock_invoice_tool",
+      "group": "documents",
+      "description": "Invoice that unlocks a document"
+    },
+    {
+      "name": "create_domain_dns_record_tool",
+      "group": "dns",
+      "description": "Create a DNS record"
+    },
+    {
+      "name": "create_domain_dns_zone_tool",
+      "group": "dns",
+      "description": "Create a DNS zone"
+    },
+    {
+      "name": "create_domain_for_accounts_stage_tool",
+      "group": "domains",
+      "description": "Create a domain for the accounts stage"
+    },
+    {
+      "name": "create_email_forwarding_tool",
+      "group": "email",
+      "description": "Create email forwarding"
+    },
+    {
+      "name": "create_email_inbox_tool",
+      "group": "email",
+      "description": "Create an inbox"
+    },
+    {
+      "name": "delete_domain_dns_record_tool",
+      "group": "dns",
+      "description": "Delete a DNS record"
+    },
+    {
+      "name": "delete_domain_forwarding_tool",
+      "group": "forwarding",
+      "description": "Delete domain forwarding"
+    },
+    {
+      "name": "delete_email_forwarding_tool",
+      "group": "email",
+      "description": "Delete email forwarding"
+    },
+    {
+      "name": "discover_products_tool",
+      "group": "cart",
+      "description": "Discover products"
+    },
+    {
+      "name": "enable_autopay_tool",
+      "group": "payments",
+      "description": "Turn on autopay"
+    },
+    {
+      "name": "get_account_shipping_address_tool",
+      "group": "account",
+      "description": "The account's shipping address"
+    },
+    {
+      "name": "get_account_summary_tool",
+      "group": "account",
+      "description": "Snapshot of subscriptions, services, recent orders and invoices"
+    },
+    {
+      "name": "get_action_items_tool",
+      "group": "account",
+      "description": "Tasks needing attention"
+    },
+    {
+      "name": "get_add_payment_method_options_tool",
+      "group": "payments",
+      "description": "How to add a payment method"
+    },
+    {
+      "name": "get_annual_reports_tool",
+      "group": "filings",
+      "description": "Annual report due dates and autopay"
+    },
+    {
+      "name": "get_call_forwarding_tool",
+      "group": "phone",
+      "description": "Call forwarding"
+    },
+    {
+      "name": "get_cart_items_tool",
+      "group": "cart",
+      "description": "The cart"
+    },
+    {
+      "name": "get_cnam_tool",
+      "group": "phone",
+      "description": "Caller ID name"
+    },
+    {
+      "name": "get_companies_tool",
+      "group": "account",
+      "description": "List the account's companies"
+    },
+    {
+      "name": "get_company_details_tool",
+      "group": "account",
+      "description": "An entity's details"
+    },
+    {
+      "name": "get_company_ein_tool",
+      "group": "account",
+      "description": "EIN on file, or pending with the EIN filing's summary"
+    },
+    {
+      "name": "get_company_state_status_tool",
+      "group": "account",
+      "description": "The company's standing with its state"
+    },
+    {
+      "name": "get_document_content_tool",
+      "group": "documents",
+      "description": "An unlocked document's text (not legal documents)"
+    },
+    {
+      "name": "get_document_details_tool",
+      "group": "documents",
+      "description": "Why a document is locked, and its unlock price"
+    },
+    {
+      "name": "get_document_plan_upgrade_options_tool",
+      "group": "documents",
+      "description": "Document plan upgrades"
+    },
+    {
+      "name": "get_document_request_options_tool",
+      "group": "documents",
+      "description": "Options for a mailed copy"
+    },
+    {
+      "name": "get_document_request_status_tool",
+      "group": "documents",
+      "description": "A mailed copy's status"
+    },
+    {
+      "name": "get_document_upload_options_tool",
+      "group": "documents",
+      "description": "The in-chat upload app"
+    },
+    {
+      "name": "get_documents_tool",
+      "group": "documents",
+      "description": "Portal documents (company, read, locked, shared filters)"
+    },
+    {
+      "name": "get_domain_detail_tool",
+      "group": "domains",
+      "description": "A domain's details"
+    },
+    {
+      "name": "get_domain_dns_records_tool",
+      "group": "dns",
+      "description": "DNS records"
+    },
+    {
+      "name": "get_domain_nameservers_tool",
+      "group": "dns",
+      "description": "Nameservers"
+    },
+    {
+      "name": "get_domains_tool",
+      "group": "domains",
+      "description": "Domains"
+    },
+    {
+      "name": "get_email_forwarding_tool",
+      "group": "email",
+      "description": "Email forwarding"
+    },
+    {
+      "name": "get_email_hosting_plans_tool",
+      "group": "email",
+      "description": "Email hosting plans"
+    },
+    {
+      "name": "get_email_hosting_tool",
+      "group": "email",
+      "description": "Email hosting"
+    },
+    {
+      "name": "get_email_inbox_login_url_tool",
+      "group": "email",
+      "description": "An inbox's login URL"
+    },
+    {
+      "name": "get_email_inbox_send_usage_tool",
+      "group": "email",
+      "description": "An inbox's send usage"
+    },
+    {
+      "name": "get_email_inbox_storage_usage_tool",
+      "group": "email",
+      "description": "An inbox's storage"
+    },
+    {
+      "name": "get_email_inboxes_tool",
+      "group": "email",
+      "description": "Inboxes"
+    },
+    {
+      "name": "get_email_smtp_settings_tool",
+      "group": "email",
+      "description": "SMTP settings"
+    },
+    {
+      "name": "get_filing_field_help_tool",
+      "group": "forms",
+      "description": "Help for a field on an open filing form"
+    },
+    {
+      "name": "get_filing_statuses_tool",
+      "group": "filings",
+      "description": "Formation, annual report and amendment filings"
+    },
+    {
+      "name": "get_forwarding_domains_tool",
+      "group": "forwarding",
+      "description": "Forwarding domains"
+    },
+    {
+      "name": "get_invoices_tool",
+      "group": "payments",
+      "description": "Open and paid invoices"
+    },
+    {
+      "name": "get_mail_plans_tool",
+      "group": "services",
+      "description": "Mail plans"
+    },
+    {
+      "name": "get_mail_service_plan_details_tool",
+      "group": "services",
+      "description": "A mail plan's details"
+    },
+    {
+      "name": "get_oi_req_attention",
+      "group": "filings",
+      "description": "Orders waiting for you to verify or complete"
+    },
+    {
+      "name": "get_order_details_tool",
+      "group": "filings",
+      "description": "An order's details"
+    },
+    {
+      "name": "get_payment_methods_tool",
+      "group": "payments",
+      "description": "Saved payment methods"
+    },
+    {
+      "name": "get_phone_app_username_tool",
+      "group": "phone",
+      "description": "Phone app username"
+    },
+    {
+      "name": "get_phone_plans_tool",
+      "group": "phone",
+      "description": "Phone plans"
+    },
+    {
+      "name": "get_phone_settings_tool",
+      "group": "phone",
+      "description": "Phone settings"
+    },
+    {
+      "name": "get_products_tool",
+      "group": "cart",
+      "description": "The product catalog"
+    },
+    {
+      "name": "get_refund_status_tool",
+      "group": "payments",
+      "description": "A refund's status"
+    },
+    {
+      "name": "get_registered_agents_tool",
+      "group": "services",
+      "description": "Registered agent services"
+    },
+    {
+      "name": "get_service_field_help_tool",
+      "group": "forms",
+      "description": "Help for a field on an open service form"
+    },
+    {
+      "name": "get_service_status_tool",
+      "group": "services",
+      "description": "A service's status"
+    },
+    {
+      "name": "get_services_tool",
+      "group": "services",
+      "description": "Services"
+    },
+    {
+      "name": "get_site_contact_information_tool",
+      "group": "account",
+      "description": "Northwest's contact information"
+    },
+    {
+      "name": "get_todays_date_tool",
+      "group": "utilities",
+      "description": "Today's date"
+    },
+    {
+      "name": "get_virtual_phones_tool",
+      "group": "phone",
+      "description": "Virtual phones"
+    },
+    {
+      "name": "get_voicemail_settings_tool",
+      "group": "phone",
+      "description": "Voicemail settings"
+    },
+    {
+      "name": "kb__search_customer",
+      "group": "utilities",
+      "description": "Search Northwest's knowledge base"
+    },
+    {
+      "name": "list_amendment_filing_options_tool",
+      "group": "filings",
+      "description": "Amendment filing options and prices"
+    },
+    {
+      "name": "list_ein_filing_options_tool",
+      "group": "filings",
+      "description": "EIN filing options and prices"
+    },
+    {
+      "name": "list_formation_filing_options_tool",
+      "group": "filings",
+      "description": "Formation filing options and prices"
+    },
+    {
+      "name": "open_order_item_requiring_attention_tool",
+      "group": "filings",
+      "description": "Open such an order in the portal"
+    },
+    {
+      "name": "pay_invoice_tool",
+      "group": "payments",
+      "description": "Pay an invoice with the saved method"
+    },
+    {
+      "name": "purchase_compliance_service_tool",
+      "group": "services",
+      "description": "Start the free renewal filing service"
+    },
+    {
+      "name": "reactivate_email_hosting_tool",
+      "group": "email",
+      "description": "Reactivate email hosting"
+    },
+    {
+      "name": "reactivate_phone_service_tool",
+      "group": "phone",
+      "description": "Reactivate phone service (45-day window)"
+    },
+    {
+      "name": "remove_from_cart_tool",
+      "group": "cart",
+      "description": "Remove from the cart"
+    },
+    {
+      "name": "reserve_phone_number_tool",
+      "group": "phone",
+      "description": "Reserve a number"
+    },
+    {
+      "name": "save_or_submit_filing_form_tool",
+      "group": "forms",
+      "description": "Save or submit an open filing form"
+    },
+    {
+      "name": "save_or_submit_service_form_tool",
+      "group": "forms",
+      "description": "Save or submit an open service form"
+    },
+    {
+      "name": "search_available_numbers_tool",
+      "group": "phone",
+      "description": "Search phone numbers"
+    },
+    {
+      "name": "search_domain_for_accounts_stage_tool",
+      "group": "domains",
+      "description": "Search a domain for the accounts stage"
+    },
+    {
+      "name": "search_domains_tool",
+      "group": "domains",
+      "description": "Search domains"
+    },
+    {
+      "name": "search_naics_codes_tool",
+      "group": "filings",
+      "description": "Search NAICS codes"
+    },
+    {
+      "name": "select_product_tool",
+      "group": "cart",
+      "description": "Select a product"
+    },
+    {
+      "name": "send_invoice_pay_link_sms_tool",
+      "group": "payments",
+      "description": "Text an invoice's pay link"
+    },
+    {
+      "name": "set_bulk_domain_forwarding_tool",
+      "group": "forwarding",
+      "description": "Set forwarding for many domains"
+    },
+    {
+      "name": "set_domain_auto_renew_tool",
+      "group": "domains",
+      "description": "Domain auto-renew"
+    },
+    {
+      "name": "set_domain_forwarding_tool",
+      "group": "forwarding",
+      "description": "Set domain forwarding"
+    },
+    {
+      "name": "set_domain_privacy_tool",
+      "group": "domains",
+      "description": "Domain privacy"
+    },
+    {
+      "name": "set_phone_app_username_tool",
+      "group": "phone",
+      "description": "Set the phone app username"
+    },
+    {
+      "name": "show_chart",
+      "group": "utilities",
+      "description": "Show a chart"
+    },
+    {
+      "name": "show_domain_forwarding_tool",
+      "group": "forwarding",
+      "description": "Domain forwarding"
+    },
+    {
+      "name": "show_table",
+      "group": "utilities",
+      "description": "Show a table"
+    },
+    {
+      "name": "submit_domain_transfer_tool",
+      "group": "domains",
+      "description": "Submit a domain transfer (voucher)"
+    },
+    {
+      "name": "update_call_forwarding_tool",
+      "group": "phone",
+      "description": "Update call forwarding"
+    },
+    {
+      "name": "update_cnam_tool",
+      "group": "phone",
+      "description": "Update caller ID name"
+    },
+    {
+      "name": "update_company_details_tool",
+      "group": "account",
+      "description": "Northwest profile only (NAICS, addresses, officials); an official change is an amendment"
+    },
+    {
+      "name": "update_company_name_tool",
+      "group": "forms",
+      "description": "The name on an in-progress formation"
+    },
+    {
+      "name": "update_domain_dns_record_tool",
+      "group": "dns",
+      "description": "Update a DNS record"
+    },
+    {
+      "name": "update_domain_forwarding_tool",
+      "group": "forwarding",
+      "description": "Update domain forwarding"
+    },
+    {
+      "name": "update_domain_lock_tool",
+      "group": "domains",
+      "description": "Lock or unlock a domain"
+    },
+    {
+      "name": "update_domain_nameservers_tool",
+      "group": "dns",
+      "description": "Change nameservers"
+    },
+    {
+      "name": "update_email_forwarding_tool",
+      "group": "email",
+      "description": "Update email forwarding"
+    },
+    {
+      "name": "update_phone_settings_tool",
+      "group": "phone",
+      "description": "Update phone settings"
+    },
+    {
+      "name": "update_voicemail_settings_tool",
+      "group": "phone",
+      "description": "Update voicemail settings"
+    }
+  ]
+}
