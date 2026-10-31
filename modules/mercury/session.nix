@@ -38,7 +38,13 @@ in
       lib.nameValuePair (profile name) {
         defaults.providers = [ "${a.owner}-sessions" ];
         MERCURY_SESSION =
-          secret "Mercury OAuth session for ${name} (refresh token), rewritten on every use" "mercury-session"
+          secret {
+            kind = "oauth-session";
+            issuer = "automation:mercury-session";
+            needs = [ "approve-sign-in" ];
+            description = "Mercury OAuth session for ${name} (refresh token), rewritten on every use";
+            item = "mercury-session";
+          }
           // {
             required = false;
           };

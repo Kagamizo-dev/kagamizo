@@ -141,13 +141,22 @@ in
   config = {
     secrets.profiles.hetzner = {
       TOFU_STATE =
-        import ../_lib/secret.nix "The Hetzner host's OpenTofu state (encrypted)" "hetzner-tofu-state"
+        (import ../_lib/secret.nix) {
+          kind = "state";
+          issuer = "automation:hetzner-infra";
+          description = "The Hetzner host's OpenTofu state (encrypted)";
+          item = "hetzner-tofu-state";
+        }
         // {
           required = false;
         };
       TOFU_STATE_PASSPHRASE =
-        import ../_lib/secret.nix "Passphrase of the Hetzner host's OpenTofu state"
-          "hetzner-tofu-passphrase"
+        (import ../_lib/secret.nix) {
+          kind = "encryption-key";
+          issuer = "automation:hetzner-infra";
+          description = "Passphrase of the Hetzner host's OpenTofu state";
+          item = "hetzner-tofu-passphrase";
+        }
         // {
           required = false;
         };

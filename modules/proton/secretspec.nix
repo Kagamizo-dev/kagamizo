@@ -42,7 +42,11 @@ let
       entity: e: lib.nameValuePair "${entity}-logins" "protonpass://${e.vault}"
     ) config.identity.checked.entities;
 
-    profiles = config.secrets.profiles;
+    # The boundary (kind, issuer, needs) is the repo's, checked by
+    # ../operations; secretspec gets the rest.
+    profiles = lib.mapAttrs (
+      _: lib.mapAttrs (name: v: if name == "defaults" then v else removeAttrs v [ "boundary" ])
+    ) config.secrets.profiles;
   };
 in
 {
@@ -51,8 +55,9 @@ in
     default = { };
     description = ''
       secretspec profiles, merged from every module: each declares the
-      secrets it uses, as VARIABLE = import ../_lib/secret.nix "what" "item"
-      under the profile that holds them, plus the profile's defaults.
+      secrets it uses, as VARIABLE = secret { kind; issuer; description;
+      item; } (../_lib/secret.nix) under the profile that holds them, plus
+      the profile's defaults.
     '';
   };
 
@@ -71,7 +76,12 @@ in
     }
     // lib.mapAttrs' (
       name: a:
-      lib.nameValuePair a.secret (secret "Proton Pass agent token `${name}`" "pass-agent-${name}")
+      lib.nameValuePair a.secret (secret {
+        kind = "api-token";
+        issuer = "automation:proton";
+        description = "Proton Pass agent token `${name}`";
+        item = "pass-agent-${name}";
+      })
     ) config.proton.agents;
 
     perSystem =

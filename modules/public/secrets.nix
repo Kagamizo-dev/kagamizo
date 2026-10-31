@@ -6,9 +6,21 @@ in
 {
   secrets.profiles.public = {
     defaults.providers = [ "root" ];
-    PUBLIC_PERSONAL_SECRET = secret "Public personal secret, made once in Settings (a Gap)" "public-personal-secret";
-    PUBLIC_ACCOUNT_ID = secret "The Public account commands act on" "public-account-id" // {
-      required = false;
+    PUBLIC_PERSONAL_SECRET = secret {
+      kind = "api-token";
+      issuer = "human:console-credential";
+      description = "Public personal secret, made once in Settings (a Gap)";
+      item = "public-personal-secret";
     };
+    PUBLIC_ACCOUNT_ID =
+      secret {
+        kind = "identifier";
+        issuer = "human:console-credential";
+        description = "The Public account commands act on";
+        item = "public-account-id";
+      }
+      // {
+        required = false;
+      };
   };
 }

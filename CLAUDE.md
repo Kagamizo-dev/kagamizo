@@ -44,6 +44,21 @@ starts as a declaration on its owner, never as an account made first.
 Every wrapper that acts on an account asks `governance-authorize`
 (`modules/governance`), and every operation it exposes is a typed action.
 
+## The boundary, and what every module is
+
+Every module is rooted in Lean, typed in Rust and wrapped in Nix: Lean
+states its rules and proves what they guarantee, Rust implements against
+them, Nix pins and packages both and runs the proofs as checks.
+
+What the owner does by hand is a closed, typed set
+(`operations.humanSteps`, mirrored by `HumanStep` in
+`modules/operations/_lean/Boundary.lean`); everything else is automation.
+Every secret is declared with `secret { kind; issuer; needs; ... }`
+(`modules/_lib/secret.nix`): what it is, whether a tool or a named human
+step issues it, and which human steps an automated issuer waits on.
+`checks.operations-boundary` has Lean prove every declared secret keeps the
+rule.
+
 ## Secrets
 
 Values live only in Proton Pass; `secretspec.toml` (generated from each

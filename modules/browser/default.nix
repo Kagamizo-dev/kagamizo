@@ -314,8 +314,13 @@ in
       lib.nameValuePair "passkey-${name}" {
         defaults.providers = [ "${a.owner}-logins" ];
         PASSKEY =
-          import ../_lib/secret.nix "Passkey for ${name}, held by the browser engine (credential JSON)"
-            "passkey-${name}"
+          (import ../_lib/secret.nix) {
+            kind = "passkey";
+            issuer = "automation:browser";
+            needs = [ "approve-sign-in" ];
+            description = "Passkey for ${name}, held by the browser engine (credential JSON)";
+            item = "passkey-${name}";
+          }
           // {
             required = false;
           };

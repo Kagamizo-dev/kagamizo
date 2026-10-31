@@ -60,7 +60,12 @@ in
     lib.nameValuePair "swarm-${entity}" {
       defaults.providers = [ "${entity}-sessions" ];
       OPENROUTER_API_KEY =
-        secret "OpenRouter key for ${entity}'s swarms, minted by `openrouter apply`" "openrouter-api-key"
+        secret {
+          kind = "api-token";
+          issuer = "automation:openrouter";
+          description = "OpenRouter key for ${entity}'s swarms, minted by `openrouter apply`";
+          item = "openrouter-api-key";
+        }
         // {
           required = false;
         };

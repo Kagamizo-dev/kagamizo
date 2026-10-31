@@ -81,8 +81,13 @@ in
     secrets.profiles.proton-mail = {
       defaults.providers = [ "root" ];
       PROTON_MAIL_SESSION =
-        import ../_lib/secret.nix "Proton Mail session for `mail`, rewritten on every run"
-          "proton-mail-session"
+        (import ../_lib/secret.nix) {
+          kind = "oauth-session";
+          issuer = "automation:mail";
+          needs = [ "approve-sign-in" ];
+          description = "Proton Mail session for `mail`, rewritten on every run";
+          item = "proton-mail-session";
+        }
         // {
           required = false;
         };

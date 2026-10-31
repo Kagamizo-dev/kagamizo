@@ -98,14 +98,23 @@ in
     secrets.profiles.${profile} = {
       defaults.providers = [ "${proton.owner}-sessions" ];
       BRIDGE_VAULT_KEY =
-        import ../_lib/secret.nix "Proton Mail Bridge's vault key, kept by its keychain stand-in"
-          "bridge-vault-key"
+        (import ../_lib/secret.nix) {
+          kind = "encryption-key";
+          issuer = "automation:mailbox";
+          description = "Proton Mail Bridge's vault key, kept by its keychain stand-in";
+          item = "bridge-vault-key";
+        }
         // {
           required = false;
         };
       BRIDGE_VAULT =
-        import ../_lib/secret.nix "Proton Mail Bridge's encrypted vault (its Proton session), base64"
-          "bridge-vault"
+        (import ../_lib/secret.nix) {
+          kind = "state";
+          issuer = "automation:mailbox";
+          needs = [ "approve-sign-in" ];
+          description = "Proton Mail Bridge's encrypted vault (its Proton session), base64";
+          item = "bridge-vault";
+        }
         // {
           required = false;
         };

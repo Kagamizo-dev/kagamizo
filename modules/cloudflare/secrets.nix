@@ -7,14 +7,28 @@ _:
 let
   secret = import ../_lib/secret.nix;
   state = {
-    TOFU_STATE_PASSPHRASE = secret "Encrypts the OpenTofu state and plans" "tofu-state-passphrase" // {
-      providers = [ "state" ];
-    };
-    TOFU_STATE = secret "The encrypted OpenTofu state, written by `infra ci apply`" "tofu-state" // {
-      providers = [ "state" ];
-      # Absent until the first apply.
-      required = false;
-    };
+    TOFU_STATE_PASSPHRASE =
+      secret {
+        kind = "encryption-key";
+        issuer = "automation:bootstrap";
+        description = "Encrypts the OpenTofu state and plans";
+        item = "tofu-state-passphrase";
+      }
+      // {
+        providers = [ "state" ];
+      };
+    TOFU_STATE =
+      secret {
+        kind = "state";
+        issuer = "automation:infra";
+        description = "The encrypted OpenTofu state, written by `infra ci apply`";
+        item = "tofu-state";
+      }
+      // {
+        providers = [ "state" ];
+        # Absent until the first apply.
+        required = false;
+      };
   };
 in
 {
@@ -22,14 +36,26 @@ in
     # GitHub Actions on main, behind the `cloudflare` environment.
     ci = {
       defaults.providers = [ "ci" ];
-      CLOUDFLARE_API_TOKEN = secret "ci-apply token, minted by bootstrap" "cloudflare-token";
+      CLOUDFLARE_API_TOKEN = secret {
+        kind = "api-token";
+        issuer = "automation:bootstrap";
+        needs = [ "approve-sign-in" ];
+        description = "ci-apply token, minted by bootstrap";
+        item = "cloudflare-token";
+      };
     }
     // state;
 
     # The agent fleet and PR plans: read everything, change nothing.
     agent = {
       defaults.providers = [ "agents" ];
-      CLOUDFLARE_API_TOKEN = secret "agent-readonly token, minted by bootstrap" "cloudflare-token";
+      CLOUDFLARE_API_TOKEN = secret {
+        kind = "api-token";
+        issuer = "automation:bootstrap";
+        needs = [ "approve-sign-in" ];
+        description = "agent-readonly token, minted by bootstrap";
+        item = "cloudflare-token";
+      };
     }
     // state;
 
@@ -37,7 +63,12 @@ in
     host = {
       defaults.providers = [ "host" ];
       TUNNEL_TOKEN =
-        secret "Cloudflare Tunnel token for chat and code, from the access layer" "tunnel-token"
+        secret {
+          kind = "api-token";
+          issuer = "automation:infra";
+          description = "Cloudflare Tunnel token for chat and code, from the access layer";
+          item = "tunnel-token";
+        }
         // {
           required = false;
         };

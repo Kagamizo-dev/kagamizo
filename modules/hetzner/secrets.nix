@@ -10,8 +10,15 @@ in
     defaults.providers = [ "${config.accounts.held.hetzner.owner}-sessions" ];
     # Absent until the account exists (its first token is made in the
     # Cloud Console, a Gap).
-    HCLOUD_TOKEN = secret "Hetzner Cloud project token for OpenTofu and hcloud" "hcloud-token" // {
-      required = false;
-    };
+    HCLOUD_TOKEN =
+      secret {
+        kind = "api-token";
+        issuer = "human:console-credential";
+        description = "Hetzner Cloud project token for OpenTofu and hcloud";
+        item = "hcloud-token";
+      }
+      // {
+        required = false;
+      };
   };
 }

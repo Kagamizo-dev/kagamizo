@@ -26,7 +26,13 @@ in
     lib.nameValuePair (profile name) {
       defaults.providers = [ "${a.owner}-sessions" ];
       NORTHWEST_SESSION =
-        secret "Northwest OAuth session for ${name}, rewritten on every use" "northwest-session"
+        secret {
+          kind = "oauth-session";
+          issuer = "automation:northwest";
+          needs = [ "approve-sign-in" ];
+          description = "Northwest OAuth session for ${name}, rewritten on every use";
+          item = "northwest-session";
+        }
         // {
           required = false;
         };
