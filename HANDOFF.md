@@ -94,6 +94,11 @@ root vault.
   published (market) research only. Kagamizo's consulting purpose is void;
   what Kagamizo becomes, and where trading is held (personal, or an entity
   with trader tax status), are open in the ownership discussion.
+- Trading (2026-10-31): derivatives first (options), the lowest entry
+  barrier; at least one decision a day, run algorithmically; a new strategy
+  tried each week; Public or IBKR as the backend (both accounts exist);
+  start with a small seed. Open: seed size, risk limits, cash or margin,
+  options approval level, personal or company (see the ownership notes).
 - Ask before anything that spends money or applies infrastructure, unless
   the owner already said go. Already approved: the R2 build cache; the
   `move-login` exception; the Proton Pass renames (done); the $5 OpenRouter
