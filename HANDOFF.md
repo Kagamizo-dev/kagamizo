@@ -21,7 +21,7 @@ The network allowlist now has every host in HANDOFF.md's "The allowlist to apply
 
 Start by signing the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login` and send me the approval link. Run no other pass-cli command until it returns.
 
-Then, from HANDOFF.md's "Where the 2026-10-23 session left it": apply the Hetzner host once I say go, add the Hugging Face hosts to modules/claude/_environment.nix and pin the DeepSeek Flash model I choose on the machine I choose, move tokens to Proton Pass API-token items with a Cedar credential hierarchy, and roll the frozen environment out to every wrapper.
+Then, from HANDOFF.md's "Where the 2026-10-31 session left it": make public-mirazo's Login item onto finance@mirazo.org (epic 5) so `brokerage summary` runs and reads the options level, render every cli.nix call into Lean and prove it accepted, and apply the Hetzner host once I say go.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, all in the one modules tree. End the session with the full allowlist (if it changed) and the updated start message, each ready to paste.
 ```
@@ -60,7 +60,7 @@ holds every login against Proton Pass.
 | Domain | kagamizo.com, mail live | jingzo.org, mail live | mirazo.org, mail live (zach@, automations@; more as Pass aliases) |
 | Registered agent | northwest-kagamizo, planned | northwest-jingzo, active; login on qsearchllc_wy@outlook.com; CLI cannot sign in | — |
 | Bank | mercury, planned (needs the LLC and EIN) | mercury-jingzo, active, not signed in; holds the $5; login is the person's passmail alias | mercury-mirazo, active, signed in (Mirazo-Root-Sessions), $0; login a passmail alias |
-| Brokerage | — (none needed) | public-jingzo, active; login on the outlook address; its API not relied on (terms) | public-mirazo, active; no login item in Pass; personal secret missing |
+| Brokerage | — (none needed) | public-jingzo, active; login on the outlook address; its API not relied on (terms) | public-mirazo, active; no login item in Pass, so governance refuses it; personal secret in the `Public` API-credential item, read |
 | Credit | — (D-U-N-S once the EIN exists) | — (D-U-N-S) | experian, active; login still zachary.oshodi@outlook.com |
 | Other | github active; hetzner, openrouter planned | arxiv-jingzo planned (paused; likely self-hosted papers and Substack instead) | proton, cloudflare active; both log in as zachariah.oshodi@protonmail.com |
 
@@ -185,9 +185,8 @@ root vault.
   serving by llama.cpp from nixpkgs. Waiting on the allowlist above and the
   owner's choice of machine and budget.
 - Proton Pass: the owner wants tokens in its API-token custom items
-  (hidden field), not notes; secretspec reads notes only, so the repo's
-  secrets get a declared kind and a reader for those items, and Cedar a
-  credential hierarchy. Not started.
+  (hidden field), not notes. Done for reading (2026-10-31, below); the
+  Cedar credential hierarchy is still to do.
 - Epic 3 done: `modules/mailbox` (Bridge 3.24.2 headless, its vault and
   key in Mirazo-Root-Sessions, signed in as zach@mirazo.org; the Proton
   item's username and email were set to it with the owner's OK). The
@@ -212,6 +211,45 @@ root vault.
   with password and code.
 - Cloudflare and Experian logins still use the old addresses; each needs
   its email changed at the provider first (a flow, now that mail is read).
+
+## Where the 2026-10-31 session left it
+
+- **Proton Pass items are typed.** `catalog/_json/pass-items.json` holds
+  every item type's fields from the pinned pass-cli's own templates
+  (stamped 2.4.2; `nix run .#pass-items-update` re-reads them, it needs the
+  session) and the app's "API credential" template (API key, Secret: hidden;
+  Expiry date: timestamp; Permissions: text), recorded from the owner's
+  `Mirazo-Root / Public` item. A secret may live in one field of such an
+  item (`secret { template; field; }`); the patched secretspec
+  (`modules/proton/_patches/secretspec-protonpass.patch`) reads a note's
+  body or a named field and refuses to write a field. Lean proves a field
+  is only ever filled by the owner, and a token in a field is hidden.
+- **Public's personal secret reads** from that item (`secretspec check
+  --profile public`: found). `brokerage` is still refused by governance:
+  public-mirazo has no Login item in Pass (the item titled `Public` is the
+  API credential), and the login rule holds. Epic 5 makes the Login item
+  (a flow onto finance@mirazo.org), then `brokerage summary` and the
+  options level read.
+- **Lean is the typing layer for every API** (`modules/lean`):
+  `_lean/Api.lean` is one model (operations with typed inputs, typed
+  values, `accepts` and its theorems: an accepted call names an operation,
+  gives only its inputs, each of its type, and every required one). Every
+  catalog in `catalog/_json` (14: CLIs, HTTP APIs, OpenTofu providers, CDP,
+  REA, Proton Pass items) is rendered into it and checked
+  (`checks.lean-api-<catalog>`); Mercury's API, CDP and the Pass items are
+  proven closed (every named type declared), kernel-checked. A catalog
+  bringing a type the model lacks fails the render. `_lean/Governance.lean`
+  types all 251 governed actions: each Mercury and Public action's command
+  is proven to be in the pinned CLI's catalog, and every agent grant proven
+  free of spend, destroy and session (`checks.lean-governance`).
+- Next for Lean: render every `cli.nix` call into a Lean `Call` and prove it
+  `accepts` (today nix-effects checks them at evaluation); generate the Rust
+  types (`mercury-cli` and `cards` as one program) from the same model; the
+  Cedar base layer stated once, in Lean, with Cedar's policy checked
+  against it.
+- The disk filled once from VM-test closures (`nix flake check` fetches
+  the desktop's); `nix-collect-garbage` freed 21 GB. The VM tests need
+  KVM, which this container lacks.
 
 ## The allowlist to apply (one change, all of it)
 
