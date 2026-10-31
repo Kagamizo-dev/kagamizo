@@ -23,6 +23,11 @@
 #   _json/hcloud.json               every hcloud command and option
 #   _json/hetzner-provider.json     every resource and data source of the
 #                                     pinned OpenTofu hcloud provider
+#   _json/pass-items.json           every Proton Pass item type's fields and
+#                                     the custom field kinds, from the pinned
+#                                     pass-cli's templates (with a session:
+#                                     nix run .#pass-items-update), and the
+#                                     app templates seen on real items
 #   _json/rea.json                  REA's MCP tools (by family) and CLI
 #                                     commands, generated from its pinned
 #                                     source (modules/rea)
@@ -40,7 +45,12 @@
 # `nix flake check` fails until the committed catalogs match the pinned tools:
 #
 #   nix run .#catalog-update
-{ self, inputs, ... }:
+{
+  self,
+  inputs,
+  lib,
+  ...
+}:
 {
   perSystem =
     { pkgs, config, ... }:
@@ -185,10 +195,19 @@
       '';
     in
     {
-      checks.catalog-coverage = coverage;
       packages = {
         catalog-coverage = coverage;
         catalog = catalogs;
+        pass-items-update = pkgs.writeShellApplication {
+          name = "pass-items-update";
+          runtimeInputs = [ pkgs.git ];
+          text = ''
+            cd "$(git rev-parse --show-toplevel)"
+            ${python} ${./_extract/pass_items.py} ${config.packages.pass-cli}/bin/pass-cli \
+              ${config.packages.pass-cli.version} modules/catalog/_json/pass-items.json
+            git status --short modules/catalog/_json/pass-items.json
+          '';
+        };
         catalog-update = pkgs.writeShellApplication {
           name = "catalog-update";
           text = ''
@@ -199,12 +218,29 @@
         };
       };
 
-      checks.catalog = pkgs.runCommand "catalog-in-sync" { } ''
-        if ! diff -r ${self}/modules/catalog/_json ${catalogs} >/dev/null; then
-          echo "modules/catalog/_json does not match the pinned tools: nix run .#catalog-update" >&2
-          exit 1
-        fi
-        touch $out
-      '';
+      checks = {
+        catalog-coverage = coverage;
+
+        # Proton Pass's item types need a signed-in session to read, so they
+        # are extracted outside the sandbox (pass-items-update) and stamped
+        # with the pass-cli they came from; this fails when the pin moves.
+        catalog-pass-items =
+          let
+            stamped = (lib.importJSON ./_json/pass-items.json).passCli;
+          in
+          assert lib.assertMsg (stamped == config.packages.pass-cli.version)
+            "catalog/_json/pass-items.json is from pass-cli ${stamped}, the pin is ${config.packages.pass-cli.version}: nix run .#pass-items-update";
+          pkgs.runCommand "catalog-pass-items" { } "touch $out";
+
+        # Every sandbox-extracted catalog matches its pinned tool; the
+        # session-extracted pass-items.json is checked above instead.
+        catalog = pkgs.runCommand "catalog-in-sync" { } ''
+          if ! diff -r -x pass-items.json ${self}/modules/catalog/_json ${catalogs} >/dev/null; then
+            echo "modules/catalog/_json does not match the pinned tools: nix run .#catalog-update" >&2
+            exit 1
+          fi
+          touch $out
+        '';
+      };
     };
 }

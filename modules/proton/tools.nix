@@ -19,22 +19,31 @@
         installPhase = "install -Dm755 $src $out/bin/pass-cli";
       };
 
-      # From its tagged source, patched: its Proton Pass provider passes item
-      # and share ids as separate arguments, and an id starting with '-'
-      # (they are URL-safe base64) reads to pass-cli as a flag, so writing a
-      # secret that already exists failed.
+      # From its tagged source, patched (./_patches/secretspec-protonpass.patch)
+      # in its Proton Pass provider: item and share ids are passed as
+      # --flag=value (an id starting with '-' read as a flag, so overwriting
+      # a secret failed); and a `field` coordinate reads that field of an
+      # item (a custom item's extra field, such as an API credential's
+      # Secret, or a login's own field) instead of the note body. Writing
+      # into a field is refused: the owner places those.
       secretspec = pkgs.rustPlatform.buildRustPackage {
         pname = "secretspec";
         version = "0.21.1";
         src = inputs.secretspec-src;
-        patches = [ ./_patches/secretspec-ids-as-values.patch ];
+        patches = [ ./_patches/secretspec-protonpass.patch ];
         cargoLock.lockFile = "${inputs.secretspec-src}/Cargo.lock";
         cargoBuildFlags = [
           "-p"
           "secretspec"
         ];
-        # Its tests reach real providers.
-        doCheck = false;
+        # Most of its tests reach real providers; the Proton Pass provider's
+        # own run offline and cover the patch.
+        cargoTestFlags = [
+          "-p"
+          "secretspec"
+          "--lib"
+        ];
+        checkFlags = [ "provider::protonpass" ];
         meta.mainProgram = "secretspec";
       };
     in

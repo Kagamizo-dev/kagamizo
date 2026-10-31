@@ -36,6 +36,26 @@ inductive Kind where
   | identifier
   deriving DecidableEq, Repr
 
+/-- A typed field of a Proton Pass custom item (catalog/_json/pass-items.json). -/
+inductive FieldKind where
+  | text
+  | hidden
+  | totp
+  | timestamp
+  deriving DecidableEq, Repr
+
+/-- Where a secret is kept in Proton Pass: a note's body, which automation
+writes, or one typed field of an item made from an app template, which the
+owner fills. -/
+inductive Store where
+  | note
+  | field (template : String) (name : String) (kind : FieldKind)
+  deriving DecidableEq, Repr
+
+def Store.isField : Store → Bool
+  | .field _ _ _ => true
+  | .note => false
+
 /-- Who produces a secret. -/
 inductive Issuer where
   | automation (tool : String)
@@ -48,6 +68,7 @@ structure Secret where
   issuer : Issuer
   /-- Human steps an automated issuer waits on. -/
   needs : List HumanStep
+  store : Store
   deriving Repr
 
 def Issuer.isHuman : Issuer → Bool
@@ -75,13 +96,37 @@ waits on nothing further. -/
 def waitsRightly (s : Secret) : Bool :=
   if s.issuer.isHuman then s.needs.isEmpty else s.needs.all (· == .approveSignIn)
 
-def wellFormed (s : Secret) : Bool := issuable s && waitsRightly s
+/-- Automation writes notes only; a field is filled by the owner, and a
+token kept in a field is kept hidden. -/
+def storedRightly (s : Secret) : Bool :=
+  match s.store with
+  | .note => true
+  | .field _ _ k =>
+    s.issuer.isHuman && (if s.kind = .apiToken then k = .hidden else true)
+
+def wellFormed (s : Secret) : Bool := issuable s && waitsRightly s && storedRightly s
+
+/-- No well-formed secret kept in a field was written by automation. -/
+theorem field_by_hand (s : Secret) (hf : s.store.isField = true)
+    (h : wellFormed s = true) : s.issuer.isHuman = true := by
+  cases s with
+  | mk n k i ns st =>
+    cases st <;> simp_all [wellFormed, storedRightly, Store.isField]
+
+/-- A well-formed token kept in a field is in a hidden one. -/
+theorem token_field_hidden (s : Secret) (t n : String) (fk : FieldKind)
+    (hk : s.kind = .apiToken) (hs : s.store = .field t n fk)
+    (h : wellFormed s = true) : fk = .hidden := by
+  cases s with
+  | mk nm k i ns st =>
+    subst hs; subst hk
+    simp_all [wellFormed, storedRightly]
 
 /-- No well-formed session is ever made by hand. -/
 theorem session_by_automation (s : Secret) (hk : s.kind = .oauthSession)
     (h : wellFormed s = true) : s.issuer.isHuman = false := by
   cases s with
-  | mk n k i ns =>
+  | mk n k i ns st =>
     cases i <;> simp_all [wellFormed, issuable, Issuer.isHuman]
 
 /-- No well-formed state or key is ever made by hand. -/
@@ -89,7 +134,7 @@ theorem state_and_keys_by_automation (s : Secret)
     (hk : s.kind = .state ∨ s.kind = .encryptionKey)
     (h : wellFormed s = true) : s.issuer.isHuman = false := by
   cases s with
-  | mk n k i ns =>
+  | mk n k i ns st =>
     rcases hk with hk | hk <;> cases i <;> simp_all [wellFormed, issuable, Issuer.isHuman]
 
 /-- The only human step that ever issues a secret is placing a credential
@@ -98,7 +143,7 @@ theorem human_issues_only_console_credentials (s : Secret) (step : HumanStep)
     (hi : s.issuer = .human step) (h : wellFormed s = true) :
     step = .consoleCredential := by
   cases s with
-  | mk n k i ns =>
+  | mk n k i ns st =>
     subst hi
     cases k <;> cases step <;> simp_all [wellFormed, issuable]
 

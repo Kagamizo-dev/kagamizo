@@ -10,8 +10,12 @@
 #                                           # waits on (default none)
 #     description = "...";
 #     item = "hcloud-token";
+#     template = "api-credential";          # with field: a custom item made
+#     field = "Secret";                     # from that Proton Pass template,
+#                                           # read at that field (pass-items.json)
 #   }
 #
+# Without a field, the secret is a note's body: what automation writes.
 # The boundary is kept under `boundary`, which ../proton/secretspec.nix
 # leaves out of secretspec.toml; ../operations checks it, and Lean proves
 # its rules hold for every declared secret.
@@ -21,9 +25,25 @@
   description,
   item,
   needs ? [ ],
+  template ? null,
+  field ? null,
 }:
+assert (template == null) == (field == null);
 {
   inherit description;
-  ref.item = item;
-  boundary = { inherit kind issuer needs; };
+  ref = {
+    inherit item;
+  }
+  // (if field == null then { } else { inherit field; });
+  boundary = {
+    inherit kind issuer needs;
+    store =
+      if field == null then
+        { at = "note"; }
+      else
+        {
+          at = "field";
+          inherit template field;
+        };
+  };
 }

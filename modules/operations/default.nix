@@ -50,6 +50,22 @@ let
     else
       throw "operations: issuer ${issuer} is neither automation:<tool> nor human:<step>";
 
+  items = lib.importJSON ../catalog/_json/pass-items.json;
+  storeLean =
+    name: store:
+    if store.at == "note" then
+      ".note"
+    else
+      let
+        tpl =
+          items.appTemplates.${store.template}
+            or (throw "operations: ${name}: no Proton Pass template ${store.template} in pass-items.json");
+        kind =
+          tpl.fields.${store.field}
+            or (throw "operations: ${name}: template ${store.template} has no field ${store.field}");
+      in
+      "(.field ${builtins.toJSON store.template} ${builtins.toJSON store.field} .${kind})";
+
   facts = ''
     open Kagamizo
 
@@ -59,7 +75,7 @@ let
       s:
       "  { name := ${builtins.toJSON s.name}, kind := .${camel s.boundary.kind}, issuer := ${issuerLean s.boundary.issuer}, needs := [${
           lib.concatMapStringsSep ", " (n: ".${camel n}") s.boundary.needs
-        }] }"
+        }], store := ${storeLean s.name s.boundary.store} }"
     ) secrets}
     ]
 

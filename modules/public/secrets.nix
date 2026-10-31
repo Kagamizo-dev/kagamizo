@@ -6,11 +6,15 @@ in
 {
   secrets.profiles.public = {
     defaults.providers = [ "root" ];
+    # The owner's API credential item (Mirazo-Root/Public), its Secret field:
+    # Public mints short-lived access tokens from it.
     PUBLIC_PERSONAL_SECRET = secret {
       kind = "api-token";
       issuer = "human:console-credential";
       description = "Public personal secret, made once in Settings (a Gap)";
-      item = "public-personal-secret";
+      item = "Public";
+      template = "api-credential";
+      field = "Secret";
     };
     PUBLIC_ACCOUNT_ID =
       secret {
