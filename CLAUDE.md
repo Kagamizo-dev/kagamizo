@@ -50,6 +50,12 @@ Every module is rooted in Lean, typed in Rust and wrapped in Nix: Lean
 states its rules and proves what they guarantee, Rust implements against
 them, Nix pins and packages both and runs the proofs as checks.
 
+The business takes no work that books the owner's time: no client
+contracts, no consulting, nothing sold by appointment or with a live
+obligation (the owner's decision, 2026-10-31). Income comes from what runs
+by itself: algorithmic trading and published research. A booked hour is
+not a human step, so no activity can be declared that needs one.
+
 What the owner does by hand is a closed, typed set
 (`operations.humanSteps`, mirrored by `HumanStep` in
 `modules/operations/_lean/Boundary.lean`); everything else is automation.

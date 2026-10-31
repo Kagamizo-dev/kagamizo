@@ -89,6 +89,11 @@ root vault.
   owner's Capital One virtual card locked to Hetzner, at a $7/month budget
   (`hetzner.payment`, `hetzner.monthlyBudgetUsd`); Mercury's "Hetzner"
   card ••7138 is no longer its payment.
+- No client work (2026-10-31): no contracts, consulting or appointments,
+  nothing that books the owner's time; income from algorithmic trading and
+  published (market) research only. Kagamizo's consulting purpose is void;
+  what Kagamizo becomes, and where trading is held (personal, or an entity
+  with trader tax status), are open in the ownership discussion.
 - Ask before anything that spends money or applies infrastructure, unless
   the owner already said go. Already approved: the R2 build cache; the
   `move-login` exception; the Proton Pass renames (done); the $5 OpenRouter
