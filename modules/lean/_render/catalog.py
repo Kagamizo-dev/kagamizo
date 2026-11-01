@@ -248,8 +248,42 @@ def pass_items(c):
     return types
 
 
+RCLONE = {
+    "string": "string",
+    "bool": "bool",
+    "int": "int",
+    "float64": "number",
+    "Duration": "duration",
+    "SizeSuffix": "string",
+    "Encoding": "string",
+    "Tristate": ("oneOf", ["true", "false", "unset"]),
+    "Bits": "string",
+    "Time": "string",
+    "CommaSepList": ("list", "string"),
+    "SpaceSepList": ("list", "string"),
+    "stringArray": ("list", "string"),
+}
+
+
+def rclone_ty(o):
+    if o["examples"]:
+        return ("oneOf", o["examples"])
+    t = o["type"]
+    if t in RCLONE:
+        return RCLONE[t]
+    if "|" in t:
+        return ("oneOf", t.split("|"))
+    fail(f"rclone option type {t!r}")
+
+
 types, enums = [], []
-if "appTemplates" in catalog:
+if "backends" in catalog:
+    # Each backend's configuration, as `rclone config create NAME BACKEND key=value`.
+    ops = [
+        {"name": f"backend.{b}", "inputs": [inp(k, rclone_ty(o), o["required"]) for k, o in d["options"].items()]}
+        for b, d in catalog["backends"].items()
+    ]
+elif "appTemplates" in catalog:
     ops, types = [], pass_items(catalog)
 elif "endpoints" in catalog:
     ops, types, enums = mercury_api(catalog)

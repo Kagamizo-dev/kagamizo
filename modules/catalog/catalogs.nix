@@ -33,6 +33,9 @@
 #   _json/rea.json                  REA's MCP tools (by family) and CLI
 #                                     commands, generated from its pinned
 #                                     source (modules/rea)
+#   _json/rclone.json               every rclone backend and its typed options
+#                                     (`rclone config providers`)
+#   _json/icloudpd.json             every icloudpd option, from its --help
 #   _json/cdp.json                  every DevTools Protocol command (its
 #                                     parameters, returns) and enum of the
 #                                     pinned Chromium, asked of Chromium itself
@@ -126,6 +129,15 @@
         ${python} ${./_extract/cdp.py} ${pkgs.lib.getExe pkgs.chromium} $out
       '';
 
+      # The migration's readers (modules/migration/tools.nix), asked of the
+      # pinned binaries themselves.
+      rclone = pkgs.runCommand "rclone.json" { } ''
+        ${python} ${./_extract/rclone.py} ${config.packages.rclone}/bin/rclone $out
+      '';
+      icloudpd = pkgs.runCommand "icloudpd.json" { } ''
+        ${python} ${./_extract/icloudpd.py} ${config.packages.icloudpd}/bin/icloudpd $out
+      '';
+
       bridge = pkgs.runCommand "bridge.json" { } ''
         ${python} ${./_extract/bridge.py} ${pkgs.protonmail-bridge.src} $out
       '';
@@ -134,6 +146,14 @@
         {
           name = "bridge.json";
           path = bridge;
+        }
+        {
+          name = "rclone.json";
+          path = rclone;
+        }
+        {
+          name = "icloudpd.json";
+          path = icloudpd;
         }
         {
           name = "cdp.json";

@@ -1,0 +1,7114 @@
+{
+ "backends": {
+  "alias": {
+   "description": "Alias for an existing remote",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "remote": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "archive": {
+   "description": "Read archives",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "remote": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "azureblob": {
+   "description": "Microsoft Azure Blob Storage",
+   "options": {
+    "access_tier": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "account": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "archive_tier_delete": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "client_certificate_password": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_certificate_path": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_send_certificate_chain": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "connection_string": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "copy_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "copy_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "copy_total_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "decompress": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "delete_snapshots": {
+     "advanced": true,
+     "examples": [
+      "include",
+      "only"
+     ],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "directory_markers": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "disable_checksum": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "disable_instance_discovery": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "env_auth": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "list_chunk": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "list_parallelism": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "memory_pool_flush_time": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "memory_pool_use_mmap": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "msi_client_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "msi_mi_res_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "msi_object_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "no_check_container": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_head_object": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "password": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "public_access": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sas_url": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "service_principal_file": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "tenant": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "use_arrow_list": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_az": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_copy_blob": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_emulator": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_msi": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "username": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "azurefiles": {
+   "description": "Microsoft Azure Files",
+   "options": {
+    "account": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "client_certificate_password": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_certificate_path": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_send_certificate_chain": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "connection_string": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "disable_instance_discovery": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "env_auth": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "max_stream_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "msi_client_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "msi_mi_res_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "msi_object_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "password": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "sas_url": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "service_principal_file": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "share_name": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "tenant": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "use_az": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_emulator": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_msi": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "username": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "b2": {
+   "description": "Backblaze B2",
+   "options": {
+    "account": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "copy_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "disable_checksum": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "download_auth_duration": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "download_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "hard_delete": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "key": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "lifecycle": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "memory_pool_flush_time": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "memory_pool_use_mmap": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "sse_customer_algorithm": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sse_customer_key": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "sse_customer_key_base64": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "sse_customer_key_md5": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "test_mode": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "version_at": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Time"
+    },
+    "versions": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    }
+   }
+  },
+  "box": {
+   "description": "Box",
+   "options": {
+    "access_token": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "box_config_file": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "box_sub_type": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "commit_retries": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "config_credentials": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "impersonate": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "list_chunk": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "owned_by": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "root_folder_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  },
+  "cache": {
+   "description": "Cache a remote",
+   "options": {
+    "chunk_clean_interval": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "chunk_no_memory": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "chunk_path": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "chunk_total_size": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "db_path": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "db_purge": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "db_wait_time": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "info_age": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "plex_insecure": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "plex_password": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "plex_token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "plex_url": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "plex_username": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "read_retries": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "remote": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "rps": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "tmp_upload_path": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "tmp_wait_time": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "workers": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "writes": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    }
+   }
+  },
+  "chunker": {
+   "description": "Transparently chunk/split large files",
+   "options": {
+    "chunk_size": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "fail_hard": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "hash_type": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "meta_format": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "name_format": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "remote": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "start_from": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "transactions": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "cloudinary": {
+   "description": "Cloudinary",
+   "options": {
+    "adjust_media_files_extensions": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "api_key": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "api_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "cloud_name": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "eventually_consistent_delay": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "media_extensions": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "stringArray"
+    },
+    "upload_prefix": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_preset": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "combine": {
+   "description": "Combine several remotes into one",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upstreams": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "SpaceSepList"
+    }
+   }
+  },
+  "compress": {
+   "description": "Compress a remote",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "level": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "mode": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "ram_cache_limit": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "remote": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "crypt": {
+   "description": "Encrypt/Decrypt a remote",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "directory_name_encryption": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "filename_encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "filename_encryption": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "no_data_encryption": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "pass_bad_blocks": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "password": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "password2": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "remote": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "server_side_across_configs": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "show_mapping": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "strict_names": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "suffix": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "doi": {
+   "description": "DOI datasets",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "doi": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "doi_resolver_api_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "provider": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "drime": {
+   "description": "Drime",
+   "options": {
+    "access_token": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "hard_delete": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "list_chunk": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "root_folder_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "workspace_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "drive": {
+   "description": "Google Drive",
+   "options": {
+    "acknowledge_abuse": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "allow_import_name_change": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "alternate_export": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "auth_owner_only": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "copy_shortcut_content": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "disable_http2": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "env_auth": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "export_formats": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "fast_list_bug_fix": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "formats": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "impersonate": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "import_formats": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "keep_revision_forever": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "list_chunk": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "metadata_enforce_expansive_access": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "metadata_labels": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Bits"
+    },
+    "metadata_owner": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Bits"
+    },
+    "metadata_permissions": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Bits"
+    },
+    "pacer_burst": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "pacer_min_sleep": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "resource_key": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "root_folder_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "scope": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "server_side_across_configs": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "service_account_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "service_account_file": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "shared_with_me": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "show_all_gdocs": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "size_as_quota": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "skip_checksum_gphotos": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "skip_dangling_shortcuts": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "skip_gdocs": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "skip_shortcuts": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "starred_only": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "stop_on_download_limit": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "stop_on_upload_limit": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "team_drive": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "trashed_only": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "use_created_date": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_shared_date": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_trash": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "v2_download_min_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  },
+  "dropbox": {
+   "description": "Dropbox",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "batch_commit_timeout": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "batch_mode": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "batch_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "batch_timeout": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "export_formats": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "CommaSepList"
+    },
+    "impersonate": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "impersonate_admin": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "pacer_min_sleep": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "root_namespace": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "shared_files": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "shared_folders": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "show_all_exports": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "skip_exports": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "skip_shared_folders": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "skip_unowned_folders": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "fichier": {
+   "description": "1Fichier",
+   "options": {
+    "api_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "cdn": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "file_password": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "folder_password": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "shared_folder": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "filefabric": {
+   "description": "Enterprise File Fabric",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "permanent_token": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "root_folder_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_expiry": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "url": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "version": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "filelu": {
+   "description": "FileLu Cloud Storage",
+   "options": {
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "key": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  },
+  "filen": {
+   "description": "Filen",
+   "options": {
+    "api_key": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "auth_version": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "base_folder_uuid": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "email": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "master_keys": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "password": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "private_key": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "public_key": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    }
+   }
+  },
+  "filescom": {
+   "description": "Files.com",
+   "options": {
+    "api_key": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "password": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "site": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "username": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "ftp": {
+   "description": "FTP",
+   "options": {
+    "allow_insecure_tls_ciphers": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "ask_password": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "close_timeout": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "disable_epsv": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "disable_mlsd": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "disable_tls13": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "disable_utf8": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "explicit_tls": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "force_list_hidden": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "host": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "http_proxy": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "idle_timeout": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "no_check_certificate": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_check_upload": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "pass": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "port": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "shut_timeout": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "socks_proxy": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "tls": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "tls_cache_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "user": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "writing_mdtm": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    }
+   }
+  },
+  "gofile": {
+   "description": "Gofile",
+   "options": {
+    "access_token": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "account_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "list_chunk": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "root_folder_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "google cloud storage": {
+   "description": "Google Cloud Storage (this is not Google Drive)",
+   "options": {
+    "access_token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "anonymous": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "bucket_acl": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "bucket_policy_only": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "decompress": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "directory_markers": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "env_auth": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "location": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "no_check_bucket": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "object_acl": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "project_number": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "service_account_credentials": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "service_account_file": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "storage_class": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "user_project": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "google photos": {
+   "description": "Google Photos",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "batch_commit_timeout": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "batch_mode": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "batch_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "batch_timeout": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "include_archived": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "proxy": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "read_only": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "read_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "start_year": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "hasher": {
+   "description": "Better checksums for other remotes",
+   "options": {
+    "auto_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "hashes": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "CommaSepList"
+    },
+    "max_age": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "remote": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "hdfs": {
+   "description": "Hadoop distributed file system",
+   "options": {
+    "data_transfer_protection": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "namenode": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "CommaSepList"
+    },
+    "service_principal_name": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "username": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "hidrive": {
+   "description": "HiDrive",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "disable_fetching_member_count": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "root_prefix": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "scope_access": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "scope_role": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  },
+  "http": {
+   "description": "HTTP",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "headers": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "CommaSepList"
+    },
+    "no_escape": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_head": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_slash": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "url": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "huaweidrive": {
+   "description": "Huawei Drive",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "list_chunk": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "root_folder_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  },
+  "iclouddrive": {
+   "description": "iCloud Drive and Photos",
+   "options": {
+    "apple_id": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "cookies": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "password": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "service": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "trust_token": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "imagekit": {
+   "description": "ImageKit.io",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "only_signed": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "private_key": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "public_key": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "upload_tags": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "versions": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    }
+   }
+  },
+  "internetarchive": {
+   "description": "Internet Archive",
+   "options": {
+    "access_key_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "disable_checksum": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "front_endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "item_derive": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "item_metadata": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "stringArray"
+    },
+    "secret_access_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "wait_archive": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    }
+   }
+  },
+  "internxt": {
+   "description": "Internxt Drive",
+   "options": {
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "email": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "mnemonic": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "pass": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "skip_hash_validation": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  },
+  "jottacloud": {
+   "description": "Jottacloud",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "hard_delete": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "md5_memory_limit": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "no_versions": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "trashed_only": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "upload_resume_limit": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  },
+  "koofr": {
+   "description": "Koofr, Digi Storage and other Koofr-compatible storage providers",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "mountid": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "password": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "provider": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "setmtime": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "user": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "linkbox": {
+   "description": "Linkbox",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "email": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "password": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "web_token": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "local": {
+   "description": "Local Disk",
+   "options": {
+    "case_insensitive": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "case_sensitive": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "copy_links": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "fatal_if_no_space": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "hashes": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "CommaSepList"
+    },
+    "links": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "metadata_restore_special_bits": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_check_updated": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_clone": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_preallocate": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_set_modtime": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_sparse": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "nounc": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "one_file_system": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "skip_links": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "skip_specials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "time_type": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "mtime|atime|btime|ctime"
+    },
+    "unicode_normalization": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "zero_size_links": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    }
+   }
+  },
+  "mailru": {
+   "description": "Mail.ru Cloud",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "check_hash": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "pass": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "quirks": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "speedup_enable": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "speedup_file_patterns": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "speedup_max_disk": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "speedup_max_memory": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "user": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "user_agent": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "mega": {
+   "description": "Mega",
+   "options": {
+    "2fa": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "debug": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "hard_delete": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "master_key": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "pass": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "session_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "use_https": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "user": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "memory": {
+   "description": "In memory object storage system.",
+   "options": {
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "discard": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    }
+   }
+  },
+  "netstorage": {
+   "description": "Akamai NetStorage",
+   "options": {
+    "account": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "host": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "protocol": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "secret": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "onedrive": {
+   "description": "Microsoft OneDrive",
+   "options": {
+    "access_scopes": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SpaceSepList"
+    },
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "av_override": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "delta": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "disable_site_permission": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "drive_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "drive_type": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "expose_onenote_files": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "hard_delete": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "hash_type": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "link_password": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "link_scope": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "link_type": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "list_chunk": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "metadata_permissions": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Bits"
+    },
+    "no_versions": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "region": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "root_folder_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "server_side_across_configs": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "tenant": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "tenant_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  },
+  "opendrive": {
+   "description": "OpenDrive",
+   "options": {
+    "access": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "password": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "username": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "oracleobjectstorage": {
+   "description": "Oracle Cloud Infrastructure Object Storage",
+   "options": {
+    "attempt_resume_upload": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "compartment": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "config_file": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "config_profile": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "copy_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "copy_timeout": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "decompress": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "disable_checksum": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "leave_parts_on_error": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "max_upload_parts": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "namespace": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "no_check_bucket": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "provider": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "region": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sse_customer_algorithm": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sse_customer_key": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sse_customer_key_file": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sse_customer_key_sha256": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sse_kms_key_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "storage_tier": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  },
+  "pcloud": {
+   "description": "Pcloud",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "hostname": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "password": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "root_folder_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "username": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "pikpak": {
+   "description": "PikPak",
+   "options": {
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "device_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "hash_memory_limit": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "no_media_link": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "pass": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "root_folder_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "trashed_only": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "use_trash": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "user": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "user_agent": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "pixeldrain": {
+   "description": "Pixeldrain Filesystem",
+   "options": {
+    "api_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "api_url": {
+     "advanced": true,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "root_folder_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "premiumizeme": {
+   "description": "premiumize.me",
+   "options": {
+    "api_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "protondrive": {
+   "description": "Proton Drive",
+   "options": {
+    "2fa": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "app_version": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "client_access_token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_refresh_token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_salted_key_pass": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_uid": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "enable_caching": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "mailbox_password": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "original_file_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "otp_secret_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "password": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "replace_existing_draft": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "username": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "putio": {
+   "description": "Put.io",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "qingstor": {
+   "description": "QingCloud Object Storage",
+   "options": {
+    "access_key_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "connection_retries": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "env_auth": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "secret_access_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "zone": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "quatrix": {
+   "description": "Quatrix by Maytech",
+   "options": {
+    "api_key": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "effective_upload_time": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "hard_delete": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "host": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "maximal_summary_chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "minimal_chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "skip_project_folders": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    }
+   }
+  },
+  "s3": {
+   "description": "Amazon S3 Compliant Storage Providers including AWS, Alibaba, ArvanCloud, BizflyCloud, Ceph, ChinaMobile, Cloudflare, Cubbit, DigitalOcean, Dreamhost, Exaba, Fastly, FileLu, FlashBlade, GCS, HCP, Hetzner, HuaweiOBS, IBMCOS, IDrive, ImpossibleCloud, Intercolo, IONOS, Leviia, Liara, Linode, LyveCloud, Magalu, Mega, Minio, Netease, Outscale, OVHcloud, Petabox, Qiniu, Rabata, RackCorp, Rclone, Scaleway, Scality, SeaweedFS, Selectel, Servercore, SpectraLogic, Storj, Synology, TencentCOS, US3, Wasabi, Zadara, Zata, ZeroServices, Other",
+   "options": {
+    "access_key_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "acl": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "bucket_acl": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "bucket_object_lock_enabled": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "bypass_governance_retention": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "copy_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "decompress": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "directory_bucket": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "directory_markers": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "disable_checksum": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "disable_http2": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "download_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "env_auth": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "force_path_style": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "ibm_api_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "ibm_iam_endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "ibm_resource_instance_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "leave_parts_on_error": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "list_chunk": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "list_url_encode": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "list_version": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "list_versions_oldest_first": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "location_constraint": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "max_upload_parts": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "memory_pool_flush_time": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "memory_pool_use_mmap": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "might_gzip": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "no_check_bucket": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_head": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_head_object": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_system_metadata": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "object_lock_legal_hold_status": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "object_lock_mode": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "object_lock_retain_until_date": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "object_lock_set_after_upload": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "object_lock_supported": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "profile": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "provider": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "region": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "requester_pays": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "role_arn": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "role_external_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "role_session_duration": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "role_session_name": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sdk_log_mode": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Bits"
+    },
+    "secret_access_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "server_side_encryption": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "session_token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "shared_credentials_file": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sign_accept_encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "sse_customer_algorithm": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sse_customer_key": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "sse_customer_key_base64": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "sse_customer_key_md5": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "sse_kms_key_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "storage_class": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sts_endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "use_accelerate_endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_accept_encoding_gzip": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "use_already_exists": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "use_arn_region": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_data_integrity_protections": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "use_dual_stack": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_multipart_etag": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "use_multipart_uploads": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "use_presigned_request": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_unsigned_payload": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "use_x_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "v2_auth": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "version_at": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Time"
+    },
+    "version_deleted": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "versions": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    }
+   }
+  },
+  "seafile": {
+   "description": "seafile",
+   "options": {
+    "2fa": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "auth_token": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "create_library": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "library": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "library_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "pass": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "url": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "user": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "sftp": {
+   "description": "SSH/SFTP",
+   "options": {
+    "ask_password": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "blake3sum_command": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "ciphers": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SpaceSepList"
+    },
+    "concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "connections": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "copy_is_hardlink": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "crc32sum_command": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "disable_concurrent_reads": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "disable_concurrent_writes": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "disable_hashcheck": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "hashes": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "CommaSepList"
+    },
+    "host": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "host_key_algorithms": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SpaceSepList"
+    },
+    "host_keys": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "CommaSepList"
+    },
+    "http_proxy": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "idle_timeout": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "key_exchange": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SpaceSepList"
+    },
+    "key_file": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "key_file_pass": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "key_pem": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "key_use_agent": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "known_hosts_file": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "macs": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SpaceSepList"
+    },
+    "md5sum_command": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "pass": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "path_override": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "pin_host_key": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "port": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "pubkey": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "pubkey_file": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "server_command": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "set_env": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SpaceSepList"
+    },
+    "set_modtime": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "sha1sum_command": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "sha256sum_command": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "shell_type": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "skip_links": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "socks_proxy": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "ssh": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SpaceSepList"
+    },
+    "subsystem": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "use_fstat": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "use_insecure_cipher": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "user": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "xxh128sum_command": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "xxh3sum_command": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "shade": {
+   "description": "Shade FS",
+   "options": {
+    "api_key": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "drive_id": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "max_upload_parts": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "token_expiry": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_concurrency": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    }
+   }
+  },
+  "sharefile": {
+   "description": "Citrix Sharefile",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "root_folder_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  },
+  "sia": {
+   "description": "Sia Decentralized Cloud",
+   "options": {
+    "api_password": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "api_url": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "user_agent": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "smb": {
+   "description": "SMB / CIFS",
+   "options": {
+    "case_insensitive": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "domain": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "hide_special_share": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "host": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": true,
+     "type": "string"
+    },
+    "idle_timeout": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "kerberos_ccache": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "pass": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "port": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "spn": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "use_kerberos": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "user": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "storj": {
+   "description": "Storj Decentralized Cloud Storage",
+   "options": {
+    "access_grant": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "api_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "passphrase": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "provider": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "satellite_address": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "sugarsync": {
+   "description": "Sugarsync",
+   "options": {
+    "access_key_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "app_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "authorization": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "authorization_expiry": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "deleted_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "hard_delete": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "private_access_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "refresh_token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "root_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "user": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "swift": {
+   "description": "OpenStack Swift (Rackspace Cloud Files, Blomp Cloud Storage, Memset Memstore, OVH)",
+   "options": {
+    "application_credential_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "application_credential_name": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "application_credential_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "auth": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "auth_token": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "auth_version": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "domain": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "endpoint_type": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "env_auth": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "fetch_until_empty_page": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "leave_parts_on_error": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_chunk": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "no_large_objects": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "partial_page_fetch_threshold": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "region": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "storage_policy": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "storage_url": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "tenant": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "tenant_domain": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "tenant_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "use_segments_container": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Tristate"
+    },
+    "user": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "user_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "tardigrade": {
+   "description": "Storj Decentralized Cloud Storage",
+   "options": {
+    "access_grant": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "api_key": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "passphrase": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "provider": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "satellite_address": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "ulozto": {
+   "description": "Uloz.to",
+   "options": {
+    "app_token": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "list_page_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "password": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "root_folder_slug": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "username": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    }
+   }
+  },
+  "union": {
+   "description": "Union merges the contents of several upstream fs",
+   "options": {
+    "action_policy": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "cache_time": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "create_policy": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "min_free_space": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "search_policy": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upstreams": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "webdav": {
+   "description": "WebDAV",
+   "options": {
+    "auth_redirect": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "bearer_token": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "bearer_token_command": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "headers": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "CommaSepList"
+    },
+    "nextcloud_chunk_size": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    },
+    "owncloud_exclude_mounts": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "owncloud_exclude_shares": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "pacer_min_sleep": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "pass": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "unix_socket": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "url": {
+     "advanced": false,
+     "examples": [],
+     "required": true,
+     "sensitive": false,
+     "type": "string"
+    },
+    "user": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "vendor": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    }
+   }
+  },
+  "yandex": {
+   "description": "Yandex Disk",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "hard_delete": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "spoof_ua": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "upload_wait": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    }
+   }
+  },
+  "zoho": {
+   "description": "Zoho",
+   "options": {
+    "auth_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "client_credentials": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "bool"
+    },
+    "client_id": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "client_secret": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "description": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "encoding": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Encoding"
+    },
+    "list_folder_burst": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "list_folder_limit": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "list_folder_window": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "Duration"
+    },
+    "region": {
+     "advanced": false,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "root_folder_id": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": true,
+     "type": "string"
+    },
+    "token_url": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "string"
+    },
+    "tpslimit": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "float64"
+    },
+    "tpslimit_burst": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "int"
+    },
+    "upload_cutoff": {
+     "advanced": true,
+     "examples": [],
+     "required": false,
+     "sensitive": false,
+     "type": "SizeSuffix"
+    }
+   }
+  }
+ }
+}

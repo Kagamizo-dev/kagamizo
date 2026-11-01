@@ -91,6 +91,23 @@
         "url": "https://github.com/hercules-ci/flake-parts"
       }
     },
+    "icloudpd-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1780177342,
+        "narHash": "sha256-u7fG/rPNzeru+DU84G/77BqrLHONz8yEg18xG3gsP70=",
+        "ref": "refs/tags/v1.32.3",
+        "rev": "879c561240d993d748ddb4546f935090502b16d3",
+        "revCount": 994,
+        "type": "git",
+        "url": "https://github.com/icloud-photos-downloader/icloud_photos_downloader"
+      },
+      "original": {
+        "ref": "refs/tags/v1.32.3",
+        "type": "git",
+        "url": "https://github.com/icloud-photos-downloader/icloud_photos_downloader"
+      }
+    },
     "import-tree": {
       "locked": {
         "lastModified": 1788467110,
@@ -230,6 +247,23 @@
         "url": "https://github.com/PublicDotCom/publicdotcom-cli"
       }
     },
+    "pyicloud-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792093300,
+        "narHash": "sha256-Bzv7wSCeB8h+V1TJMFjT3r972PghR5MNupoqf2rWPG4=",
+        "ref": "refs/tags/2026.10.1",
+        "rev": "2d3d137e17cdd06e4e58a4d0e0e400dccb31b08f",
+        "revCount": 668,
+        "type": "git",
+        "url": "https://github.com/timlaing/pyicloud"
+      },
+      "original": {
+        "ref": "refs/tags/2026.10.1",
+        "type": "git",
+        "url": "https://github.com/timlaing/pyicloud"
+      }
+    },
     "rea": {
       "flake": false,
       "locked": {
@@ -252,12 +286,14 @@
         "agency-agents": "agency-agents",
         "disko": "disko",
         "flake-parts": "flake-parts",
+        "icloudpd-src": "icloudpd-src",
         "import-tree": "import-tree",
         "mercury-cli": "mercury-cli",
         "nix-effects": "nix-effects",
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixpkgs": "nixpkgs",
         "publicdotcom-cli": "publicdotcom-cli",
+        "pyicloud-src": "pyicloud-src",
         "rea": "rea",
         "secretspec-src": "secretspec-src"
       }

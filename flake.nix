@@ -34,6 +34,17 @@
       url = "git+https://github.com/morluto/rea?ref=refs/tags/rea-agents-6.7.0";
       flake = false;
     };
+    # The migration's readers (modules/migration/tools.nix), newer than
+    # nixpkgs': icloudpd 1.32.3 restores 2FA for Apple's 2026 sign-in, and
+    # pyicloud's maintained fork reads Notes and Reminders.
+    icloudpd-src = {
+      url = "git+https://github.com/icloud-photos-downloader/icloud_photos_downloader?ref=refs/tags/v1.32.3";
+      flake = false;
+    };
+    pyicloud-src = {
+      url = "git+https://github.com/timlaing/pyicloud?ref=refs/tags/2026.10.1";
+      flake = false;
+    };
     # Built from source to carry ./modules/proton/_patches (modules/proton/tools.nix).
     secretspec-src = {
       url = "git+https://github.com/cachix/secretspec?ref=refs/tags/v0.21.1";

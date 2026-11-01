@@ -105,6 +105,14 @@ in
           from = "morluto/rea";
           version = tagOf "rea";
         };
+        rclone = {
+          from = "rclone (nixpkgs)";
+          inherit (config.packages.rclone) version;
+        };
+        icloudpd = {
+          from = "icloud-photos-downloader/icloud_photos_downloader";
+          version = tagOf "icloudpd-src";
+        };
         cdp = {
           from = "the pinned Chromium's /json/protocol";
           version = "Chromium ${pkgs.chromium.version}, protocol ${(stamp "cdp").protocol}";
