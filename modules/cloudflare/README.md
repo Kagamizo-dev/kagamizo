@@ -326,12 +326,11 @@ around.
   (`nix run .#migrate`).
 - **Registrar prerequisites**: default payment method, registrant contact and
   the registration agreement, dashboard only.
-- **`cf`'s sign-in cannot mint tokens** (2026-11-01): Cloudflare grants
-  the device sign-in every scope `cloudflare-login` asks for except
-  `account_api_tokens:create` (`cf auth whoami`), so `bootstrap` fails at
-  the permission groups (403, code 9109), and `cf` never requests billing
-  scopes at all. Minting the token profiles, and the owner-approved one-shot
-  billing token that enables R2, needs another root credential.
+- **`cf`'s sign-in mints tokens only when its scope is ticked**: Cloudflare's
+  consent page lets the approver untick scopes, and `account_api_tokens:create`
+  must stay ticked or `bootstrap` fails at the permission groups (403, code
+  9109). A token can only hold what the sign-in's scopes cover, and `cf`
+  never requests billing, so no billing token comes from it.
 - **R2 and Zero Trust are turned on by hand** (`enable-product`, typed in
   `accounts.products.cloudflare`): Cloudflare's API refuses both until a
   person turns them on in the dashboard, and `cf`'s sign-in cannot hold
