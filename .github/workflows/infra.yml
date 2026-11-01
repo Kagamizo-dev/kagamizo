@@ -56,9 +56,10 @@ jobs:
           extra_nix_config: |
             accept-flake-config = true
 
-      - uses: protonpass/install-cli-action@9a5ae5819440dc2cb1c154823193ea30f18926e3 # v1.1.0
-        with:
-          version: "2.4.2"
+      # The flake's pinned pass-cli (the install action's pinned commit
+      # shipped no dist/index.js).
+      - name: pass-cli 2.4.2 (the flake's)
+        run: nix profile install .#pass-cli && pass-cli --version
 
       - name: Log in to Proton Pass (agents vault, state as viewer)
         run: pass-cli login
@@ -91,9 +92,10 @@ jobs:
           extra_nix_config: |
             accept-flake-config = true
 
-      - uses: protonpass/install-cli-action@9a5ae5819440dc2cb1c154823193ea30f18926e3 # v1.1.0
-        with:
-          version: "2.4.2"
+      # The flake's pinned pass-cli (the install action's pinned commit
+      # shipped no dist/index.js).
+      - name: pass-cli 2.4.2 (the flake's)
+        run: nix profile install .#pass-cli && pass-cli --version
 
       - name: Log in to Proton Pass (ci vault, state as editor)
         run: pass-cli login

@@ -19,9 +19,8 @@ jobs:
     - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd
       with:
         extra_nix_config: accept-flake-config = true
-    - uses: protonpass/install-cli-action@9a5ae5819440dc2cb1c154823193ea30f18926e3
-      with:
-        version: 2.4.2
+    - name: pass-cli 2.4.2 (the flake's)
+      run: nix profile install .#pass-cli && pass-cli --version
     - env:
         PROTON_PASS_KEY_PROVIDER: fs
         PROTON_PASS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PROTON_PASS_CACHE_TOKEN }}

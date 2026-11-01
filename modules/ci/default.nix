@@ -252,8 +252,17 @@ in
   };
 
   config.perSystem =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
     let
+      # A step's pass-cli version is the flake's: the renderer installs
+      # that package, so a different version would be a lie in the log.
+      passClis = lib.unique (
+        lib.filter (v: v != null) (
+          lib.concatMap (w: lib.concatMap (j: map (st: st.passCli) j.steps) (lib.attrValues w.jobs)) (
+            lib.attrValues cfg.workflows
+          )
+        )
+      );
       enabled = lib.filterAttrs (_: h: h.enable) cfg.hosts;
       files = lib.mapAttrs (_: h: h.render pkgs cfg.workflows) cfg.hosts;
       tree = lib.concatLists (
@@ -265,7 +274,10 @@ in
           }) fs
         ) (lib.filterAttrs (n: _: enabled ? ${n}) files)
       );
-      rendered = pkgs.linkFarm "ci-rendered" tree;
+      rendered =
+        assert lib.assertMsg (lib.all (v: v == config.packages.pass-cli.version) passClis)
+          "ci: a step asks for pass-cli ${lib.concatStringsSep ", " passClis}; the flake pins ${config.packages.pass-cli.version}";
+        pkgs.linkFarm "ci-rendered" tree;
       # Every host renders, enabled or not: a model a host cannot express
       # fails here, before anyone moves to it.
       all = pkgs.linkFarm "ci-all-hosts" (
