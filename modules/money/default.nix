@@ -208,6 +208,14 @@ let
     )
     ++ lib.concatLists (
       lib.mapAttrsToList (
+        id: d:
+        lib.optional (
+          (d.as == "schedule-c") != (d.line != null)
+        ) "money.decisions.${id}: a Schedule C line exactly when as = schedule-c"
+      ) cfg.decisions
+    )
+    ++ lib.concatLists (
+      lib.mapAttrsToList (
         c: t:
         lib.optional (
           (t.kind == "schedule-c") != (t.line != null)
@@ -229,6 +237,40 @@ in
     treatment = mkOption {
       type = types.attrsOf treatment;
       default = { };
+    };
+    decisions = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            as = mkOption {
+              type = types.enum [
+                "schedule-c"
+                "owner-draw"
+                "contribution"
+                "transfer"
+                "gross-receipts"
+                "personal"
+              ];
+            };
+            line = mkOption {
+              type = types.nullOr (types.strMatching "[0-9]+[ab]?");
+              default = null;
+            };
+            percent = mkOption {
+              type = types.ints.between 0 100;
+              default = 100;
+            };
+            why = mkOption { type = types.str; };
+            decided = mkOption { type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}"; };
+          };
+        }
+      );
+      default = { };
+      description = ''
+        The owner's decision on one transaction, by Mercury's transaction id
+        (no amount or name: this repo is public), for what its category
+        cannot settle.
+      '';
     };
     returnOf = mkOption {
       type = types.functionTo types.str;
@@ -271,7 +313,7 @@ in
       rules = lib.genAttrs returns (r: {
         "return" = r;
         accounts = accountsOf r;
-        inherit (money) treatment;
+        inherit (money) treatment decisions;
         obligations = lib.genAttrs (map toString years) (
           y: lib.filter (o: money.returnOf o.entity == r || o.entity == r) (money.obligations (lib.toInt y))
         );
@@ -359,6 +401,38 @@ in
     };
 
   config.money = {
+    # The owner's answers, 2026-11-01, on what the 2026 report could not
+    # settle by category.
+    decisions =
+      let
+        nav = {
+          as = "schedule-c";
+          line = "27a";
+          why = "Nav: business credit for QSearch LLC";
+          decided = "2026-11-01";
+        };
+      in
+      {
+        "3e790b18-ea89-11f0-8f2c-37bad8b45988" = nav;
+        "8e988de6-0152-11f1-b6bd-7b8946967030" = nav;
+        "885fd92a-1755-11f1-98dd-bffe2032812e" = nav;
+        "7eed8d40-be9b-11f1-a15d-cfbf517e1ad9" = {
+          as = "transfer";
+          why = "funding QSearch LLC's own Interactive Brokers account";
+          decided = "2026-11-01";
+        };
+        "e03ecdd8-c04a-11f1-a0ae-f7500c27c024" = {
+          as = "owner-draw";
+          why = "paid to the owner from their disregarded LLC";
+          decided = "2026-11-01";
+        };
+        "f678bb64-cda5-11f1-af36-db0bbda5b4c7" = {
+          as = "transfer";
+          why = "from the owner's own checking account at another bank";
+          decided = "2026-11-01";
+        };
+      };
+
     checked =
       assert lib.assertMsg (problems == [ ]) (
         "modules/money:\n" + lib.concatMapStrings (p: "  - ${p}\n") problems

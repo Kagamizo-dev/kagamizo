@@ -23,6 +23,15 @@ struct Treatment {
     why: String,
 }
 
+#[derive(Deserialize, Debug, Clone)]
+struct Decision {
+    #[serde(rename = "as")]
+    as_: String,
+    line: Option<String>,
+    percent: u32,
+    why: String,
+}
+
 #[derive(Deserialize, Debug)]
 struct Account {
     entity: String,
@@ -54,6 +63,8 @@ struct Rules {
     year: i32,
     accounts: BTreeMap<String, Account>,
     treatment: BTreeMap<String, Treatment>,
+    #[serde(default)]
+    decisions: BTreeMap<String, Decision>,
     obligations: Vec<Obligation>,
     #[serde(default)]
     unread: Vec<Unread>,
@@ -79,6 +90,8 @@ enum Lands {
     ScheduleC(String, i64),
     Personal,
     OwnerDraw,
+    Contribution,
+    GrossReceipts,
     Nondeductible(String),
     Interest,
     Transfer,
@@ -96,6 +109,18 @@ fn money(c: i64) -> String {
 
 fn classify(t: &Txn, acct: &Account, rules: &Rules) -> Lands {
     let c = cents(t.amount);
+    // The owner's decision on this transaction settles it first.
+    if let Some(d) = rules.decisions.get(&t.id) {
+        return match d.as_.as_str() {
+            "schedule-c" => Lands::ScheduleC(d.line.clone().unwrap_or_default(), -c * i64::from(d.percent) / 100),
+            "owner-draw" => Lands::OwnerDraw,
+            "contribution" => Lands::Contribution,
+            "transfer" => Lands::Transfer,
+            "gross-receipts" => Lands::GrossReceipts,
+            "personal" => Lands::Personal,
+            other => Lands::Review(format!("decision {other} ({}) is not one this report knows", d.why)),
+        };
+    }
     match t.kind.as_str() {
         "internalTransfer" | "treasuryTransfer" => return Lands::Transfer,
         "interestPayment" => return Lands::Interest,
@@ -164,6 +189,11 @@ fn build(rules: &Rules, sources: &[(String, Vec<Txn>)]) -> Report {
                 }
                 Lands::Personal => format!("expenses:{e}:personal"),
                 Lands::OwnerDraw => format!("equity:{e}:owner-draw"),
+                Lands::Contribution => format!("equity:{e}:contribution"),
+                Lands::GrossReceipts => {
+                    *r.schedule_c.entry(e.clone()).or_default().entry("1".into()).or_default() += c;
+                    format!("income:{e}:gross-receipts")
+                }
                 Lands::Nondeductible(_) => format!("expenses:{e}:nondeductible"),
                 Lands::Interest => format!("income:{e}:interest"),
                 Lands::Transfer => format!("assets:{e}:transfers"),
@@ -200,11 +230,13 @@ fn render(rules: &Rules, r: &Report, out: &Path) -> std::io::Result<()> {
     for (e, lines) in &r.schedule_c {
         let name = rules.accounts.values().find(|a| &a.entity == e).map(|a| a.legal_name.as_str());
         let _ = writeln!(sc, "# Schedule C, {} ({}), {}\n", name.unwrap_or(e), e, rules.year);
-        let _ = writeln!(sc, "Deductible expenses by Part II line, deductible share applied. Line 1 (gross receipts) waits on review.md.\n");
+        let _ = writeln!(sc, "Line 1 is gross receipts; the rest are Part II expense lines, deductible share applied. Anything in review.md is not counted yet.\n");
         let _ = writeln!(sc, "| Line | Deductible |\n|---|---|");
         let mut total = 0;
         for (l, v) in lines {
-            total += v;
+            if l != "1" {
+                total += v;
+            }
             let _ = writeln!(sc, "| {l} | {} |", money(*v));
         }
         let _ = writeln!(sc, "| **28 (total expenses)** | **{}** |\n", money(total));
@@ -356,6 +388,16 @@ mod tests {
         assert!(matches!(classify(&txn("incomingDomesticWire", 100.0, None), a, &r), Lands::Review(_)));
         assert_eq!(classify(&txn("interestPayment", 0.3, None), a, &r), Lands::Interest);
         assert_eq!(classify(&txn("internalTransfer", -50.0, None), a, &r), Lands::Transfer);
+    }
+
+    #[test]
+    fn decision_settles_first() {
+        let mut r = rules();
+        r.decisions.insert(
+            "t".into(),
+            Decision { as_: "owner-draw".into(), line: None, percent: 100, why: "w".into() },
+        );
+        assert_eq!(classify(&txn("outgoingPayment", -60.0, None), &r.accounts["biz"], &r), Lands::OwnerDraw);
     }
 
     #[test]
