@@ -21,7 +21,7 @@ The network allowlist now has every host in HANDOFF.md's "The allowlist to apply
 
 Start by signing the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login` and send me the approval link. Run no other pass-cli command until it returns.
 
-Then, from HANDOFF.md's "Where the 2026-11-01 session left it": run `brokerage summary` read-only once public-mirazo's login matches, then §5 (the generated sites, status.mirazo.org; ask before the first deploy), §6 (the module contract and the Minecraft twin, accounts & identity first) and the rest of §4 (the remaining workflows into modules/ci, its Rust runner).
+Then, from HANDOFF.md's "Where the 2026-11-01 session left it": apply status.mirazo.org (approved; `nix run .#infra -- ci apply`), run `brokerage summary` read-only once public-mirazo's login matches and read Public's history into the tax report, then §6 (the module contract and the Minecraft twin, accounts & identity first) and the rest of §4 (the remaining workflows into modules/ci, its Rust runner).
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, all in the one modules tree. End the session with the full allowlist (if it changed) and the updated start message, each ready to paste.
 ```
@@ -297,6 +297,33 @@ root vault.
 - Later: publishing targets (Ghost, PeerTube, a journal site with Zenodo
   DOIs, each declared as an account), a self-hosted tracker (Plane needs
   ≥4 GB), an audit typing every domain, alias and vault item.
+
+### Later the same session (2026-11-01)
+
+- **Payments typed**: every plan states its billing with a source; every
+  account on a billed plan names exactly one payment: a Mercury card, the
+  owner's card (which must name the Mercury card that replaces it: every
+  payment ends on a Mercury card, the owner's rule), a waiver, or a Gap.
+  Proton, Cloudflare and Northwest are paid personally today; their
+  Mercury cards (proton, cloudflare, northwest-jingzo, hetzner) are
+  declared on mercury-jingzo for the owner to mint (`cards plan` lists
+  them). A card paying the owner's own account is booked as their draw.
+  OpenRouter is now Jingzo's (dev@jingzo.org), not Kagamizo's.
+- **Taxes** (`modules/money`): Mirazo an individual (no state income tax,
+  the owner's statement; state not named), QSearch LLC disregarded into
+  Mirazo's 1040; every Mercury category mapped to Schedule C or settled
+  as personal/nondeductible/review; obligations per year with dates and
+  sources (Wyoming's report waits on Jingzo's state and formation date).
+  `nix run .#tax-report -- mirazo 2026 DIR` reads both Mercury accounts
+  and writes the journal, Schedule C, review list and obligations; the
+  six open 2026 transactions are decided (`money.decisions`, by id).
+  Public's history is not read into it yet (named in the report).
+- **Status page**: `modules/site`, generated from the declarations,
+  screenshotted by `checks.site-status`; declared at status.mirazo.org
+  (a Worker behind Cloudflare Access, only zach@mirazo.org). Planned with
+  the read-only view: 4 to add. **Not applied**: this session's
+  permission check refused `infra ci apply -auto-approve`; the owner
+  approved the deploy, so the next step is that apply.
 
 ## The allowlist to apply (one change, all of it)
 
