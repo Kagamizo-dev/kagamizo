@@ -9,6 +9,11 @@
   "servers": [
    "https://api.hetzner.cloud/v1"
   ],
+  "spec": {
+   "lastModified": "Tue, 27 Oct 2026 14:17:08 GMT",
+   "sha256": "772d662e1336ea01925ba30381f47d5c0e23265767dcf9399983aba3dada082a",
+   "url": "https://docs.hetzner.cloud/cloud.spec.json"
+  },
   "title": "Hetzner Cloud API",
   "version": "1.0.0"
  },
@@ -2238,6 +2243,30 @@
   },
   "attach_volume": {
    "body": {
+    "assignee": {
+     "description": "Resource the Volume will be attached to.",
+     "enum": null,
+     "format": null,
+     "nullable": false,
+     "required": true,
+     "type": "object"
+    },
+    "assignee.id": {
+     "description": "ID of the Resource.",
+     "enum": null,
+     "format": "int64",
+     "nullable": false,
+     "required": true,
+     "type": "integer"
+    },
+    "assignee.type": {
+     "description": "Type of the Resource.",
+     "enum": null,
+     "format": null,
+     "nullable": false,
+     "required": true,
+     "type": "string"
+    },
     "automount": {
      "description": "Auto-mount the Volume after attaching it.",
      "enum": null,
@@ -2247,11 +2276,11 @@
      "type": "boolean"
     },
     "server": {
-     "description": "ID of the Server the Volume will be attached to.",
+     "description": "This field is deprecated, use the `assignee` field with `server` as the `type` instead.\n\nID of the Server the Volume will be attached to.\n",
      "enum": null,
      "format": "int64",
      "nullable": false,
-     "required": true,
+     "required": false,
      "type": "integer"
     }
    },
@@ -2386,7 +2415,7 @@
     }
    },
    "status": "201",
-   "summary": "Attach Volume to a Server",
+   "summary": "Attach Volume to a Resource",
    "tag": "Volume Actions"
   },
   "change_floating_ip_dns_ptr": {
@@ -12430,6 +12459,30 @@
   },
   "create_volume": {
    "body": {
+    "assignee": {
+     "description": "Resource to which to attach the Volume once it's created (Volume will be created in the same Location as the resource).",
+     "enum": null,
+     "format": null,
+     "nullable": false,
+     "required": false,
+     "type": "object"
+    },
+    "assignee.id": {
+     "description": "ID of the Resource.",
+     "enum": null,
+     "format": "int64",
+     "nullable": false,
+     "required": true,
+     "type": "integer"
+    },
+    "assignee.type": {
+     "description": "Type of the Resource.",
+     "enum": null,
+     "format": null,
+     "nullable": false,
+     "required": true,
+     "type": "string"
+    },
     "automount": {
      "description": "Auto-mount Volume after attach. `server` must be provided.",
      "enum": null,
@@ -12479,7 +12532,7 @@
      "type": "string"
     },
     "server": {
-     "description": "Server to which to attach the Volume once it's created (Volume will be created in the same Location as the server).",
+     "description": "This field is deprecated, use the `assignee` field with `server` as the `type` instead.\n\nServer to which to attach the Volume once it's created (Volume will be created in the same Location as the server).\n",
      "enum": null,
      "format": "int64",
      "nullable": false,
@@ -12748,6 +12801,30 @@
      "required": true,
      "type": "object"
     },
+    "volume.assignee": {
+     "description": "Resource the Volume is attached to, null if it is not attached at all.",
+     "enum": null,
+     "format": null,
+     "nullable": true,
+     "required": true,
+     "type": "object|null"
+    },
+    "volume.assignee.id": {
+     "description": "ID of the Resource.",
+     "enum": null,
+     "format": "int64",
+     "nullable": false,
+     "required": true,
+     "type": "integer"
+    },
+    "volume.assignee.type": {
+     "description": "Type of the Resource.",
+     "enum": null,
+     "format": null,
+     "nullable": false,
+     "required": true,
+     "type": "string"
+    },
     "volume.created": {
      "description": "Point in time when the Resource was created (in [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) format).",
      "enum": null,
@@ -12893,7 +12970,7 @@
      "type": "boolean"
     },
     "volume.server": {
-     "description": "ID of the Server the Volume is attached to, null if it is not attached at all.",
+     "description": "This field is deprecated, use the `assignee` field instead.\n\nID of the Server the Volume is attached to, null if it is not attached at all.\n",
      "enum": null,
      "format": "int64",
      "nullable": true,
@@ -25188,6 +25265,30 @@
      "required": true,
      "type": "object"
     },
+    "volume.assignee": {
+     "description": "Resource the Volume is attached to, null if it is not attached at all.",
+     "enum": null,
+     "format": null,
+     "nullable": true,
+     "required": true,
+     "type": "object|null"
+    },
+    "volume.assignee.id": {
+     "description": "ID of the Resource.",
+     "enum": null,
+     "format": "int64",
+     "nullable": false,
+     "required": true,
+     "type": "integer"
+    },
+    "volume.assignee.type": {
+     "description": "Type of the Resource.",
+     "enum": null,
+     "format": null,
+     "nullable": false,
+     "required": true,
+     "type": "string"
+    },
     "volume.created": {
      "description": "Point in time when the Resource was created (in [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) format).",
      "enum": null,
@@ -25333,7 +25434,7 @@
      "type": "boolean"
     },
     "volume.server": {
-     "description": "ID of the Server the Volume is attached to, null if it is not attached at all.",
+     "description": "This field is deprecated, use the `assignee` field instead.\n\nID of the Server the Volume is attached to, null if it is not attached at all.\n",
      "enum": null,
      "format": "int64",
      "nullable": true,
@@ -37803,6 +37904,30 @@
      "required": true,
      "type": "object"
     },
+    "volumes[].assignee": {
+     "description": "Resource the Volume is attached to, null if it is not attached at all.",
+     "enum": null,
+     "format": null,
+     "nullable": true,
+     "required": true,
+     "type": "object|null"
+    },
+    "volumes[].assignee.id": {
+     "description": "ID of the Resource.",
+     "enum": null,
+     "format": "int64",
+     "nullable": false,
+     "required": true,
+     "type": "integer"
+    },
+    "volumes[].assignee.type": {
+     "description": "Type of the Resource.",
+     "enum": null,
+     "format": null,
+     "nullable": false,
+     "required": true,
+     "type": "string"
+    },
     "volumes[].created": {
      "description": "Point in time when the Resource was created (in [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) format).",
      "enum": null,
@@ -37948,7 +38073,7 @@
      "type": "boolean"
     },
     "volumes[].server": {
-     "description": "ID of the Server the Volume is attached to, null if it is not attached at all.",
+     "description": "This field is deprecated, use the `assignee` field instead.\n\nID of the Server the Volume is attached to, null if it is not attached at all.\n",
      "enum": null,
      "format": "int64",
      "nullable": true,
@@ -47327,6 +47452,30 @@
      "required": true,
      "type": "object"
     },
+    "volume.assignee": {
+     "description": "Resource the Volume is attached to, null if it is not attached at all.",
+     "enum": null,
+     "format": null,
+     "nullable": true,
+     "required": true,
+     "type": "object|null"
+    },
+    "volume.assignee.id": {
+     "description": "ID of the Resource.",
+     "enum": null,
+     "format": "int64",
+     "nullable": false,
+     "required": true,
+     "type": "integer"
+    },
+    "volume.assignee.type": {
+     "description": "Type of the Resource.",
+     "enum": null,
+     "format": null,
+     "nullable": false,
+     "required": true,
+     "type": "string"
+    },
     "volume.created": {
      "description": "Point in time when the Resource was created (in [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6) format).",
      "enum": null,
@@ -47472,7 +47621,7 @@
      "type": "boolean"
     },
     "volume.server": {
-     "description": "ID of the Server the Volume is attached to, null if it is not attached at all.",
+     "description": "This field is deprecated, use the `assignee` field instead.\n\nID of the Server the Volume is attached to, null if it is not attached at all.\n",
      "enum": null,
      "format": "int64",
      "nullable": true,

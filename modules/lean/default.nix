@@ -126,7 +126,7 @@ in
       versionOf =
         n:
         if n == "hetzner-api" then
-          (lib.importJSON (json + "/hetzner-api.json")).api.version
+          "spec of " + (lib.importJSON (json + "/hetzner-api.json")).api.spec.lastModified
         else
           versions.${n}.version or (throw "lean: no pinned version known for catalog ${n}");
       render =

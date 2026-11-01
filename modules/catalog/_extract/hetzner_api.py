@@ -1,7 +1,10 @@
-"""Hetzner Cloud's API surface, from its published OpenAPI spec (pinned by
-hash in ../catalogs.nix).
+"""Hetzner Cloud's API surface, from its published OpenAPI spec.
 
-    hetzner_api.py SPEC OUT
+    hetzner_api.py SPEC OUT --stamp SHA256 LAST_MODIFIED
+
+The spec has no versions, so the catalog records the one it was read from
+(`spec`: its SHA-256 and Last-Modified); `nix run .#hetzner-api-update`
+fetches it and runs this.
 
 Writes every operation by its operationId: HTTP method, path, tag, summary,
 whether it is deprecated, its parameters (where, required, type, enum), its
@@ -136,7 +139,9 @@ def operations(spec):
     return out
 
 
-def main(spec_path, out):
+def main(spec_path, out, flag, sha, modified):
+    if flag != "--stamp":
+        sys.exit("usage: hetzner_api.py SPEC OUT --stamp SHA256 LAST_MODIFIED")
     with open(spec_path) as f:
         spec = json.load(f)
     ops = operations(spec)
@@ -151,6 +156,11 @@ def main(spec_path, out):
                     "version": spec["info"]["version"],
                     "servers": [s["url"] for s in spec.get("servers", [])],
                     "security": spec["components"].get("securitySchemes"),
+                    "spec": {
+                        "url": "https://docs.hetzner.cloud/cloud.spec.json",
+                        "sha256": sha,
+                        "lastModified": modified,
+                    },
                 },
                 "operations": ops,
             },

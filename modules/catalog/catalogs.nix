@@ -18,7 +18,9 @@
 #                                     command of its CLI, from its pinned
 #                                     source
 #   _json/hetzner-api.json          Hetzner Cloud's API from its OpenAPI
-#                                     spec (pinned by hash): every operation,
+#                                     spec (stamped with the one it was read
+#                                     from; nix run .#hetzner-api-update):
+#                                     every operation,
 #                                     its parameters, body and response fields
 #   _json/hcloud.json               every hcloud command and option
 #   _json/hetzner-provider.json     every resource and data source of the
@@ -88,14 +90,6 @@
 
       # Hetzner Cloud's API from its published OpenAPI spec, pinned by hash: a
       # changed spec fails the fetch until the hash (and the catalog) move.
-      hetzner-api = pkgs.runCommand "hetzner-api.json" { } ''
-        ${python} ${./_extract/hetzner_api.py} ${
-          pkgs.fetchurl {
-            url = "https://docs.hetzner.cloud/cloud.spec.json";
-            hash = "sha256-D39Tih12DS4Jo0ozq0Eanim1IQJyGixJhqr1HNsYjF0=";
-          }
-        } $out
-      '';
 
       hcloud = pkgs.runCommand "hcloud.json" { } ''
         export TMPDIR
@@ -158,10 +152,6 @@
           path = config.packages.rea-catalog;
         }
         {
-          name = "hetzner-api.json";
-          path = hetzner-api;
-        }
-        {
           name = "hcloud.json";
           path = hcloud;
         }
@@ -208,6 +198,31 @@
             git status --short modules/catalog/_json/pass-items.json
           '';
         };
+        # Hetzner publishes its OpenAPI spec at one URL with no versions (its
+        # info.version stays 1.0.0), so a hash pin breaks whenever it is
+        # edited. The catalog is read from it here, outside the sandbox, and
+        # stamped with the spec's SHA-256 and Last-Modified; the change
+        # arrives as a reviewable diff of catalog/_json/hetzner-api.json.
+        hetzner-api-update = pkgs.writeShellApplication {
+          name = "hetzner-api-update";
+          runtimeInputs = [
+            pkgs.git
+            pkgs.curl
+            pkgs.coreutils
+            pkgs.gnugrep
+          ];
+          text = ''
+            cd "$(git rev-parse --show-toplevel)"
+            dir=$(mktemp -d)
+            trap 'rm -rf "$dir"' EXIT
+            curl -fsS -D "$dir/headers" -o "$dir/spec.json" https://docs.hetzner.cloud/cloud.spec.json
+            modified=$(grep -i '^last-modified:' "$dir/headers" | cut -d' ' -f2- | tr -d '\r')
+            sha=$(sha256sum "$dir/spec.json" | cut -d' ' -f1)
+            ${python} ${./_extract/hetzner_api.py} "$dir/spec.json" modules/catalog/_json/hetzner-api.json \
+              --stamp "$sha" "$modified"
+            git status --short modules/catalog/_json/hetzner-api.json
+          '';
+        };
         catalog-update = pkgs.writeShellApplication {
           name = "catalog-update";
           text = ''
@@ -233,9 +248,10 @@
           pkgs.runCommand "catalog-pass-items" { } "touch $out";
 
         # Every sandbox-extracted catalog matches its pinned tool; the
-        # session-extracted pass-items.json is checked above instead.
+        # session-extracted pass-items.json is checked above instead, and
+        # hetzner-api.json carries the spec it was read from.
         catalog = pkgs.runCommand "catalog-in-sync" { } ''
-          if ! diff -r -x pass-items.json ${self}/modules/catalog/_json ${catalogs} >/dev/null; then
+          if ! diff -r -x pass-items.json -x hetzner-api.json ${self}/modules/catalog/_json ${catalogs} >/dev/null; then
             echo "modules/catalog/_json does not match the pinned tools: nix run .#catalog-update" >&2
             exit 1
           fi
