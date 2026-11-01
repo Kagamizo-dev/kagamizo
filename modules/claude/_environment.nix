@@ -112,6 +112,11 @@ in
           "*.icloud.com"
           "*.icloud-content.com"
           "*.apple-cloudkit.com"
+          # The trusted-device 2FA prompt: the websocket the pinned pyicloud
+          # opens (its hsa2 bridge; `icloud login` dials it through the proxy,
+          # modules/apple/_icloud.py)
+          "websocket.push.apple.com"
+          "websocket.sandbox.push.apple.com"
         ];
       };
       # The migration tools' own documentation, for mapping them and the
