@@ -227,6 +227,7 @@ in
   imports = [
     ./_treatment.nix
     ./_obligations.nix
+    ./_credit.nix
   ];
 
   options.money = {
@@ -282,6 +283,10 @@ in
       type = types.raw;
       readOnly = true;
       description = "money, after every rule above holds.";
+    };
+    creditLinesChecked = mkOption {
+      type = types.raw;
+      readOnly = true;
     };
   };
 

@@ -176,6 +176,33 @@ in
             )
         )}
 
+        <h2>Credit lines</h2>
+        ${table
+          [
+            "Line"
+            "Issuer"
+            "Limit"
+            "Annual fee"
+            "Opened"
+            "Paid from"
+            "Fate"
+          ]
+          (
+            lib.mapAttrsToList (
+              _: l:
+              row [
+                l.product
+                l.account
+                (if l.limitUsd == null then "not read" else "$${toString l.limitUsd}")
+                (if l.annualFeeUsd == null then "not read" else "$${toString l.annualFeeUsd}")
+                (if l.opened == null then "not read" else l.opened)
+                (if l.autopayFrom == null then "not read" else l.autopayFrom)
+                l.fate
+              ]
+            ) top.money.creditLinesChecked
+          )
+        }
+
         <h2>Migration</h2>
         ${table [ "Account" "Class" "Into" "State" "How" ] (
           lib.concatLists (
