@@ -19,11 +19,16 @@ in
     };
   };
   config.hetzner = {
-    # $7 for the host; $26 while the migration's staging volume exists (the
-    # owner's choice, 2026-11-01: raised from 20 when Hetzner's live prices
-    # put cpx11 $5.99 + IPv4 $0.60 + 250 GB at $25.77). Back to 7 when
-    # hetzner.volumes is empty.
-    monthlyBudgetUsd = 26;
+    # $7 for the host; $27 while the migration's staging volume exists (the
+    # owner raised it on 2026-11-01 when Hetzner's live prices put the host,
+    # its IPv4 and 250 GB at $25.77 with cpx11; the apply then found cpx11
+    # withdrawn from the EU locations since 2025-12-31, and cx23, the
+    # cheapest type still sold there, makes it $26.26: ./_json/prices.json
+    # keeps every observation). Back to 7 when hetzner.volumes is empty.
+    monthlyBudgetUsd = 27;
+    # cx23 (2 cores, 4 GB, 40 GB; $6.49 in fsn1 on 2026-11-01): cpx11 is no
+    # longer ordered in the EU.
+    host.serverType = "cx23";
     volumes.staging = {
       sizeGb = 250;
       why = "staging for the migration off Apple, Google and Outlook (modules/migration): photos, drives and the full archives on their way to Proton Drive";

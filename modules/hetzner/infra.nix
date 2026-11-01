@@ -204,6 +204,11 @@ in
         description = "Create or change the host's server, address and firewall";
         command = "hetzner-infra apply";
       };
+      prices = {
+        effect = "read";
+        description = "Record Hetzner's prices and which types each location still sells (./_json/prices.json)";
+        command = "hetzner-prices";
+      };
     };
 
     perSystem =
@@ -238,6 +243,13 @@ in
             ip=$(jq -r --arg l ${cfg.host.location} \
               '.pricing.primary_ips[] | select(.type == "ipv4") | .prices[] | select(.location == $l) | .price_monthly.gross' <<<"$prices")
             [ -n "$server" ] && [ -n "$ip" ] || { echo "hetzner-infra: no price for ${cfg.host.serverType} or IPv4 in ${cfg.host.location}" >&2; exit 1; }
+            # Hetzner withdraws types per location (cpx11 in the EU after
+            # 2025-12-31, found on the first apply): refused here, not by the
+            # provider halfway through an apply.
+            types=$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" "https://api.hetzner.cloud/v1/server_types?per_page=50")
+            gone=$(jq -r --arg t ${cfg.host.serverType} --arg l ${cfg.host.location} '.server_types[] | select(.name == $t)
+              | (.deprecation.unavailable_after // empty), ((.locations // [])[] | select(.name == $l) | .deprecation.unavailable_after // empty)' <<<"$types" | head -1)
+            [ -z "$gone" ] || { echo "hetzner-infra: ${cfg.host.serverType} is withdrawn in ${cfg.host.location} after $gone; pick another type (hetzner.host.serverType)" >&2; exit 1; }
             pergb=$(jq -r '.pricing.volume.price_per_gb_month.gross' <<<"$prices")
             gb=${toString (lib.foldl' (n: v: n + v.sizeGb) 0 (lib.attrValues cfg.volumes))}
             today=$(date -u +%F)
@@ -319,6 +331,49 @@ in
       in
       {
         packages = {
+          # The price ledger: every observation of Hetzner's prices and
+          # availability, appended and committed, so price movements are
+          # on record (the owner's ask, 2026-11-01). One line per run.
+          hetzner-prices = pkgs.writeShellApplication {
+            name = "hetzner-prices";
+            runtimeInputs = [
+              config.packages.secretspec
+              config.packages.pass-cli
+              config.packages.governance-authorize
+              pkgs.curl
+              pkgs.jq
+              pkgs.git
+              pkgs.coreutils
+            ];
+            text = builtins.seq top.accounts.checked ''
+              export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+              governance-authorize hetzner:prices hetzner
+              cd "$(git rev-parse --show-toplevel)"
+              f=modules/hetzner/_json/prices.json
+              dir=$(mktemp -d)
+              # The token expands inside secretspec's environment, not here.
+              # shellcheck disable=SC2016
+              secretspec run --file ${spec} --profile hetzner --reason "hetzner-prices" -- sh -c '
+                curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" https://api.hetzner.cloud/v1/pricing > "$1/pricing.json"
+                curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" "https://api.hetzner.cloud/v1/server_types?per_page=50" > "$1/types.json"
+              ' _ "$dir"
+              obs=$(jq -n --arg at "$(date -u +%FT%TZ)" --slurpfile p "$dir/pricing.json" --slurpfile t "$dir/types.json" '{
+                at: $at,
+                currency: $p[0].pricing.currency,
+                ipv4Monthly: ($p[0].pricing.primary_ips[] | select(.type == "ipv4") | .prices | map({(.location): .price_monthly.gross}) | add),
+                volumePerGbMonth: $p[0].pricing.volume.price_per_gb_month.gross,
+                serverTypes: ($t[0].server_types | map({(.name): {
+                  cores, memory, disk, architecture,
+                  monthly: (.prices | map({(.location): .price_monthly.gross}) | add),
+                  withdrawn: ((.locations // []) | map(select(.deprecation != null) | {(.name): .deprecation.unavailable_after}) | add)
+                }}) | add)
+              }')
+              jq --argjson o "$obs" '.observations += [$o]' "$f" > "$f.new" && mv "$f.new" "$f"
+              rm -rf "$dir"
+              jq -r '.observations[-1] | "hetzner-prices: recorded \(.at): \(.serverTypes | length) types, IPv4 \(.ipv4Monthly.fsn1), volume \(.volumePerGbMonth)/GB"' "$f"
+              git status --short "$f"
+            '';
+          };
           hetzner-infra-config = main;
           hetzner-infra-inner = inner;
           hetzner-infra = frozen {
