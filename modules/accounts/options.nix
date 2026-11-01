@@ -116,6 +116,11 @@ let
         default = null;
         description = "The fee is waived, with the page that says when.";
       };
+      fromBalance = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Charged against the account's own balance (a brokerage's commissions): what is charged.";
+      };
       pending = mkOption {
         type = types.nullOr types.str;
         default = null;
@@ -172,7 +177,13 @@ let
           type = types.enum [
             "active"
             "planned"
+            "retiring"
           ];
+          description = ''
+            retiring: an account being emptied and closed. It may still sign
+            in on an address off its owner's domains, but only while
+            migration.sources.<name> declares how it is emptied.
+          '';
         };
         payment = mkOption {
           type = types.nullOr payment;
@@ -335,7 +346,11 @@ let
     lib.concatLists (
       lib.mapAttrsToList (
         name: a:
-        if a.login.email == null then
+        if a.status == "retiring" then
+          lib.optional (
+            !(config.migration.sources ? ${name})
+          ) "accounts.held.${name}: retiring, but migration.sources.${name} does not say how it is emptied"
+        else if a.login.email == null then
           [ "accounts.held.${name}.login.email: say which address the account signs in with" ]
         else
           lib.optional (!lib.elem (lib.last (lib.splitString "@" a.login.email)) (domainsOf a.owner))
@@ -370,6 +385,7 @@ let
               p.mercuryCard
               p.ownerCard
               p.waived
+              p.fromBalance
               p.pending
             ]
         );
@@ -387,9 +403,9 @@ let
       in
       lib.optional (billing != "free" && p == null)
         "accounts.held.${name}: its ${a.provider} ${a.plan} plan is billed (${billing}); declare its payment"
-      ++ lib.optional (
-        p != null && lib.length set != 1
-      ) "accounts.held.${name}.payment: exactly one of mercuryCard, ownerCard, waived, pending"
+      ++
+        lib.optional (p != null && lib.length set != 1)
+          "accounts.held.${name}.payment: exactly one of mercuryCard, ownerCard, waived, fromBalance, pending"
       ++
         lib.optional
           (card != null && cardOwner != a.owner && (card.between == null || card.between.for != a.owner))

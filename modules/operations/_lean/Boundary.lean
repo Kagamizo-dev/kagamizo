@@ -24,6 +24,12 @@ inductive HumanStep where
   | approvePayment
   /-- A signature, or an SSN, in a provider's portal. -/
   | signLegal
+  /-- Asking a provider for its full data copy in its own console. -/
+  | requestExport
+  /-- Closing an account at its provider, once it is proven emptied. -/
+  | closeAccount
+  /-- Hands on hardware: flashing, an eSIM, iMessage. -/
+  | handleDevice
   deriving DecidableEq, Repr
 
 /-- What a secret is. -/

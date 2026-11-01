@@ -29,6 +29,11 @@ let
     "models"
     "research"
     "credit"
+    # Accounts held as they are, or being left (modules/migration).
+    "platform"
+    "shopping"
+    "payments"
+    "device"
   ];
   required =
     kind:

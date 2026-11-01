@@ -40,6 +40,8 @@ let
       "owner's ${p.ownerCard.issuer} card${
         lib.optionalString (p.ownerCard.lockedTo != null) ", locked to ${p.ownerCard.lockedTo}"
       }, until Mercury card ${p.ownerCard.replacedBy}"
+    else if p.fromBalance != null then
+      "from its own balance: ${p.fromBalance}"
     else if p.waived != null then
       "waived: ${p.waived.because}"
     else
@@ -172,6 +174,41 @@ in
                 top.money.obligations year
               )
             )
+        )}
+
+        <h2>Migration</h2>
+        ${table [ "Account" "Class" "Into" "State" "How" ] (
+          lib.concatLists (
+            lib.mapAttrsToList (
+              n: src:
+              lib.mapAttrsToList (
+                c: x:
+                row [
+                  (n + lib.optionalString (src.product != null) " (${src.product})")
+                  c
+                  x.destination
+                  x.state
+                  x.export
+                ]
+              ) src.classes
+            ) top.migration.sources
+          )
+        )}
+        ${table [ "Account" "Depends on it" "Moves to" "Done" ] (
+          lib.concatLists (
+            lib.mapAttrsToList (
+              n: src:
+              map (
+                d:
+                row [
+                  n
+                  "${d.kind}: ${d.what}"
+                  d.movedTo
+                  (if d.done then "yes" else "no")
+                ]
+              ) src.dependants
+            ) top.migration.sources
+          )
         )}
 
         <h2>CI</h2>

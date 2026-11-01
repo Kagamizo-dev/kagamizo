@@ -87,7 +87,7 @@ let
       namespace ${ns} {
         entity Person;
         entity Entity { kind: String, controllers: Set<Person>, domains: Set<String> };
-        entity Account in [Entity] { owner: Entity, provider: String, login: String, loginDomain: String, credential: String };
+        entity Account in [Entity] { owner: Entity, provider: String, login: String, loginDomain: String, credential: String, retiring: Bool };
         entity Agent { serves: Entity, purpose: String };
 
         action ${lib.concatMapStringsSep ", " str cfg.effects};
@@ -120,9 +120,10 @@ let
     @id("logins-say-whose-they-are")
     forbid (principal, action, resource is ${ns}::Account)
     unless {
-      resource.owner.domains.contains(resource.loginDomain) &&
+      (resource.owner.domains.contains(resource.loginDomain) || resource.retiring) &&
       (
         (context has login && context.login == resource.login) ||
+        (resource.retiring && resource.login == "") ||
         (principal is ${ns}::Person && action in ${act "move-login"})
       ) &&
       (
@@ -178,9 +179,12 @@ let
       attrs = {
         owner = uid "Entity" a.owner;
         inherit (a) provider;
-        login = a.login.email;
-        loginDomain = domainOf a.login.email;
+        login = if a.login.email == null then "" else a.login.email;
+        loginDomain = if a.login.email == null then "" else domainOf a.login.email;
         credential = credentialOf a;
+        # Being emptied and closed (migration.sources): its login may still
+        # be off its owner's domains, but must still be the declared one.
+        retiring = a.status == "retiring";
       };
       parents = [ (uid "Entity" a.owner).__entity ];
     }) accounts
@@ -200,7 +204,7 @@ let
   test = testAs (
     account:
     {
-      login = accounts.${account}.login.email;
+      login = if accounts.${account}.login.email == null then "" else accounts.${account}.login.email;
     }
     // lib.optionalAttrs (accounts.${account}.credential != null) {
       credential = credentialOf accounts.${account};
@@ -383,7 +387,7 @@ let
           "allow"
           [ "controllers" ]
       )
-    ) withActions
+    ) (lib.filterAttrs (_: a: !(a.status == "retiring" && a.login.email == null)) withActions)
   );
 in
 {

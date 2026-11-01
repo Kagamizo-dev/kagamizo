@@ -22,6 +22,16 @@
       why = "Northwest, Jingzo's registered agent";
       account = "mercury-jingzo";
     };
+    amazon = {
+      limitUsd = 150;
+      interval = "yearly";
+      why = "Amazon Prime, the owner's own";
+      account = "mercury-jingzo";
+      between = {
+        for = "mirazo";
+        as = "draw";
+      };
+    };
     hetzner = {
       limitUsd = 7;
       interval = "monthly";

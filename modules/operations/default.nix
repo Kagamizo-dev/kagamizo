@@ -120,6 +120,9 @@ in
         console-credential = "a credential the provider issues only in its own console (a Gap, to be closed)";
         approve-payment = "the bank's own approval to move money, by design";
         sign-legal = "a signature or an SSN in a provider's portal";
+        request-export = "asking a provider for its full data copy, where it offers one only in its own console (a Gap; by mail from the repo where accepted)";
+        close-account = "closing an account at its provider, once Lean proves it emptied (modules/migration)";
+        handle-device = "hands on hardware: flashing a phone, moving an eSIM, signing a phone out of iMessage";
       };
       secretKinds = [
         "api-token"
