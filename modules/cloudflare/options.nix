@@ -47,6 +47,14 @@ in
       type = types.attrsOf profile;
       default = { };
     };
+    # Live objects the state adopts (OpenTofu import blocks), by address:
+    # how a lost state is rebuilt from Cloudflare without touching it. Once
+    # the state holds them, each import is a no-op.
+    imports = mkOption {
+      type = types.attrsOf (types.strMatching "[0-9a-f]{32}/[A-Za-z0-9_-]+");
+      default = { };
+      description = "Resource address -> import id (<zone or account id>/<object id>).";
+    };
     checked = mkOption {
       type = types.raw;
       readOnly = true;

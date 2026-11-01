@@ -274,7 +274,24 @@ let
             lib.mapAttrsToList (type: lib.mapAttrsToList (check kind schemas type)) (config.${kind} or { })
           )
         );
-      problems = inBlock "resource" provider.resources ++ inBlock "data" provider.data;
+      # An import block adopts a live object into the state: it must name a
+      # resource this config declares, by type and name, and give an id.
+      imports = lib.concatMap (
+        i:
+        let
+          parts = lib.splitString "." (i.to or "");
+          declared =
+            lib.length parts == 2
+            && (config.resource or { }) ? ${lib.head parts}
+            && config.resource.${lib.head parts} ? ${lib.last parts};
+        in
+        lib.optional (!declared) "import: `${i.to or "?"}` is not a resource this config declares"
+        ++ lib.optional (!(builtins.isString (i.id or null)) || i.id == "") "import ${i.to or "?"}: no id"
+        ++ map (k: "import ${i.to or "?"}: unknown attribute `${k}`") (
+          lib.subtractLists [ "to" "id" ] (lib.attrNames i)
+        )
+      ) (config.import or [ ]);
+      problems = inBlock "resource" provider.resources ++ inBlock "data" provider.data ++ imports;
     in
     if problems == [ ] then config else fail "OpenTofu config does not match the provider" problems;
 

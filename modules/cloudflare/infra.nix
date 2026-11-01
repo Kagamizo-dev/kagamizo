@@ -16,6 +16,7 @@
 let
   top = config;
   inherit (config.identity.checked) domains;
+  statusOn = config.accounts.held.cloudflare.products ? zeroTrust;
   cli = import ../_lib/cli.nix {
     inherit lib;
     fx = inputs.nix-effects.lib;
@@ -47,15 +48,26 @@ in
         cloudflare =
           lib.foldl' lib.recursiveUpdate (import ./_zones.nix { inherit lib domains terraform; })
             [
-              (import ./_status.nix {
-                inherit (top.cloudflare.checked) accountId;
-                zoneId = domains."mirazo.org".zoneId;
-                hostname = "status.mirazo.org";
-                viewers = [ "zach@mirazo.org" ];
-                html = config.site.statusHtml;
-              })
+              # status.mirazo.org is served only behind Access: the whole
+              # layer waits for the owner to turn Zero Trust on
+              # (accounts.held.cloudflare.products.zeroTrust).
+              (lib.optionalAttrs statusOn (
+                import ./_status.nix {
+                  inherit (top.cloudflare.checked) accountId;
+                  zoneId = domains."mirazo.org".zoneId;
+                  hostname = "status.mirazo.org";
+                  viewers = [ "zach@mirazo.org" ];
+                  html = config.site.statusHtml;
+                }
+              ))
               # The build cache's bucket and its domain (../cache).
               top.cache.layer
+              # What the state adopts from Cloudflare (./imports.nix).
+              {
+                import = lib.mapAttrsToList (to: id: { inherit to id; }) (
+                  lib.filterAttrs (to: _: statusOn || !(lib.hasSuffix ".status" to)) top.cloudflare.imports
+                );
+              }
             ];
       };
 
