@@ -37,7 +37,9 @@ let
     else if p.mercuryCard != null then
       "Mercury card ${p.mercuryCard}"
     else if p.ownerCard != null then
-      "owner's ${p.ownerCard.issuer} card, locked to ${p.ownerCard.lockedTo}"
+      "owner's ${p.ownerCard.issuer} card${
+        lib.optionalString (p.ownerCard.lockedTo != null) ", locked to ${p.ownerCard.lockedTo}"
+      }, until Mercury card ${p.ownerCard.replacedBy}"
     else if p.waived != null then
       "waived: ${p.waived.because}"
     else

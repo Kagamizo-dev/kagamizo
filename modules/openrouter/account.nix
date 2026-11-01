@@ -42,13 +42,15 @@
     held.openrouter = {
       provider = "openrouter";
       plan = "pay-as-you-go";
-      payment.pending = "mercury.cards.openrouter, on mercury-jingzo for Kagamizo: owed or a contribution is the owner's call";
-      owner = "kagamizo";
+      payment.mercuryCard = "openrouter";
+      # Jingzo's own (the owner's decision, 2026-11-01): Kagamizo is not
+      # formed and takes no client work, so nothing is owed between them.
+      owner = "jingzo";
       status = "planned";
       signup = {
         url = "https://openrouter.ai/sign-up";
-        handle = "kagamizo";
-        email = "dev@kagamizo.com";
+        handle = "jingzo";
+        email = "dev@jingzo.org";
         credential = "password";
         findings = [
           {

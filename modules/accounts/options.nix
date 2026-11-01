@@ -79,10 +79,24 @@ let
         type = types.nullOr (
           types.submodule {
             options = {
-              issuer = mkOption { type = types.enum [ "capital-one" ]; };
+              issuer = mkOption {
+                type = types.enum [
+                  "capital-one"
+                  "personal"
+                ];
+                description = "Whose card: a named issuer, or one of the owner's personal cards.";
+              };
               lockedTo = mkOption {
-                type = types.str;
-                description = "The one merchant the card is locked to.";
+                type = types.nullOr types.str;
+                default = null;
+                description = "The one merchant the card is locked to, if it is.";
+              };
+              replacedBy = mkOption {
+                type = types.enum (lib.attrNames config.mercury.cards);
+                description = ''
+                  The Mercury virtual card that takes over: every payment ends
+                  on a Mercury card of its own (the owner's rule, 2026-11-01).
+                '';
               };
             };
           }
@@ -359,7 +373,16 @@ let
               p.pending
             ]
         );
-        card = if p == null || p.mercuryCard == null then null else config.mercury.cards.${p.mercuryCard};
+        cardName =
+          if p == null then
+            null
+          else if p.mercuryCard != null then
+            p.mercuryCard
+          else if p.ownerCard != null then
+            p.ownerCard.replacedBy
+          else
+            null;
+        card = if cardName == null then null else config.mercury.cards.${cardName};
         cardOwner = if card == null then null else cfg.held.${card.account}.owner;
       in
       lib.optional (billing != "free" && p == null)
@@ -370,7 +393,7 @@ let
       ++
         lib.optional
           (card != null && cardOwner != a.owner && (card.between == null || card.between.for != a.owner))
-          "accounts.held.${name}.payment: card ${p.mercuryCard} is ${cardOwner}'s, the account ${a.owner}'s; declare the card `between` them"
+          "accounts.held.${name}.payment: card ${cardName} is ${cardOwner}'s, the account ${a.owner}'s; declare the card `between` them"
     ) cfg.held
   );
   problems =

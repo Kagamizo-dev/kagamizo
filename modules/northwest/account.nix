@@ -104,7 +104,10 @@
     held.northwest-jingzo = {
       provider = "northwest";
       plan = "registered-agent";
-      payment.pending = "what pays the yearly renewal is not declared";
+      payment.ownerCard = {
+        issuer = "personal";
+        replacedBy = "northwest-jingzo";
+      };
       owner = "jingzo";
       status = "active";
       login = {

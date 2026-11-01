@@ -81,8 +81,13 @@ let
                 type = types.enum [
                   "owed"
                   "contribution"
+                  "draw"
                 ];
-                description = "owed: the other entity repays it (a receivable); contribution: a capital contribution to it.";
+                description = ''
+                  owed: the other entity repays it (a receivable); contribution:
+                  a capital contribution to it; draw: the business pays its
+                  owner's own cost, an owner's draw.
+                '';
               };
             };
           }

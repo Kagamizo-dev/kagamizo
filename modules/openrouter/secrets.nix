@@ -7,7 +7,7 @@ in
   secrets.profiles = {
     # It cannot call models itself.
     openrouter = {
-      defaults.providers = [ "kagamizo" ];
+      defaults.providers = [ "jingzo-logins" ];
       OPENROUTER_MANAGEMENT_KEY = secret {
         kind = "api-token";
         issuer = "human:console-credential";

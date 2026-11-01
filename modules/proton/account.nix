@@ -48,7 +48,10 @@
     held.proton = {
       provider = "proton";
       plan = "unlimited";
-      payment.pending = "what pays Proton Unlimited is not declared";
+      payment.ownerCard = {
+        issuer = "personal";
+        replacedBy = "proton";
+      };
       owner = "mirazo";
       status = "active";
       # Proton signs in with any address of the account, the domain's too.

@@ -40,6 +40,7 @@
       payment.ownerCard = {
         issuer = "capital-one";
         lockedTo = "Hetzner";
+        replacedBy = "hetzner";
       };
       owner = "jingzo";
       status = "active";

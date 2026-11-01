@@ -73,7 +73,10 @@
     held.cloudflare = {
       provider = "cloudflare";
       plan = "free";
-      payment.pending = "mercury.cards.cloudflare is on Kagamizo's Mercury, not formed; what pays renewals today is not declared";
+      payment.ownerCard = {
+        issuer = "personal";
+        replacedBy = "cloudflare";
+      };
       owner = "mirazo";
       status = "active";
       login = {

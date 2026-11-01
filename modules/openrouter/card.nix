@@ -11,7 +11,7 @@ in
   mercury.cards.openrouter = {
     limitUsd = 5;
     interval = "monthly";
-    why = "OpenRouter credits, the first top-up (the keys' caps total ${toString keyCaps})";
+    why = "OpenRouter credits, Jingzo's (the keys' caps total ${toString keyCaps})";
     account = "mercury-jingzo";
   };
 }
