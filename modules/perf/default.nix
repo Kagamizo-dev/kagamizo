@@ -210,14 +210,16 @@ in
           |---|---|
           ${lib.concatStringsSep "\n" (lib.mapAttrsToList (n: ms: "| `${n}` | ${toString ms} |") baseline.ms)}
 
-          What stands out, in order of cost: `governance-cedar` (every Cedar
-          test runs one by one through the Cedar CLI; batching them into one
-          authorizer run, or Lean deciding the policy against its base
-          layer, is the cut), `lean-api-rclone` (one `decide` over 1200
-          operations; splitting the closedness proof per operation chunk,
+          ${lib.optionalString (baseline ? notes) (
+            lib.concatStringsSep "\n" (lib.mapAttrsToList (n: note: "- `${n}`: ${note}") baseline.notes)
+          )}
+
+          What stands out, in order of cost: `lean-api-rclone` (one `decide`
+          over 1200 operations; splitting the closedness proof per chunk,
           or `native_decide`, is the cut), `migrate-build` (the Rust
           release build; LTO off and `codegen-units` up for CI, the cache
-          serving it otherwise).
+          serving it otherwise), `catalog-coverage` (Python over every
+          source file; a Rust walker, or scanning only changed files).
         ''}
       '';
     in

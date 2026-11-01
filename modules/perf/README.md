@@ -27,18 +27,18 @@ Measured on the cloud container, 4 jobs, 2026-11-01 (not records: CI's runner se
 |---|---|
 | `catalog-coverage` | 3038 |
 | `ci-pipeline` | 993 |
-| `governance-cedar` | 305613 |
+| `governance-cedar` | 918 |
 | `lean-api-rclone` | 37377 |
 | `migrate-build` | 20591 |
 | `migration-lean` | 1360 |
 | `operations-boundary` | 2848 |
 
-What stands out, in order of cost: `governance-cedar` (every Cedar
-test runs one by one through the Cedar CLI; batching them into one
-authorizer run, or Lean deciding the policy against its base
-layer, is the cut), `lean-api-rclone` (one `decide` over 1200
-operations; splitting the closedness proof per operation chunk,
+- `governance-cedar`: 305613 ms with `cedar run-tests` (entities inside each of 6289 tests, 70 MB); 918 ms with the in-process runner (modules/governance/_src), the same tests, 2.4 MB
+
+What stands out, in order of cost: `lean-api-rclone` (one `decide`
+over 1200 operations; splitting the closedness proof per chunk,
 or `native_decide`, is the cut), `migrate-build` (the Rust
 release build; LTO off and `codegen-units` up for CI, the cache
-serving it otherwise).
+serving it otherwise), `catalog-coverage` (Python over every
+source file; a Rust walker, or scanning only changed files).
 

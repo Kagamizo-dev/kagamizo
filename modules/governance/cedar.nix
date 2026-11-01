@@ -219,7 +219,6 @@ let
       resource = ref "Account" account;
       context = context account;
     };
-    entities = entityJson;
   };
   neverEffects = [
     "spend"
@@ -406,7 +405,21 @@ in
       '';
     in
     {
-      packages.governance-policy = policy;
+      # The tests run in-process (./_src, the pinned cedar-policy crate at
+      # the CLI's version): the entities parsed and validated once, every
+      # request authorized against them. `cedar run-tests` took the
+      # entities inside each test (70 MB of JSON, two minutes for 6289);
+      # this is a quarter of a second (modules/perf, governance-cedar).
+      packages = {
+        governance-policy = policy;
+        cedar-tests = pkgs.rustPlatform.buildRustPackage {
+          pname = "cedar-tests";
+          version = "0.1.0";
+          src = ./_src;
+          cargoLock.lockFile = ./_src/Cargo.lock;
+          meta.mainProgram = "cedar-tests";
+        };
+      };
 
       packages.governance-authorize = pkgs.writeShellApplication {
         name = "governance-authorize";
@@ -467,12 +480,21 @@ in
 
       checks.governance-cedar =
         assert lib.assertMsg (cfg.problems == [ ]) (lib.concatStringsSep "\n" cfg.problems);
-        pkgs.runCommand "governance-cedar" { nativeBuildInputs = [ pkgs.cedar ]; } ''
-          cedar validate --schema ${policy}/schema.cedarschema --policies ${policy}/policies.cedar
-          cedar check-parse --schema ${policy}/schema.cedarschema --entities ${policy}/entities.json
-          cedar run-tests --schema ${policy}/schema.cedarschema --policies ${policy}/policies.cedar \
-            --tests ${policy}/tests.json
-          touch $out
-        '';
+        assert lib.assertMsg (pkgs.cedar.version == "4.11.0")
+          "modules/governance: the cedar CLI moved to ${pkgs.cedar.version}; pin cedar-policy in _src/Cargo.toml to it";
+        pkgs.runCommand "governance-cedar"
+          {
+            nativeBuildInputs = [
+              pkgs.cedar
+              config.packages.cedar-tests
+            ];
+          }
+          ''
+            cedar validate --schema ${policy}/schema.cedarschema --policies ${policy}/policies.cedar
+            cedar check-parse --schema ${policy}/schema.cedarschema --entities ${policy}/entities.json
+            cedar-tests --schema ${policy}/schema.cedarschema --policies ${policy}/policies.cedar \
+              --entities ${policy}/entities.json --tests ${policy}/tests.json
+            touch $out
+          '';
     };
 }
