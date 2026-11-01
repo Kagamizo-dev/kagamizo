@@ -53,7 +53,15 @@ source = open(dist).read()
 block = next(
     s for s in re.findall(r"`([^`]*)`", source) if "account_api_tokens:create" in s.split(",")
 )
-scopes = sorted(set(block.split(",")))
+# cf then drops a set of them before validating a login's scopes (billing
+# among them): `Re = Ie.filter(e => !Le.has(e))`, `Le` the Set literal just
+# before it. Only what survives is a cf OAuth scope.
+end = source.index("]),Re=Ie.filter")
+start = source.rfind("new Set([", 0, end)
+excluded = set(re.findall(r"`([^`]*)`", source[start:end]))
+if not excluded:
+    sys.exit("cf.py: cf's excluded-scope set was not found; the bundle changed")
+scopes = sorted(set(block.split(",")) - excluded)
 
 json.dump(
     {"commands": commands, "oauthScopes": scopes},

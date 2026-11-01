@@ -26695,7 +26695,7 @@
      "type": "string"
     }
    },
-   "summary": "Create a new empty D1 migration file, numbered one above the highest existing migration. Entirely local \u2014 takes no database, needs no credentials and makes no n"
+   "summary": "Create a new empty D1 migration file, numbered one above the highest existing migration. Entirely local — takes no database, needs no credentials and makes no n"
   },
   "d1 migrations list": {
    "args": [
@@ -98432,8 +98432,6 @@
   "artifacts.read",
   "artifacts.write",
   "auditlogs:read",
-  "billing:read",
-  "billing:write",
   "bot-management-feedback.read",
   "bot-management-feedback.write",
   "bot-management.read",
@@ -98521,9 +98519,7 @@
   "email-security-dmarcreports.write",
   "email-sending.read",
   "email-sending.write",
-  "email_routing:read",
   "email_routing:write",
-  "email_sending:read",
   "email_sending:write",
   "fbm.admin",
   "fbm.read",
@@ -98604,12 +98600,10 @@
   "moq.read",
   "moq.write",
   "notebook-examples:read",
-  "notebook-managed:read",
   "notification:read",
   "notification:write",
   "notifications.read",
   "notifications.write",
-  "oauth_account_ssl_and_certificates_write",
   "offline",
   "openid",
   "origin.read",
