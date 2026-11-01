@@ -83,7 +83,48 @@ in
       };
       hetzner = {
         reason = "The always-on host: hcloud and OpenTofu (modules/hetzner)";
-        hosts = [ "api.hetzner.cloud" ];
+        hosts = [
+          "api.hetzner.cloud"
+          # The marketing site's price list, besides `GET /pricing`
+          "www.hetzner.com"
+        ];
+      };
+      # Pinning and fetching models (DeepSeek Flash-class, quantized): the
+      # API, the model files and the CDNs they redirect to.
+      hugging-face = {
+        reason = "Model pinning and downloads from Hugging Face (model hosting)";
+        hosts = [
+          "huggingface.co"
+          "*.huggingface.co"
+          "*.hf.co"
+        ];
+      };
+      # The migration off Apple (modules/migration, modules/apple): iCloud's
+      # sign-in (pyicloud), its reads (icloudpd, rclone iclouddrive) and the
+      # content and CloudKit hosts its downloads redirect to.
+      icloud = {
+        reason = "iCloud sign-in and reads for the migration (modules/apple)";
+        hosts = [
+          "idmsa.apple.com"
+          "appleid.apple.com"
+          "gsa.apple.com"
+          "setup.icloud.com"
+          "*.icloud.com"
+          "*.icloud-content.com"
+          "*.apple-cloudkit.com"
+        ];
+      };
+      # The migration tools' own documentation, for mapping them and the
+      # providers' export pages (modules/migration).
+      migration-docs = {
+        reason = "The migration tools' and providers' documentation (modules/migration)";
+        hosts = [
+          "rclone.org"
+          "developers.google.com"
+          "learn.microsoft.com"
+          "support.apple.com"
+          "privacy.apple.com"
+        ];
       };
       interactive-brokers = {
         reason = "The second trading backend: IB Gateway's sign-in and IBKR's Web API (modules/trading)";
