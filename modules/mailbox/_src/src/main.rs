@@ -11,7 +11,7 @@
 //!       the newest link on a declared host, in mail to A from a declared
 //!       sender domain received in the last M minutes, on stdout only;
 //!       waits up to --wait minutes for it to arrive
-//!   mailbox senders [--since DAYS]
+//!   mailbox senders [--since DAYS] [--wait MIN]
 //!       who has written to the account: per sender domain, the number of
 //!       messages, the first and last date, and whether any subject reads
 //!       as a signup, a receipt or a security notice, as JSON lines on
@@ -444,12 +444,17 @@ fn with_imap<T>(wait_min: u64, f: impl FnOnce(u16, &str, &str, &[u8]) -> Result<
 
 /// Who has written to the account, by sender domain (headers only).
 fn senders(args: &[String]) -> Result<()> {
-    let since_days: u64 = match args {
-        [] => 36500,
-        [flag, d] if flag == "--since" => d.parse().context("--since DAYS")?,
-        _ => bail!("usage: mailbox senders [--since DAYS]"),
-    };
-    let lines = with_imap(0, |port, user, pass, pem| {
+    let (mut since_days, mut wait_min) = (36500u64, 45u64);
+    let mut it = args.iter();
+    while let Some(flag) = it.next() {
+        let v = it.next().context("usage: mailbox senders [--since DAYS] [--wait MIN]")?;
+        match flag.as_str() {
+            "--since" => since_days = v.parse().context("--since DAYS")?,
+            "--wait" => wait_min = v.parse().context("--wait MIN")?,
+            _ => bail!("usage: mailbox senders [--since DAYS] [--wait MIN]"),
+        }
+    }
+    let lines = with_imap(wait_min, |port, user, pass, pem| {
         let tls = native_tls::TlsConnector::builder()
             .add_root_certificate(native_tls::Certificate::from_pem(pem)?)
             .disable_built_in_roots(true)
