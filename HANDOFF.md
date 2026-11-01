@@ -17,7 +17,7 @@ Start message for the next session:
 ```
 Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; HANDOFF.md's "The owner's standing decisions" holds what I've already decided, and its Roadmap is the order of work.
 
-The network allowlist now has HANDOFF.md's "The allowlist to apply" (Apple's trusted-device websocket hosts): add them to modules/claude/_environment.nix first.
+Before anything else, check the network: `nix build .#session-tools` must reach cache.nixos.org. If the proxy refuses it (403), the session is not in the Kagamizo environment (see HANDOFF.md's "midday session"): stop and tell me, run nothing.
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
@@ -429,13 +429,26 @@ and Lean the proof; C only where a measured record demands it.
 
 ## The allowlist to apply (one change, all of it)
 
-Everything up to 2026-11-01 morning is applied and declared. To apply
-next (the session may not widen its own allowlist; they go into
-`modules/claude/_environment.nix` once applied):
+Everything is applied and declared, Apple's trusted-device websocket hosts
+(`websocket.push.apple.com`, `websocket.sandbox.push.apple.com`, in the
+icloud group of `modules/claude/_environment.nix`) included. Nothing is
+waiting to be applied.
 
-| For | Hosts |
-|---|---|
-| iCloud's 2FA prompt: the trusted-device websocket the pinned pyicloud opens (its hsa2 bridge; `icloud login` dials it through the proxy, `modules/apple/_icloud.py`) | `websocket.push.apple.com`, `websocket.sandbox.push.apple.com` |
+## Where the 2026-11-01 midday session left it
+
+- **Nothing ran: the session was not in the Kagamizo environment.** Its
+  container (a `remote_cowork` workspace, not the cloud environment with
+  the custom network) reached github.com and nothing else: the proxy
+  answered 403 to `cache.nixos.org`, the GNU mirrors, PyPI, npm,
+  crates.io, `api.cloudflare.com`, `proton.me`, `api.hetzner.cloud`,
+  `idmsa.apple.com` and the Apple websocket hosts alike. Since the package
+  managers' defaults were refused too, this is not a missing host: the
+  declared allowlist was not the one in force. `nix build .#session-tools`
+  fails at its first fetch, so there is no pass-cli and no sign-in.
+- The repository was cloned by hand, so the session-start hook never ran
+  either (no session tools, no commit-msg hook).
+- Everything under "Where the 2026-11-01 afternoon session left it" is
+  still the next work, in the same order.
 
 ## Where the 2026-11-01 afternoon session left it
 
