@@ -36,6 +36,9 @@
 #   _json/rclone.json               every rclone backend and its typed options
 #                                     (`rclone config providers`)
 #   _json/icloudpd.json             every icloudpd option, from its --help
+#   _json/pyicloud.json             pyicloud's services, their methods and
+#                                     properties with their parameters,
+#                                     asked of the pinned library
 #   _json/cdp.json                  every DevTools Protocol command (its
 #                                     parameters, returns) and enum of the
 #                                     pinned Chromium, asked of Chromium itself
@@ -137,6 +140,9 @@
       icloudpd = pkgs.runCommand "icloudpd.json" { } ''
         ${python} ${./_extract/icloudpd.py} ${config.packages.icloudpd}/bin/icloudpd $out
       '';
+      pyicloud = pkgs.runCommand "pyicloud.json" { } ''
+        ${config.packages.migration-python}/bin/python3 -I ${./_extract/pyicloud.py} $out
+      '';
 
       bridge = pkgs.runCommand "bridge.json" { } ''
         ${python} ${./_extract/bridge.py} ${pkgs.protonmail-bridge.src} $out
@@ -154,6 +160,10 @@
         {
           name = "icloudpd.json";
           path = icloudpd;
+        }
+        {
+          name = "pyicloud.json";
+          path = pyicloud;
         }
         {
           name = "cdp.json";

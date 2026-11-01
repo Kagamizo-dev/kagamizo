@@ -276,13 +276,90 @@ def rclone_ty(o):
     fail(f"rclone option type {t!r}")
 
 
+# rclone's command-line flags carry Go types of its own; each is one the
+# model has.
+RCLONE_FLAG = {
+    "string": "string",
+    "int": "int",
+    "uint32": "int",
+    "count": "int",
+    "float": "number",
+    "h": "string",  # `--hash h`: a hash's name
+    "Duration": "duration",
+    "stringArray": "stringArray",
+    "CommaSepList": "stringArray",
+    "SpaceSepList": "stringArray",
+    "SizeSuffix": "string",
+    "Encoding": "string",
+    "Bits": "string",
+    "Time": "string",
+    "BwTimetable": "string",
+    "LogLevel": "string",
+    "DumpFlags": "string",
+    "Tristate": "string",
+}
+
+
+def rclone_flag(o):
+    if o.get("type") is None:
+        return {"value": False}
+    t = o["type"]
+    if t not in RCLONE_FLAG:
+        # rclone's own flag types (ConflictLoserAction, CutoffMode, ...) are
+        # Go types parsed from one word; a lowercase name is a Go builtin
+        # the table above lacks, so it stops here.
+        if not t[:1].isupper():
+            fail(f"rclone flag type {t!r}")
+        t = "Encoding"
+    out = {"value": True, "type": RCLONE_FLAG[t]}
+    if o.get("oneOf"):
+        out["oneOf"] = o["oneOf"]
+    return out
+
+
+def pyicloud(c):
+    """Each service's methods as operations (`service.method`), each
+    parameter a string input unless annotated otherwise; the client's own
+    constructor and methods under `client`."""
+    PY = {"str": "string", "bool": "bool", "int": "int", "float": "number"}
+
+    def ty(p):
+        t = (p.get("type") or "").replace(" | None", "")
+        return PY.get(t, "json")
+
+    ops = [{"name": "client.__init__", "inputs": [inp(p["name"], ty(p), p["required"]) for p in c["service"]["init"]]}]
+    ops += [
+        {"name": f"client.{m}", "inputs": [inp(p["name"], ty(p), p["required"]) for p in d["params"]]}
+        for m, d in c["service"]["methods"].items()
+    ]
+    for prop, cls in c["services"].items():
+        for m, d in c["classes"][cls]["methods"].items():
+            ops.append({"name": f"{prop}.{m}", "inputs": [inp(p["name"], ty(p), p["required"]) for p in d["params"]]})
+        for prop2 in c["classes"][cls]["properties"]:
+            ops.append({"name": f"{prop}.{prop2}", "inputs": []})
+    return ops
+
+
 types, enums = [], []
 if "backends" in catalog:
-    # Each backend's configuration, as `rclone config create NAME BACKEND key=value`.
+    # Each backend's configuration, as `rclone config create NAME BACKEND key=value`,
+    # and each command with its own flags and the global ones.
     ops = [
         {"name": f"backend.{b}", "inputs": [inp(k, rclone_ty(o), o["required"]) for k, o in d["options"].items()]}
         for b, d in catalog["backends"].items()
     ]
+    if "commands" in catalog:
+        commands = {
+            words: {"args": c.get("args") or [], "options": {o: rclone_flag(s) for o, s in (c.get("options") or {}).items()}}
+            for words, c in catalog["commands"].items()
+        }
+        # Its 1100 global flags go on one operation, `flags`, not on each of
+        # the 101 commands (Lean's closedness proof would not finish); every
+        # command takes them, as ../../catalog/_extract/coverage.py checks.
+        ops += cli_ops(commands, {})
+        ops += cli_ops({"flags": {"args": [], "options": {o: rclone_flag(s) for o, s in (catalog.get("global") or {}).items()}}}, {})
+elif "services" in catalog:
+    ops = pyicloud(catalog)
 elif "appTemplates" in catalog:
     ops, types = [], pass_items(catalog)
 elif "endpoints" in catalog:

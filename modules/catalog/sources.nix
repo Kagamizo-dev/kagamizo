@@ -113,6 +113,10 @@ in
           from = "icloud-photos-downloader/icloud_photos_downloader";
           version = tagOf "icloudpd-src";
         };
+        pyicloud = {
+          from = "timlaing/pyicloud";
+          version = tagOf "pyicloud-src";
+        };
         cdp = {
           from = "the pinned Chromium's /json/protocol";
           version = "Chromium ${pkgs.chromium.version}, protocol ${(stamp "cdp").protocol}";

@@ -24,6 +24,8 @@ TOOLS = {
     "mercury": ("mercury.json", "mercury"),
     "public": ("public.json", "public"),
     "cf": ("cf.json", "cf"),
+    "rclone": ("rclone.json", "rclone"),
+    "icloudpd": ("icloudpd.json", "icloudpd"),
 }
 SOURCES = (".nix", ".sh", ".rs", ".py")
 WORD = re.compile(r"[a-z][a-z0-9-]*")
@@ -91,9 +93,13 @@ def shell_calls(path, text, tools):
 
 def rust_calls(path, text, tools):
     """A Rust file that runs a tool: each `Command::new("tool")` call's
-    string literals up to where it runs, its command word pairs and
-    options. A call whose arguments come from a helper (`.args(args)`) has
-    none of its own; then the file's literals are what it is given."""
+    string literals up to where it runs, its command words (literal pairs
+    for two-word commands, single literals for one-word ones; a tool that
+    is its own one command, icloudpd, is named by the tool) and options. A
+    file headed `//! catalog: <tool>` gives that tool every literal in it,
+    for a crate whose helper builds the Command away from where it runs
+    (modules/migration/_src/src/rclone.rs)."""
+    whole = set(re.findall(r"^//! catalog: ([a-z-]+)$", text, re.M))
     for tool, cat in tools.items():
         marker = f'Command::new("{tool}")'
         spans = []
@@ -102,13 +108,15 @@ def rust_calls(path, text, tools):
             spans.append(text[m.end(): m.end() + end.start()] if end else text[m.end():])
         if not spans:
             continue
-        if all(not re.search(r'"[a-z-]', span) for span in spans):
+        if tool in whole or all(not re.search(r'"[a-z-]', span) for span in spans):
             spans = [text]
         for span in spans:
             literals = re.findall(r'"([a-z][a-z0-9-]*)",\s*"([a-z][a-z0-9-]*)"', span)
-            commands = sorted(
-                {f"{a} {b}" for a, b in literals if f"{a} {b}" in cat["commands"]}
-            )
+            commands = {f"{a} {b}" for a, b in literals if f"{a} {b}" in cat["commands"]}
+            commands |= {w for w in re.findall(r'"([a-z][a-z0-9-]*)"', span) if w in cat["commands"]}
+            if tool in cat["commands"]:
+                commands.add(tool)
+            commands = sorted(commands)
             options = sorted(set(re.findall(r'"--([a-z][a-z0-9-]*)"', span)))
             if not commands:
                 yield tool, None, options, path, "(no command found)"

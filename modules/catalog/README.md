@@ -20,6 +20,7 @@ Lean). Generated from `sources.nix`: `nix run .#catalog-readme`.
 | pass-cli | pass-cli release binary | 2.4.2 |
 | pass-items | pass-cli's templates, read with a session; app templates as observed | 2.4.2 (app templates: api-credential, Mirazo-Root/Public, an API credential made in the Proton Pass app (2026-10-31)) |
 | public | PublicDotCom/publicdotcom-cli | v1.3.7 (bac3f08ca76a) |
+| pyicloud | timlaing/pyicloud | 2026.10.1 (2d3d137e17cd) |
 | rclone | rclone (nixpkgs) | 1.75.2 |
 | rea | morluto/rea | rea-agents-6.7.0 (27dc42d10249) |
 
