@@ -71,7 +71,36 @@ api.authenticate()
 if mode == "login":
     fifo = sys.argv[4]
     if api.requires_2fa:
-        print("icloud: Apple sent a code to the owner's trusted devices; waiting for it", file=sys.stderr, flush=True)
+        # Apple sends nothing until asked: the pinned pyicloud starts the
+        # trusted-device prompt here, or falls back to an SMS to the trusted
+        # number when the prompt cannot start (2026-11-01: without this call
+        # no code ever arrived).
+        try:
+            requested = api.request_2fa_code()
+        except PyiCloudTrustedDevicePromptException:
+            # The device prompt's bridge subscribed but Apple's push never
+            # came back (2026-11-01, through the session's proxy). pyicloud
+            # falls back to SMS only when the challenge's mode is "sms"; its
+            # own SMS request needs only a trusted number, so ask for that
+            # (the pinned 2026.10.1's _request_sms_2fa_code, base.py:1040).
+            if api._trusted_phone_number() is not None:
+                requested = api._request_sms_2fa_code(notice="the device prompt did not start")
+            else:
+                # No trusted number: a code Apple shows on a trusted device
+                # still validates through the legacy device endpoint.
+                print("icloud: the device prompt did not start and no trusted number is on file", file=sys.stderr, flush=True)
+                requested = True
+        if not requested:
+            sys.exit(f"icloud: Apple offers no code delivery here ({api.two_factor_delivery_method})")
+        where = {"trusted_device": "the owner's trusted devices", "sms": "the trusted phone number by SMS"}
+        notice = api.two_factor_delivery_notice
+        print(
+            f"icloud: Apple sent a code to {where.get(api.two_factor_delivery_method, api.two_factor_delivery_method)}"
+            + (f" ({notice})" if notice else "")
+            + "; waiting for it",
+            file=sys.stderr,
+            flush=True,
+        )
         with open(fifo) as f:
             code = f.readline().strip()
         if not api.validate_2fa_code(code):
