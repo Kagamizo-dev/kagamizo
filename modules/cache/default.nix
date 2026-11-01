@@ -57,7 +57,8 @@ in
     };
     publicKey = mkOption {
       type = types.nullOr (types.strMatching "${lib.escapeRegex keyName}:[A-Za-z0-9+/=]+");
-      default = null;
+      # Generated 2026-11-01 (cache-key); its secret half is in the cache vault.
+      default = "cache.kagamizo.com-1:CI8baL7Y24eA45LdMEPk6s/v0IXA3uL59vkIpAfjO7c=";
       description = "The signing key's public half (cache-key prints it); null until generated.";
     };
     layer = mkOption {

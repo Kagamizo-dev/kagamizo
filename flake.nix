@@ -76,8 +76,13 @@
 
   # Prebuilt kernel/firmware; avoids compiling the Pi kernel yourself.
   nixConfig = {
-    extra-substituters = [ "https://nixos-raspberrypi.cachix.org" ];
+    extra-substituters = [
+      # The build cache CI fills (modules/cache).
+      "https://cache.kagamizo.com"
+      "https://nixos-raspberrypi.cachix.org"
+    ];
     extra-trusted-public-keys = [
+      "cache.kagamizo.com-1:CI8baL7Y24eA45LdMEPk6s/v0IXA3uL59vkIpAfjO7c="
       "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
     ];
   };
