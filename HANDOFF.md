@@ -17,11 +17,11 @@ Start message for the next session:
 ```
 Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; HANDOFF.md's "The owner's standing decisions" holds what I've already decided, and its Roadmap is the order of work.
 
-The network allowlist now has every host in HANDOFF.md's "The allowlist to apply" (Hugging Face, www.hetzner.com): add them to modules/claude/_environment.nix first.
+The network allowlist now has every host in HANDOFF.md's "The allowlist to apply" (Hugging Face, www.hetzner.com, iCloud's sign-in and data hosts, the tools' docs): add them to modules/claude/_environment.nix first.
 
 Start by signing the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login` and send me the approval link. Run no other pass-cli command until it returns.
 
-Then, from HANDOFF.md's "Where the 2026-11-01 session left it": apply status.mirazo.org (approved; `nix run .#infra -- ci apply`), run `brokerage summary` read-only once public-mirazo's login matches and read Public's history into the tax report, then §6 (the module contract and the Minecraft twin, accounts & identity first) and the rest of §4 (the remaining workflows into modules/ci, its Rust runner).
+Then the migration, from HANDOFF.md's "Where the migration stands": sign iCloud in (`nix run .#icloud -- login`; send me Apple's code request when it starts) and read its inventory, apply the Hetzner host and its staging volume and status.mirazo.org (both approved), run `mailbox senders` on the host, and write the Phase 3 runners.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, all in the one modules tree. End the session with the full allowlist (if it changed) and the updated start message, each ready to paste.
 ```
@@ -325,6 +325,47 @@ root vault.
   permission check refused `infra ci apply -auto-approve`; the owner
   approved the deploy, so the next step is that apply.
 
+## Where the migration stands (2026-11-01, end of session)
+
+The owner approved the migration plan (Apple, Google, both Outlooks and
+Chase's checking into Proton and Mercury; GrapheneOS phones after).
+
+- **Phase 0 done:**
+  - `modules/migration`: sources, data classes, dependants; Lean proves
+    nothing closes before it is emptied.
+  - Every provider is declared from the owner's Pass items, and the
+    `retiring` status is in place.
+  - The new human steps are in the typed set: request-export,
+    close-account and handle-device.
+  - The tools are pinned: icloudpd 1.32.3, pyicloud 2026.10.1 (2307 tests
+    pass), rclone, vdirsyncer and imapsync. icloudpd and rclone are
+    catalogued into Lean.
+  - Credit lines are typed.
+  - `mailbox senders` and `icloud login|inventory` exist (governed).
+- **Phase 1 (host and volume):** declared, priced and validated; not
+  applied. The session's permission check refuses `apply -auto-approve`, the
+  same as for status.mirazo.org. The owner allows both (a permission rule),
+  or runs them:
+  - `nix run .#hetzner-infra -- apply`
+  - `nix run .#infra -- ci apply -input=false -auto-approve`
+- **Phase 2 (inventory):**
+  - `mailbox senders` needs Bridge's first full sync of the Proton
+    mailbox. That is more than 100 minutes and over 1 GB here, so it runs
+    on the host.
+  - `icloud login` got no answer: `idmsa.apple.com` is not on the allowlist
+    (above). Next session: `nix run .#icloud -- login`, relay the owner's
+    code into /tmp/icloud-2fa-code, then
+    `nix run .#icloud -- inventory <scratch>/icloud.json`.
+  - The audit shows Chase has no login item in Pass. Public's login is
+    admin@jingzo.org; the owner moves it to finance@mirazo.org.
+- **Next:**
+  1. The iCloud inventory (sizes, Hide My Email relays).
+  2. Apply the host and volume, then run `mailbox senders` there.
+  3. Write the Phase 3 runners on the host: icloudpd, rclone and pyicloud
+     exports, verified by hash. icloudpd needs a session of its own, from
+     its own sign-in here.
+  4. Read the credit report for the card fates.
+
 ## The allowlist to apply (one change, all of it)
 
 The 2026-10-22 hosts are applied and declared. To apply next, for pinning
@@ -335,6 +376,8 @@ allowlist; they go into `modules/claude/_environment.nix` once applied):
 |---|---|
 | Hugging Face: its API, model files and their CDNs | `huggingface.co`, `*.huggingface.co`, `*.hf.co` |
 | Hetzner's marketing site (its price list, besides `GET /pricing`) | `www.hetzner.com` |
+| iCloud sign-in and reads (pyicloud, icloudpd, rclone iclouddrive) | `idmsa.apple.com`, `appleid.apple.com`, `gsa.apple.com`, `setup.icloud.com`, `*.icloud.com`, `*.icloud-content.com`, `*.apple-cloudkit.com` |
+| The migration tools' own documentation | `rclone.org`, `developers.google.com`, `learn.microsoft.com`, `support.apple.com`, `privacy.apple.com` |
 
 ## Roadmap
 
