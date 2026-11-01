@@ -26695,7 +26695,7 @@
      "type": "string"
     }
    },
-   "summary": "Create a new empty D1 migration file, numbered one above the highest existing migration. Entirely local — takes no database, needs no credentials and makes no n"
+   "summary": "Create a new empty D1 migration file, numbered one above the highest existing migration. Entirely local \u2014 takes no database, needs no credentials and makes no n"
   },
   "d1 migrations list": {
    "args": [

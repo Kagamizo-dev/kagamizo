@@ -113,6 +113,11 @@ def rust_calls(path, text, tools):
         for span in spans:
             literals = re.findall(r'"([a-z][a-z0-9-]*)",\s*"([a-z][a-z0-9-]*)"', span)
             commands = {f"{a} {b}" for a, b in literals if f"{a} {b}" in cat["commands"]}
+            # Three-word commands (pass-cli's `item create note`).
+            triples = re.findall(
+                r'"([a-z][a-z0-9-]*)",\s*"([a-z][a-z0-9-]*)",\s*"([a-z][a-z0-9-]*)"', span
+            )
+            commands |= {f"{a} {b} {c}" for a, b, c in triples if f"{a} {b} {c}" in cat["commands"]}
             commands |= {w for w in re.findall(r'"([a-z][a-z0-9-]*)"', span) if w in cat["commands"]}
             if tool in cat["commands"]:
                 commands.add(tool)

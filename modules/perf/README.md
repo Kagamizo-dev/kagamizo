@@ -18,6 +18,8 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | migration | `migrate-build` | build | none yet | none yet | 10% | cargo build --release of the runner; crates vendored by Nix; moves with the dependency set and codegen settings (LTO, codegen-units) |
 | migration | `migration-lean` | build | none yet | none yet | 10% | Lean deciding closedRightly over the declared sources |
 | operations | `operations-boundary` | build | none yet | none yet | 10% | Lean deciding every declared secret well-formed |
+| statestore | `statestore-build` | build | none yet | none yet | 10% | cargo build --release of the Proton Pass state backend (std-only HTTP, serde, sha2); moves with the dependency set |
+| statestore | `statestore-lean` | build | none yet | none yet | 10% | Lean checking the write protocol's safety and liveness and chunking's proofs (induction, no decide); moves with the proofs' tactic search |
 
 ## Baseline
 

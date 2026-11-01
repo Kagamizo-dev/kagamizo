@@ -23,6 +23,10 @@ let
   };
 in
 {
+  # The layer's state, in the state vault every reader shares (proton.agents
+  # gives ci editor, agents viewer).
+  statestore.backends.cloudflare.vault = top.proton.infraVaults.state;
+
   perSystem =
     {
       pkgs,
@@ -40,6 +44,8 @@ in
           source = "cloudflare/cloudflare";
           version = "~> 5.19";
         };
+        # Served by statestore-run (../statestore) from Proton Pass.
+        backend.http = { };
       };
 
       # Each layer is checked against the pinned provider (catalog/) before it
@@ -78,8 +84,9 @@ in
           tofu
           pkgs.jq
           pkgs.diffutils
-          config.packages.secretspec
           config.packages.pass-cli
+          config.packages.statestore-run
+          pkgs.bash
         ];
         text = ''
           : "''${CLOUDFLARE_API_TOKEN:?}" "''${TOFU_STATE_PASSPHRASE:?}"
@@ -109,29 +116,17 @@ in
           work=$(mktemp -d)
           trap 'rm -rf "$work"' EXIT
           cp ${configs.cloudflare} "$work/main.tf.json"
-          if [ -n "''${TOFU_STATE:-}" ]; then
-            printf %s "$TOFU_STATE" >"$work/terraform.tfstate"
-            cp "$work/terraform.tfstate" "$work/before"
-          fi
-          unset TOFU_STATE
-          # stderr keeps stdout clean for `output -raw`.
-          tofu -chdir="$work" init -input=false >&2
+          # The state lives in Proton Pass (statestore.backends.cloudflare),
+          # served for this run; only `ci` may lock and write it.
+          mode=()
+          [ "$INFRA_PROFILE" = ci ] || mode=(--read-only)
           status=0
-          tofu -chdir="$work" "$@" || status=$?
-
-          # Write a changed state back, even after a partial failure, so
-          # what was created is never forgotten. Only `ci` holds the state
-          # vault as editor; anything else changing it is a bug.
-          if [ -f "$work/terraform.tfstate" ] && ! cmp -s "$work/terraform.tfstate" "$work/before" 2>/dev/null; then
-            if [ "$INFRA_PROFILE" != ci ]; then
-              echo "infra: the $INFRA_PROFILE view changed the state; not saving it" >&2
-              exit 1
-            fi
-            secretspec set TOFU_STATE --file "$INFRA_SPEC" --profile ci \
-              --reason "infra: save the state after ci $*" \
-              --from-file "$work/terraform.tfstate" >/dev/null
-            echo "infra: state saved to Proton Pass" >&2
-          fi
+          # The script's $0 and $@ are its own arguments, expanded inside.
+          # shellcheck disable=SC2016
+          statestore-run cloudflare "''${mode[@]}" -- bash -c '
+            # stderr keeps stdout clean for `output -raw`.
+            tofu -chdir="$0" init -input=false >&2 && tofu -chdir="$0" "$@"
+          ' "$work" "$@" || status=$?
           exit "$status"
         '';
       };

@@ -59,6 +59,8 @@ let
 
   tofu = {
     terraform.required_providers.hcloud.source = "hetznercloud/hcloud";
+    # Served by statestore-run (../statestore) from Proton Pass.
+    terraform.backend.http = { };
     resource = {
       hcloud_primary_ip.host = {
         name = "${cfg.host.name}-ipv4";
@@ -170,17 +172,10 @@ in
   };
 
   config = {
+    # The host's state, beside its token in the owner's sessions vault.
+    statestore.backends.hetzner.vault = config.proton.sessionVaults.${top.accounts.held.hetzner.owner};
+
     secrets.profiles.hetzner = {
-      TOFU_STATE =
-        (import ../_lib/secret.nix) {
-          kind = "state";
-          issuer = "automation:hetzner-infra";
-          description = "The Hetzner host's OpenTofu state (encrypted)";
-          item = "hetzner-tofu-state";
-        }
-        // {
-          required = false;
-        };
       TOFU_STATE_PASSPHRASE =
         (import ../_lib/secret.nix) {
           kind = "encryption-key";
@@ -226,7 +221,8 @@ in
           name = "hetzner-infra-run";
           runtimeInputs = [
             config.packages.tofu-hetzner
-            config.packages.secretspec
+            config.packages.statestore-run
+            pkgs.bash
             pkgs.curl
             pkgs.jq
             pkgs.coreutils
@@ -271,22 +267,16 @@ in
             work=$(mktemp -d)
             trap 'rm -rf "$work"' EXIT
             cp ${main} "$work/main.tf.json"
-            if [ -n "''${TOFU_STATE:-}" ]; then
-              printf %s "$TOFU_STATE" >"$work/terraform.tfstate"
-              cp "$work/terraform.tfstate" "$work/before"
-            fi
-            unset TOFU_STATE
-            tofu -chdir="$work" init -input=false >&2
+            # The state lives in Proton Pass (statestore.backends.hetzner),
+            # served and locked for this run.
+            mode=-input=false
+            [ "$1" = apply ] && mode=-auto-approve
             status=0
-            case "$1" in
-              plan) tofu -chdir="$work" plan -input=false || status=$? ;;
-              apply) tofu -chdir="$work" apply -input=false -auto-approve || status=$? ;;
-            esac
-            if [ -f "$work/terraform.tfstate" ] && ! cmp -s "$work/terraform.tfstate" "$work/before" 2>/dev/null; then
-              secretspec set TOFU_STATE --file ${spec} --profile hetzner \
-                --reason "hetzner-infra: save the state after $1" --from-file "$work/terraform.tfstate" >/dev/null
-              echo "hetzner-infra: state saved to Proton Pass" >&2
-            fi
+            # The script's $0, $1 and $2 are its own arguments.
+            # shellcheck disable=SC2016
+            statestore-run hetzner -- bash -c '
+              tofu -chdir="$0" init -input=false >&2 && tofu -chdir="$0" "$1" -input=false "$2"
+            ' "$work" "$1" "$mode" || status=$?
             exit "$status"
           '';
         };

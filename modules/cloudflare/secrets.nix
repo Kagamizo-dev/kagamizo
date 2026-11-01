@@ -1,6 +1,7 @@
 # What the OpenTofu layers run with: a Cloudflare token per view, minted by
 # `bootstrap`, and the state. The state and its passphrase live in the state
-# vault every reader shares: CI holds it as editor, plans and agents as
+# vault every reader shares (the state itself is statestore's,
+# ../statestore): CI holds it as editor, plans and agents as
 # viewer (proton.agents). The same variable names everywhere, so what a
 # process can do depends only on which vault resolved it.
 _:
@@ -16,18 +17,6 @@ let
       }
       // {
         providers = [ "state" ];
-      };
-    TOFU_STATE =
-      secret {
-        kind = "state";
-        issuer = "automation:infra";
-        description = "The encrypted OpenTofu state, written by `infra ci apply`";
-        item = "tofu-state";
-      }
-      // {
-        providers = [ "state" ];
-        # Absent until the first apply.
-        required = false;
       };
   };
 in

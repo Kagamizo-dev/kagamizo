@@ -11,6 +11,18 @@
 # runtimes (statistically bounded, outliers reported).
 {
   perf.targets = {
+    statestore-build = {
+      module = "statestore";
+      kind = "build";
+      attr = "packages.x86_64-linux.statestore";
+      method = "cargo build --release of the Proton Pass state backend (std-only HTTP, serde, sha2); moves with the dependency set";
+    };
+    statestore-lean = {
+      module = "statestore";
+      kind = "build";
+      attr = "checks.x86_64-linux.statestore-lean";
+      method = "Lean checking the write protocol's safety and liveness and chunking's proofs (induction, no decide); moves with the proofs' tactic search";
+    };
     migrate-build = {
       module = "migration";
       kind = "build";
