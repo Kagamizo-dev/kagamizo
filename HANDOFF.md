@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "Where the 2026-11-01 evening session ended": add cache.kagamizo.com and developers.cloudflare.com to modules/claude/_environment.nix; rerun github-bootstrap for PROTON_PASS_CACHE_TOKEN (send me its Proton link the moment it posts), then let the cache workflow fill the bucket; jingzo-host's first boot (it never ran: diagnose and fix); then `icloud login` (Apple's code) and its inventory, the Phase 3 sign-ins and the notes and reminders exports, and `mailbox senders`; then the module contract with typed sources and environments per module.
+Then, in order, from HANDOFF.md's "Where the 2026-11-01 evening session ended": add cache.kagamizo.com and developers.cloudflare.com to modules/claude/_environment.nix and check that this session pulls from the cache; measure the workflows against modules/perf; jingzo-host's first boot (it never ran: diagnose and fix); then `icloud login` (Apple's code) and its inventory, the Phase 3 sign-ins and the notes and reminders exports, and `mailbox senders`; then the module contract with typed sources and environments per module.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). End the session with the full allowlist (if it changed) and the updated start message, each ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -473,10 +473,18 @@ Supersedes the evening notes below where they disagree.
   is never served without Access. The Worker made by the first apply still
   exists at Cloudflare, unserved (no workers.dev subdomain, no route).
   Turning on Zero Trust is the owner's dashboard step, like R2.
-- **PROTON_PASS_CACHE_TOKEN not set yet**: the `github-bootstrap` run's
-  Proton link expired unapproved (18:30). Rerun by changing
-  `.github/github-bootstrap.request`; its links appear as comments on
-  issue #1 (public, readable through api.github.com) and in the log.
+- **The cache is filled.** PROTON_PASS_CACHE_TOKEN is set (github-bootstrap,
+  19:16). The `cache` workflow then failed twice and was fixed: the pinned
+  protonpass/install-cli-action shipped no dist/index.js (workflows now
+  install the flake's own pass-cli, version-checked), and one failed
+  download from cache.nixos.org sank a whole build (cache-push now runs
+  `--keep-going --fallback` and pushes whatever built). Run 41343110404
+  pushed in 40 min; the bucket holds over 1000 narinfos. Sessions pull
+  once cache.kagamizo.com is on the allowlist (above); then measure the
+  bootstrap and every workflow against modules/perf before deciding on
+  a self-hosted build box (the owner asked; it would be a priced Hetzner
+  server as Nix remote builder and runner, locked to trusted branches,
+  since the repository is public).
 - **jingzo-host never ran its first boot** (unchanged; see below).
 - **The owner's architecture direction (2026-11-01)**: every module typed
   end to end: Proton Pass typed inside the infra layer (statestore is the
