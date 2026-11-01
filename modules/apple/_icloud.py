@@ -13,14 +13,60 @@ that must move before the account closes) and prints only the counts.
 """
 
 import json
+import os
+import socket
+import ssl
 import sys
+from urllib.parse import urlparse
 
 from pyicloud import PyiCloudService
+from pyicloud.exceptions import PyiCloudTrustedDevicePromptException
+from pyicloud.hsa2_bridge import TrustedDeviceBridgeBootstrapper, _RawWebSocketClient
+
+
+class ProxiedWebSocket(_RawWebSocketClient):
+    """The trusted-device bridge's websocket (Apple's push host, for the
+    2FA prompt) through the host's HTTPS proxy: the pinned client dials the
+    host directly, which a cloud session cannot (its proxy resolves and
+    admits every host; websocket.push.apple.com must be on the allowlist).
+    Only the dial changes: a CONNECT tunnel, then the same TLS and upgrade.
+    """
+
+    def _open(self) -> ssl.SSLSocket:
+        proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+        if not proxy:
+            return super()._open()
+        parsed = urlparse(self._url)
+        if parsed.scheme != "wss" or not parsed.hostname:
+            raise PyiCloudTrustedDevicePromptException(f"Unsupported websocket URL: {self._url}")
+        port = parsed.port or 443
+        p = urlparse(proxy)
+        tunnel = socket.create_connection((p.hostname, p.port or 3128), self._timeout)
+        tunnel.sendall(f"CONNECT {parsed.hostname}:{port} HTTP/1.1\r\nHost: {parsed.hostname}:{port}\r\n\r\n".encode("ascii"))
+        reply = b""
+        while b"\r\n\r\n" not in reply:
+            chunk = tunnel.recv(4096)
+            if not chunk:
+                raise PyiCloudTrustedDevicePromptException("The proxy closed the websocket tunnel.")
+            reply += chunk
+        status = reply.split(b"\r\n", 1)[0].decode("iso-8859-1")
+        if " 200" not in status:
+            raise PyiCloudTrustedDevicePromptException(f"The proxy refused the websocket host: {status}")
+        # From here the pinned client's own handshake, on the tunnel.
+        real_create = socket.create_connection
+        socket.create_connection = lambda *_a, **_k: tunnel
+        try:
+            return super()._open()
+        finally:
+            socket.create_connection = real_create
+
 
 mode, apple_id, cookies = sys.argv[1:4]
 password = sys.stdin.readline().rstrip("\n")
-api = PyiCloudService(apple_id, password, cookie_directory=cookies)
+api = PyiCloudService(apple_id, password, cookie_directory=cookies, authenticate=False)
 del password
+api._trusted_device_bridge = TrustedDeviceBridgeBootstrapper(websocket_factory=ProxiedWebSocket)
+api.authenticate()
 
 if mode == "login":
     fifo = sys.argv[4]

@@ -17,13 +17,13 @@ Start message for the next session:
 ```
 Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; HANDOFF.md's "The owner's standing decisions" holds what I've already decided, and its Roadmap is the order of work.
 
-The network allowlist now has every host in HANDOFF.md's "The allowlist to apply" (Hugging Face, www.hetzner.com, iCloud's sign-in and data hosts, the tools' docs): add them to modules/claude/_environment.nix first.
+The network allowlist now has HANDOFF.md's "The allowlist to apply" (Apple's trusted-device websocket hosts): add them to modules/claude/_environment.nix first.
 
-Start by signing the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login` and send me the approval link. Run no other pass-cli command until it returns.
+Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then the migration, from HANDOFF.md's "Where the migration stands": sign iCloud in (`nix run .#icloud -- login`; send me Apple's code request when it starts) and read its inventory, apply the Hetzner host and its staging volume and status.mirazo.org (both approved), run `mailbox senders` on the host, and write the Phase 3 runners.
+Then, in order, from HANDOFF.md's "Where the 2026-11-01 afternoon session left it": the Cloudflare apply from the saved plan (the cache bucket and status.mirazo.org), the cache-push token (root sign-in, or derive-r2 if the device grant still stays pending), the PROTON_PASS_CACHE_TOKEN repository secret, then `icloud login` (Apple's code) and its inventory, the Phase 3 sign-ins and the notes and reminders exports, and `mailbox senders`. Check jingzo-host's first boot (Hetzner's API: status, and whether it rebooted into NixOS).
 
-The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, all in the one modules tree. End the session with the full allowlist (if it changed) and the updated start message, each ready to paste.
+The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). End the session with the full allowlist (if it changed) and the updated start message, each ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
 ## A new cloud environment
@@ -429,16 +429,42 @@ and Lean the proof; C only where a measured record demands it.
 
 ## The allowlist to apply (one change, all of it)
 
-The 2026-10-22 hosts are applied and declared. To apply next, for pinning
-and fetching models from Hugging Face (the session may not widen its own
-allowlist; they go into `modules/claude/_environment.nix` once applied):
+Everything up to 2026-11-01 morning is applied and declared. To apply
+next (the session may not widen its own allowlist; they go into
+`modules/claude/_environment.nix` once applied):
 
 | For | Hosts |
 |---|---|
-| Hugging Face: its API, model files and their CDNs | `huggingface.co`, `*.huggingface.co`, `*.hf.co` |
-| Hetzner's marketing site (its price list, besides `GET /pricing`) | `www.hetzner.com` |
-| iCloud sign-in and reads (pyicloud, icloudpd, rclone iclouddrive) | `idmsa.apple.com`, `appleid.apple.com`, `gsa.apple.com`, `setup.icloud.com`, `*.icloud.com`, `*.icloud-content.com`, `*.apple-cloudkit.com` |
-| The migration tools' own documentation | `rclone.org`, `developers.google.com`, `learn.microsoft.com`, `support.apple.com`, `privacy.apple.com` |
+| iCloud's 2FA prompt: the trusted-device websocket the pinned pyicloud opens (its hsa2 bridge; `icloud login` dials it through the proxy, `modules/apple/_icloud.py`) | `websocket.push.apple.com`, `websocket.sandbox.push.apple.com` |
+
+## Where the 2026-11-01 afternoon session left it
+
+- **Proton Pass signs in** once the link reaches the owner: the app drops
+  a bare URL from a message, so links go as a file card (SendUserFile,
+  an HTML with the link) plus a markdown link; a link lives nine minutes
+  (the CLI's own poll window), a Cloudflare device code five.
+- **The Hetzner host is live**: jingzo-host, cx23 in fsn1, 2.31.96.54,
+  with the 250 GB staging volume; its first boot installs commit 926da28.
+  cpx11 is withdrawn from the EU (the plan now refuses withdrawn types,
+  read live); `hetzner-prices` keeps the price ledger
+  (`modules/hetzner/_json/prices.json`), the owner's ask. Budget $27.
+- **The cache**: the vault and agent exist (`proton apply`), the signing
+  key is in the vault and its public half declared (flake.nix nixConfig,
+  `cache.publicKey`). Not done: the bucket and status.mirazo.org apply
+  (this session's permission check refused the apply as a DNS change; the
+  plan, saved to a file, is 6 to add), the `cache-push` token (the
+  Cloudflare root sign-in's device grant stayed "authorization pending"
+  through five codes the owner approved; `bootstrap derive-r2`, deriving
+  the R2 keys from ci-apply instead, was refused as credential
+  exploration), the repository secret PROTON_PASS_CACHE_TOKEN (github
+  bootstrap). The owner allows those with a permission rule, or runs them.
+- **iCloud**: `icloud login` reaches Apple and gets the 2FA challenge, then
+  the pinned pyicloud opens a websocket to websocket.push.apple.com
+  directly for the trusted-device prompt; the host is not allowed (above)
+  and the dial bypasses the proxy; `_icloud.py` now dials it through the
+  proxy once the host is allowed.
+- **Performance**: `modules/perf` (records per module, Lean-decided,
+  measured by CI's cache workflow); the Cedar check 305 s to 1 s.
 
 ## Roadmap
 
