@@ -241,7 +241,8 @@ in
             pergb=$(jq -r '.pricing.volume.price_per_gb_month.gross' <<<"$prices")
             gb=${toString (lib.foldl' (n: v: n + v.sizeGb) 0 (lib.attrValues cfg.volumes))}
             today=$(date -u +%F)
-            for until in ${lib.concatStringsSep " " (lib.mapAttrsToList (_: v: v.until) cfg.volumes)}; do
+            untils=(${lib.concatStringsSep " " (lib.mapAttrsToList (_: v: v.until) cfg.volumes)})
+            for until in "''${untils[@]}"; do
               [[ "$today" < "$until" || "$today" == "$until" ]] ||
                 { echo "hetzner-infra: a volume was to be removed by $until; remove it from hetzner.volumes" >&2; exit 1; }
             done
