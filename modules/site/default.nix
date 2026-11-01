@@ -211,22 +211,24 @@ in
         readOnly = true;
         description = "The status page, for the deployments that serve it (../cloudflare/_status.nix).";
       };
-      config.site.statusHtml = htmlText;
-      config.packages.site-status = site;
-      config.checks.site-status =
-        pkgs.runCommand "site-status-screenshot"
-          {
-            nativeBuildInputs = [ pkgs.chromium ];
-          }
-          ''
-            export HOME=$TMPDIR FONTCONFIG_FILE=${
-              pkgs.makeFontsConf { fontDirectories = [ pkgs.dejavu_fonts ]; }
+      config = {
+        site.statusHtml = htmlText;
+        packages.site-status = site;
+        checks.site-status =
+          pkgs.runCommand "site-status-screenshot"
+            {
+              nativeBuildInputs = [ pkgs.chromium ];
             }
-            mkdir $out
-            chromium --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
-              --window-size=1200,2600 --screenshot=$out/status.png file://${site}/index.html 2>/dev/null
-            test -s $out/status.png
-            cp ${site}/index.html $out/
-          '';
+            ''
+              export HOME=$TMPDIR FONTCONFIG_FILE=${
+                pkgs.makeFontsConf { fontDirectories = [ pkgs.dejavu_fonts ]; }
+              }
+              mkdir $out
+              chromium --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
+                --window-size=1200,2600 --screenshot=$out/status.png file://${site}/index.html 2>/dev/null
+              test -s $out/status.png
+              cp ${site}/index.html $out/
+            '';
+      };
     };
 }
