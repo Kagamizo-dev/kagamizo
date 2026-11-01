@@ -74,6 +74,8 @@ in
               --item-title ${lib.escapeShellArg account.login.item} --field password
           }
           restore() {
+            # The session expands inside secretspec's environment, not here.
+            # shellcheck disable=SC2016
             secretspec run --file "$spec" --profile ${profile} --reason "icloud: restore the session" -- \
               sh -c 'test -n "''${ICLOUD_SESSION:-}" && printf %s "$ICLOUD_SESSION" | base64 -d | tar -xz -C "$1"' _ "$work/cookies" ||
               true
