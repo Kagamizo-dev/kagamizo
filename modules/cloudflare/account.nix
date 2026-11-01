@@ -19,6 +19,13 @@
   accounts = {
     roles.cloudflare = [ "registrar" ];
 
+    # Products Cloudflare sells only in its dashboard: its API refuses to turn
+    # them on (operations.humanSteps.enable-product).
+    products.cloudflare = {
+      r2 = "R2 object storage; the API answers 10042, \"Please enable R2 through the Cloudflare Dashboard\"";
+      zeroTrust = "Access (Zero Trust); the API answers access.api.error.not_enabled until it is turned on";
+    };
+
     capabilities.cloudflare = {
       registrarAtCost = "flag";
       accountTokens = "flag";
@@ -73,6 +80,11 @@
     held.cloudflare = {
       provider = "cloudflare";
       plan = "free";
+      products.r2 = {
+        on = "2026-11-01";
+        evidence = "GET /accounts/{id}/r2/buckets answered success (it had answered 10042 before)";
+        source = "https://developers.cloudflare.com/r2/get-started/";
+      };
       payment.ownerCard = {
         issuer = "personal";
         replacedBy = "cloudflare";

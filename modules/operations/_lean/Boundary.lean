@@ -30,6 +30,8 @@ inductive HumanStep where
   | closeAccount
   /-- Hands on hardware: flashing, an eSIM, iMessage. -/
   | handleDevice
+  /-- Turning on a product a provider sells only in its own console. -/
+  | enableProduct
   deriving DecidableEq, Repr
 
 /-- What a secret is. -/

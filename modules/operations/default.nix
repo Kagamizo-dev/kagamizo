@@ -94,6 +94,23 @@ let
 
     /-- Every token account's token is declared, so it is the owner's and hidden. -/
     theorem credentials_backed : credentialAccounts.all (backed declared) = true := by decide
+
+    /-- Every product an account has turned on by hand, with the step that did it. -/
+    def enabledProducts : List (String × String × HumanStep) := [
+    ${lib.concatStringsSep ",\n" (
+      lib.concatLists (
+        lib.mapAttrsToList (
+          n: a:
+          lib.mapAttrsToList (
+            p: e: "  (${builtins.toJSON n}, ${builtins.toJSON p}, .${camel e.by})"
+          ) a.products
+        ) config.accounts.held
+      )
+    )}
+    ]
+
+    /-- A product is only ever turned on by the owner's enable-product step. -/
+    theorem products_by_hand : enabledProducts.all (fun (_, _, s) => s == .enableProduct) = true := by decide
   '';
 in
 {
@@ -123,6 +140,7 @@ in
         request-export = "asking a provider for its full data copy, where it offers one only in its own console (a Gap; by mail from the repo where accepted)";
         close-account = "closing an account at its provider, once Lean proves it emptied (modules/migration)";
         handle-device = "hands on hardware: flashing a phone, moving an eSIM, signing a phone out of iMessage";
+        enable-product = "turning on a product its provider sells only in its own console, once per account (accounts.held.<a>.products; Cloudflare R2: its API answers 10042)";
       };
       secretKinds = [
         "api-token"

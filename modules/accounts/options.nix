@@ -195,6 +195,37 @@ let
           default = null;
           description = "How the account is created, for `signup`.";
         };
+        # Products the provider turns on only in its own console, each done
+        # once by hand (operations.humanSteps.enable-product) and recorded
+        # here with what showed it: a demand on a product not listed here
+        # fails evaluation.
+        products = mkOption {
+          type = types.attrsOf (
+            types.submodule {
+              options = {
+                by = mkOption {
+                  type = types.enum (lib.attrNames config'.operations.humanSteps);
+                  default = "enable-product";
+                  description = "The human step that turned it on.";
+                };
+                on = mkOption {
+                  type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+                  description = "When it was turned on.";
+                };
+                evidence = mkOption {
+                  type = types.str;
+                  description = "What showed it on, read through the API, never a screenshot.";
+                };
+                source = mkOption {
+                  type = types.strMatching "https://.+";
+                  description = "Where the provider says it is turned on by hand.";
+                };
+              };
+            }
+          );
+          default = { };
+          description = "Products turned on by hand; each must be in accounts.products.<provider>.";
+        };
         # An account reached by a token (an API credential), not only by a
         # web login: the token lives in a custom item of a Proton Pass app
         # template in its owner's vault, and governance-authorize confirms
@@ -412,8 +443,18 @@ let
           "accounts.held.${name}.payment: card ${cardName} is ${cardOwner}'s, the account ${a.owner}'s; declare the card `between` them"
     ) cfg.held
   );
+  productProblems = lib.concatLists (
+    lib.mapAttrsToList (
+      name: a:
+      map (
+        p:
+        "accounts.held.${name}.products.${p}: ${a.provider} has no such product (accounts.products.${a.provider})"
+      ) (lib.filter (p: !((cfg.products.${a.provider} or { }) ? ${p})) (lib.attrNames a.products))
+    ) cfg.held
+  );
   problems =
-    planProblems
+    productProblems
+    ++ planProblems
     ++ paymentProblems
     ++ signupProblems
     ++ loginProblems
@@ -421,10 +462,33 @@ let
       d:
       let
         a = cfg.held.${d.account} or null;
-        c = if a == null then null else cfg.plans.${a.provider}.${a.plan}.capabilities.${d.capability};
+        c =
+          if a == null || d.capability == null then
+            null
+          else
+            cfg.plans.${a.provider}.${a.plan}.capabilities.${d.capability};
       in
       if a == null then
         [ "${d.why}: no account `${d.account}` is declared" ]
+      else if (d.capability == null) == (d.product == null) then
+        [ "${d.why}: a demand names exactly one of capability and product" ]
+      else if d.product != null then
+        if !((cfg.products.${a.provider} or { }) ? ${d.product}) then
+          [
+            "${d.why}: ${a.provider} has no product `${d.product}`; known: ${
+              lib.concatStringsSep ", " (lib.attrNames (cfg.products.${a.provider} or { }))
+            }"
+          ]
+        else if d.need != true then
+          [ "${d.why}: a product demand needs = true" ]
+        else if !(a.products ? ${d.product}) then
+          [
+            "${d.why}: ${d.account} has not turned on ${d.product} (${
+              cfg.products.${a.provider}.${d.product}
+            }); the owner's enable-product step, then declare accounts.held.${d.account}.products.${d.product}"
+          ]
+        else
+          [ ]
       else if !(cfg.capabilities.${a.provider} ? ${d.capability}) then
         [
           "${d.why}: ${a.provider} plans have no capability `${d.capability}`; known: ${
@@ -453,6 +517,11 @@ in
       default = { };
       description = "Per provider, its closed set of capabilities; declared by the provider's module.";
     };
+    products = mkOption {
+      type = types.attrsOf (types.attrsOf types.str);
+      default = { };
+      description = "Per provider, its closed set of products turned on by hand, each with why it is manual.";
+    };
     plans = mkOption {
       type = types.attrsOf (types.attrsOf plan);
       default = { };
@@ -467,7 +536,16 @@ in
         types.submodule {
           options = {
             account = mkOption { type = types.str; };
-            capability = mkOption { type = types.str; };
+            capability = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "A capability of the account's plan; or name a product instead.";
+            };
+            product = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "A product turned on by hand (accounts.held.<a>.products); need = true.";
+            };
             need = mkOption { type = types.either types.ints.unsigned types.bool; };
             why = mkOption { type = types.str; };
           };

@@ -69,6 +69,16 @@ in
   };
 
   config = {
+    # The bucket needs R2 turned on in the account, a step only the owner
+    # can take (accounts.held.cloudflare.products.r2).
+    accounts.demands = [
+      {
+        account = "cloudflare";
+        product = "r2";
+        need = true;
+        why = "cache: the build cache's R2 bucket";
+      }
+    ];
     cache.layer.resource = {
       cloudflare_r2_bucket.cache = {
         account_id = accountId;

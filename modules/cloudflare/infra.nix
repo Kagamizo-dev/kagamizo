@@ -136,7 +136,8 @@ in
           config.packages.pass-cli
           config.packages.secretspec
         ];
-        text = ''
+        # Builds only while every demand holds (R2 turned on for the cache).
+        text = builtins.seq top.accounts.checked ''
           usage="usage: infra <ci|agent> <tofu args...>"
           profile=''${1:?$usage}
           shift
