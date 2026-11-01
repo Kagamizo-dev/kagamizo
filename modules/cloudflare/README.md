@@ -326,6 +326,22 @@ around.
   (`nix run .#migrate`).
 - **Registrar prerequisites**: default payment method, registrant contact and
   the registration agreement, dashboard only.
+- **R2 and Access are not enabled on the account** (2026-11-01, the first
+  `infra ci apply`): `POST .../r2/buckets` answered 403, code 10042 ("Please
+  enable R2 through the Cloudflare Dashboard"), and `POST .../access/policies`
+  answered `access.api.error.not_enabled`. The pinned provider has
+  `cloudflare_account_subscription` (a rate plan) and
+  `cloudflare_zero_trust_organization` (the Access organization), so both can
+  be declared rather than clicked; neither current token may read billing or
+  the Access organization, so `tokens.nix` needs those groups first (a
+  `bootstrap apply`, which takes the root sign-in). Whether R2's subscription
+  also needs a payment method on file is unknown until tried.
+- **The Cloudflare state has never been saved**: Kagamizo-State holds no
+  `tofu-state` item, and the first apply's save failed creating it ("Error
+  creating note item ... InvalidValue"). The state now carries the status
+  Worker's 19.5 KB page, so a note size limit is the likely cause;
+  unconfirmed, since probing with a throwaway item was refused as a vault
+  write. Until it is fixed, no apply keeps what it creates.
 - **Hetzner's sign-in is behind a proof-of-work page** (`/_ray/pow`, seen
   on 2026-10-22): a browser flow has to pass it before the form shows,
   and its signup checks a government ID and a selfie besides.
