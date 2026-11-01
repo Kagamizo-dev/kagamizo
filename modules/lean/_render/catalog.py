@@ -1,7 +1,10 @@
 """One pinned catalog (catalog/_json/<name>.json) -> Lean, in the model of
 ../_lean/Api.lean.
 
-    catalog.py NAME VERSION CATALOG.json OUT.lean
+    catalog.py NAME VERSION CATALOG.json OUT.lean [OUT.json]
+
+OUT.json, when given, is the same model as JSON: what the Rust checker
+(../_src, `api-check`) reads, so Lean and Rust check one thing.
 
 Each catalog's own shape (a CLI's commands and options, an HTTP API's
 operations and body fields, a provider's resources) is read into
@@ -15,6 +18,7 @@ import re
 import sys
 
 name, version, path, out = sys.argv[1:5]
+out_json = sys.argv[5] if len(sys.argv) > 5 else None
 catalog = json.load(open(path))
 
 
@@ -40,8 +44,8 @@ def ty_lean(t):
     raise Unknown(f"ty {t}")
 
 
-def inp(n, t, required=False):
-    return {"name": n, "ty": t, "required": bool(required)}
+def inp(n, t, required=False, positional=False):
+    return {"name": n, "ty": t, "required": bool(required), "positional": positional}
 
 
 def fail(what):
@@ -81,7 +85,10 @@ def cli_ty(o):
     fail(f"option type {t!r}")
 
 
-def cli_ops(commands):
+def cli_ops(commands, globals_):
+    """Each command's positional arguments, in order, then its options; the
+    tool's global options are every command's too, as ../../_lib/cli.nix
+    takes them."""
     ops = []
     for words, c in commands.items():
         inputs = []
@@ -89,8 +96,10 @@ def cli_ops(commands):
             t = cli_ty(a)
             if a.get("variadic"):
                 t = ("list", t)
-            inputs.append(inp(a["name"], t, a.get("required")))
-        for o, spec in (c.get("options") or {}).items():
+            inputs.append(inp(a["name"], t, a.get("required"), positional=True))
+        options = dict(globals_)
+        options.update(c.get("options") or {})
+        for o, spec in options.items():
             t = cli_ty(spec)
             if spec.get("multiple"):
                 t = ("list", t)
@@ -255,7 +264,8 @@ elif "runtime_catalog" in catalog:
     ops = [{"name": f"tool.{t}", "inputs": []} for f in catalog["tools"]["families"] for t in f["tools"]]
     ops += [{"name": f"cli.{t}", "inputs": []} for t in catalog["cli"]["commands"]]
 elif "commands" in catalog:
-    ops = cli_ops(catalog["commands"])
+    g = catalog.get("global") or {}
+    ops = cli_ops(catalog["commands"], g if isinstance(g, dict) else {})
 else:
     fail("catalog shape")
 
@@ -265,11 +275,21 @@ ident = re.sub(r"[^A-Za-z0-9]", "", name.title())
 
 
 def input_lean(i):
-    return "{ name := %s, ty := %s, required := %s }" % (
+    return "{ name := %s, ty := %s, required := %s%s }" % (
         lean_str(i["name"]),
         ty_lean(i["ty"]),
         "true" if i["required"] else "false",
+        ", positional := true" if i.get("positional") else "",
     )
+
+
+def ty_json(t):
+    if isinstance(t, str):
+        return t
+    tag, arg = t
+    if tag == "list":
+        return {"list": ty_json(arg)}
+    return {tag: arg}
 
 
 def chunks(xs, n=100):
@@ -314,4 +334,17 @@ if types or enums:
 lines.append(f"end Kagamizo.Api.{ident}")
 with open(out, "w") as f:
     f.write("\n".join(lines) + "\n")
+if out_json:
+    with open(out_json, "w") as f:
+        json.dump(
+            {
+                "name": name,
+                "version": version,
+                "ops": [
+                    {"name": o["name"], "inputs": [dict(i, ty=ty_json(i["ty"])) for i in o["inputs"]]} for o in ops
+                ],
+            },
+            f,
+            sort_keys=True,
+        )
 print(f"{name}: {len(ops)} operations, {len(types)} types, {len(enums)} enums", file=sys.stderr)

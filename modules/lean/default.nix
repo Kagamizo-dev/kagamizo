@@ -106,35 +106,33 @@ in
     { pkgs, config, ... }:
     let
       python = "${pkgs.python3}/bin/python3 -I";
-      versions = {
-        inherit (config.packages)
-          pass-cli
-          hcloud
-          public
-          mercury
-          cf
-          rea
-          ;
-        pass-items = config.packages.pass-cli;
-        mercury-api = config.packages.mercury;
-        inherit (pkgs) gh chromium;
-        bridge = pkgs.protonmail-bridge;
-        cdp = pkgs.chromium;
-        hetzner-provider = config.packages.tofu-hetzner;
-        cloudflare-provider = config.packages.tofu;
-      };
+      # Each catalog's pinned version, as ../catalog/sources.nix reads it.
       versionOf =
-        n:
-        if n == "hetzner-api" then
-          "spec of " + (lib.importJSON (json + "/hetzner-api.json")).api.spec.lastModified
-        else
-          versions.${n}.version or (throw "lean: no pinned version known for catalog ${n}");
+        n: config.catalog.sources.${n}.version or (throw "lean: no pinned version known for catalog ${n}");
       render =
         n:
         pkgs.runCommand "${n}.lean" { } ''
           ${python} ${./_render/catalog.py} ${n} ${lib.escapeShellArg (versionOf n)} ${json}/${n}.json $out
         '';
       rendered = lib.genAttrs catalogs render;
+      # The same model as JSON, for the Rust checker.
+      model =
+        n:
+        pkgs.runCommand "${n}-model.json" { } ''
+          ${python} ${./_render/catalog.py} ${n} ${lib.escapeShellArg (versionOf n)} ${json}/${n}.json \
+            "$TMPDIR/model.lean" $out
+        '';
+      models = lib.genAttrs catalogs model;
+      # `api-check MODEL.json WORDS...`: whether a command line is one the
+      # pinned tool accepts, by the model Api.lean states (./_src).
+      api-check = pkgs.rustPlatform.buildRustPackage {
+        pname = "api-check";
+        version = "0.1.0";
+        src = ./_src;
+        cargoLock.lockFile = ./_src/Cargo.lock;
+        API_CHECK_PUBLIC = models.public;
+        meta.mainProgram = "api-check";
+      };
       leanCheck =
         name: files:
         pkgs.runCommand name { nativeBuildInputs = [ pkgs.lean4 ]; } ''
@@ -145,9 +143,15 @@ in
       governedLean = pkgs.writeText "Governed.lean" governed;
     in
     {
-      packages = lib.mapAttrs' (n: v: lib.nameValuePair "lean-api-${n}" v) rendered // {
-        lean-governance = governedLean;
-      };
+      packages =
+        lib.mapAttrs' (n: v: lib.nameValuePair "lean-api-${n}" v) rendered
+        // lib.mapAttrs' (n: v: lib.nameValuePair "api-model-${n}" v) models
+        // {
+          lean-governance = governedLean;
+          # The model itself, for a module's own Lean checks.
+          lean-api-core = pkgs.writeText "Api.lean" (builtins.readFile ./_lean/Api.lean);
+          inherit api-check;
+        };
       checks =
         lib.mapAttrs' (
           n: v:

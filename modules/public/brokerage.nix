@@ -5,6 +5,11 @@
 #   brokerage summary        accounts, then the default account's portfolio
 #   brokerage <public args>  anything else, e.g. `brokerage market quotes AAPL`
 #
+# Every command line is checked against Public's pinned CLI (its Lean model,
+# modules/lean) by `api-check` before governance or Public sees it: an
+# unknown command, option or value type is refused here. ./_lean/Calls.lean
+# proves the calls the wrappers make are accepted and others refused.
+#
 # Orders go through `public order preflight-single` before `order place`, as
 # Public's CLI asks; nothing here places one by itself.
 {
@@ -44,15 +49,24 @@ in
       };
     in
     {
+      checks.public-calls = pkgs.runCommand "public-calls" { nativeBuildInputs = [ pkgs.lean4 ]; } ''
+        cat ${config.packages.lean-api-core} ${config.packages.lean-api-public} ${./_lean/Calls.lean} > Check.lean
+        lean Check.lean
+        touch $out
+      '';
       packages.brokerage = pkgs.writeShellApplication {
         name = "brokerage";
         runtimeInputs = [
           config.packages.secretspec
           config.packages.pass-cli
           config.packages.governance-authorize
+          config.packages.api-check
         ];
         text = builtins.seq top.accounts.checked ''
           export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+          if [ "''${1:-}" != summary ]; then
+            api-check ${config.packages.api-model-public} "$@"
+          fi
           # The command's words, up to its first option: `order place`.
           words=()
           for w in "$@"; do

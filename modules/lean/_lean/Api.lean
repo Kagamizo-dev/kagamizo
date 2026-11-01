@@ -35,6 +35,8 @@ structure Input where
   name : String
   ty : Ty
   required : Bool := false
+  /-- A command-line argument given by position, not as `--name`. -/
+  positional : Bool := false
   deriving DecidableEq, Repr, Inhabited
 
 /-- A command (its words), an HTTP operation (its id) or a provider's
