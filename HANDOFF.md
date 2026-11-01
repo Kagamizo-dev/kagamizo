@@ -418,9 +418,13 @@ records (`_json/records.json`, `README.md` the report); a measurement
 slower than the record by more than its tolerance fails the build, a
 faster one moves the record (`perf-record` on the run's `perf.jsonl`
 artifact, committed). Records are CI's runner's; this container's
-baseline is in the report. First cuts, by cost: governance-cedar (305 s:
-6169 Cedar tests run one by one), lean-api-rclone (37 s: one `decide`),
-migrate's release build (20 s). Rust stays the implementation language
+baseline is in the report. First cut done: governance-cedar, 305 s to
+under 1 s (`cedar-tests`, the tests in-process on the pinned crate).
+lean-api-rclone's 37 s was container load: alone it is 7.7 s, 2.4 s of
+it parsing the 197 KB model (no theorem is decided for rclone); the
+records need CI's idle runner before the next cut is chosen.
+migrate's release build (20 s) and catalog-coverage (3 s, Python over
+every source) are next. Rust stays the implementation language
 and Lean the proof; C only where a measured record demands it.
 
 ## The allowlist to apply (one change, all of it)
