@@ -326,28 +326,17 @@ around.
   (`nix run .#migrate`).
 - **Registrar prerequisites**: default payment method, registrant contact and
   the registration agreement, dashboard only.
-- **R2 and Access are not enabled on the account** (2026-11-01, the first
-  `infra ci apply`): `POST .../r2/buckets` answered 403, code 10042 ("Please
-  enable R2 through the Cloudflare Dashboard"), and `POST .../access/policies`
-  answered `access.api.error.not_enabled`. The pinned provider has
-  `cloudflare_account_subscription` (a rate plan) and
-  `cloudflare_zero_trust_organization` (the Access organization), so both can
-  be declared rather than clicked; neither current token may read billing or
-  the Access organization, so `tokens.nix` needs those groups first (a
-  `bootstrap apply`, which takes the root sign-in). Whether R2's subscription
-  also needs a payment method on file is unknown until tried.
 - **`cf`'s sign-in cannot mint tokens** (2026-11-01): Cloudflare grants
   the device sign-in every scope `cloudflare-login` asks for except
   `account_api_tokens:create` (`cf auth whoami`), so `bootstrap` fails at
   the permission groups (403, code 9109), and `cf` never requests billing
   scopes at all. Minting the token profiles, and the owner-approved one-shot
   billing token that enables R2, needs another root credential.
-- **The Cloudflare state has never been saved**: Kagamizo-State holds no
-  `tofu-state` item, and the first apply's save failed creating it ("Error
-  creating note item ... InvalidValue"). The state now carries the status
-  Worker's 19.5 KB page, so a note size limit is the likely cause;
-  unconfirmed, since probing with a throwaway item was refused as a vault
-  write. Until it is fixed, no apply keeps what it creates.
+- **R2 and Zero Trust are turned on by hand** (`enable-product`, typed in
+  `accounts.products.cloudflare`): Cloudflare's API refuses both until a
+  person turns them on in the dashboard, and `cf`'s sign-in cannot hold
+  billing scopes. R2 is on (2026-11-01); Zero Trust is not, so
+  status.mirazo.org is not deployed.
 - **Hetzner's sign-in is behind a proof-of-work page** (`/_ray/pow`, seen
   on 2026-10-22): a browser flow has to pass it before the form shows,
   and its signup checks a government ID and a selfie besides.

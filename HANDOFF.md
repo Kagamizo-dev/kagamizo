@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "Where the 2026-11-01 evening session left it": add developers.cloudflare.com to modules/claude/_environment.nix; find R2's rate-plan id from Cloudflare's own docs and a root credential that can mint tokens (cf's sign-in is never granted account_api_tokens:create), then the one-shot billing token I approved to enable R2 (dry-run first, deleted after); settle how the Cloudflare state is stored (it has never been saved; the status Worker exists outside it), enable Access as code, re-run the Cloudflare apply (the cache bucket and status.mirazo.org), then the cache-push token and the PROTON_PASS_CACHE_TOKEN repository secret; jingzo-host's first boot (it never ran: diagnose and fix); then `icloud login` (Apple's code) and its inventory, the Phase 3 sign-ins and the notes and reminders exports, and `mailbox senders`.
+Then, in order, from HANDOFF.md's "Where the 2026-11-01 evening session ended": add cache.kagamizo.com and developers.cloudflare.com to modules/claude/_environment.nix; rerun github-bootstrap for PROTON_PASS_CACHE_TOKEN (send me its Proton link the moment it posts), then let the cache workflow fill the bucket; jingzo-host's first boot (it never ran: diagnose and fix); then `icloud login` (Apple's code) and its inventory, the Phase 3 sign-ins and the notes and reminders exports, and `mailbox senders`; then the module contract with typed sources and environments per module.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). End the session with the full allowlist (if it changed) and the updated start message, each ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -429,8 +429,62 @@ and Lean the proof; C only where a measured record demands it.
 
 ## The allowlist to apply (one change, all of it)
 
-Add `developers.cloudflare.com` (Cloudflare's API and subscription
-reference: R2's rate plan). Everything else is applied and declared.
+Add `cache.kagamizo.com` (the build cache: sessions pull from it) and
+`developers.cloudflare.com` (Cloudflare's references). Everything else is
+applied and declared.
+
+## Where the 2026-11-01 evening session ended (read this first)
+
+Supersedes the evening notes below where they disagree.
+
+- **R2 is on** (the owner, in the dashboard: Cloudflare sells it only
+  there, API code 10042). Typed: `operations.humanSteps.enable-product`,
+  `accounts.products.cloudflare` (r2, zeroTrust), and
+  `accounts.held.cloudflare.products.r2`; the cache demands it, so `infra`
+  and `bootstrap` fail evaluation, naming the step, without it; Lean
+  proves every turned-on product came from that step.
+- **The cache bucket is live**: `kagamizo-nix-cache` at cache.kagamizo.com
+  (`infra ci apply`). Empty until the `cache` workflow runs, which needs
+  PROTON_PASS_CACHE_TOKEN (below). The `cache-push` token and its R2 S3
+  keys are minted into Kagamizo-Cache (`bootstrap apply`; the cf sign-in
+  needs "API Tokens: create" ticked on Cloudflare's consent page).
+- **The Cloudflare state was lost and rebuilt.** The first apply's save
+  failed and secretspec had already deleted the old item (delete, then
+  create). Fixed twice over: the secretspec patch now creates first, and
+  OpenTofu states no longer live in a secretspec note at all (next point).
+  The 25 DNS records were adopted unchanged through typed import blocks
+  (`cloudflare.imports`, ./modules/cloudflare/imports.nix).
+- **`modules/statestore`: Proton Pass as an OpenTofu backend.** Typed
+  backends (`statestore.backends.<layer>`: declared vault, item prefix,
+  chunk size), generations of chunked notes plus a hashed manifest, the
+  old generation deleted only after the new one reads back.
+  `_lean/Store.lean` proves the write never loses a state after any
+  prefix, completes, and chunks losslessly within the limit; lock is an
+  item created only when absent. Rust (`_src`) serves OpenTofu's `http`
+  backend on the loopback; `statestore-run <layer> [--read-only] -- cmd`
+  wraps a run. `infra` (Kagamizo-State, `cloudflare@<g>`) and
+  `hetzner-infra` (Jingzo-LLC-Sessions, `hetzner@<g>`) use it; both moved
+  byte-identical and plan no changes. The old notes `tofu-state` and
+  `hetzner-tofu-state` are kept, stale, as a fallback; delete them once a
+  later apply has run on the new backend.
+- **status.mirazo.org waits for Zero Trust**: the whole layer (Worker,
+  domain, Access) is included only once
+  `accounts.held.cloudflare.products.zeroTrust` is declared, so the page
+  is never served without Access. The Worker made by the first apply still
+  exists at Cloudflare, unserved (no workers.dev subdomain, no route).
+  Turning on Zero Trust is the owner's dashboard step, like R2.
+- **PROTON_PASS_CACHE_TOKEN not set yet**: the `github-bootstrap` run's
+  Proton link expired unapproved (18:30). Rerun by changing
+  `.github/github-bootstrap.request`; its links appear as comments on
+  issue #1 (public, readable through api.github.com) and in the log.
+- **jingzo-host never ran its first boot** (unchanged; see below).
+- **The owner's architecture direction (2026-11-01)**: every module typed
+  end to end: Proton Pass typed inside the infra layer (statestore is the
+  first piece), Lean proofs and research papers as required, typed
+  sources per module, and each module with its own typed Nix build and
+  deployment environment. Next: the module contract of §6 carrying
+  `sources` (papers, specs, each typed with what it supports) and
+  `environments` (build, deploy), checked by Lean.
 
 ## Where the 2026-11-01 evening session left it
 
