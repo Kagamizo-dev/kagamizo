@@ -336,6 +336,12 @@ around.
   the Access organization, so `tokens.nix` needs those groups first (a
   `bootstrap apply`, which takes the root sign-in). Whether R2's subscription
   also needs a payment method on file is unknown until tried.
+- **`cf`'s sign-in cannot mint tokens** (2026-11-01): Cloudflare grants
+  the device sign-in every scope `cloudflare-login` asks for except
+  `account_api_tokens:create` (`cf auth whoami`), so `bootstrap` fails at
+  the permission groups (403, code 9109), and `cf` never requests billing
+  scopes at all. Minting the token profiles, and the owner-approved one-shot
+  billing token that enables R2, needs another root credential.
 - **The Cloudflare state has never been saved**: Kagamizo-State holds no
   `tofu-state` item, and the first apply's save failed creating it ("Error
   creating note item ... InvalidValue"). The state now carries the status

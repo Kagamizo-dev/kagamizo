@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "Where the 2026-11-01 evening session left it": settle how the Cloudflare state is stored (it has never been saved), enable R2 and Access as code, re-run the Cloudflare apply (the cache bucket and status.mirazo.org), then the cache-push token and the PROTON_PASS_CACHE_TOKEN repository secret; jingzo-host's first boot (it never ran: diagnose and fix); then `icloud login` (Apple's code) and its inventory, the Phase 3 sign-ins and the notes and reminders exports, and `mailbox senders`.
+Then, in order, from HANDOFF.md's "Where the 2026-11-01 evening session left it": add developers.cloudflare.com to modules/claude/_environment.nix; find R2's rate-plan id from Cloudflare's own docs and a root credential that can mint tokens (cf's sign-in is never granted account_api_tokens:create), then the one-shot billing token I approved to enable R2 (dry-run first, deleted after); settle how the Cloudflare state is stored (it has never been saved; the status Worker exists outside it), enable Access as code, re-run the Cloudflare apply (the cache bucket and status.mirazo.org), then the cache-push token and the PROTON_PASS_CACHE_TOKEN repository secret; jingzo-host's first boot (it never ran: diagnose and fix); then `icloud login` (Apple's code) and its inventory, the Phase 3 sign-ins and the notes and reminders exports, and `mailbox senders`.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). End the session with the full allowlist (if it changed) and the updated start message, each ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -429,10 +429,8 @@ and Lean the proof; C only where a measured record demands it.
 
 ## The allowlist to apply (one change, all of it)
 
-Everything is applied and declared, Apple's trusted-device websocket hosts
-(`websocket.push.apple.com`, `websocket.sandbox.push.apple.com`, in the
-icloud group of `modules/claude/_environment.nix`) included. Nothing is
-waiting to be applied.
+Add `developers.cloudflare.com` (Cloudflare's API and subscription
+reference: R2's rate plan). Everything else is applied and declared.
 
 ## Where the 2026-11-01 evening session left it
 
@@ -463,6 +461,26 @@ waiting to be applied.
   (/var/log/kagamizo-first-boot.log) is out of reach; Hetzner's console
   (`request_console`, VNC) or a rebuild are the ways in, both the owner's
   call. Meanwhile it bills (cx23, IPv4 and the 250 GB volume).
+- **R2, approved (2026-11-01 evening):** the owner approved a one-shot
+  billing token: declared, minted with a root credential, used once to
+  enable R2's subscription (`cf accounts subscriptions create
+  --rate-plan-id ... --dry-run` first), then deleted. The standing ban on
+  Billing in tokens stays. Not built yet, for two reasons:
+  - R2's rate-plan id is not published where this session could read it
+    (Cloudflare's tenant reference lists zone plans only) and no pinned
+    thing names it; it is not to be guessed. developers.cloudflare.com is
+    not on the allowlist (below); dash.cloudflare.com is, but answers
+    non-browser clients with Cloudflare's own 403.
+  - `cf`'s sign-in can never hold billing scopes (cf drops billing:read
+    and billing:write before validating; the catalog now knows it), and
+    Cloudflare granted it every requested scope **except
+    `account_api_tokens:create`** (`cf auth whoami`: 36 scopes). So
+    `bootstrap` cannot mint any token from the cf session: `bootstrap
+    plan` fails listing permission groups (403, code 9109). That, not a
+    pending device grant, is why the cache-push token never came. Minting
+    needs another root credential, e.g. a user API token with "API
+    Tokens Write" kept in Mirazo-Root-Sessions; it would also mint the
+    one-shot billing token.
 - Not started: `icloud login`, the Phase 3 sign-ins, `mailbox senders`.
 
 ## Where the 2026-11-01 midday session left it
