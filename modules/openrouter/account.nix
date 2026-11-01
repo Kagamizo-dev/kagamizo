@@ -13,6 +13,11 @@
 
     # Prepaid credits, spent per token.
     plans.openrouter.pay-as-you-go = {
+      # credits bought ahead, spent per token
+      billing = {
+        value = "usage";
+        source = "https://openrouter.ai/pricing";
+      };
       checked = "2026-10-20";
       capabilities = {
         # A passkey signs in on its own ("a safer, passwordless login").
@@ -37,6 +42,7 @@
     held.openrouter = {
       provider = "openrouter";
       plan = "pay-as-you-go";
+      payment.pending = "mercury.cards.openrouter, on mercury-jingzo for Kagamizo: owed or a contribution is the owner's call";
       owner = "kagamizo";
       status = "planned";
       signup = {

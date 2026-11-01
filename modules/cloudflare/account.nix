@@ -30,6 +30,11 @@
     };
 
     plans.cloudflare.free = {
+      # the plan is free; each domain is billed at cost when registered and renewed
+      billing = {
+        value = "usage";
+        source = "https://www.cloudflare.com/products/registrar/";
+      };
       checked = "2026-10-20";
       capabilities = {
         registrarAtCost = {
@@ -68,6 +73,7 @@
     held.cloudflare = {
       provider = "cloudflare";
       plan = "free";
+      payment.pending = "mercury.cards.cloudflare is on Kagamizo's Mercury, not formed; what pays renewals today is not declared";
       owner = "mirazo";
       status = "active";
       login = {

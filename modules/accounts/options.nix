@@ -52,6 +52,61 @@ let
         description = "When the sources were last read.";
       };
       capabilities = mkOption { type = types.attrsOf (cap Value); };
+      # Whether the plan costs money, and how: anything but free needs a
+      # payment on every account held on it.
+      billing = mkOption {
+        type = cap (
+          types.enum [
+            "free"
+            "subscription"
+            "usage"
+          ]
+        );
+        description = "free, a subscription, or billed by usage; with the page that states it.";
+      };
+    };
+  };
+
+  # What pays for an account: exactly one of these.
+  payment = types.submodule {
+    options = {
+      mercuryCard = mkOption {
+        type = types.nullOr (types.enum (lib.attrNames config.mercury.cards));
+        default = null;
+        description = "A declared Mercury virtual card (mercury.cards), one per vendor: the default.";
+      };
+      ownerCard = mkOption {
+        type = types.nullOr (
+          types.submodule {
+            options = {
+              issuer = mkOption { type = types.enum [ "capital-one" ]; };
+              lockedTo = mkOption {
+                type = types.str;
+                description = "The one merchant the card is locked to.";
+              };
+            };
+          }
+        );
+        default = null;
+        description = "A card the owner mints and manages outside Mercury (their decision, 2026-10-24).";
+      };
+      waived = mkOption {
+        type = types.nullOr (
+          types.submodule {
+            options = {
+              because = mkOption { type = types.str; };
+              source = mkOption { type = types.strMatching "https://.+"; };
+            };
+          }
+        );
+        default = null;
+        description = "The fee is waived, with the page that says when.";
+      };
+      pending = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Not yet known what pays it: a Gap, listed until it is declared.";
+      };
     };
   };
 
@@ -104,6 +159,11 @@ let
             "active"
             "planned"
           ];
+        };
+        payment = mkOption {
+          type = types.nullOr payment;
+          default = null;
+          description = "What pays for it; required when its plan is not free.";
         };
         signup = mkOption {
           type = types.nullOr signup;
@@ -278,8 +338,44 @@ let
             ) (lib.attrNames (lib.filterAttrs (_: a: a.login.email != null) cfg.held))
           )
         );
+  # Every account on a paid plan names exactly one thing that pays it, and
+  # a Mercury card that pays it is issued on its owner's own Mercury account
+  # (an expense is the entity's that incurs it), unless declared between
+  # them.
+  paymentProblems = lib.concatLists (
+    lib.mapAttrsToList (
+      name: a:
+      let
+        billing = cfg.plans.${a.provider}.${a.plan}.billing.value;
+        p = a.payment;
+        set = lib.filter (x: x != null) (
+          if p == null then
+            [ ]
+          else
+            [
+              p.mercuryCard
+              p.ownerCard
+              p.waived
+              p.pending
+            ]
+        );
+        card = if p == null || p.mercuryCard == null then null else config.mercury.cards.${p.mercuryCard};
+        cardOwner = if card == null then null else cfg.held.${card.account}.owner;
+      in
+      lib.optional (billing != "free" && p == null)
+        "accounts.held.${name}: its ${a.provider} ${a.plan} plan is billed (${billing}); declare its payment"
+      ++ lib.optional (
+        p != null && lib.length set != 1
+      ) "accounts.held.${name}.payment: exactly one of mercuryCard, ownerCard, waived, pending"
+      ++
+        lib.optional
+          (card != null && cardOwner != a.owner && (card.between == null || card.between.for != a.owner))
+          "accounts.held.${name}.payment: card ${p.mercuryCard} is ${cardOwner}'s, the account ${a.owner}'s; declare the card `between` them"
+    ) cfg.held
+  );
   problems =
     planProblems
+    ++ paymentProblems
     ++ signupProblems
     ++ loginProblems
     ++ lib.concatMap (

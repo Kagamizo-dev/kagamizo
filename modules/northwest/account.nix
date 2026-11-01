@@ -20,6 +20,11 @@
     };
 
     plans.northwest.registered-agent = {
+      # $125-149 a year, the first year with formation
+      billing = {
+        value = "subscription";
+        source = "https://www.northwestregisteredagent.com/registered-agent";
+      };
       checked = "2026-10-21";
       capabilities = {
         # Streamable HTTP at mcp.northwestregisteredagent.com, the same tools
@@ -72,6 +77,7 @@
     held.northwest-kagamizo = {
       provider = "northwest";
       plan = "registered-agent";
+      payment.pending = "paid at formation, then yearly, from Kagamizo's Mercury once it exists";
       owner = "kagamizo";
       status = "planned";
       signup = {
@@ -98,6 +104,7 @@
     held.northwest-jingzo = {
       provider = "northwest";
       plan = "registered-agent";
+      payment.pending = "what pays the yearly renewal is not declared";
       owner = "jingzo";
       status = "active";
       login = {

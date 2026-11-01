@@ -12,6 +12,10 @@
     };
 
     plans.arxiv.author = {
+      billing = {
+        value = "free";
+        source = "https://info.arxiv.org/help/registerhelp.html";
+      };
       checked = "2026-10-21";
       capabilities = {
         # Search and metadata, no sign-in: reports and literature reviews.

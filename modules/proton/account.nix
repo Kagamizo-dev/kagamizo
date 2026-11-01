@@ -16,6 +16,11 @@
     };
 
     plans.proton.unlimited = {
+      # Proton Unlimited
+      billing = {
+        value = "subscription";
+        source = "https://proton.me/pricing";
+      };
       checked = "2026-10-20";
       capabilities = {
         customDomains = {
@@ -43,6 +48,7 @@
     held.proton = {
       provider = "proton";
       plan = "unlimited";
+      payment.pending = "what pays Proton Unlimited is not declared";
       owner = "mirazo";
       status = "active";
       # Proton signs in with any address of the account, the domain's too.

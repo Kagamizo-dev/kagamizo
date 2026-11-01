@@ -69,6 +69,27 @@ let
         default = "debit";
       };
       why = mkOption { type = types.str; };
+      between = mkOption {
+        type = types.nullOr (
+          types.submodule {
+            options = {
+              for = mkOption {
+                type = types.enum (lib.attrNames config.identity.entities);
+                description = "The entity the card pays for, other than the one it is issued on.";
+              };
+              as = mkOption {
+                type = types.enum [
+                  "owed"
+                  "contribution"
+                ];
+                description = "owed: the other entity repays it (a receivable); contribution: a capital contribution to it.";
+              };
+            };
+          }
+        );
+        default = null;
+        description = "When the card pays another entity's account: how it is booked between them.";
+      };
       nickname = mkOption {
         type = types.nullOr types.str;
         default = null;

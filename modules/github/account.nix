@@ -41,6 +41,10 @@ in
     };
 
     plans.github.free-org = {
+      billing = {
+        value = "free";
+        source = "https://github.com/pricing";
+      };
       checked = "2026-10-20";
       capabilities = {
         privateRepos = {

@@ -12,6 +12,11 @@
 
     # Pay as you go: servers are billed hourly, capped monthly.
     plans.hetzner.cloud = {
+      # billed hourly, capped monthly
+      billing = {
+        value = "usage";
+        source = "https://www.hetzner.com/cloud/";
+      };
       checked = "2026-10-20";
       capabilities = {
         projects = {
@@ -32,6 +37,10 @@
     held.hetzner = {
       provider = "hetzner";
       plan = "cloud";
+      payment.ownerCard = {
+        issuer = "capital-one";
+        lockedTo = "Hetzner";
+      };
       owner = "jingzo";
       status = "active";
       signup = {

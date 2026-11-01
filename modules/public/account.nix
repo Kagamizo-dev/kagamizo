@@ -15,6 +15,11 @@
     };
 
     plans.public.individual = {
+      # no fee for the API
+      billing = {
+        value = "free";
+        source = "https://public.com/api";
+      };
       checked = "2026-10-20";
       capabilities = {
         # Accounts, portfolio, market data, preflight and orders.
@@ -57,6 +62,11 @@
     # A business account of a single-owner LLC. Its API is not relied on
     # until Public says its API terms (personal, non-commercial) cover one.
     plans.public.business = {
+      # no fee for the API
+      billing = {
+        value = "free";
+        source = "https://public.com/api";
+      };
       checked = "2026-10-22";
       capabilities = {
         tradingApi = {

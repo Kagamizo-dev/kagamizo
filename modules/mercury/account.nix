@@ -18,6 +18,10 @@
     };
 
     plans.mercury.standard = {
+      billing = {
+        value = "free";
+        source = "https://mercury.com/pricing";
+      };
       checked = "2026-10-20";
       capabilities = {
         # Scoped tokens with fine-grained permissions; the CLI reads one from
@@ -71,6 +75,11 @@
     # its API, tokens and cards for business accounts only, so nothing here
     # relies on them for a personal one.
     plans.mercury.personal = {
+      # $240 a year, covered with a Mercury business account
+      billing = {
+        value = "subscription";
+        source = "https://mercury.com/personal";
+      };
       checked = "2026-10-22";
       capabilities = {
         apiTokens = {
@@ -172,6 +181,10 @@
       mercury-mirazo = {
         provider = "mercury";
         plan = "personal";
+        payment.waived = {
+          because = "covered with a Mercury business account (mercury-jingzo)";
+          source = "https://mercury.com/personal";
+        };
         owner = "mirazo";
         status = "active";
         login = {

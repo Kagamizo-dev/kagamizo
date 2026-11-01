@@ -14,6 +14,10 @@
     };
 
     plans.experian.free = {
+      billing = {
+        value = "free";
+        source = "https://www.experian.com/consumer-products/free-credit-report.html";
+      };
       checked = "2026-10-21";
       capabilities = {
         # Bureau APIs are for approved businesses, not a person's own file.
