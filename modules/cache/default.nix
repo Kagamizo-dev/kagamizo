@@ -202,11 +202,28 @@ in
             trap 'rm -f "$key"' EXIT
             printf %s "$NIX_CACHE_SIGNING_KEY" >"$key"
             unset NIX_CACHE_SIGNING_KEY R2_SECRET_ACCESS_KEY
-            echo "cache-push: building ${toString (lib.length targets)} targets" >&2
-            mapfile -t paths < <(nix build --no-link --print-out-paths ${lib.concatStringsSep " " targets})
+            targets=(${lib.concatStringsSep " " targets})
+            echo "cache-push: building ''${#targets[@]} targets" >&2
+            # Keep going past a failed target, and build from source when a
+            # substitute's download fails (cache.nixos.org's HTTP 416 on a
+            # resumed download sank a whole run on 2026-11-01): whatever
+            # built is pushed either way, and the run still fails after.
+            status=0
+            nix build --no-link --keep-going --fallback "''${targets[@]}" || status=$?
+            paths=()
+            for t in "''${targets[@]}"; do
+              if p=$(nix path-info "$t" 2>/dev/null); then
+                mapfile -t -O "''${#paths[@]}" paths <<<"$p"
+              else
+                echo "cache-push: not built: $t" >&2
+              fi
+            done
             echo "cache-push: copying ''${#paths[@]} outputs and their closures to ${cfg.host}" >&2
-            nix copy --to "${store}&secret-key=$key" "''${paths[@]}"
+            if [ "''${#paths[@]}" -gt 0 ]; then
+              nix copy --to "${store}&secret-key=$key" "''${paths[@]}"
+            fi
             echo "cache-push: done" >&2
+            exit "$status"
           '';
         };
       in
