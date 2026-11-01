@@ -33,9 +33,20 @@ let
     "commit"
     "repository"
   ];
+  # A literal, a value only the host knows (`context`), or a secret the host
+  # holds for the repository (`secret`, declared in modules/github).
   value = types.either types.str (
     types.submodule {
-      options.context = mkOption { type = types.enum contexts; };
+      options = {
+        context = mkOption {
+          type = types.nullOr (types.enum contexts);
+          default = null;
+        };
+        secret = mkOption {
+          type = types.nullOr (types.strMatching "[A-Z][A-Z0-9_]*");
+          default = null;
+        };
+      };
     }
   );
 
@@ -58,6 +69,11 @@ let
         type = types.bool;
         default = false;
         description = "Run even when an earlier step failed.";
+      };
+      passCli = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Install this version of pass-cli on the runner (Proton Pass in CI); not with `run`.";
       };
       artifact = mkOption {
         type = types.nullOr (

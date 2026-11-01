@@ -61,7 +61,7 @@ in
   options.proton = {
     infraVaults = mkOption {
       type = types.attrsOf types.str;
-      description = "Vaults holding the infra secrets: root (person), entity, ci, agents, state, host.";
+      description = "Vaults holding the infra secrets: root (person), entity, ci, agents, state, host, cache.";
     };
     vaults = mkOption {
       type = types.listOf types.str;
@@ -89,6 +89,9 @@ in
         state = "Kagamizo-State";
         # What the always-on host (modules/kagamizo-host) reads at boot.
         host = "Kagamizo-Host";
+        # The build cache's signing key and R2 keys (modules/cache): CI on
+        # any branch pushes, every machine pulls over HTTPS with no secret.
+        cache = "Kagamizo-Cache";
       };
       inherit vaults sessionVaults;
     };

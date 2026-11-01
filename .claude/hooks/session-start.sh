@@ -18,6 +18,13 @@ echo "export PATH=\"$link/bin:\$PATH\"" >>"$CLAUDE_ENV_FILE"
 # the session as tampered with and logs out.
 echo "export PROTON_PASS_KEY_PROVIDER=fs" >>"$CLAUDE_ENV_FILE"
 
+# Pull from the build cache (modules/cache) once its key is declared; root
+# is a trusted user here, so the lines take effect at once (no daemon).
+conf=$(nix build --no-link --print-out-paths .#cache-nix-conf)
+if [ -s "$conf" ] && ! grep -qF "$(head -1 "$conf")" /etc/nix/nix.custom.conf 2>/dev/null; then
+  cat "$conf" >>/etc/nix/nix.custom.conf
+fi
+
 # Reject commits that break the message convention (modules/repo/commits.nix).
 "$link/bin/commit-lint" --install-hook >/dev/null
 

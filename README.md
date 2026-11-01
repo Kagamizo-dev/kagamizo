@@ -53,6 +53,8 @@ modules/
 ├─ mercury/       the bank: its official CLI, every command governed
 │                 (`mercury-cli`), one capped virtual card per vendor; `cards`
 ├─ mailbox/       confirmation mail through Proton Mail Bridge; `mailbox`
+├─ migration/     leaving Apple, Google, Outlook and Chase: typed sources, pinned
+│                 readers, the Phase 3 runners; `migrate`
 ├─ runtime/       the host boundary and the declared environment wrappers run in
 ├─ northwest/     registered agent and filings over its MCP server; `northwest`
 ├─ governance/    controllers, typed actions, agents; Cedar; `orca-swarm`
@@ -62,6 +64,7 @@ modules/
 ├─ public/        the brokerage: CLI, account; `brokerage`
 ├─ catalog/       what each pinned tool can do (_json/), and its extractors
 ├─ claude/        cloud session tools and network allowlist
+├─ cache/         the build cache: an R2 bucket at cache.kagamizo.com, filled by CI
 ├─ repo/          commit convention, lint
 ├─ tmux/ tools/ desktop/ welcome/ setup/   shared NixOS modules
 └─ rpi5/ yoga-c940/                        devices: configs, images, checks

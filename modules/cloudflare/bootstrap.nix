@@ -86,6 +86,9 @@ let
         targets = map (p: {
           profile = p;
           vault = lib.removePrefix "protonpass://" providers.${lib.head profiles.${p}.defaults.providers};
+          # R2's S3 API signs with the token's id and the SHA-256 of its
+          # value (Cloudflare's documented derivation), stored beside it.
+          s3 = profiles.${p} ? R2_ACCESS_KEY_ID && profiles.${p} ? R2_SECRET_ACCESS_KEY;
         }) profile.storeIn;
       }
     else
@@ -165,12 +168,20 @@ in
           # Store a new token value (JSON with id and value on stdin) in every
           # vault the profile names.
           store() {
-            local name=$1 value
-            value=$(jq -r .value)
+            local name=$1 token value id
+            token=$(cat)
+            value=$(jq -r .value <<<"$token")
+            id=$(jq -r .id <<<"$token")
             for p in $(jq -r --arg n "$name" '.[$n].targets[].profile' <<<"$declared"); do
               printf %s "$value" | put "$p" CLOUDFLARE_API_TOKEN
               echo "  stored $name in profile $p"
+              if [ "$(jq -r --arg n "$name" --arg p "$p" '.[$n].targets[] | select(.profile == $p) | .s3' <<<"$declared")" = true ]; then
+                printf %s "$id" | put "$p" R2_ACCESS_KEY_ID
+                printf %s "$value" | sha256sum | cut -d' ' -f1 | tr -d '\n' | put "$p" R2_SECRET_ACCESS_KEY
+                echo "  stored its R2 S3 keys in profile $p"
+              fi
             done
+            unset token value
           }
 
           cmd=''${1:?$usage}

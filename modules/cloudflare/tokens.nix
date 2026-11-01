@@ -42,6 +42,15 @@
       ];
     };
 
+    # CI on any branch, writing the build cache's bucket (modules/cache),
+    # and nothing else of the account. Its R2 S3 keys are derived from it
+    # by bootstrap (the key id is the token's id, the secret its SHA-256).
+    cache-push = {
+      storeIn = [ "cache" ];
+      zone = [ ];
+      account = [ "Workers R2 Storage Write" ];
+    };
+
     # CI applying merged changes from main.
     ci-apply = {
       storeIn = [ "ci" ];

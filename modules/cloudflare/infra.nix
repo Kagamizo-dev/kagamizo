@@ -44,15 +44,19 @@ in
       # Each layer is checked against the pinned provider (catalog/) before it
       # is written out.
       configs = lib.mapAttrs (name: c: pkgs.writeText "${name}.tf.json" (builtins.toJSON (cli.tofu c))) {
-        cloudflare = lib.recursiveUpdate (import ./_zones.nix { inherit lib domains terraform; }) (
-          import ./_status.nix {
-            inherit (top.cloudflare.checked) accountId;
-            zoneId = domains."mirazo.org".zoneId;
-            hostname = "status.mirazo.org";
-            viewers = [ "zach@mirazo.org" ];
-            html = config.site.statusHtml;
-          }
-        );
+        cloudflare =
+          lib.foldl' lib.recursiveUpdate (import ./_zones.nix { inherit lib domains terraform; })
+            [
+              (import ./_status.nix {
+                inherit (top.cloudflare.checked) accountId;
+                zoneId = domains."mirazo.org".zoneId;
+                hostname = "status.mirazo.org";
+                viewers = [ "zach@mirazo.org" ];
+                html = config.site.statusHtml;
+              })
+              # The build cache's bucket and its domain (../cache).
+              top.cache.layer
+            ];
       };
 
       # Inside secretspec: the profile's secrets are in the environment.

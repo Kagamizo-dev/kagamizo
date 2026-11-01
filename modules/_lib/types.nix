@@ -186,6 +186,7 @@ let
       agents = VaultName;
       state = VaultName;
       host = VaultName;
+      cache = VaultName;
     };
 
   # Spend per month: domains bought that month, plus renewals of domains

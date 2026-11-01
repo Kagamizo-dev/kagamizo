@@ -23,11 +23,22 @@
   lib,
   config,
   inputs,
+  withSystem,
   ...
 }:
 let
   inherit (lib) mkOption types;
   cfg = config.hetzner.host;
+  # The migration's staging and exports on the host (../migration/_host.nix),
+  # with the host's own build of the runner and its tools.
+  staging = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ../migration/_host.nix {
+      inherit (config.packages) migrate secretspec;
+      secretspecToml = config.packages.secretspec-toml;
+      passCli = config.packages.pass-cli;
+    }
+  );
 
   # The disk Hetzner Cloud gives an x86 server (virtio-scsi, /dev/sda),
   # GPT with a BIOS boot partition and an ESP, so GRUB boots either way.
@@ -71,6 +82,7 @@ let
         (modulesPath + "/profiles/qemu-guest.nix")
         inputs.disko.nixosModules.disko
         disk
+        staging
       ];
       networking.hostName = cfg.name;
       boot.loader.grub = {

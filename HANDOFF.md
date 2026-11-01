@@ -325,7 +325,7 @@ root vault.
   permission check refused `infra ci apply -auto-approve`; the owner
   approved the deploy, so the next step is that apply.
 
-## Where the migration stands (2026-11-01, end of session)
+## Where the migration stands (2026-11-01, end of session; 2026-11-01 later)
 
 The owner approved the migration plan (Apple, Google, both Outlooks and
 Chase's checking into Proton and Mercury; GrapheneOS phones after).
@@ -338,8 +338,10 @@ Chase's checking into Proton and Mercury; GrapheneOS phones after).
   - The new human steps are in the typed set: request-export,
     close-account and handle-device.
   - The tools are pinned: icloudpd 1.32.3, pyicloud 2026.10.1 (2307 tests
-    pass), rclone, vdirsyncer and imapsync. icloudpd and rclone are
-    catalogued into Lean.
+    pass), rclone, vdirsyncer and imapsync. icloudpd, rclone (its backends,
+    every command and every global flag) and pyicloud (every service's
+    methods and properties, asked of the library) are catalogued into
+    Lean; `checks.catalog-coverage` holds the runner's calls to them.
   - Credit lines are typed.
   - `mailbox senders` and `icloud login|inventory` exist (governed).
 - **Phase 1 (host and volume):** declared, priced and validated; not
@@ -352,19 +354,60 @@ Chase's checking into Proton and Mercury; GrapheneOS phones after).
   - `mailbox senders` needs Bridge's first full sync of the Proton
     mailbox. That is more than 100 minutes and over 1 GB here, so it runs
     on the host.
-  - `icloud login` got no answer: `idmsa.apple.com` is not on the allowlist
-    (above). Next session: `nix run .#icloud -- login`, relay the owner's
-    code into /tmp/icloud-2fa-code, then
+  - `icloud login` got no answer: `idmsa.apple.com` was not on the
+    allowlist; it is now (declared). Next: `nix run .#icloud -- login`,
+    relay the owner's code into /tmp/icloud-2fa-code, then
     `nix run .#icloud -- inventory <scratch>/icloud.json`.
   - The audit shows Chase has no login item in Pass. Public's login is
     admin@jingzo.org; the owner moves it to finance@mirazo.org.
+- **Phase 3 (runners) written, not yet run:** `modules/migration/export.nix`
+  and `_src` (Rust, `migrate`): `login icloudpd` and `login rclone` (each
+  tool's own trusted session, the password piped from Proton Pass, Apple's
+  code relayed through the FIFO, the session kept in Mirazo-Root-Sessions
+  as ICLOUDPD_SESSION / RCLONE_ICLOUD_CONFIG); `photos`, `drive`, `notes`,
+  `reminders` into a directory, each ending in `manifest.json` (every
+  file's size and SHA-256; `rclone check` and the source's counts besides);
+  `verify DIR` holds a copy to its manifest. Six governed actions on
+  apple-mirazo. On the host, `modules/migration/_host.nix` (imported by
+  the Hetzner host): the staging volume LUKS-formatted with a key kept in
+  the host vault, and a nightly timer running every class then `verify`;
+  idle until the host's Proton Pass token is delivered (a Gap).
 - **Next:**
   1. The iCloud inventory (sizes, Hide My Email relays).
   2. Apply the host and volume, then run `mailbox senders` there.
-  3. Write the Phase 3 runners on the host: icloudpd, rclone and pyicloud
-     exports, verified by hash. icloudpd needs a session of its own, from
-     its own sign-in here.
+  3. Run the Phase 3 sign-ins here (`migrate login icloudpd`, `migrate
+     login rclone`: one code each), then `notes` and `reminders` here
+     (small), `drive` and `photos` on the host once its token is delivered.
   4. Read the credit report for the card fates.
+
+## Build times (2026-11-01, the owner's ask)
+
+Every fresh container rebuilt the Rust crates, the Lean checks, the
+catalogs, pyicloud's test suite and the host closure from source: the only
+substituter was cache.nixos.org, the flake's own nixConfig is ignored here
+(`accept-flake-config = false`), and nothing CI builds was kept anywhere.
+Epic 4 is now declared (`modules/cache`): an R2 bucket served at
+cache.kagamizo.com (public reads, no secret; OpenTofu in the Cloudflare
+layer), a `cache` workflow pushing every check and package, signed, on
+every push to any branch, under the new cache vault's agent token
+(`nix-images-cache`, repository secret PROTON_PASS_CACHE_TOKEN), and the
+session-start hook writing the substituter into the container's nix.conf.
+To make it live, in order, each a session with Proton Pass signed in:
+
+1. `nix run .#proton -- apply` (the cache vault and agent; the token into
+   the root vault), then `nix run .#github-bootstrap` or CI's bootstrap
+   for the repository secret.
+2. `nix run .#bootstrap -- apply` with `cloudflare-login` (mints the
+   `cache-push` token and derives its R2 S3 keys into the cache vault).
+3. `nix run .#cache-key`: the signing key into the vault; declare the
+   printed public key as `cache.publicKey` and in flake.nix's `nixConfig`
+   (`extra-substituters`, `extra-trusted-public-keys`); `checks.cache-declared`
+   holds the two together.
+4. `nix run .#infra -- ci apply` (the bucket and its domain), then push:
+   the `cache` workflow fills it; from then on sessions and runners pull.
+
+Until then, prefer `nix build` of the one check a change touches over
+`nix flake check` here, and leave the VM tests and the host closure to CI.
 
 ## The allowlist to apply (one change, all of it)
 
@@ -390,7 +433,7 @@ owner's part, always an approval. Order is the order of work.
 | 1 | **Mercury, Jingzo's own login** | Explore the signed-in pages; invite finance@jingzo.org (team settings); its passkey (after an authenticator-app 2FA); login item in Jingzo-LLC; `login.passkey.rpId`; `mercury-session --account mercury-jingzo login` | the allowlist | sign-in approval; Mercury link; the invite mail until epic 3 | 2 h |
 | 2 | **$5 OpenRouter card** | `mercury.account = "mercury-jingzo"`, `cards plan`, `cards apply` | 1; how to record it between Jingzo and Kagamizo (owed, or wait) | that decision | 30 min |
 | 3 | **Confirmation mail** | Bridge headless under Nix, its login driven from Proton Pass; a Rust IMAP reader (declared addresses, declared senders, links on the flow's hosts only); then the outlook mailbox the same way | — | one Proton sign-in approval | 6 h |
-| 4 | **Build cache and CI** (approved) | R2 bucket in the Cloudflare module, signing key in Proton Pass, CI pushes and machines pull; `nix flake check` one job per check; Rust with crane | — | — (a Gap if R2 is not enabled) | 5 h |
+| 4 | **Build cache and CI** (approved) | Declared (`modules/cache`, above): the four steps to make it live; then `nix flake check` one job per check; Rust with crane | Proton Pass signed in | — (a Gap if R2 is not enabled) | 2 h |
 | 5 | **Every login onto its domain** | One flow each, passkeys where offered: Northwest, Public, Cloudflare, Experian, IBKR (two), GitHub, Gitea; the outlook Email retired last | 0, 3 | a sign-in approval each | 1 h each, ~1.5 days |
 | 6 | **Public** | public-mirazo's login item and personal secret through the browser; whether the API may serve an LLC's account | 5 | the terms question | 2 h |
 | 7 | **OpenRouter** | Signup (passkey), first top-up from the card, management key, `openrouter apply` mints the capped keys | 2 | approvals | 2 h |

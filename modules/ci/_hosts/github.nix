@@ -7,6 +7,7 @@ let
     checkout = "actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5"; # v4.3.1
     nix = "cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd"; # v31.9.1
     upload = "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"; # v4.6.2
+    passCli = "protonpass/install-cli-action@9a5ae5819440dc2cb1c154823193ea30f18926e3"; # v1.1.0
   };
   runners = {
     linux-x86_64 = "ubuntu-latest";
@@ -26,7 +27,16 @@ let
       "|| format('{0}..{1}', github.event.before, github.sha)) }}"
     ];
   };
-  envValue = v: if builtins.isString v then v else contexts.${v.context};
+  envValue =
+    v:
+    if builtins.isString v then
+      v
+    else if v.secret != null then
+      "\${{ secrets.${v.secret} }}"
+    else if v.context != null then
+      contexts.${v.context}
+    else
+      throw "ci: an env value names neither a context nor a secret";
 
   on =
     t:
@@ -45,7 +55,12 @@ let
     lib.optionalAttrs (s.name != null) { inherit (s) name; }
     // lib.optionalAttrs s.always { "if" = "always()"; }
     // (
-      if s.artifact != null then
+      if s.passCli != null then
+        {
+          uses = actions.passCli;
+          "with".version = s.passCli;
+        }
+      else if s.artifact != null then
         {
           uses = actions.upload;
           "with" = {

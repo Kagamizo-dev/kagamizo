@@ -17,6 +17,8 @@ in
       inherit visibility;
       # PR plans: the read-only view.
       secrets.PROTON_PASS_AGENT_TOKEN = "PROTON_PASS_AGENT_TOKEN";
+      # Pushes to the build cache from every branch (modules/cache).
+      secrets.PROTON_PASS_CACHE_TOKEN = "PROTON_PASS_CACHE_TOKEN";
       # Applies from main only.
       environments.cloudflare = {
         branches = [ "main" ];

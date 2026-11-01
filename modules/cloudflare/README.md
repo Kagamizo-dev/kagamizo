@@ -315,6 +315,15 @@ around.
   its go-proton-api; signing in takes your 2FA code (and a verification link
   if Proton asks for one). It is a gap in the sense that Proton could change
   it without notice.
+- **The host's Proton Pass token**: the host's units (modules/migration/
+  _host.nix: the staging volume's LUKS key, the nightly exports) sign in
+  with the host's agent token (`pass-cli login --pat`, read from
+  `/var/lib/kagamizo/host-token`), and nothing delivers that file yet: the
+  first boot installs from a public repository and can read no vault. Until
+  it is delivered (the plan: `hetzner-infra apply` hands it in the server's
+  user data, 600, from the proton-agents profile), the units stay idle and
+  say so, and the exports run from a session instead
+  (`nix run .#migrate`).
 - **Registrar prerequisites**: default payment method, registrant contact and
   the registration agreement, dashboard only.
 - **Hetzner's sign-in is behind a proof-of-work page** (`/_ray/pow`, seen

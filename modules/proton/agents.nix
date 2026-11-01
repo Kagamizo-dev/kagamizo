@@ -98,6 +98,14 @@ in
       secret = "PROTON_PASS_HOST_TOKEN";
     };
 
+    # CI on any branch, pushing to the build cache (modules/cache): its
+    # vault holds the signing key and the R2 keys, nothing else.
+    nix-images-cache = {
+      vault = infraVaults.cache;
+      expiration = "6m";
+      secret = "PROTON_PASS_CACHE_TOKEN";
+    };
+
     # The Orca agent fleet: the same view as plans, renewed monthly.
     orca-fleet = {
       vault = infraVaults.agents;

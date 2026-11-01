@@ -32,6 +32,7 @@ let
       agents = "protonpass://${infraVaults.agents}";
       state = "protonpass://${infraVaults.state}";
       host = "protonpass://${infraVaults.host}";
+      cache = "protonpass://${infraVaults.cache}";
     }
     // lib.mapAttrs' (
       entity: vault: lib.nameValuePair "${entity}-sessions" "protonpass://${vault}"
