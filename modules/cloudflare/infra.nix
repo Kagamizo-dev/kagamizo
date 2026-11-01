@@ -14,6 +14,7 @@
   ...
 }:
 let
+  top = config;
   inherit (config.identity.checked) domains;
   cli = import ../_lib/cli.nix {
     inherit lib;
@@ -43,7 +44,16 @@ in
       # Each layer is checked against the pinned provider (catalog/) before it
       # is written out.
       configs = lib.mapAttrs (name: c: pkgs.writeText "${name}.tf.json" (builtins.toJSON (cli.tofu c))) {
-        cloudflare = import ./_zones.nix { inherit lib domains terraform; };
+        cloudflare = lib.recursiveUpdate (import ./_zones.nix { inherit lib domains terraform; }) (
+          import ./_status.nix {
+            inherit lib;
+            inherit (top.cloudflare.checked) accountId;
+            zoneId = domains."mirazo.org".zoneId;
+            hostname = "status.mirazo.org";
+            viewers = [ "zach@mirazo.org" ];
+            html = config.site.statusHtml;
+          }
+        );
       };
 
       # Inside secretspec: the profile's secrets are in the environment.

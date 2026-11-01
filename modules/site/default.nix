@@ -11,8 +11,8 @@
 #   checks.site-status      renders it in the pinned Chromium and keeps the
 #                           screenshot (site-status/status.png in the build)
 #
-# Deploying is applying infrastructure (a Pages project, DNS, an Access
-# policy): not done until the owner says go (HANDOFF.md).
+# Served at status.mirazo.org by a Worker behind Cloudflare Access, only to
+# the owner (../cloudflare/_status.nix; the owner's go, 2026-11-01).
 { lib, config, ... }:
 let
   top = config;
@@ -51,7 +51,7 @@ in
     { pkgs, config, ... }:
     let
       gaps = lib.filterAttrs (_: a: a.payment != null && a.payment.pending != null) held;
-      html = pkgs.writeText "index.html" ''
+      htmlText = ''
         <!doctype html>
         <html lang="en"><head><meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -199,14 +199,21 @@ in
         )}
         </body></html>
       '';
+      html = pkgs.writeText "index.html" htmlText;
       site = pkgs.runCommand "site-status" { } ''
         mkdir $out
         cp ${html} $out/index.html
       '';
     in
     {
-      packages.site-status = site;
-      checks.site-status =
+      options.site.statusHtml = lib.mkOption {
+        type = lib.types.str;
+        readOnly = true;
+        description = "The status page, for the deployments that serve it (../cloudflare/_status.nix).";
+      };
+      config.site.statusHtml = htmlText;
+      config.packages.site-status = site;
+      config.checks.site-status =
         pkgs.runCommand "site-status-screenshot"
           {
             nativeBuildInputs = [ pkgs.chromium ];
