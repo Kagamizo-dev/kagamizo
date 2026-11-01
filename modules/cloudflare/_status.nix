@@ -3,7 +3,6 @@
 # their address). The custom domain depends on the Access application, so
 # the hostname never answers before Access guards it.
 {
-  lib,
   accountId,
   zoneId,
   hostname,

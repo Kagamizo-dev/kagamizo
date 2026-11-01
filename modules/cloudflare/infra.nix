@@ -46,7 +46,6 @@ in
       configs = lib.mapAttrs (name: c: pkgs.writeText "${name}.tf.json" (builtins.toJSON (cli.tofu c))) {
         cloudflare = lib.recursiveUpdate (import ./_zones.nix { inherit lib domains terraform; }) (
           import ./_status.nix {
-            inherit lib;
             inherit (top.cloudflare.checked) accountId;
             zoneId = domains."mirazo.org".zoneId;
             hostname = "status.mirazo.org";
