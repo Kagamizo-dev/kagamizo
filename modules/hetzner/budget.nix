@@ -19,6 +19,13 @@ in
     };
   };
   config.hetzner = {
-    monthlyBudgetUsd = 7;
+    # $7 for the host; $20 while the migration's staging volume exists (the
+    # owner's choice, 2026-11-01). Back to 7 when hetzner.volumes is empty.
+    monthlyBudgetUsd = 20;
+    volumes.staging = {
+      sizeGb = 250;
+      why = "staging for the migration off Apple, Google and Outlook (modules/migration): photos, drives and the full archives on their way to Proton Drive";
+      until = "2027-01-31";
+    };
   };
 }

@@ -89,6 +89,20 @@ let
         labels.owner = top.accounts.held.hetzner.owner;
         lifecycle.ignore_changes = [ "user_data" ];
       };
+    }
+    // lib.optionalAttrs (cfg.volumes != { }) {
+      # Raw block devices; the host encrypts them (LUKS, key in Proton Pass).
+      hcloud_volume = lib.mapAttrs (n: v: {
+        name = "${cfg.host.name}-${n}";
+        size = v.sizeGb;
+        server_id = "\${hcloud_server.host.id}";
+        automount = false;
+        delete_protection = false;
+        labels = {
+          owner = top.accounts.held.hetzner.owner;
+          until = v.until;
+        };
+      }) cfg.volumes;
     };
     output.ipv4.value = "\${hcloud_primary_ip.host.ip_address}";
   };
@@ -110,6 +124,23 @@ let
   pricingOk = api.operations ? get_pricing && api.operations.get_pricing.path == "/pricing";
 in
 {
+  options.hetzner.volumes = mkOption {
+    type = types.attrsOf (
+      types.submodule {
+        options = {
+          sizeGb = mkOption { type = types.ints.between 10 10240; };
+          why = mkOption { type = types.str; };
+          until = mkOption {
+            type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+            description = "When it is removed; the plan refuses it after this date.";
+          };
+        };
+      }
+    );
+    default = { };
+    description = "Block volumes on the host, each priced against the budget and dated.";
+  };
+
   options.hetzner.host = {
     serverType = mkOption {
       type = types.strMatching "[a-z]+[0-9]+";
@@ -207,9 +238,17 @@ in
             ip=$(jq -r --arg l ${cfg.host.location} \
               '.pricing.primary_ips[] | select(.type == "ipv4") | .prices[] | select(.location == $l) | .price_monthly.gross' <<<"$prices")
             [ -n "$server" ] && [ -n "$ip" ] || { echo "hetzner-infra: no price for ${cfg.host.serverType} or IPv4 in ${cfg.host.location}" >&2; exit 1; }
-            total=$(jq -n --arg s "$server" --arg i "$ip" '($s|tonumber) + ($i|tonumber)')
+            pergb=$(jq -r '.pricing.volume.price_per_gb_month.gross' <<<"$prices")
+            gb=${toString (lib.foldl' (n: v: n + v.sizeGb) 0 (lib.attrValues cfg.volumes))}
+            today=$(date -u +%F)
+            for until in ${lib.concatStringsSep " " (lib.mapAttrsToList (_: v: v.until) cfg.volumes)}; do
+              [[ "$today" < "$until" || "$today" == "$until" ]] ||
+                { echo "hetzner-infra: a volume was to be removed by $until; remove it from hetzner.volumes" >&2; exit 1; }
+            done
+            total=$(jq -n --arg s "$server" --arg i "$ip" --arg p "$pergb" --arg g "$gb" \
+              '($s|tonumber) + ($i|tonumber) + ($p|tonumber) * ($g|tonumber)')
             budget=${toString cfg.monthlyBudgetUsd}
-            echo "hetzner-infra: ${cfg.host.serverType} \$$server + IPv4 \$$ip = \$$total a month, budget \$$budget" >&2
+            echo "hetzner-infra: ${cfg.host.serverType} \$$server + IPv4 \$$ip + $gb GB of volumes = \$$total a month, budget \$$budget" >&2
             jq -en --arg t "$total" --arg b "$budget" '($t|tonumber) <= ($b|tonumber)' >/dev/null ||
               { echo "hetzner-infra: over budget; refused" >&2; exit 1; }
 

@@ -128,6 +128,11 @@ in
         description = "Sign Proton Mail Bridge in and serve the mailboxes over IMAP on the loopback";
         command = "mailbox login";
       };
+      proton.inventory = {
+        effect = "read";
+        description = "Who has written to the account, by sender domain: headers only (modules/migration's inventory)";
+        command = "mailbox senders";
+      };
     }
     // lib.mapAttrs (_: _: {
       confirmation-mail = {
@@ -188,11 +193,16 @@ in
               pkgs.coreutils
             ];
             text = builtins.seq top.accounts.checked ''
-              usage="usage: mailbox login | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
+              usage="usage: mailbox login | senders [--since DAYS] | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
               governance-authorize proton:bridge proton
               args=()
               case "''${1:-}" in
                 login) args=(login) ;;
+                senders)
+                  governance-authorize proton:inventory proton
+                  shift
+                  args=(senders "$@")
+                  ;;
                 link)
                   [ "''${2:-}" = --account ] || { echo "$usage" >&2; exit 2; }
                   account=''${3:?$usage}

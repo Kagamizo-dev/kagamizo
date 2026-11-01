@@ -11,6 +11,13 @@
 //!       the newest link on a declared host, in mail to A from a declared
 //!       sender domain received in the last M minutes, on stdout only;
 //!       waits up to --wait minutes for it to arrive
+//!   mailbox senders [--since DAYS]
+//!       who has written to the account: per sender domain, the number of
+//!       messages, the first and last date, and whether any subject reads
+//!       as a signup, a receipt or a security notice, as JSON lines on
+//!       stdout. Headers only (From, Date, Subject), from All Mail; no
+//!       subject or body is printed. The services an account holds are
+//!       read off this (modules/migration's inventory).
 //!
 //! Bridge's own output is never echoed: its `info` carries the IMAP
 //! password. Only its prompts for the owner and its errors are passed on.
@@ -36,7 +43,8 @@ fn main() -> Result<()> {
     match args.first().map(String::as_str) {
         Some("login") => login(),
         Some("link") => link(&Query::parse(&args[1..])?),
-        _ => bail!("usage: mailbox login | link --to A --from D... --host H... [--path P] [--since M] [--wait M]"),
+        Some("senders") => senders(&args[1..]),
+        _ => bail!("usage: mailbox login | link --to A --from D... --host H... [--path P] [--since M] [--wait M] | senders [--since DAYS]"),
     }
 }
 
@@ -395,6 +403,139 @@ fn imap_date(secs: u64) -> String {
     format!("{d}-{}-{y}", MONTHS[(m - 1) as usize])
 }
 
+/// Bridge signed in and synced, then `f` with its IMAP port, user, password
+/// and certificate; Bridge is stopped and its vault saved after.
+fn with_imap<T>(wait_min: u64, f: impl FnOnce(u16, &str, &str, &[u8]) -> Result<T>) -> Result<T> {
+    let home = Home::new()?;
+    if !home.restore()? {
+        bail!("Bridge has no stored session: run `mailbox login` first");
+    }
+    let mut bridge = Bridge::start(&home)?;
+    let result = (|| -> Result<T> {
+        bridge.settle()?;
+        let seen = bridge.seen;
+        bridge.seen = 0;
+        bridge
+            .wait(&["A sync has finished"], wait_min * 60 + 600)
+            .context("Bridge's sync did not finish")?;
+        bridge.seen = bridge.seen.max(seen);
+        bridge.send("info")?;
+        bridge.wait(&["IMAP port:"], 60)?;
+        let port: u16 = bridge.line(30)?.trim().parse().context("IMAP port")?;
+        bridge.wait(&["Username:"], 30)?;
+        let user = bridge.line(30)?.trim().to_owned();
+        bridge.wait(&["Password:"], 30)?;
+        let pass = Zeroizing::new(bridge.line(30)?.trim().to_owned());
+        let certs = home.private.join("cert");
+        std::fs::create_dir_all(&certs)?;
+        bridge.send("cert export")?;
+        bridge.wait(&["Enter a path"], 30)?;
+        bridge.wait(&[":"], 30)?;
+        bridge.send(certs.to_str().context("cert path")?)?;
+        bridge.wait(&["exported to"], 30)?;
+        let pem = std::fs::read(certs.join("cert.pem"));
+        std::fs::remove_dir_all(&certs).ok();
+        f(port, &user, &pass, &pem?)
+    })();
+    bridge.stop()?;
+    home.save()?;
+    result
+}
+
+/// Who has written to the account, by sender domain (headers only).
+fn senders(args: &[String]) -> Result<()> {
+    let since_days: u64 = match args {
+        [] => 36500,
+        [flag, d] if flag == "--since" => d.parse().context("--since DAYS")?,
+        _ => bail!("usage: mailbox senders [--since DAYS]"),
+    };
+    let lines = with_imap(0, |port, user, pass, pem| {
+        let tls = native_tls::TlsConnector::builder()
+            .add_root_certificate(native_tls::Certificate::from_pem(pem)?)
+            .disable_built_in_roots(true)
+            .danger_accept_invalid_hostnames(true)
+            .build()?;
+        let client = imap::connect_starttls(("127.0.0.1", port), "127.0.0.1", &tls)?;
+        let mut session = client.login(user, pass).map_err(|e| e.0).context("Bridge's IMAP login")?;
+        session.select("All Mail")?;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+        let uids = session.uid_search(format!("SINCE {}", imap_date(now.saturating_sub(since_days * 86400))))?;
+        let mut uids: Vec<u32> = uids.into_iter().collect();
+        uids.sort_unstable();
+        let mut tally: std::collections::BTreeMap<String, Sender> = Default::default();
+        for chunk in uids.chunks(500) {
+            let set = chunk.iter().map(u32::to_string).collect::<Vec<_>>().join(",");
+            for fetch in session.uid_fetch(set, "BODY.PEEK[HEADER.FIELDS (FROM DATE SUBJECT)]")?.iter() {
+                if let Some(h) = fetch.header() {
+                    tally_header(&mut tally, h);
+                }
+            }
+        }
+        session.logout().ok();
+        Ok(tally.into_iter().map(|(d, s)| s.json(&d)).collect::<Vec<_>>())
+    })?;
+    for l in lines {
+        println!("{l}");
+    }
+    Ok(())
+}
+
+#[derive(Default)]
+struct Sender {
+    count: u32,
+    first: i64,
+    last: i64,
+    signup: bool,
+    receipt: bool,
+    security: bool,
+}
+
+impl Sender {
+    fn json(&self, domain: &str) -> String {
+        format!(
+            "{{\"domain\":\"{}\",\"count\":{},\"first\":{},\"last\":{},\"signup\":{},\"receipt\":{},\"security\":{}}}",
+            domain.replace(['"', '\\'], ""),
+            self.count,
+            self.first,
+            self.last,
+            self.signup,
+            self.receipt,
+            self.security
+        )
+    }
+}
+
+/// The registrable part of a sender's domain: the last two labels, or three
+/// under a two-letter country code with a short second level (co.uk).
+fn base_domain(host: &str) -> String {
+    let labels: Vec<&str> = host.split('.').filter(|l| !l.is_empty()).collect();
+    let n = labels.len();
+    let keep = if n >= 3 && labels[n - 1].len() == 2 && labels[n - 2].len() <= 3 { 3 } else { 2 };
+    labels[n.saturating_sub(keep)..].join(".")
+}
+
+fn tally_header(tally: &mut std::collections::BTreeMap<String, Sender>, raw: &[u8]) {
+    let Ok((headers, _)) = mailparse::parse_headers(raw) else { return };
+    let get = |k: &str| headers.iter().find(|h| h.get_key().eq_ignore_ascii_case(k)).map(|h| h.get_value());
+    let Some(from) = get("from") else { return };
+    let Some(host) = from.rsplit('@').next().map(|d| d.trim_end_matches(['>', ' ', '"']).to_lowercase()) else { return };
+    if !host.contains('.') {
+        return;
+    }
+    let when = get("date").and_then(|d| mailparse::dateparse(&d).ok()).unwrap_or(0);
+    let subject = get("subject").unwrap_or_default().to_lowercase();
+    let has = |words: &[&str]| words.iter().any(|w| subject.contains(w));
+    let s = tally.entry(base_domain(&host)).or_default();
+    s.count += 1;
+    if s.first == 0 || (when != 0 && when < s.first) {
+        s.first = when;
+    }
+    s.last = s.last.max(when);
+    s.signup |= has(&["welcome", "verify your", "confirm your", "activate", "get started", "account created"]);
+    s.receipt |= has(&["receipt", "invoice", "your order", "payment", "subscription", "renew", "billing", "charged"]);
+    s.security |= has(&["sign-in", "sign in", "login", "password", "security", "verification code", "2-step", "two-factor"]);
+}
+
 fn link(q: &Query) -> Result<()> {
     let home = Home::new()?;
     if !home.restore()? {
@@ -589,6 +730,18 @@ mod tests {
     fn dates_are_a_day_early() {
         assert_eq!(imap_date(NOW), "21-Oct-2026");
         assert_eq!(imap_date(951_868_800), "29-Feb-2000"); // 2000-03-01
+    }
+
+    #[test]
+    fn senders_count_by_base_domain_and_flag_subjects() {
+        let mut t = Default::default();
+        tally_header(&mut t, b"From: Apple <no_reply@email.apple.com>\r\nDate: Tue, 1 Oct 2024 10:00:00 +0000\r\nSubject: Your receipt from Apple.\r\n\r\n");
+        tally_header(&mut t, b"From: x@apple.com\r\nSubject: Welcome to iCloud\r\n\r\n");
+        tally_header(&mut t, b"From: Bank <alerts@service.example.co.uk>\r\nSubject: New sign-in\r\n\r\n");
+        let a = &t["apple.com"];
+        assert_eq!(a.count, 2);
+        assert!(a.receipt && a.signup && !a.security);
+        assert!(t["example.co.uk"].security);
     }
 
     #[test]
