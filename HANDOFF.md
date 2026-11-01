@@ -21,7 +21,7 @@ The network allowlist now has every host in HANDOFF.md's "The allowlist to apply
 
 Start by signing the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login` and send me the approval link. Run no other pass-cli command until it returns.
 
-Then, from HANDOFF.md's "Where the 2026-10-31 session left it": make public-mirazo's Login item onto finance@mirazo.org (epic 5) so `brokerage summary` runs and reads the options level, render every cli.nix call into Lean and prove it accepted, and apply the Hetzner host once I say go.
+Then, from HANDOFF.md's "Where the 2026-11-01 session left it": run `brokerage summary` read-only once public-mirazo's login matches, then §5 (the generated sites, status.mirazo.org; ask before the first deploy), §6 (the module contract and the Minecraft twin, accounts & identity first) and the rest of §4 (the remaining workflows into modules/ci, its Rust runner).
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, all in the one modules tree. End the session with the full allowlist (if it changed) and the updated start message, each ready to paste.
 ```
@@ -250,6 +250,53 @@ root vault.
 - The disk filled once from VM-test closures (`nix flake check` fetches
   the desktop's); `nix-collect-garbage` freed 21 GB. The VM tests need
   KVM, which this container lacks.
+
+## Where the 2026-11-01 session left it
+
+§1–§3 of the approved plan are done, §4 begun; the rest is below.
+
+- **CI was red on every push since 2026-10-27**, not from KVM: Hetzner
+  edited its unversioned spec, so its fetchurl hash broke (cached locally).
+  Fixed by stamping (`nix run .#hetzner-api-update`); CI then went green
+  with both VM tests (tmux, desktop) on GitHub's KVM runners. This
+  container has no KVM, so VM tests are CI's.
+- **§1 Token accounts**: `accounts.held.<a>.credential = { item; template; }`;
+  `pass-credential` confirms the item by field names and kinds;
+  Cedar requires it (6169 tests); Lean proves the token is the owner's
+  and hidden. public-mirazo's `Public` API credential is confirmed.
+- **Public is blocked on one thing**: the Login item `Mirazo-Root /
+  Public` now exists, but its address is admin@jingzo.org, while
+  public-mirazo is declared on finance@mirazo.org. Either Public's sign-in
+  moves to finance@mirazo.org (at Public, the owner's) and the item with
+  it, or the declaration changes; the owner decides. No browser.
+- **§2**: `api-check` (Rust, modules/lean/_src) decides from the Lean
+  model's JSON whether a command line is the pinned CLI's; `brokerage`
+  runs it first (an unknown command or option is refused before
+  governance or Public). Lean proves the wrappers' calls accepted
+  (`checks.public-calls`). Public has no backtest or paper API: backtests
+  stay NautilusTrader on `historicdata bars`.
+- **§3**: `modules/catalog/sources.nix` reads every catalog's version from
+  its pin; `modules/catalog/README.md` is rendered from it and checked.
+- **§4 begun**: `modules/ci` (typed workflows, GitHub renderer, Forgejo
+  renderer checked but off, `checks.ci-rendered`, Lean `Pipeline.lean`:
+  needs declared and acyclic, PR jobs never write). `checks` and the new
+  weekly `spec-drift` are rendered. Still hand-written: build-image,
+  infra, yoga-c940, github-bootstrap (they need typed releases, job
+  outputs and environments). Still to do: the Rust runner
+  (`nix run .#ci -- <job>`), the host's settings in OpenTofu.
+- **§5 next**: `modules/site`, one site per domain generated from the
+  declarations; `status.mirazo.org` behind Cloudflare Access (entities,
+  domains, accounts with audit results, the Roadmap as a tracker, CI,
+  catalog versions); landing and redirect pages; Chromium screenshots as
+  CI artifacts. The first deploy is an apply: ask first.
+- **§6 next**: the module contract (Lean, Rust, Kotlin twin, harness,
+  Nix per module; a typed `modules.<m>` with Lean-checked dependencies;
+  `checks.frozen`). The twin world: a Paper server pinned in Nix, local,
+  offline mode, no account (the owner chose Minecraft, viewed through
+  prismarine-viewer and bots); first module accounts & identity.
+- Later: publishing targets (Ghost, PeerTube, a journal site with Zenodo
+  DOIs, each declared as an account), a self-hosted tracker (Plane needs
+  ≥4 GB), an audit typing every domain, alias and vault item.
 
 ## The allowlist to apply (one change, all of it)
 
