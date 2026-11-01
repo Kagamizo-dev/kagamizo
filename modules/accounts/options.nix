@@ -22,6 +22,7 @@
 let
   inherit (lib) mkOption types;
   cfg = config.accounts;
+  passTemplates = lib.attrNames (lib.importJSON ../catalog/_json/pass-items.json).appTemplates;
 
   # A capability: its value and the evidence for it.
   cap =
@@ -108,6 +109,29 @@ let
           type = types.nullOr signup;
           default = null;
           description = "How the account is created, for `signup`.";
+        };
+        # An account reached by a token (an API credential), not only by a
+        # web login: the token lives in a custom item of a Proton Pass app
+        # template in its owner's vault, and governance-authorize confirms
+        # that item's shape (its field names and kinds, never its values)
+        # before every action, as it confirms the login's address.
+        credential = mkOption {
+          type = types.nullOr (
+            types.submodule {
+              options = {
+                item = mkOption {
+                  type = types.str;
+                  description = "Title of the credential's custom item in its owner's vault.";
+                };
+                template = mkOption {
+                  type = types.enum passTemplates;
+                  description = "The app template it is made from (catalog/_json/pass-items.json).";
+                };
+              };
+            }
+          );
+          default = null;
+          description = "The account's API credential, when it is reached by token.";
         };
         # Proton Pass is the authority on who signs in where: the login item
         # is what `identity-audit` and governance-authorize read (its address

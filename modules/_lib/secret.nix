@@ -43,7 +43,7 @@ assert (template == null) == (field == null);
       else
         {
           at = "field";
-          inherit template field;
+          inherit template field item;
         };
   };
 }

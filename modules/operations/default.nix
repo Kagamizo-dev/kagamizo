@@ -64,7 +64,7 @@ let
           tpl.fields.${store.field}
             or (throw "operations: ${name}: template ${store.template} has no field ${store.field}");
       in
-      "(.field ${builtins.toJSON store.template} ${builtins.toJSON store.field} .${kind})";
+      "(.field ${builtins.toJSON store.template} ${builtins.toJSON store.item} ${builtins.toJSON store.field} .${kind})";
 
   facts = ''
     open Kagamizo
@@ -81,6 +81,19 @@ let
 
     /-- Every declared secret keeps the rule. -/
     theorem declared_wellFormed : declared.all wellFormed = true := by decide
+
+    /-- Every account reached by token, rendered by ../default.nix. -/
+    def credentialAccounts : List CredentialAccount := [
+    ${lib.concatStringsSep ",\n" (
+      lib.mapAttrsToList (
+        n: a:
+        "  { name := ${builtins.toJSON n}, item := ${builtins.toJSON a.credential.item}, template := ${builtins.toJSON a.credential.template} }"
+      ) (lib.filterAttrs (_: a: a.credential != null) config.accounts.held)
+    )}
+    ]
+
+    /-- Every token account's token is declared, so it is the owner's and hidden. -/
+    theorem credentials_backed : credentialAccounts.all (backed declared) = true := by decide
   '';
 in
 {

@@ -49,11 +49,11 @@ writes, or one typed field of an item made from an app template, which the
 owner fills. -/
 inductive Store where
   | note
-  | field (template : String) (name : String) (kind : FieldKind)
+  | field (template : String) (item : String) (name : String) (kind : FieldKind)
   deriving DecidableEq, Repr
 
 def Store.isField : Store → Bool
-  | .field _ _ _ => true
+  | .field _ _ _ _ => true
   | .note => false
 
 /-- Who produces a secret. -/
@@ -101,7 +101,7 @@ token kept in a field is kept hidden. -/
 def storedRightly (s : Secret) : Bool :=
   match s.store with
   | .note => true
-  | .field _ _ k =>
+  | .field _ _ _ k =>
     s.issuer.isHuman && (if s.kind = .apiToken then k = .hidden else true)
 
 def wellFormed (s : Secret) : Bool := issuable s && waitsRightly s && storedRightly s
@@ -114,8 +114,8 @@ theorem field_by_hand (s : Secret) (hf : s.store.isField = true)
     cases st <;> simp_all [wellFormed, storedRightly, Store.isField]
 
 /-- A well-formed token kept in a field is in a hidden one. -/
-theorem token_field_hidden (s : Secret) (t n : String) (fk : FieldKind)
-    (hk : s.kind = .apiToken) (hs : s.store = .field t n fk)
+theorem token_field_hidden (s : Secret) (t i n : String) (fk : FieldKind)
+    (hk : s.kind = .apiToken) (hs : s.store = .field t i n fk)
     (h : wellFormed s = true) : fk = .hidden := by
   cases s with
   | mk nm k i ns st =>
@@ -146,5 +146,41 @@ theorem human_issues_only_console_credentials (s : Secret) (step : HumanStep)
   | mk n k i ns st =>
     subst hi
     cases k <;> cases step <;> simp_all [wellFormed, issuable]
+
+/-- An account reached by token: its credential's custom item and the app
+template it is made from. -/
+structure CredentialAccount where
+  name : String
+  item : String
+  template : String
+  deriving Repr
+
+/-- A secret is the account's token: an API token kept in a field of the
+account's own credential item. -/
+def CredentialAccount.tokenIn (a : CredentialAccount) (s : Secret) : Bool :=
+  s.kind == .apiToken &&
+    match s.store with
+    | .field t i _ _ => t == a.template && i == a.item
+    | .note => false
+
+/-- Every token account has its token declared. -/
+def backed (secrets : List Secret) (a : CredentialAccount) : Bool :=
+  secrets.any a.tokenIn
+
+/-- A well-formed token of a credential account is the owner's (human-issued)
+and kept in a hidden field: automation never makes or sees it in the clear. -/
+theorem credential_token_owners_and_hidden (a : CredentialAccount) (s : Secret)
+    (ht : a.tokenIn s = true) (h : wellFormed s = true) :
+    s.issuer.isHuman = true ∧ ∃ t i n, s.store = .field t i n .hidden := by
+  cases s with
+  | mk nm k iss ns st =>
+    cases st with
+    | note => simp [CredentialAccount.tokenIn] at ht
+    | field t i n fk =>
+      simp only [CredentialAccount.tokenIn, Bool.and_eq_true, beq_iff_eq] at ht
+      obtain ⟨hk, _⟩ := ht
+      have hh := field_by_hand ⟨nm, k, iss, ns, .field t i n fk⟩ rfl h
+      have hf := token_field_hidden ⟨nm, k, iss, ns, .field t i n fk⟩ t i n fk hk rfl h
+      exact ⟨hh, t, i, n, by simp [hf]⟩
 
 end Kagamizo

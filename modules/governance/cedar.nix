@@ -40,7 +40,11 @@ let
   logins = lib.mapAttrs (_: a: {
     vault = entities.${a.owner}.vault;
     inherit (a.login) item email;
+    credentialItem = if a.credential == null then "" else a.credential.item;
+    credential = credentialOf a;
   }) accounts;
+  # The app template an account's API credential is made from, or "".
+  credentialOf = a: if a.credential == null then "" else a.credential.template;
   root = lib.head (
     lib.attrNames (lib.filterAttrs (_: e: e.vault == config.proton.infraVaults.root) people)
   );
@@ -83,7 +87,7 @@ let
       namespace ${ns} {
         entity Person;
         entity Entity { kind: String, controllers: Set<Person>, domains: Set<String> };
-        entity Account in [Entity] { owner: Entity, provider: String, login: String, loginDomain: String };
+        entity Account in [Entity] { owner: Entity, provider: String, login: String, loginDomain: String, credential: String };
         entity Agent { serves: Entity, purpose: String };
 
         action ${lib.concatMapStringsSep ", " str cfg.effects};
@@ -96,7 +100,7 @@ let
       ${
         lib.concatMapStrings (a: ''
           action ${str a.id} in [${str "${a.provider}:${a.effect}"}]
-            appliesTo { principal: [Person, Agent], resource: [Account], context: { login?: String } };
+            appliesTo { principal: [Person, Agent], resource: [Account], context: { login?: String, credential?: String } };
         '') actionList
       }}
     '';
@@ -120,6 +124,10 @@ let
       (
         (context has login && context.login == resource.login) ||
         (principal is ${ns}::Person && action in ${act "move-login"})
+      ) &&
+      (
+        resource.credential == "" ||
+        (context has credential && context.credential == resource.credential)
       )
     };
 
@@ -172,6 +180,7 @@ let
         inherit (a) provider;
         login = a.login.email;
         loginDomain = domainOf a.login.email;
+        credential = credentialOf a;
       };
       parents = [ (uid "Entity" a.owner).__entity ];
     }) accounts
@@ -188,9 +197,15 @@ let
   # grant allows, and every base rule denies, for one action of each kind.
   # `reason` is the policies that decide it: a test fails if the right
   # answer comes from the wrong rule.
-  test = testAs (account: {
-    login = accounts.${account}.login.email;
-  });
+  test = testAs (
+    account:
+    {
+      login = accounts.${account}.login.email;
+    }
+    // lib.optionalAttrs (accounts.${account}.credential != null) {
+      credential = credentialOf accounts.${account};
+    }
+  );
   testAs = context: name: principal: action: account: decision: reason: {
     inherit name decision reason;
     num_errors = 0;
@@ -337,13 +352,30 @@ let
           ];
         fix = firstOf a.provider "move-login";
       in
-      lib.optionals (x != null) [
-        (deny { } "when Proton Pass has no login for it")
-        (deny { login = "someone@example.com"; } "when its login in Proton Pass is another address")
-      ]
+      lib.optionals (x != null) (
+        [
+          (deny { } "when Proton Pass has no login for it")
+          (deny { login = "someone@example.com"; } "when its login in Proton Pass is another address")
+        ]
+        # A token account also needs its credential item confirmed.
+        ++ lib.optionals (a.credential != null) [
+          (deny { login = a.login.email; } "when Proton Pass does not confirm its ${credentialOf a}")
+          (deny {
+            login = a.login.email;
+            credential = "another-template";
+          } "when its credential is another kind of item")
+        ]
+      )
       # Moving the login onto the declared address is the one way out.
       ++ lib.optional (fix != null) (
-        testAs (_: { login = "someone@example.com"; })
+        testAs
+          (
+            _:
+            {
+              login = "someone@example.com";
+            }
+            // lib.optionalAttrs (a.credential != null) { credential = credentialOf a; }
+          )
           "${person} may move ${acc}'s login from another address"
           (ref "Person" person)
           fix.id
@@ -379,6 +411,7 @@ in
           pkgs.jq
           pkgs.coreutils
           config.packages.pass-login
+          config.packages.pass-credential
         ];
         text = ''
           action=''${1:?usage: governance-authorize ACTION ACCOUNT}
@@ -394,11 +427,16 @@ in
           [ -z "$vault" ] || seen=$(pass-login "$vault" "$item")
           context=$(mktemp)
           trap 'rm -f "$context"' EXIT
-          if [ -n "$seen" ] && [ "$(wc -l <<<"$seen")" = 1 ]; then
-            jq -n --arg l "$seen" '{login: $l}' >"$context"
-          else
-            echo '{}' >"$context"
+          # Its API credential, when it has one: confirmed by shape only.
+          template=$(jq -r --arg a "$account" '.[$a].credential // empty' ${loginsJson})
+          citem=$(jq -r --arg a "$account" '.[$a].credentialItem // empty' ${loginsJson})
+          confirmed=
+          if [ -n "$template" ] && [ "$(pass-credential "$vault" "$citem" "$template")" = ok ]; then
+            confirmed=$template
           fi
+          jq -n --arg l "$seen" --arg c "$confirmed" \
+            '(if ($l != "" and ($l | split("\n") | length) == 1) then {login: $l} else {} end)
+             + (if $c != "" then {credential: $c} else {} end)' >"$context"
           who=''${KAGAMIZO_PRINCIPAL:-person:${root}}
           case "$who" in
             agent:*) principal="${ns}::Agent::\"''${who#agent:}\"" ;;
@@ -412,6 +450,9 @@ in
             exit 0
           fi
           echo "governance: $who may not $action on $account (modules/governance)" >&2
+          if [ -n "$template" ] && [ -z "$confirmed" ]; then
+            echo "governance: its $template in Proton Pass ($vault / $citem) is missing or not of that template" >&2
+          fi
           if [ "$seen" != "$declared" ]; then
             echo "governance: its login in Proton Pass ($vault / $item) is ''${seen:-missing or unreadable}, not $declared" | tr '\n' ' ' >&2
             echo >&2

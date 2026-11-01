@@ -93,9 +93,15 @@
       plan = "individual";
       owner = "mirazo";
       status = "active";
+      # Its web login, the address the account is held on; and its
+      # personal secret, the token every command is run with.
       login = {
         item = "Public";
         email = "finance@mirazo.org";
+      };
+      credential = {
+        item = "Public";
+        template = "api-credential";
       };
     };
 
