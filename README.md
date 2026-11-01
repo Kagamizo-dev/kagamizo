@@ -65,6 +65,7 @@ modules/
 ├─ catalog/       what each pinned tool can do (_json/), and its extractors
 ├─ claude/        cloud session tools and network allowlist
 ├─ cache/         the build cache: an R2 bucket at cache.kagamizo.com, filled by CI
+├─ perf/          performance records per module, measured by CI, decided by Lean
 ├─ repo/          commit convention, lint
 ├─ tmux/ tools/ desktop/ welcome/ setup/   shared NixOS modules
 └─ rpi5/ yoga-c940/                        devices: configs, images, checks

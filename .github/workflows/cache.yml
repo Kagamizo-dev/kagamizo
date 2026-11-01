@@ -31,6 +31,17 @@ jobs:
         PROTON_PASS_KEY_PROVIDER: fs
       name: cache-push
       run: nix run .#cache-push
+    - name: perf-measure
+      run: nix run .#perf-measure -- perf.jsonl
+    - name: perf-check
+      run: nix run .#perf-check -- perf.jsonl
+    - if: always()
+      name: Keep the measurements
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        if-no-files-found: ignore
+        name: perf
+        path: perf.jsonl
     timeout-minutes: 180
 name: cache
 'on':

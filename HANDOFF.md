@@ -409,6 +409,20 @@ To make it live, in order, each a session with Proton Pass signed in:
 Until then, prefer `nix build` of the one check a change touches over
 `nix flake check` here, and leave the VM tests and the host closure to CI.
 
+## Performance records (2026-11-01, the owner's rule)
+
+Every module's measured targets live in `modules/perf` (`targets.nix`):
+CI's `cache` workflow rebuilds each from scratch, times it, and
+`perf-check` has Lean decide the fresh numbers against the committed
+records (`_json/records.json`, `README.md` the report); a measurement
+slower than the record by more than its tolerance fails the build, a
+faster one moves the record (`perf-record` on the run's `perf.jsonl`
+artifact, committed). Records are CI's runner's; this container's
+baseline is in the report. First cuts, by cost: governance-cedar (305 s:
+6169 Cedar tests run one by one), lean-api-rclone (37 s: one `decide`),
+migrate's release build (20 s). Rust stays the implementation language
+and Lean the proof; C only where a measured record demands it.
+
 ## The allowlist to apply (one change, all of it)
 
 The 2026-10-22 hosts are applied and declared. To apply next, for pinning

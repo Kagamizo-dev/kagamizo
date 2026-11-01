@@ -138,6 +138,24 @@ in
             env.PROTON_PASS_KEY_PROVIDER = "fs";
             run = "nix run .#cache-push";
           }
+          # The performance records (modules/perf): every target rebuilt
+          # from scratch on the runner's clock and held to its record.
+          {
+            name = "perf-measure";
+            run = "nix run .#perf-measure -- perf.jsonl";
+          }
+          {
+            name = "perf-check";
+            run = "nix run .#perf-check -- perf.jsonl";
+          }
+          {
+            name = "Keep the measurements";
+            always = true;
+            artifact = {
+              name = "perf";
+              path = "perf.jsonl";
+            };
+          }
         ];
       };
     };

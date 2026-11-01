@@ -1,0 +1,15 @@
+{
+ "records": {},
+ "baseline": {
+  "host": "the cloud container, 4 jobs, 2026-11-01 (not records: CI's runner sets those)",
+  "ms": {
+   "migrate-build": 20591,
+   "lean-api-rclone": 37377,
+   "catalog-coverage": 3038,
+   "governance-cedar": 305613,
+   "migration-lean": 1360,
+   "ci-pipeline": 993,
+   "operations-boundary": 2848
+  }
+ }
+}
