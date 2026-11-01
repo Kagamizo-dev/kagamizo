@@ -100,7 +100,7 @@ let
         delete_protection = false;
         labels = {
           owner = top.accounts.held.hetzner.owner;
-          until = v.until;
+          inherit (v) until;
         };
       }) cfg.volumes;
     };
