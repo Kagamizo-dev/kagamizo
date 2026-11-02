@@ -47,6 +47,17 @@ in
       type = types.attrsOf profile;
       default = { };
     };
+    # Which OAuth scope of the root sign-in covers each permission group a
+    # token holds. Cloudflare enforces it: a sign-in can mint only groups
+    # its scopes cover ("The OAuth session does not include the scopes
+    # required for the requested permission groups", 2026-11-01, Billing
+    # Read), and every group below was minted under its scope.
+    # modules/tokens proves each token's groups are covered.
+    groupScopes = mkOption {
+      type = types.attrsOf (types.enum (lib.importJSON ../catalog/_json/cf.json).oauthScopes);
+      default = { };
+      description = "Permission group name -> the cf OAuth scope that covers it.";
+    };
     # Live objects the state adopts (OpenTofu import blocks), by address:
     # how a lost state is rebuilt from Cloudflare without touching it. Once
     # the state holds them, each import is a no-op.

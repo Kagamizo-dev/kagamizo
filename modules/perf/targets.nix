@@ -11,6 +11,12 @@
 # runtimes (statistically bounded, outliers reported).
 {
   perf.targets = {
+    tokens-graph = {
+      module = "tokens";
+      kind = "build";
+      attr = "checks.x86_64-linux.tokens-graph";
+      method = "Lean deciding the credential graph (every child's scope within its parent's, by List.contains); moves with nodes × scope sizes";
+    };
     statestore-build = {
       module = "statestore";
       kind = "build";

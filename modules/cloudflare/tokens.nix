@@ -18,6 +18,36 @@
     }
   ];
 
+  cloudflare.groupScopes = {
+    "Zone Read" = "zone.read";
+    "DNS Read" = "dns.read";
+    "DNS Write" = "dns.write";
+    "Zone Settings Read" = "zone-settings.read";
+    "Zone Settings Write" = "zone-settings.write";
+    "SSL and Certificates Read" = "ssl-and-certificates.read";
+    "SSL and Certificates Write" = "ssl-and-certificates.write";
+    "Cache Purge" = "cache.purge";
+    "Workers Routes Read" = "workers-routes.read";
+    "Workers Routes Write" = "workers-routes.write";
+    "Email Routing Rules Read" = "email-routing-rule.read";
+    "Email Routing Rules Write" = "email-routing-rule.write";
+    "Account Settings Read" = "account-settings.read";
+    "Workers Scripts Read" = "workers-scripts.read";
+    "Workers Scripts Write" = "workers-scripts.write";
+    "Pages Read" = "pages:read";
+    "Pages Write" = "pages:write";
+    "Workers KV Storage Read" = "workers-kv-storage.read";
+    "Workers KV Storage Write" = "workers-kv-storage.write";
+    "Workers R2 Storage Read" = "workers-r2.read";
+    "Workers R2 Storage Write" = "workers-r2.write";
+    "D1 Read" = "d1.read";
+    "D1 Write" = "d1.write";
+    "Cloudflare Tunnel Read" = "argotunnel.read";
+    "Cloudflare Tunnel Write" = "argotunnel.write";
+    "Access: Apps and Policies Read" = "access.read";
+    "Access: Apps and Policies Write" = "access.write";
+  };
+
   cloudflare.tokens = {
     # Agents and PR plans: look at everything, change nothing.
     agent-readonly = {
