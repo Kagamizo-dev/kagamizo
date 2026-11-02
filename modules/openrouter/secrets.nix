@@ -11,8 +11,10 @@ in
       OPENROUTER_MANAGEMENT_KEY = secret {
         kind = "api-token";
         issuer = "human:console-credential";
-        description = "OpenRouter management key, made once in the dashboard (a Gap)";
+        description = "OpenRouter management key, made once in the dashboard and pasted by the owner into the prepared API-credential item";
         item = "openrouter-management-key";
+        template = "api-credential";
+        field = "Secret";
       };
     };
     agent.OPENROUTER_API_KEY =

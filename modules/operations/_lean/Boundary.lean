@@ -108,7 +108,9 @@ def waitsRightly (s : Secret) : Bool :=
 token kept in a field is kept hidden. -/
 def storedRightly (s : Secret) : Bool :=
   match s.store with
-  | .note => true
+  -- A note is only what automation writes: whatever the owner issues
+  -- (a console credential, an identifier) lives in a typed template item.
+  | .note => !s.issuer.isHuman
   | .field _ _ _ k =>
     s.issuer.isHuman && (if s.kind = .apiToken then k = .hidden else true)
 
@@ -117,6 +119,14 @@ def wellFormed (s : Secret) : Bool := issuable s && waitsRightly s && storedRigh
 /-- No well-formed secret kept in a field was written by automation. -/
 theorem field_by_hand (s : Secret) (hf : s.store.isField = true)
     (h : wellFormed s = true) : s.issuer.isHuman = true := by
+  cases s with
+  | mk n k i ns st =>
+    cases st <;> simp_all [wellFormed, storedRightly, Store.isField]
+
+/-- Whatever the owner issues is kept in a template item's field, never a note
+(the owner's rule, 2026-11-02). -/
+theorem by_hand_in_field (s : Secret) (hh : s.issuer.isHuman = true)
+    (h : wellFormed s = true) : s.store.isField = true := by
   cases s with
   | mk n k i ns st =>
     cases st <;> simp_all [wellFormed, storedRightly, Store.isField]

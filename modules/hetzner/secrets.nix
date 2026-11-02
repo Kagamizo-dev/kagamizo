@@ -15,7 +15,9 @@ in
         kind = "api-token";
         issuer = "human:console-credential";
         description = "Hetzner Cloud project token for OpenTofu and hcloud";
-        item = "hcloud-token";
+        item = "hetzner-project-token";
+        template = "api-credential";
+        field = "Secret";
       }
       // {
         required = false;

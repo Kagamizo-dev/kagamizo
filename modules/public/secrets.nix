@@ -19,7 +19,9 @@ in
     PUBLIC_ACCOUNT_ID =
       secret {
         kind = "identifier";
-        issuer = "human:console-credential";
+        # Read from Public's own `accounts list` (the one BROKERAGE account)
+        # when absent; never typed by hand.
+        issuer = "automation:brokerage";
         description = "The Public account commands act on";
         item = "public-account-id";
       }
