@@ -24,11 +24,13 @@ in
     # its IPv4 and 250 GB at $25.77 with cpx11; the apply then found cpx11
     # withdrawn from the EU locations since 2025-12-31, and cx23, the
     # cheapest type still sold there, makes it $26.26: ./_json/prices.json
-    # keeps every observation). Back to 7 when hetzner.volumes is empty.
-    monthlyBudgetUsd = 27;
-    # cx23 (2 cores, 4 GB, 40 GB; $6.49 in fsn1 on 2026-11-01): cpx11 is no
-    # longer ordered in the EU.
-    host.serverType = "cx23";
+    # keeps every observation). $30 from 2026-11-03 (the owner's go): cx33
+    # for the always-on agents (Open WebUI, OpenCode) and the Minecraft
+    # twin. Back down when hetzner.volumes is empty.
+    monthlyBudgetUsd = 30;
+    # cx33 (4 cores, 8 GB; $9.99 in fsn1 on 2026-11-01), resized from cx23
+    # keeping its 40 GB disk (./infra.nix: keep_disk), so it can move back.
+    host.serverType = "cx33";
     volumes.staging = {
       sizeGb = 250;
       why = "staging for the migration off Apple, Google and Outlook (modules/migration): photos, drives and the full archives on their way to Proton Drive";

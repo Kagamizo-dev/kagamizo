@@ -93,6 +93,9 @@ let
       hcloud_server.host = {
         name = cfg.host.name;
         server_type = cfg.host.serverType;
+        # A resize keeps the 40 GB disk: disko's layout fills the disk only
+        # at install, and a grown disk could never move to a smaller type.
+        keep_disk = true;
         location = cfg.host.location;
         image = cfg.host.bootstrapImage;
         # nixos-anywhere installs over SSH (./install.nix); no first-boot
