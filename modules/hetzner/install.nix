@@ -55,12 +55,69 @@ in
       # Closed. Installs on 2026-11-03: host-install runs 41568360740 (the
       # first), 41573145877 (with its token), 41575267127 (resolved, the
       # console report). Open it again, dated, only to reinstall.
-      window = null;
+      # Open for host-rescue (2026-11-03): read why the installed host never
+      # reaches the network; null once read.
+      window.until = "2026-11-04";
     };
 
     perSystem =
       { pkgs, config, ... }:
       {
+        # Read the installed system from Hetzner's rescue Linux, without a
+        # reinstall: boot rescue with the install key (enable_rescue,
+        # reset; the pinned API), mount the disk, print the host's token
+        # state and its journal (NixOS's own journalctl, in a chroot),
+        # then disable rescue and boot NixOS again. Needs the window open.
+        packages.host-rescue = pkgs.writeShellApplication {
+          name = "host-rescue";
+          runtimeInputs = [
+            config.packages.pass-cli
+            pkgs.openssh
+            pkgs.curl
+            pkgs.jq
+            pkgs.coreutils
+          ];
+          text = ''
+            ip=''${1:?usage: host-rescue <ipv4>}
+            export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+            export PROTON_PASS_AGENT_REASON="host-rescue: read jingzo-host's journal from rescue"
+            umask 077
+            key=$(mktemp)
+            trap 'rm -f "$key"' EXIT
+            pass-cli item view --vault-name ${vault} --item-title ${item} --field private_key >"$key"
+            token=$(pass-cli item view --vault-name ${vault} --item-title hetzner-console --field Secret)
+            api() { curl -fsS -X "$1" -H "Authorization: Bearer $token" -H "Content-Type: application/json" "https://api.hetzner.cloud/v1$2" ''${3:+-d "$3"}; }
+            id=$(api GET "/servers?name=jingzo-host" | jq -r '.servers[0].id')
+            keyid=$(api GET "/ssh_keys?name=jingzo-host-install" | jq -r '.ssh_keys[0].id')
+            ssh_() { ssh -i "$key" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 "root@$ip" "$@"; }
+            back() {
+              api POST "/servers/$id/actions/disable_rescue" >/dev/null || true
+              api POST "/servers/$id/actions/reset" >/dev/null || true
+              echo "host-rescue: rescue disabled, booting NixOS again"
+            }
+            api POST "/servers/$id/actions/enable_rescue" "{\"type\":\"linux64\",\"ssh_keys\":[$keyid]}" >/dev/null
+            api POST "/servers/$id/actions/reset" >/dev/null
+            trap 'back; rm -f "$key"' EXIT
+            echo "host-rescue: waiting for the rescue system"
+            for _ in $(seq 1 60); do ssh_ true 2>/dev/null && break; sleep 10; done
+            # shellcheck disable=SC2016
+            ssh_ bash -s <<'REMOTE'
+            set -x
+            lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINT
+            root=$(lsblk -lnpo NAME,FSTYPE /dev/sda | awk '$2 == "ext4" {print $1}' | head -1)
+            mount "$root" /mnt
+            ls -la /mnt/var/lib/kagamizo /mnt/var/lib 2>&1 | head -30
+            for d in proc sys dev; do mount --bind /$d /mnt/$d; done
+            jc() { chroot /mnt /nix/var/nix/profiles/system/sw/bin/journalctl -D /var/log/journal --no-pager "$@"; }
+            jc --list-boots | tail -5
+            last=$(jc --list-boots -q | tail -1 | awk '{print $2}')
+            jc -b "$last" -u migration-staging -u host-report -o short-iso | tail -60
+            jc -b "$last" -u systemd-networkd -u systemd-networkd-wait-online -u systemd-resolved -o short-iso | tail -40
+            jc -b "$last" -p err -o short-iso | tail -40
+            REMOTE
+          '';
+        };
+
         packages.host-install = pkgs.writeShellApplication {
           name = "host-install";
           runtimeInputs = [
