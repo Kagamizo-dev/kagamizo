@@ -1,16 +1,15 @@
 name: host-install
 
 # Installs NixOS on jingzo-host with nixos-anywhere (modules/hetzner/install.nix),
-# from this branch, inside the declared install window. Started by hand
-# (workflow_dispatch); reads only the install key, through the host-install
-# agent, whose token opens Kagamizo-Install and nothing else.
+# from the branch it is pushed on, inside the declared install window. It
+# starts when .github/host-install.request changes (a manual dispatch works
+# only once the workflow is on main); the file names the host's address.
+# Reads only the install key, through the host-install agent, whose token
+# opens Kagamizo-Install and nothing else.
 on:
-  workflow_dispatch:
-    inputs:
-      ipv4:
-        description: "The host's address (hetzner-infra output ipv4)"
-        required: true
-        default: "2.31.96.54"
+  push:
+    paths:
+      - .github/host-install.request
 
 permissions: {}
 
@@ -44,7 +43,6 @@ jobs:
           PROTON_PASS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PROTON_PASS_HOST_INSTALL_TOKEN }}
 
       - name: nixos-anywhere
-        run: nix run .#host-install -- "$IPV4"
+        run: nix run .#host-install -- "$(head -1 .github/host-install.request | cut -d' ' -f1)"
         env:
           PROTON_PASS_KEY_PROVIDER: fs
-          IPV4: ${{ inputs.ipv4 }}
