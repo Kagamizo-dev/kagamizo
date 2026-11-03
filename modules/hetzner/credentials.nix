@@ -55,6 +55,7 @@ in
             to = mkOption {
               type = types.enum [
                 "host"
+                "hostState"
                 "install"
               ];
               default = "host";
@@ -119,6 +120,8 @@ in
           item = "icloud-session";
           kind = "note";
         };
+        # The host refreshes it, so it goes where the host may write.
+        to = "hostState";
         until = "2026-12-31";
         why = "pyicloud's trusted session, so the host's exports need no new code";
       };

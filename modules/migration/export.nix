@@ -42,7 +42,7 @@ in
     # the delegations (../hetzner/credentials.nix): it never opens the
     # owner's.
     icloud-host = {
-      defaults.providers = [ "host" ];
+      defaults.providers = [ "host-state" ];
       ICLOUD_SESSION = session "icloud-session" "apple-mirazo's trusted iCloud session, the host's copy";
       ICLOUDPD_SESSION = session "icloudpd-session" "icloudpd's trusted iCloud session, the host's copy";
       RCLONE_ICLOUD_CONFIG = session "rclone-icloud-config" "rclone's iclouddrive remote, the host's copy";
@@ -61,6 +61,7 @@ in
         item = "staging-luks-key";
       }
       // {
+        providers = [ "host-state" ];
         required = false;
       };
   };

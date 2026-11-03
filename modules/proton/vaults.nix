@@ -95,6 +95,9 @@ in
         # The host's install key (modules/hetzner/install.nix): only the
         # host-install workflow's agent opens it.
         install = "Kagamizo-Install";
+        # What jingzo-host writes (its volume key, its refreshed sessions):
+        # an agent is read-only in its own vault, editor here.
+        hostState = "Kagamizo-Host-State";
       };
       inherit vaults sessionVaults;
     };

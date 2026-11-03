@@ -91,16 +91,16 @@ in
       secret = "PROTON_PASS_AGENT_TOKEN";
     };
 
-    # The always-on host: its own vault and nothing else, as editor, since
-    # it keeps what it makes there (the staging volume's LUKS key, its
-    # refreshed sessions). An agent's home vault alone is read-only: the
-    # host's first write was refused (NotAllowed, 2026-11-03).
+    # The always-on host: reads its own vault (what is delegated to it) and
+    # writes Kagamizo-Host-State (what it makes: the staging volume's LUKS
+    # key, its refreshed sessions). An agent stays read-only in its own
+    # vault, even granted editor there (NotAllowed, 2026-11-03).
     kagamizo-host = {
       vault = infraVaults.host;
       expiration = "6m";
       access = [
         {
-          vault = infraVaults.host;
+          vault = infraVaults.hostState;
           role = "editor";
         }
       ];
