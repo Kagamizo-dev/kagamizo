@@ -42,6 +42,19 @@ let
     }
   );
 
+  # Open WebUI and OpenCode, behind the agents tunnel (./agents.nix).
+  agents = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ./_agents.nix {
+      inherit (cfg.agents) services zone;
+      inherit (config.packages) secretspec;
+      secretspecToml = config.packages.secretspec-toml;
+      passCli = config.packages.pass-cli;
+      opencodeConfig = config.packages.opencode-config;
+      tokenFile = "/var/lib/kagamizo/host-token";
+    }
+  );
+
   # The disk Hetzner Cloud gives an x86 server (virtio-scsi, /dev/sda),
   # GPT with a BIOS boot partition and an ESP, so GRUB boots either way.
   disk = {
@@ -85,6 +98,7 @@ let
         inputs.disko.nixosModules.disko
         disk
         staging
+        agents
       ];
       networking.hostName = cfg.name;
       boot.loader.grub = {

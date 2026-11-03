@@ -66,6 +66,15 @@ in
                   html = config.site.statusHtml;
                 }
               ))
+              # jingzo-host's agents, through their tunnel behind Access
+              # (../hetzner/agents.nix).
+              (lib.optionalAttrs statusOn (
+                import ./_agents.nix {
+                  inherit (top.cloudflare.checked) accountId;
+                  inherit (top.hetzner.host.agents) zone viewers services;
+                  zoneId = domains.${top.hetzner.host.agents.zone}.zoneId;
+                }
+              ))
               # The build cache's bucket and its domain (../cache).
               top.cache.layer
               # The Zero Trust organization (Access), team "kagamizo" (the
