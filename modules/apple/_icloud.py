@@ -20,7 +20,11 @@ import sys
 from urllib.parse import urlparse
 
 from pyicloud import PyiCloudService
-from pyicloud.exceptions import PyiCloudTrustedDevicePromptException
+from pyicloud.exceptions import (
+    PyiCloud2FARequiredException,
+    PyiCloudAPIResponseException,
+    PyiCloudTrustedDevicePromptException,
+)
 from pyicloud.hsa2_bridge import TrustedDeviceBridgeBootstrapper, _RawWebSocketClient
 
 
@@ -59,6 +63,30 @@ class ProxiedWebSocket(_RawWebSocketClient):
             return super()._open()
         finally:
             socket.create_connection = real_create
+
+
+def validate(api, code):
+    """Check Apple's code where it was sent. The pinned pyicloud (2026.10.1)
+    requests an SMS with mode "sms" (base.py:1040) but validates it with the
+    phone's push mode (base.py:1432), which Apple refuses when they differ:
+    an SMS code is checked here with the mode it was requested with. A code
+    the owner read off a trusted device is checked at the device endpoint,
+    once, if the SMS check refuses it."""
+    if api.two_factor_delivery_method != "sms":
+        return api.validate_2fa_code(code)
+    phone = api._trusted_phone_number()
+    data = {"phoneNumber": phone.as_phone_number_payload(), "securityCode": {"code": code}, "mode": "sms"}
+    headers = api._get_auth_headers({"Accept": "application/json, text/plain"})
+    try:
+        api.session.post(f"{api._auth_endpoint}/verify/phone/securitycode", json=data, headers=headers)
+    except (PyiCloudAPIResponseException, PyiCloud2FARequiredException) as error:
+        if not api._is_accepted_security_code_conflict(error.response):
+            try:
+                api._validate_trusted_device_code(code)
+            except (PyiCloudAPIResponseException, PyiCloud2FARequiredException):
+                return False
+    api.trust_session()
+    return not api.requires_2sa
 
 
 mode, apple_id, cookies = sys.argv[1:4]
@@ -103,7 +131,7 @@ if mode == "login":
         )
         with open(fifo) as f:
             code = f.readline().strip()
-        if not api.validate_2fa_code(code):
+        if not validate(api, code):
             sys.exit("icloud: Apple refused the code")
         if not api.is_trusted_session:
             api.trust_session()
