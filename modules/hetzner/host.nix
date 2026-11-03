@@ -120,8 +120,8 @@ let
           ];
           serviceConfig = {
             Type = "oneshot";
-            StandardOutput = "tty";
-            TTYPath = "/dev/tty1";
+            # The journal (host-rescue reads it) and the console.
+            StandardOutput = "journal+console";
           };
           script = ''
             # Long enough for migration-staging's first tries.
