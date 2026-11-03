@@ -63,6 +63,10 @@ in
     environment.systemPackages = [ migrate ];
 
     systemd = {
+      # A fresh pass-cli session every boot: a saved one keeps the
+      # permissions it was made with (a grant made later was not seen,
+      # 2026-11-03); within a boot, retries reuse the session.
+      tmpfiles.rules = [ "R /root/.local/share/proton-pass-cli - - - - -" ];
       services.migration-staging = {
         description = "The migration's staging volume: LUKS, mounted";
         wantedBy = [ "multi-user.target" ];

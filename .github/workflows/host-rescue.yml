@@ -40,6 +40,6 @@ jobs:
           PROTON_PASS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PROTON_PASS_HOST_INSTALL_TOKEN }}
 
       - name: host-rescue
-        run: nix run .#host-rescue -- "$(head -1 .github/host-rescue.request | cut -d' ' -f1)"
+        run: nix run .#host-rescue -- $(head -1 .github/host-rescue.request | cut -d' ' -f1,2)
         env:
           PROTON_PASS_KEY_PROVIDER: fs

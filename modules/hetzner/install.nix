@@ -78,7 +78,8 @@ in
             pkgs.coreutils
           ];
           text = ''
-            ip=''${1:?usage: host-rescue <ipv4>}
+            ip=''${1:?usage: host-rescue <ipv4> [read|reset-session]}
+            action=''${2:-read}
             export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
             export PROTON_PASS_AGENT_REASON="host-rescue: read jingzo-host's journal from rescue"
             umask 077
@@ -101,7 +102,7 @@ in
             echo "host-rescue: waiting for the rescue system"
             for _ in $(seq 1 60); do ssh_ true 2>/dev/null && break; sleep 10; done
             # shellcheck disable=SC2016
-            ssh_ bash -s <<'REMOTE'
+            ssh_ ACTION="$action" bash -s <<'REMOTE'
             set -x
             lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINT
             root=$(lsblk -lnpo NAME,FSTYPE /dev/sda | awk '$2 == "ext4" {print $1}' | head -1)
@@ -115,6 +116,9 @@ in
             jc -b "$last" -u host-report -o short-iso | head -40
             jc -b "$last" -u systemd-networkd -u systemd-networkd-wait-online -u systemd-resolved -o short-iso | tail -40
             jc -b "$last" -p err -o short-iso | tail -40
+            # A stale pass-cli session keeps old permissions: the next boot
+            # signs in fresh.
+            if [ "$ACTION" = reset-session ]; then rm -rf /mnt/root/.local/share/proton-pass-cli; echo "pass-cli session removed"; fi
             REMOTE
           '';
         };
