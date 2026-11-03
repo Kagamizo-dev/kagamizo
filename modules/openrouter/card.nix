@@ -8,9 +8,12 @@ let
   keyCaps = lib.foldl' (n: k: n + k.limitUsd) 0 (lib.attrValues config.openrouter.keys);
 in
 {
+  # Minted by the owner on 2026-11-02 as "Research-OpenRouter" (••5055).
   mercury.cards.openrouter = {
-    limitUsd = 5;
-    interval = "monthly";
+    nickname = "Research-OpenRouter";
+    limitUsd = 50;
+    interval = "weekly";
+    merchantLock = "OpenRouter";
     why = "OpenRouter credits, Jingzo's (the keys' caps total ${toString keyCaps})";
     account = "mercury-jingzo";
   };

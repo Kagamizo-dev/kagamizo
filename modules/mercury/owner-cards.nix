@@ -4,6 +4,7 @@
 # mints each; `cards plan` lists the ones not minted yet. Mirazo's personal
 # Mercury has no virtual cards, so the owner's own accounts are paid from
 # Jingzo's, as the owner's draw.
+{ config, ... }:
 {
   mercury.cards = {
     proton = {
@@ -22,6 +23,20 @@
       why = "Northwest, Jingzo's registered agent";
       account = "mercury-jingzo";
     };
+    # Minted by the owner on 2026-10-21 as "Media" (••1975), found by
+    # `cards plan`'s discovery on 2026-11-03.
+    netflix = {
+      nickname = "Media";
+      limitUsd = 20;
+      interval = "monthly";
+      merchantLock = "Netflix";
+      why = "Netflix, the owner's own";
+      account = "mercury-jingzo";
+      between = {
+        for = "mirazo";
+        as = "draw";
+      };
+    };
     amazon = {
       limitUsd = 150;
       interval = "yearly";
@@ -33,7 +48,8 @@
       };
     };
     hetzner = {
-      limitUsd = 7;
+      # The card's limit is Hetzner's budget, so the two never drift.
+      limitUsd = config.hetzner.monthlyBudgetUsd;
       interval = "monthly";
       why = "Hetzner, Jingzo's host (hetzner.monthlyBudgetUsd)";
       account = "mercury-jingzo";

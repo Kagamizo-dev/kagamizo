@@ -73,6 +73,11 @@ let
         default = "debit";
       };
       why = mkOption { type = types.str; };
+      merchantLock = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "The merchant the owner locked the card to in Mercury (merchantLock.name), checked by `cards plan`.";
+      };
       between = mkOption {
         type = types.nullOr (
           types.submodule {
@@ -288,10 +293,22 @@ in
                       "spend-limit.interval".shell = "$interval";
                     }
                   } >/dev/null
+                elif [ "$(jq -r '.merchantLock // empty' <<<"$c")" != "$(jq -r '.merchantLock.name // empty' <<<"$have")" ]; then
+                  echo "~ lock    $name: Mercury says $(jq -r '.merchantLock.name // "no lock"' <<<"$have"), declared $(jq -r '.merchantLock // "no lock"' <<<"$c") (the owner sets it in Mercury)"
                 else
-                  echo "  ok      $name: \$$(jq -r .limitUsd <<<"$c")/$interval, $(jq -r .status <<<"$have"), ••$(jq -r .lastFour <<<"$have")"
+                  echo "  ok      $name: \$$(jq -r .limitUsd <<<"$c")/$interval, $(jq -r .status <<<"$have"), ••$(jq -r .lastFour <<<"$have")$(jq -r 'if .merchantLock.name then ", locked to \(.merchantLock.name)" else "" end' <<<"$have")$(jq -r 'if .isAgentCard then ", agentic" else "" end' <<<"$have")"
                 fi
               done
+              # Discovery: every live virtual card on the account, whatever
+              # its name, so a card the owner minted is never invisible.
+              ${
+                cli.mercury "cards list" {
+                  type = [ "virtual" ];
+                  format = "jsonl";
+                }
+              } | jq -s -r --argjson c "$cards" '[.[] | if has("cards") then .cards[] else . end | select(.status != "cancelled")]
+                | .[] | select((.nickname // "") as $n | [$c[].nickname] | index($n) | not)
+                | "? undeclared \(.nickname // "(no nickname)"): ••\(.lastFour), $\(.spendLimit.amountCents / 100)/\(.spendLimit.interval)\(if .merchantLock.name then ", locked to \(.merchantLock.name)" else "" end), \(.status); declare it in mercury.cards"'
               jq -r --argjson c "$cards" '.[] | select(.nickname as $n | [$c[].nickname] | index($n) | not) | "\(.id) \(.nickname)"' <<<"$l" |
                 while read -r id nick; do
                   if [ "$1" = apply ] && [ "''${2:-}" = --prune ]; then
