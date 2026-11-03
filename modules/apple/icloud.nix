@@ -21,6 +21,22 @@ in
 {
   secrets.profiles.${profile} = {
     defaults.providers = [ "${account.owner}-sessions" ];
+    # IMAP, CardDAV and CalDAV for the migration (imapsync, vdirsyncer):
+    # an app-specific password the owner makes in Apple's account settings
+    # and pastes into the prepared API-credential item.
+    ICLOUD_APP_PASSWORD =
+      (import ../_lib/secret.nix) {
+        kind = "api-token";
+        issuer = "human:console-credential";
+        description = "apple-mirazo's app-specific password for IMAP, CardDAV and CalDAV";
+        item = "icloud-app-password";
+        template = "api-credential";
+        field = "Secret";
+      }
+      // {
+        providers = [ "${account.owner}-logins" ];
+        required = false;
+      };
     ICLOUD_SESSION =
       (import ../_lib/secret.nix) {
         kind = "oauth-session";

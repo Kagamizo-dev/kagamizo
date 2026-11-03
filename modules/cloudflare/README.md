@@ -324,6 +324,10 @@ around.
   user data, 600, from the proton-agents profile), the units stay idle and
   say so, and the exports run from a session instead
   (`nix run .#migrate`).
+- **Proton Easy Switch** (Gmail and Outlook into Proton Mail, contacts,
+  calendars) starts only in Proton's web settings: Proton publishes no API
+  for it. The owner approves the provider's sign-in there; two imports run
+  at once, one per account.
 - **Card details into Proton Pass**: `cards vault` stores an owner-minted
   card as a Proton Pass credit card item (card-<name>, the owner's vault)
   straight from Mercury's reveal, never printed. Mercury reveals agentic
