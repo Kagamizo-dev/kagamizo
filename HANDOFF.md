@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "Where the 2026-11-03 session left it": add cache.kagamizo.com and developers.cloudflare.com to modules/claude/_environment.nix; deliver jingzo-host's Proton Pass token (nixos-anywhere --extra-files from Proton Pass) and run the iCloud exports there (notes, reminders as Markdown, Drive, photos into Proton Drive); after my OpenRouter key, `openrouter apply` and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order, from HANDOFF.md's "Later on 2026-11-03: the always-on agents": confirm the agents tunnel is healthy and agents.jingzo.org and code.jingzo.org answer behind Access; move the host's iCloud exports from staging into Proton Drive; the typed machines.<name> contract; the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). End the session with the full allowlist (if it changed) and the updated start message, each ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -429,11 +429,35 @@ and Lean the proof; C only where a measured record demands it.
 
 ## The allowlist to apply (one change, all of it)
 
-Add `cache.kagamizo.com` (the build cache: sessions pull from it) and
-`developers.cloudflare.com` (Cloudflare's references). Everything else is
-applied and declared.
+Declared (2026-11-03): `cache.kagamizo.com`, `developers.cloudflare.com`,
+and the host's agents (`agents.jingzo.org`, `code.jingzo.org`,
+`kagamizo.cloudflareaccess.com`). Paste the full list from
+`nix build .#claude-allowed-domains`.
 
-## Where the 2026-11-03 session left it (read this first)
+## Later on 2026-11-03: the always-on agents (read this first)
+
+- **Cloudflare, applied** (state: 7 added): the remotely managed tunnel
+  `jingzo-host-agents` (id 515fc4b0-c25c-4b27-9653-b268f0c08829), its
+  ingress (agents.jingzo.org → localhost:8080, code.jingzo.org →
+  localhost:4096, else 404), the Access policy for zach@mirazo.org, one
+  Access application per name, and the proxied CNAMEs, each made after its
+  application (`modules/cloudflare/_agents.nix`). The tunnel's token is in
+  Kagamizo-Host/tunnel-token (`infra-tunnel-token`, never printed).
+- **The host** (`modules/hetzner/{agents,_agents}.nix`): `agents-secrets`
+  writes /run/agents from Kagamizo-Host (the capped chat-and-code OpenRouter
+  key, the tunnel token); `open-webui` (trusts Access's
+  Cf-Access-Authenticated-User-Email; the one unfree package admitted);
+  `opencode-web` with the repo's OpenCode config; `cloudflared-agents`.
+  Pushed as b46cadb; the host switches at its 04:40 UTC autoUpgrade
+  (2026-11-04), building Open WebUI itself (not in cache.nixos.org; this
+  session's proxy blocks its GitHub tarball).
+- **To check after 04:40 UTC:** the tunnel's status from Cloudflare's API
+  (agent profile; `inactive` before the switch, `healthy` after), then
+  `host-console` for the units. If the switch failed, `host-console` shows
+  the failed units; reinstalling (dated window, `hetzner-infra reinstall`,
+  `host-install`) is the fallback.
+
+## Where the 2026-11-03 session left it
 
 - **jingzo-host is up** (2026-11-03, 05:10 UTC): NixOS from the repository,
   installed by nixos-anywhere from the `host-install` workflow (no SSH on

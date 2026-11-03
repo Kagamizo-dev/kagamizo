@@ -45,6 +45,18 @@ in
           "api.cloudflare.com"
           # OAuth device login (cloudflare-login): the root session
           "dash.cloudflare.com"
+          # The provider's and the API's pages the layers cite
+          "developers.cloudflare.com"
+          # The build cache's own domain (modules/cache)
+          "cache.kagamizo.com"
+        ];
+      };
+      host-agents = {
+        reason = "jingzo-host's agents behind Access, to check them (modules/hetzner/agents.nix)";
+        hosts = [
+          "agents.jingzo.org"
+          "code.jingzo.org"
+          "kagamizo.cloudflareaccess.com"
         ];
       };
       proton = {
