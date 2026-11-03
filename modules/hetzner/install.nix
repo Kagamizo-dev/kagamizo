@@ -70,7 +70,9 @@ in
             key=$(mktemp)
             trap 'rm -f "$key"' EXIT
             # From Proton Pass into the file; never onto the screen.
-            pass-cli item view --vault-name ${vault} --item-title ${item} --field private_key >"$key"
+            # An agent's pass-cli states why it reads (pass-cli 2.4.2 refuses otherwise).
+            PROTON_PASS_AGENT_REASON="host-install: nixos-anywhere installs jingzo-host at $ip" \
+              pass-cli item view --vault-name ${vault} --item-title ${item} --field private_key >"$key"
             [ -s "$key" ] || { echo "host-install: no install key in ${vault}/${item}" >&2; exit 1; }
             nixos-anywhere -L --flake "$(pwd)#jingzo-host" -i "$key" \
               --ssh-option StrictHostKeyChecking=accept-new "root@$ip"
