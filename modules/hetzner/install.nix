@@ -55,9 +55,11 @@ in
       # Closed. Installs on 2026-11-03: host-install runs 41568360740 (the
       # first), 41573145877 (with its token), 41575267127 (resolved, the
       # console report). Open it again, dated, only to reinstall.
-      # Open for host-rescue (2026-11-03): read why the installed host never
-      # reaches the network; null once read.
-      window.until = "2026-11-04";
+      # Closed. On 2026-11-03 the host was installed (host-install runs
+      # 41568360740 to 41582003588) and read from rescue (host-rescue) until
+      # it signed in and kept its volume key. Open it again, dated, only to
+      # reinstall or rescue.
+      window = null;
     };
 
     perSystem =
