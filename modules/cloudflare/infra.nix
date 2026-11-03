@@ -68,6 +68,16 @@ in
               ))
               # The build cache's bucket and its domain (../cache).
               top.cache.layer
+              # The Zero Trust organization (Access), team "kagamizo" (the
+              # owner's choice, 2026-11-03): what status.mirazo.org and the
+              # host's agents sit behind.
+              {
+                resource.cloudflare_zero_trust_organization.kagamizo = {
+                  account_id = top.cloudflare.checked.accountId;
+                  name = "kagamizo";
+                  auth_domain = "kagamizo.cloudflareaccess.com";
+                };
+              }
               # What the state adopts from Cloudflare (./imports.nix).
               {
                 import = lib.mapAttrsToList (to: id: { inherit to id; }) (
