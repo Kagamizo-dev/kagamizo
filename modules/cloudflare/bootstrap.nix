@@ -120,6 +120,16 @@ in
           export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
           declared=${lib.escapeShellArg (builtins.toJSON declared)}
           spec=${config.packages.secretspec-toml}
+          # The root account token, when the owner has made it: cf runs on
+          # it (CLOUDFLARE_API_TOKEN), not on the device sign-in. Held in a
+          # variable only, never printed.
+          if [ -z "''${CLOUDFLARE_API_TOKEN:-}" ] &&
+            root=$(secretspec get CLOUDFLARE_ROOT_TOKEN --file "$spec" --profile cloudflare-root \
+              --reason "bootstrap: the root token" 2>/dev/null) && [ -n "$root" ]; then
+            export CLOUDFLARE_API_TOKEN=$root
+            unset root
+            echo "bootstrap: on the root account token (Mirazo-Root/cloudflare-root-token)" >&2
+          fi
           expiry=${lib.escapeShellArg cloudflare.tokenExpiry}
 
           result() { jq -c '.result // .'; }

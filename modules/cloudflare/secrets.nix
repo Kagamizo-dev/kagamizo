@@ -22,6 +22,26 @@ let
 in
 {
   secrets.profiles = {
+    # The account token that mints every other one (bootstrap): made once
+    # by the owner in the dashboard with only "Account API Tokens: Edit",
+    # and pasted into its prepared API-credential item. It replaces the cf
+    # device sign-in, which can never hold billing and loses scopes the
+    # approver unticks.
+    cloudflare-root = {
+      defaults.providers = [ "root" ];
+      CLOUDFLARE_ROOT_TOKEN =
+        secret {
+          kind = "api-token";
+          issuer = "human:console-credential";
+          description = "Cloudflare account token with Account API Tokens: Edit, for bootstrap";
+          item = "cloudflare-root-token";
+          template = "api-credential";
+          field = "Secret";
+        }
+        // {
+          required = false;
+        };
+    };
     # GitHub Actions on main, behind the `cloudflare` environment.
     ci = {
       defaults.providers = [ "ci" ];
