@@ -11,6 +11,10 @@
 #   cards funds             the balances the cards draw from
 #   cards apply [--prune]   refused: the owner mints and cancels cards
 #                           (2026-10-24); plan reports what differs
+#   cards vault <name>|--all  put a card the owner minted into their vault
+#                           as a Proton Pass credit card item, card-<name>,
+#                           straight from Mercury: never printed, never on
+#                           disk (agentic cards only, Mercury's rule)
 #   cards freeze <name>     stop a card at once; `unfreeze` restores it
 #   cards unfreeze <name>
 #
@@ -178,7 +182,7 @@ in
           account=''${CARDS_ACCOUNT:?}
           cards=$(jq -c --arg a "$account" 'with_entries(select(.value.account == $a))' <<<${lib.escapeShellArg (builtins.toJSON cards)})
           vault=$(jq -r --arg a "$account" '.[$a] // empty' <<<${lib.escapeShellArg (builtins.toJSON vaults)})
-          usage="usage: cards <plan|spend [YYYY-MM]|funds|apply [--prune]|freeze <name>|unfreeze <name>>"
+          usage="usage: cards <plan|spend [YYYY-MM]|funds|vault <name>|--all|apply [--prune]|freeze <name>|unfreeze <name>>"
 
           # Each line of jsonl output is a card, or a page holding cards.
           declared=$cards
@@ -225,7 +229,7 @@ in
           # lets reveal (agentic cards).
           store() { # name card-json
             if [ "$(jq -r '.isAgentCard // false' <<<"$2")" != true ]; then
-              echo "  card-$1: Mercury does not reveal this card (not agentic); not stored" >&2
+              echo "  card-$1: Mercury reveals agentic cards only; mint it as an agentic card, or its details go into Proton Pass by hand (a Gap)" >&2
               return 0
             fi
             ${
@@ -334,6 +338,40 @@ in
                 jq -rs '.[] | if has("accounts") then .accounts[] else . end
                   | "  \(.name // .nickname): $\(.availableBalance) available (\(.kind), \(.status))"'
               ;;
+            vault)
+              # The card's number moves from Mercury's reveal into Proton
+              # Pass through pipes only: TLS to Mercury, jq in memory,
+              # pass-cli's stdin, Proton's end-to-end encryption; nothing is
+              # printed, nothing touches the disk.
+              [ -n "$vault" ] || { echo "cards: no owner vault for $account" >&2; exit 1; }
+              l=$(live)
+              if [ "''${2:-}" = --all ]; then
+                names=$(jq -r 'keys[]' <<<"$cards")
+              else
+                names=''${2:?$usage}
+                jq -e --arg n "$names" 'has($n)' <<<"$cards" >/dev/null ||
+                  { echo "cards: $names is not declared on $account (mercury.cards)" >&2; exit 1; }
+              fi
+              for name in $names; do
+                nick=$(jq -r --arg n "$name" '.[$n].nickname' <<<"$cards")
+                have=$(jq -c --arg n "$nick" 'map(select(.nickname == $n))[0] // empty' <<<"$l")
+                if [ -z "$have" ]; then
+                  echo "  card-$name: not minted yet ($nick); the owner mints it in Mercury" >&2
+                  continue
+                fi
+                if ${
+                  cli.passCli "item list" {
+                    vault-name.shell = "$vault";
+                    filter-type = "credit-card";
+                    output = "json";
+                  }
+                } | jq -e --arg t "card-$name" '(.items // .) | any(.title == $t)' >/dev/null; then
+                  echo "  card-$name: already in $vault"
+                  continue
+                fi
+                store "$name" "$have"
+              done
+              ;;
             freeze | unfreeze)
               name=''${2:?$usage}
               have=$(byName "$name")
@@ -401,6 +439,7 @@ in
             apply) needs=("cards create" "cards update") ;;
             freeze) needs=("cards freeze") ;;
             unfreeze) needs=("cards unfreeze") ;;
+            vault) needs=("cards reveal") ;;
             *) needs=() ;;
           esac
           [ "''${1:-}" != apply ] || [ "''${2:-}" != --prune ] || needs+=("cards cancel")
@@ -413,7 +452,7 @@ in
           done
           case "''${1:-}" in
             apply) if [ "''${2:-}" = --prune ]; then action=cards-prune; else action=cards-apply; fi ;;
-            plan | spend | funds | freeze | unfreeze) action=cards-$1 ;;
+            plan | spend | funds | vault | freeze | unfreeze) action=cards-$1 ;;
             *) action= ;;
           esac
           if [ -n "$action" ]; then

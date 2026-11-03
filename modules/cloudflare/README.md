@@ -324,6 +324,11 @@ around.
   user data, 600, from the proton-agents profile), the units stay idle and
   say so, and the exports run from a session instead
   (`nix run .#migrate`).
+- **Card details into Proton Pass**: `cards vault` stores an owner-minted
+  card as a Proton Pass credit card item (card-<name>, the owner's vault)
+  straight from Mercury's reveal, never printed. Mercury reveals agentic
+  cards only (its Vault API); any other card's details are entered in
+  Proton Pass by hand.
 - **Registrar prerequisites**: default payment method, registrant contact and
   the registration agreement, dashboard only.
 - **`cf`'s sign-in mints tokens only when its scope is ticked**: Cloudflare's

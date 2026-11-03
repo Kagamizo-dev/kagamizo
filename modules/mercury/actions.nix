@@ -28,6 +28,13 @@
       description = "Cancel cards no longer declared";
       command = "cards apply --prune";
     };
+    # Puts a card the owner minted into their vault: it hands out what
+    # spends, so a controller only, like issuing one.
+    cards-vault = {
+      effect = "spend";
+      description = "Store an owner-minted card's details in Proton Pass (never printed)";
+      command = "cards vault";
+    };
     cards-freeze = {
       effect = "write";
       description = "Stop a card at once";
