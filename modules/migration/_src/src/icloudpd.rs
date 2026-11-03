@@ -55,17 +55,35 @@ pub fn icloudpd(photos: Option<&Path>) -> Result<()> {
     }
     // icloudpd asks for the code on stdout; the session relays it.
     let out = child.stdout.take().context("icloudpd stdout")?;
+    // The prompt ends without a newline ("...code: "), so the output is
+    // read as it arrives, not by lines (a line-reader waited forever).
     let relay = std::thread::spawn(move || -> Result<()> {
-        use std::io::BufRead;
+        use std::io::Read;
+        let mut out = out;
+        let mut seen = String::new();
         let mut asked = false;
-        for line in std::io::BufReader::new(out).lines() {
-            let line = line?;
-            if line.contains("two-factor authentication code") && !asked {
+        let mut buf = [0u8; 4096];
+        loop {
+            let n = out.read(&mut buf)?;
+            if n == 0 {
+                break;
+            }
+            seen.push_str(&String::from_utf8_lossy(&buf[..n]));
+            if !asked && seen.contains("two-factor authentication code") {
                 asked = true;
                 let c = code()?;
                 writeln!(stdin, "{}", c.as_str())?;
-            } else if line.contains("Try again") || line.contains("Invalid") {
-                bail!("icloudpd refused the relayed code: {line}");
+                seen.clear();
+            } else if asked && (seen.contains("Try again") || seen.contains("Invalid")) {
+                bail!("icloudpd refused the relayed code");
+            }
+            // Keep only the tail, enough to hold a prompt split across reads.
+            if seen.len() > 8192 {
+                let mut cut = seen.len() - 1024;
+                while !seen.is_char_boundary(cut) {
+                    cut += 1;
+                }
+                seen = seen[cut..].to_string();
             }
         }
         Ok(())
