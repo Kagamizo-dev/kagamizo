@@ -42,7 +42,14 @@ in
                 type = types.enum [
                   "login"
                   "note"
+                  "field"
                 ];
+                description = "login, note, or one field of an API-credential item (from.field).";
+              };
+              field = mkOption {
+                type = types.nullOr types.str;
+                default = null;
+                description = "For kind = field: the field of the source item copied.";
               };
             };
             to = mkOption {
@@ -93,6 +100,19 @@ in
         until = "2026-12-31";
         why = "the iCloud exports sign in as apple-mirazo (pyicloud, icloudpd, rclone)";
       };
+      # Reads jingzo-host's console from CI (./console.nix): Hetzner's
+      # project token, for request_console only.
+      hetzner-console = {
+        from = {
+          vault = config.proton.sessionVaults.${config.accounts.held.hetzner.owner};
+          item = "hetzner-project-token";
+          kind = "field";
+          field = "Secret";
+        };
+        to = "install";
+        until = "2026-11-17";
+        why = "host-console asks Hetzner for jingzo-host's console and screenshots it";
+      };
       icloud-session = {
         from = {
           vault = config.proton.sessionVaults.mirazo;
@@ -109,7 +129,12 @@ in
       let
         declared = builtins.toJSON (
           lib.mapAttrs (_: c: {
-            inherit (c.from) vault item kind;
+            inherit (c.from)
+              vault
+              item
+              kind
+              field
+              ;
             to = vaults.${c.to};
             title = c.item;
             inherit (c) until;
@@ -153,6 +178,18 @@ in
                 note)
                   jq -c --arg t "$title" --arg n "$note" '{title: $t, note: .item.content.note}' <<<"$view" |
                     pass-cli item create note --vault-name "$to" --from-template - >/dev/null ;;
+                field)
+                  f=$(jq -r .field <<<"$c")
+                  # The one field, as the Secret of an API credential.
+                  jq -c --arg t "$title" --arg n "$note" --arg f "$f" '
+                    [(.item.content.extra_fields // []), ((.item.content.content.Custom.sections // [])[] | .section_fields)] | add
+                    | map(select(.name == $f))[0].content | to_entries[0].value as $v |
+                    {title: $t, note: $n, sections: [{section_name: "API credential", fields: [
+                      {field_name: "API key", field_type: "hidden", value: $f},
+                      {field_name: "Secret", field_type: "hidden", value: $v},
+                      {field_name: "Expiry date", field_type: "timestamp", value: "0"},
+                      {field_name: "Permissions", field_type: "text", value: "delegated"}]}]}' <<<"$view" |
+                    pass-cli item create custom --vault-name "$to" --from-template - >/dev/null ;;
                 login)
                   jq -c --arg t "$title" --arg n "$note" '.item.content.content.Login as $l |
                     {title: $t, username: $l.username, email: $l.email, password: $l.password, totp_uri: null, urls: ($l.urls // [])}' <<<"$view" |

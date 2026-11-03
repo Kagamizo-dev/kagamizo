@@ -93,11 +93,48 @@ let
       };
       # Hetzner Cloud hands the IPv4 out by DHCP.
       networking.useNetworkd = true;
-      systemd.network.networks."10-uplink" = {
-        matchConfig.Name = "en*";
-        networkConfig.DHCP = "ipv4";
+      services = {
+        # DHCP's DNS servers, through resolved (networkd hands them over).
+        resolved.enable = true;
+        openssh.enable = false;
+        # No SSH, so the console is how the host shows its state: getty
+        # keeps the boot messages, and host-report prints the state over
+        # them, for host-console's screenshot (./console.nix).
+        getty.extraArgs = [ "--noclear" ];
       };
-      services.openssh.enable = false;
+      systemd = {
+        network.networks."10-uplink" = {
+          matchConfig.Name = "en*";
+          networkConfig.DHCP = "ipv4";
+        };
+        services.host-report = {
+          description = "Print the host's state on its console";
+          wantedBy = [ "multi-user.target" ];
+          after = [ "network-online.target" ];
+          wants = [ "network-online.target" ];
+          path = [
+            pkgs.iproute2
+            pkgs.systemd
+            pkgs.coreutils
+            pkgs.gnugrep
+          ];
+          serviceConfig = {
+            Type = "oneshot";
+            StandardOutput = "tty";
+            TTYPath = "/dev/tty1";
+          };
+          script = ''
+            # Long enough for migration-staging's first tries.
+            sleep 120
+            echo "== host-report $(date -u +%FT%TZ)"
+            ip -4 -brief addr
+            resolvectl dns 2>/dev/null | grep -v '^Global' || true
+            echo "-- failed units"; systemctl --failed --no-legend --plain || true
+            [ -r /var/lib/kagamizo/host-token ] && echo "-- host token: present" || echo "-- host token: MISSING"
+            echo "-- migration-staging"; journalctl -u migration-staging -b --no-pager -n 12 -o cat || true
+          '';
+        };
+      };
       nix.settings.experimental-features = [
         "nix-command"
         "flakes"

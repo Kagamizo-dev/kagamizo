@@ -79,6 +79,9 @@ in
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
+          # The network can come up after the unit starts; try again.
+          Restart = "on-failure";
+          RestartSec = 30;
         };
         script = ''
           set -euo pipefail
