@@ -49,8 +49,10 @@ in
   config = {
     hetzner.host.install = {
       publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF4o1biNsiYTdl40/PDI5xOPjGA1H5FFD6wot5JPn3ie jingzo-host install (nixos-anywhere), modules/hetzner/install.nix";
-      # Opened for the first install (the owner's approval, 2026-11-03).
-      window.until = "2026-11-05";
+      # Closed: the first install ran on 2026-11-03 (host-install run
+      # 41568360740, nixos-anywhere, 3 min). Open it again, dated, only to
+      # reinstall.
+      window = null;
     };
 
     perSystem =
