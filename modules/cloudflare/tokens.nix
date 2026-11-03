@@ -46,6 +46,7 @@
     "Cloudflare Tunnel Write" = "argotunnel.write";
     "Access: Apps and Policies Read" = "access.read";
     "Access: Apps and Policies Write" = "access.write";
+    "Access: Organizations, Identity Providers, and Groups Write" = "access.write";
   };
 
   cloudflare.tokens = {
@@ -102,6 +103,9 @@
         "D1 Write"
         "Cloudflare Tunnel Write"
         "Access: Apps and Policies Write"
+        # The Zero Trust organization itself (status.mirazo.org, and the
+        # agents behind Access).
+        "Access: Organizations, Identity Providers, and Groups Write"
       ];
     };
   };
