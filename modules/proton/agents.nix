@@ -106,6 +106,14 @@ in
       secret = "PROTON_PASS_CACHE_TOKEN";
     };
 
+    # The host-install workflow (modules/hetzner/install.nix): its vault holds
+    # the install key, nothing else.
+    host-install = {
+      vault = infraVaults.install;
+      expiration = "6m";
+      secret = "PROTON_PASS_HOST_INSTALL_TOKEN";
+    };
+
     # The Orca agent fleet: the same view as plans, renewed monthly.
     orca-fleet = {
       vault = infraVaults.agents;

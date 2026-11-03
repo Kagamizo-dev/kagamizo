@@ -12,16 +12,15 @@
 #
 # Hetzner has no spending limit of its own: the budget is enforced here,
 # from Hetzner's live prices (GET /pricing) for the declared server type and
-# address in the declared location. The state is a local file kept in
-# Proton Pass (TOFU_STATE, encrypted with TOFU_STATE_PASSPHRASE), in the
-# account owner's sessions vault, as the Cloudflare layers keep theirs.
+# address in the declared location. The state is kept in Proton Pass by
+# statestore (../statestore, hetzner@<generation> in the owner's sessions
+# vault), encrypted with TOFU_STATE_PASSPHRASE.
 #
-# First boot (Hetzner's cloud-init, as root on its bootstrap image): Nix's
-# official release tarball for the pinned nixpkgs' Nix, checked against the
-# hash recorded here; then `nix build` of jingzo-host-installer from this
-# repository at the applied commit, kexec into it, and it partitions and
-# installs (./host.nix). Later changes to the first-boot script do not
-# replace the server: the host follows the repository by itself.
+# Installing it: the server boots Hetzner's image with the install key's
+# public half; the host-install workflow (./install.nix) runs nixos-anywhere
+# against it over SSH, inside a dated install window, which partitions the
+# disk as declared (disko) and installs jingzo-host from this repository.
+# The installed host runs no SSH server, and the window then closes.
 {
   lib,
   config,
@@ -35,27 +34,7 @@ let
   provider = lib.importJSON ../catalog/_json/hetzner-provider.json;
   api = lib.importJSON ../catalog/_json/hetzner-api.json;
 
-  nixRelease = {
-    version = "2.34.8";
-    sha256 = "2c2e146b80834fe0ca201b51deeb939405b4f18e8d2071bf80b10f8123c50464";
-  };
   rev = self.rev or null;
-
-  firstBoot = ''
-    #!/bin/bash
-    set -euo pipefail
-    exec >/var/log/kagamizo-first-boot.log 2>&1
-    cd /root
-    v=${nixRelease.version}
-    curl -fsSL "https://releases.nixos.org/nix/nix-$v/nix-$v-x86_64-linux.tar.xz" -o nix.tar.xz
-    echo "${nixRelease.sha256}  nix.tar.xz" | sha256sum -c -
-    mkdir nix-release && tar -xJf nix.tar.xz -C nix-release --strip-components=1
-    USER=root HOME=/root sh nix-release/install --no-daemon --yes --no-channel-add --no-modify-profile
-    /root/.nix-profile/bin/nix --extra-experimental-features "nix-command flakes" \
-      build --out-link installer "github:Kagamizo-dev/kagamizo/${toString rev}#jingzo-host-installer"
-    mkdir kexec && tar -xf installer -C kexec
-    exec ./kexec/kexec-boot
-  '';
 
   tofu = {
     terraform.required_providers.hcloud.source = "hetznercloud/hcloud";
@@ -71,9 +50,31 @@ let
         labels.owner = top.accounts.held.hetzner.owner;
       };
       # Admits nothing: the host has no service to reach, and is changed
-      # through the repository, not over the network.
+      # through the repository, not over the network. The one exception is
+      # SSH to the installer during a declared, dated install window
+      # (./install.nix): nixos-anywhere's only way in, closed again after.
       hcloud_firewall.host = {
         name = "${cfg.host.name}-closed";
+        labels.owner = top.accounts.held.hetzner.owner;
+      }
+      // lib.optionalAttrs (cfg.host.install.window != null) {
+        rule = [
+          {
+            direction = "in";
+            protocol = "tcp";
+            port = "22";
+            source_ips = [
+              "0.0.0.0/0"
+              "::/0"
+            ];
+            description = "install window until ${cfg.host.install.window.until}";
+          }
+        ];
+      };
+      # The install key's public half; its private half stays in Proton Pass.
+      hcloud_ssh_key.install = {
+        name = "${cfg.host.name}-install";
+        public_key = cfg.host.install.publicKey;
         labels.owner = top.accounts.held.hetzner.owner;
       };
       hcloud_server.host = {
@@ -81,7 +82,9 @@ let
         server_type = cfg.host.serverType;
         location = cfg.host.location;
         image = cfg.host.bootstrapImage;
-        user_data = firstBoot;
+        # nixos-anywhere installs over SSH (./install.nix); no first-boot
+        # script races it.
+        ssh_keys = [ "\${hcloud_ssh_key.install.id}" ];
         firewall_ids = [ "\${hcloud_firewall.host.id}" ];
         public_net = {
           ipv4_enabled = true;
@@ -89,7 +92,6 @@ let
           ipv6_enabled = false;
         };
         labels.owner = top.accounts.held.hetzner.owner;
-        lifecycle.ignore_changes = [ "user_data" ];
       };
     }
     // lib.optionalAttrs (cfg.volumes != { }) {
@@ -246,6 +248,11 @@ in
             gone=$(jq -r --arg t ${cfg.host.serverType} --arg l ${cfg.host.location} '.server_types[] | select(.name == $t)
               | (.deprecation.unavailable_after // empty), ((.locations // [])[] | select(.name == $l) | .deprecation.unavailable_after // empty)' <<<"$types" | head -1)
             [ -z "$gone" ] || { echo "hetzner-infra: ${cfg.host.serverType} is withdrawn in ${cfg.host.location} after $gone; pick another type (hetzner.host.serverType)" >&2; exit 1; }
+            ${lib.optionalString (cfg.host.install.window != null) ''
+              # SSH is open only until its declared date.
+              [[ "$(date -u +%F)" < "${cfg.host.install.window.until}" || "$(date -u +%F)" == "${cfg.host.install.window.until}" ]] ||
+                { echo "hetzner-infra: the install window closed on ${cfg.host.install.window.until}; set hetzner.host.install.window = null" >&2; exit 1; }
+            ''}
             pergb=$(jq -r '.pricing.volume.price_per_gb_month.gross' <<<"$prices")
             gb=${toString (lib.foldl' (n: v: n + v.sizeGb) 0 (lib.attrValues cfg.volumes))}
             today=$(date -u +%F)

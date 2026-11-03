@@ -15,10 +15,14 @@ in
     repos.kagamizo = {
       seed = true;
       inherit visibility;
-      # PR plans: the read-only view.
-      secrets.PROTON_PASS_AGENT_TOKEN = "PROTON_PASS_AGENT_TOKEN";
-      # Pushes to the build cache from every branch (modules/cache).
-      secrets.PROTON_PASS_CACHE_TOKEN = "PROTON_PASS_CACHE_TOKEN";
+      secrets = {
+        # PR plans: the read-only view.
+        PROTON_PASS_AGENT_TOKEN = "PROTON_PASS_AGENT_TOKEN";
+        # Pushes to the build cache from every branch (modules/cache).
+        PROTON_PASS_CACHE_TOKEN = "PROTON_PASS_CACHE_TOKEN";
+        # Installs NixOS on the Hetzner host (modules/hetzner/install.nix).
+        PROTON_PASS_HOST_INSTALL_TOKEN = "PROTON_PASS_HOST_INSTALL_TOKEN";
+      };
       # Applies from main only.
       environments.cloudflare = {
         branches = [ "main" ];

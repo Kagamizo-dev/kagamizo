@@ -1,0 +1,50 @@
+name: host-install
+
+# Installs NixOS on jingzo-host with nixos-anywhere (modules/hetzner/install.nix),
+# from this branch, inside the declared install window. Started by hand
+# (workflow_dispatch); reads only the install key, through the host-install
+# agent, whose token opens Kagamizo-Install and nothing else.
+on:
+  workflow_dispatch:
+    inputs:
+      ipv4:
+        description: "The host's address (hetzner-infra output ipv4)"
+        required: true
+        default: "2.31.96.54"
+
+permissions: {}
+
+concurrency:
+  group: host-install
+  cancel-in-progress: false
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      - name: pass-cli 2.4.2 (the flake's)
+        run: nix profile install .#pass-cli && pass-cli --version
+
+      - name: Log in to Proton Pass (install vault)
+        run: pass-cli login
+        env:
+          PROTON_PASS_KEY_PROVIDER: fs
+          PROTON_PASS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PROTON_PASS_HOST_INSTALL_TOKEN }}
+
+      - name: nixos-anywhere
+        run: nix run .#host-install -- "$IPV4"
+        env:
+          PROTON_PASS_KEY_PROVIDER: fs
+          IPV4: ${{ inputs.ipv4 }}

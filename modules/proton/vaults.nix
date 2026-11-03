@@ -92,6 +92,9 @@ in
         # The build cache's signing key and R2 keys (modules/cache): CI on
         # any branch pushes, every machine pulls over HTTPS with no secret.
         cache = "Kagamizo-Cache";
+        # The host's install key (modules/hetzner/install.nix): only the
+        # host-install workflow's agent opens it.
+        install = "Kagamizo-Install";
       };
       inherit vaults sessionVaults;
     };
