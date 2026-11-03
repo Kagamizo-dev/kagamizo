@@ -92,7 +92,9 @@ in
           export PROTON_PASS_KEY_PROVIDER=fs HOME=/root
           # An agent token: pass-cli refuses its commands without a reason.
           export PROTON_PASS_AGENT_REASON="jingzo-host: migration staging and exports"
-          pass-cli login --pat "$(cat ${cfg.tokenFile})" >/dev/null
+          # Once a boot: a retry finds the session and goes on (pass-cli
+          # refuses a second login with "Already authenticated").
+          pass-cli info >/dev/null 2>&1 || pass-cli login --pat "$(cat ${cfg.tokenFile})" >/dev/null
           key=$(mktemp -p /run)
           chmod 600 "$key"
           trap 'rm -f "$key"' EXIT
@@ -133,7 +135,9 @@ in
           export PROTON_PASS_KEY_PROVIDER=fs HOME=/root
           # An agent token: pass-cli refuses its commands without a reason.
           export PROTON_PASS_AGENT_REASON="jingzo-host: migration staging and exports"
-          pass-cli login --pat "$(cat ${cfg.tokenFile})" >/dev/null
+          # Once a boot: a retry finds the session and goes on (pass-cli
+          # refuses a second login with "Already authenticated").
+          pass-cli info >/dev/null 2>&1 || pass-cli login --pat "$(cat ${cfg.tokenFile})" >/dev/null
           for class in ${lib.concatStringsSep " " cfg.classes}; do
             migrate "$class" ${cfg.mount}/apple/"$class"
             migrate verify ${cfg.mount}/apple/"$class"

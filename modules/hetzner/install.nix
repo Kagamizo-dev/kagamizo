@@ -111,7 +111,8 @@ in
             jc() { chroot /mnt /nix/var/nix/profiles/system/sw/bin/journalctl -D /var/log/journal --no-pager "$@"; }
             jc --list-boots | tail -5
             last=$(jc --list-boots -q | tail -1 | awk '{print $2}')
-            jc -b "$last" -u migration-staging -u host-report -o short-iso | tail -60
+            jc -b "$last" -u migration-staging -o short-iso | head -40
+            jc -b "$last" -u host-report -o short-iso | head -40
             jc -b "$last" -u systemd-networkd -u systemd-networkd-wait-online -u systemd-resolved -o short-iso | tail -40
             jc -b "$last" -p err -o short-iso | tail -40
             REMOTE
