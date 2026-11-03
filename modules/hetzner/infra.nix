@@ -56,19 +56,32 @@ let
       hcloud_firewall.host = {
         name = "${cfg.host.name}-closed";
         labels.owner = top.accounts.held.hetzner.owner;
-      }
-      // lib.optionalAttrs (cfg.host.install.window != null) {
+        # The pinned hcloud provider never clears a firewall's last rule
+        # (it plans the removal, reports it applied, and Hetzner keeps the
+        # rule: 2026-11-03). So a closed firewall holds one rule that
+        # admits nothing usable: ICMP from TEST-NET-1 (192.0.2.0/24, RFC
+        # 5737), never routed on the internet.
         rule = [
-          {
-            direction = "in";
-            protocol = "tcp";
-            port = "22";
-            source_ips = [
-              "0.0.0.0/0"
-              "::/0"
-            ];
-            description = "install window until ${cfg.host.install.window.until}";
-          }
+          (
+            if cfg.host.install.window == null then
+              {
+                direction = "in";
+                protocol = "icmp";
+                source_ips = [ "192.0.2.0/24" ];
+                description = "closed (admits nothing: TEST-NET-1, RFC 5737)";
+              }
+            else
+              {
+                direction = "in";
+                protocol = "tcp";
+                port = "22";
+                source_ips = [
+                  "0.0.0.0/0"
+                  "::/0"
+                ];
+                description = "install window until ${cfg.host.install.window.until}";
+              }
+          )
         ];
       };
       # The install key's public half; its private half stays in Proton Pass.
