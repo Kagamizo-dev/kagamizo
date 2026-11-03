@@ -46,7 +46,7 @@
       # Jingzo's own (the owner's decision, 2026-11-01): Kagamizo is not
       # formed and takes no client work, so nothing is owed between them.
       owner = "jingzo";
-      status = "planned";
+      status = "active";
       signup = {
         url = "https://openrouter.ai/sign-up";
         handle = "jingzo";
