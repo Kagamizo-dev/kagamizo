@@ -785,3 +785,258 @@ as findings on the accounts they concern:
 - **Northwest** forms in Wyoming online; nothing is filed in person. The EIN
   can be ordered with it, or taken free from the IRS online after the LLC
   exists.
+
+## The approved trading plan (2026-11-02)
+
+### Options trading on Public: research agents → backtest → paper → gated live
+
+#### Context
+
+The owner wants to drop unclear paths (Apple is parked; an emailed
+data-copy request to Apple comes later) and build only on direct APIs:
+NautilusTrader, Public, Mercury and OpenRouter. The target is one
+pipeline:
+
+1. **Research:** LLM agent loops run in parallel on OpenRouter, using
+   TradingAgents (TauricResearch/TradingAgents).
+2. **Backtest:** TradingAgents' own `run_backtest`, plus NautilusTrader for
+   the options execution.
+3. **Paper:** real chains and Public's preflight; no order is placed.
+4. **Live:** gated. The owner approves every order.
+
+What exists:
+- **NautilusTrader 1.231.0** (`modules/trading`): backtest and paper
+  preflight of one equity example. The adapter `_public.py` is stdlib REST
+  with EQUITY hard-coded.
+- **Public CLI 1.3.7** (catalog `public.json`): option chains, greeks,
+  preflight single and multi, place and place-multileg (spend), cancel
+  (write), order status, portfolio.
+- **Orca fleet** (`modules/governance/orca.nix`, `modules/openrouter/
+  opencode.nix`): declarations only. `orca` and `opencode` are not
+  packaged. Not needed for this plan; it comes later as the steering UI.
+- **OpenRouter** (`modules/openrouter`): status `planned`; the wrapper
+  `openrouter plan|apply` mints capped keys from a management key. Payment
+  is declared as Mercury card `openrouter` ($5), which was never issued.
+- **TradingAgents** (Apache-2.0, v0.7.1, arXiv 2412.20138):
+  - Analysts, a bull/bear debate, a trader, risk and a portfolio manager.
+  - Any OpenAI-compatible endpoint, OpenRouter included (`backend_url`,
+    `deep_think_llm` and `quick_think_llm`).
+  - Its own `run_backtest` scores alpha over a ticker and date grid.
+  - Equities only. Its decisions go to a simulated exchange, never to a
+    broker.
+
+The owner's decisions (2026-11-02):
+- **Public's login:** keep admin@jingzo.org for now, as a typed, dated
+  exception.
+- **Limits:** $100 seed, defined-risk options only, $25 max premium per
+  trade, 1 open position, stop for the day after a $25 loss.
+- **Approval:** the owner approves every live order.
+- **OpenRouter:** paid by the Mercury card. Research budget $20/month.
+
+#### Owner's steps (typed human steps; all one-time)
+1. **mint-card:** in Mercury's app, the card `kagamizo/openrouter` on
+   Jingzo's account, $20/month, locked to OpenRouter. Only the owner mints
+   or cancels cards; agents never can. Card discovery (G) then finds it and
+   checks it against the declaration.
+2. **sign-up**, then **console-credential:** I send the OpenRouter sign-in
+   link as a file card plus a markdown link. The owner signs in as
+   dev@jingzo.org (passkey), makes the first management key and the first
+   top-up from the card. The owner pastes the key into the Proton Pass item
+   I created beforehand: `Jingzo-LLC / openrouter-management-key`, an "API
+   credential" item with every field but the secret filled in (F). That
+   paste is the only manual storing.
+3. **approve-payment:** deposit $100 into Public, and confirm options are
+   enabled on the account.
+
+#### F. Proton Pass items, typed; no secret as a note
+- **Rule:** a secret's store is a typed item made from a template (API
+  credential, login, password, SSH key), never a note.
+  - `modules/_lib/secret.nix`: `store = { template; item; field; }` is
+    required for every secret a human issues. Evaluation fails on a note.
+  - `modules/operations/_lean/Boundary.lean`: a theorem that a secret
+    issued by a human step is stored in a hidden field of a template item.
+- **`pass-prepare <secret>`:**
+  - Creates the declared item with `pass-cli item create custom
+    --from-template` (the template's JSON shape is read from pass-cli's own
+    `--get-template` and recorded in `catalog/_json/pass-items.json`).
+  - Fills everything declared: title, vault, and the non-secret fields
+    (Permissions, Expiry date, the provider's URL in a note field of the
+    template). The secret field is left empty.
+  - It then reads the item back and confirms its shape, using
+    `pass-credential`.
+- **After the owner's paste:** `secretspec check` sees the field filled.
+  The value is never read into the terminal; it is only piped to the tool
+  that uses it.
+- **OpenRouter's management key** moves from a note store to the API
+  credential's `API key` field. Every other human-issued secret today
+  (`hcloud-token`, `public-personal-secret` already done) follows the same
+  pattern.
+- **Values automation writes** (OpenTofu state chunks, sign-in sessions,
+  minted keys) are still notes today. These move to a typed custom item too
+  ("kagamizo-blob": a hidden `value` field plus `kind`, `written` and
+  `sha256`). That needs field writes, in statestore and the secretspec
+  patch, which today refuses to write fields. This is staged after the
+  trading path, and recorded as a Gap until then.
+
+#### G. Card discovery, typed (`modules/mercury/cards.nix`)
+- **`cards discover`:** a read through `mercury-cli cards list`, an
+  observed read. It writes `modules/mercury/_json/cards.json`, one entry
+  per live card: id, nickname, status, account, spending limit and period,
+  and merchant lock. The fields are typed from the pinned Mercury SDK's
+  card schema (`catalog/_json/mercury-api.json`); no card number, CVC or
+  expiry is written.
+- **Typed check** (`checks.cards-declared`):
+  - every declared `mercury.cards.<v>` is live, active, on its declared
+    account, with its declared limit
+  - every live `kagamizo/*` card is declared
+  - a mismatch fails, naming the card and the field
+  - a Lean fact list proves the same match for the committed discovery
+- **Governance:** `cards apply` stays refused, and minting stays the
+  owner's (`mint-card`). The `cards create` and `cards update` effects
+  stay spend and write, controller only. Agents never get them.
+
+#### Plan
+
+#### A. Unblock Public (typed, dated exception)
+- `modules/accounts/options.nix`: add `held.<a>.login.exception = { email;
+  until; because; decided }`. `loginProblems` accepts the off-domain address
+  only while the exception names it.
+- `modules/governance/cedar.nix`:
+  - Add the exception's address and its expiry (a YYYYMMDD integer) to the
+    account entity.
+  - `governance-authorize` passes `context.today`.
+  - `logins-say-whose-they-are` admits `login == exception.email && today
+    <= until`.
+  - New Cedar tests: admitted before expiry, refused after, refused for any
+    other address.
+- `modules/public/account.nix`: public-mirazo's exception is
+  admin@jingzo.org until 2026-11-30.
+- `modules/lean/_lean/Governance.lean`: a theorem that an exception never
+  covers another address or a later date.
+
+#### B. OpenRouter for the research loops
+- `modules/openrouter/card.nix`: `limitUsd = 20` (the owner's budget).
+- `modules/openrouter/openrouter.nix`: one key, `research`, at $20/month,
+  in a new secretspec profile `research`.
+  - The existing keys (chat-and-code, orca-fleet and swarms-*) stay
+    declared but are disabled until their own budget is approved.
+  - New typed check: the sum of the enabled caps is at most the paying
+    card's limit, otherwise evaluation fails.
+- After the owner's steps: `openrouter apply` mints `research`, and
+  `openrouter credits` confirms the balance.
+- `modules/tokens`: the research key joins the credential graph. Its root
+  is the management key, a console-credential root.
+
+#### C. TradingAgents, packaged and governed (`modules/research`)
+- A flake input pinned at the v0.7.1 commit, built with
+  `buildPythonPackage`. Python deps come from nixpkgs where present, and
+  are otherwise pinned by hash.
+- Map it from the pinned source before use, into
+  `catalog/_json/tradingagents.json`:
+  - its config keys
+  - its data sources, each with its host: Yahoo Finance, SEC EDGAR, FRED,
+    Alpha Vantage, StockTwits, Reddit, Polymarket
+  - which sources need keys
+  The hosts go into `modules/claude/_environment.nix` (a new `research`
+  group), and the next allowlist carries them.
+- `research run TICKER DATE` writes one decision with the full debate
+  transcript to `research/<date>/<ticker>.json`.
+  - Config is generated by Nix: `llm_provider = openai_compatible`, the
+    OpenRouter `backend_url`, deep and quick models from the declared
+    open-weight list, `max_debate_rounds`.
+  - The key comes from secretspec profile `research`.
+  - It runs under `frozen.nix`: `env -i`, declared variables only.
+- `research sweep TICKERS FROM TO --jobs N` runs one isolated process per
+  ticker-date, in parallel, all on the shared $20-capped key.
+- `research backtest …` wraps TradingAgents' `run_backtest` over the same
+  grid and records alpha against the benchmark.
+- Governance: research reads only market data. It calls no broker and
+  needs no account action, so it needs no Cedar grant.
+
+#### D. From decision to defined-risk option (`modules/trading`)
+- `trading.limits.public = { seedUsd = 100; maxPremiumUsd = 25;
+  maxOpenPositions = 1; dailyLossStopUsd = 25; allowed = [ "long-call"
+  "long-put" "debit-spread" ]; }`.
+- `_lean/Risk.lean`:
+  - `admissible`: an allowed kind, max loss within the cap, open positions
+    below the max, the day's loss below the stop.
+  - Theorems: an admissible order's max loss is at most `maxPremium`, and a
+    day loses at most `stop + maxPremium`.
+  - `checks.trading-risk` decides the declared limits.
+- `_public.py`, every endpoint mapped from the pinned CLI's generated
+  client:
+  - option expirations and chain, greeks
+  - an OPTION order body (OSI symbol, open/close, LIMIT, DAY)
+  - preflight single and multi
+  - place and order status, called only by `trade place`
+  The offline stub `_stub_public.py` gains a chain and a preflight.
+- Strategy kind `agent-option`:
+  - Takes the day's TradingAgents decision (BUY, SELL or HOLD) for the
+    underlying: BUY becomes a call, SELL a put, HOLD means no trade.
+  - Contract: the nearest expiration 7 to 21 days out, the cheapest strike
+    with ask × 100 ≤ $25 and |delta| ≥ 0.15. If none fits, no trade.
+  - Declared as `trading.strategies.spy-agents` on SPY.
+
+#### E. Stages and gates (typed, Lean-checked)
+- `trading.strategies.<s>.stage` is `research`, `backtest`, `paper` or
+  `live`. Promotion is declared with evidence:
+  - **backtest → paper:** a recorded backtest (grid, alpha, max drawdown)
+    meeting declared thresholds.
+  - **paper → live:** N recorded paper days with preflight-accepted
+    proposals, plus the owner's dated decision.
+  - `_lean/Stages.lean` proves no strategy is `live` without both pieces of
+    evidence. `trade place` refuses unless the stage is `live`.
+- Commands:
+  - `trade propose <s>`: the day's research decision, the risk check and
+    Public's preflight. Writes `proposal.json` and sends the owner a
+    summary.
+  - `trade place proposal.json`: the governed spend action, controller
+    only. It re-runs the risk check and the preflight, places, then polls
+    order status.
+  - `trade paper-day <s>`: propose without placing; the day is recorded as
+    paper evidence.
+
+#### Order of work
+1. A and the read-only Public checks (brokerage summary, option chain).
+   These need nothing from the owner.
+2. F's rule and `pass-prepare`, then create the OpenRouter item. G's
+   `cards discover`.
+3. C's packaging and catalog, D's limits and Lean, and E, all built and
+   checked offline.
+4. The owner's step 1, then `cards discover` confirms the card. The owner's
+   step 2 (my link, their sign-in, their paste). Then B: `openrouter
+   apply`, and the first research run.
+5. Research sweep and backtest, then paper days on SPY.
+6. The owner's step 3, then the promotion decision, then `trade propose`
+   and the owner's approval of `trade place`.
+
+Timing: A and the read-only Public checks are realistic for tomorrow
+morning. Live placement needs the paper evidence and the owner's
+promotion, so it is not tomorrow.
+
+#### Files
+- `modules/accounts/options.nix`, `modules/governance/cedar.nix`,
+  `modules/lean/_lean/Governance.lean`, `modules/public/account.nix`
+- `modules/openrouter/{card,openrouter,secrets}.nix`, `modules/tokens/
+  default.nix`
+- New `modules/research/` (`default.nix`, `_src` or `_py`, `_lean`), a
+  flake input, `catalog/_json/tradingagents.json`
+- `modules/trading/{strategies.nix,_trade.py,_public.py,_stub_public.py}`,
+  and new `_lean/Risk.lean` and `_lean/Stages.lean`
+- `modules/public/_lean/Calls.lean`: add the option commands
+- `modules/perf/targets.nix`, `modules/claude/_environment.nix`
+  (research hosts), HANDOFF.md, the Gaps (Public funding has no API; card
+  minting is the owner's)
+
+#### Verification
+- Checks: trading-backtest (with the options stub), trading-risk,
+  trading-stages, research-catalog, a research smoke run against a stubbed
+  OpenAI-compatible endpoint, public-calls, governance-cedar,
+  lean-governance, tokens-graph, operations-boundary, formatting, statix
+  and deadnix.
+- Live, read-only: `brokerage summary` and `brokerage market option-chain
+  SPY <date>` through the exception.
+- After OpenRouter exists: `research run SPY <date>`, then a small
+  `research sweep`, with `openrouter credits` checked against the cap.
+- Paper: `trade paper-day spy-agents` gives a preflight-accepted proposal
+  within $25.
