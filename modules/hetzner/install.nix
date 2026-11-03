@@ -52,9 +52,10 @@ in
       # Closed. Installs: 2026-11-03 (host-install runs 41568360740, the
       # first, and 41573145877, which handed the host its token). Open it
       # again, dated, only to reinstall.
-      # Open for the reinstall that brings DNS through resolved and the
-      # console report (2026-11-03); null once it has run.
-      window.until = "2026-11-04";
+      # Closed. Installs on 2026-11-03: host-install runs 41568360740 (the
+      # first), 41573145877 (with its token), 41575267127 (resolved, the
+      # console report). Open it again, dated, only to reinstall.
+      window = null;
     };
 
     perSystem =
