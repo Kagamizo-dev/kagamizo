@@ -43,7 +43,7 @@ if mode == "notes":
             locked += 1
             continue
         folder = safe(folders.get(n.folder_id) or n.folder_name, "Notes")
-        target = os.path.join(out_dir, folder, n.id)
+        target = os.path.join(out_dir, folder, safe(n.id, "note"))
         os.makedirs(target, exist_ok=True)
         api.notes.export_note(n.id, target)
         exported += 1
@@ -54,7 +54,7 @@ elif mode == "reminders":
     for l in lists:
         result = api.reminders.list_reminders(l.id, include_completed=True, results_limit=100000)
         total += len(result.reminders)
-        with open(os.path.join(out_dir, f"{safe(l.title, l.id)}.{l.id}.json"), "w") as f:
+        with open(os.path.join(out_dir, f"{safe(l.title, "list")}.{safe(l.id, "id")}.json"), "w") as f:
             json.dump({"list": l.model_dump(mode="json"), **result.model_dump(mode="json")}, f, indent=1, default=str)
     print(json.dumps({"count": total, "lists": len(lists)}))
 else:
