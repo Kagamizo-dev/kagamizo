@@ -87,6 +87,8 @@ in
           [ ''${#devs[@]} -eq 1 ] && [ -e "''${devs[0]}" ] || { echo "migration-staging: expected one Hetzner volume, found ''${#devs[@]}" >&2; exit 1; }
           dev=''${devs[0]}
           export PROTON_PASS_KEY_PROVIDER=fs HOME=/root
+          # An agent token: pass-cli refuses its commands without a reason.
+          export PROTON_PASS_AGENT_REASON="jingzo-host: migration staging and exports"
           pass-cli login --pat "$(cat ${cfg.tokenFile})" >/dev/null
           key=$(mktemp -p /run)
           chmod 600 "$key"
@@ -126,6 +128,8 @@ in
           [ -r ${cfg.tokenFile} ] || { echo "migration-export: no host token; idle" >&2; exit 0; }
           mountpoint -q ${cfg.mount} || { echo "migration-export: staging not mounted" >&2; exit 1; }
           export PROTON_PASS_KEY_PROVIDER=fs HOME=/root
+          # An agent token: pass-cli refuses its commands without a reason.
+          export PROTON_PASS_AGENT_REASON="jingzo-host: migration staging and exports"
           pass-cli login --pat "$(cat ${cfg.tokenFile})" >/dev/null
           for class in ${lib.concatStringsSep " " cfg.classes}; do
             migrate "$class" ${cfg.mount}/apple/"$class"

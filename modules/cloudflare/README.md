@@ -328,6 +328,10 @@ around.
   calendars) starts only in Proton's web settings: Proton publishes no API
   for it. The owner approves the provider's sign-in there; two imports run
   at once, one per account.
+- **The host has no Cedar principal**: jingzo-host's runner (`migrate-host`)
+  is authorized by its typed, dated delegations (hetzner.host.credentials)
+  and its token's one vault, not by governance-authorize, which reads the
+  owner's login items the host cannot open.
 - **Card details into Proton Pass**: `cards vault` stores an owner-minted
   card as a Proton Pass credit card item (card-<name>, the owner's vault)
   straight from Mercury's reveal, never printed. Mercury reveals agentic

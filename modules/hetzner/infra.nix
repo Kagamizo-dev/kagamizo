@@ -289,14 +289,19 @@ in
             cp ${main} "$work/main.tf.json"
             # The state lives in Proton Pass (statestore.backends.hetzner),
             # served and locked for this run.
-            mode=-input=false
-            [ "$1" = apply ] && mode=-auto-approve
+            # reinstall: a new server from Hetzner's image (the same address
+            # and volume), for host-install to install again.
+            case "$1" in
+              plan) args=(plan -input=false) ;;
+              apply) args=(apply -input=false -auto-approve) ;;
+              reinstall) args=(apply -input=false -auto-approve -replace=hcloud_server.host) ;;
+            esac
             status=0
-            # The script's $0, $1 and $2 are its own arguments.
+            # The script's $0 and $@ are its own arguments.
             # shellcheck disable=SC2016
             statestore-run hetzner -- bash -c '
-              tofu -chdir="$0" init -input=false >&2 && tofu -chdir="$0" "$1" -input=false "$2"
-            ' "$work" "$1" "$mode" || status=$?
+              tofu -chdir="$0" init -input=false >&2 && tofu -chdir="$0" "$@"
+            ' "$work" "''${args[@]}" || status=$?
             exit "$status"
           '';
         };
@@ -309,10 +314,10 @@ in
             pkgs.coreutils
           ];
           text = builtins.seq top.accounts.checked ''
-            usage="usage: hetzner-infra <plan|apply|init-state>"
+            usage="usage: hetzner-infra <plan|apply|reinstall|init-state>"
             case "''${1:-}" in
               plan) governance-authorize hetzner:infra-plan hetzner ;;
-              apply)
+              apply | reinstall)
                 ${
                   if rev == null then
                     ''echo "hetzner-infra: apply only from a clean, committed tree (the first boot installs that commit)" >&2; exit 2''

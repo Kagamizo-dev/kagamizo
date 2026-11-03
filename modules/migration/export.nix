@@ -37,23 +37,33 @@ let
     };
 in
 {
-  secrets.profiles.${profile} = {
-    ICLOUDPD_SESSION = session "icloudpd-session" "icloudpd's trusted iCloud session (its cookie jar), base64";
-    RCLONE_ICLOUD_CONFIG = session "rclone-icloud-config" "rclone's iclouddrive remote: the obscured password, trust token and cookies";
-  };
-
-  # The staging volume's LUKS key, generated on the host and kept in its
-  # vault (./_host.nix).
-  secrets.profiles.host.STAGING_LUKS_KEY =
-    (import ../_lib/secret.nix) {
-      kind = "encryption-key";
-      issuer = "automation:migration-staging";
-      description = "The migration staging volume's LUKS key, base64";
-      item = "staging-luks-key";
-    }
-    // {
-      required = false;
+  secrets.profiles = {
+    # On jingzo-host the same sessions live in the host's own vault, from
+    # the delegations (../hetzner/credentials.nix): it never opens the
+    # owner's.
+    icloud-host = {
+      defaults.providers = [ "host" ];
+      ICLOUD_SESSION = session "icloud-session" "apple-mirazo's trusted iCloud session, the host's copy";
+      ICLOUDPD_SESSION = session "icloudpd-session" "icloudpd's trusted iCloud session, the host's copy";
+      RCLONE_ICLOUD_CONFIG = session "rclone-icloud-config" "rclone's iclouddrive remote, the host's copy";
     };
+    ${profile} = {
+      ICLOUDPD_SESSION = session "icloudpd-session" "icloudpd's trusted iCloud session (its cookie jar), base64";
+      RCLONE_ICLOUD_CONFIG = session "rclone-icloud-config" "rclone's iclouddrive remote: the obscured password, trust token and cookies";
+    };
+    # The staging volume's LUKS key, generated on the host and kept in its
+    # vault (./_host.nix).
+    host.STAGING_LUKS_KEY =
+      (import ../_lib/secret.nix) {
+        kind = "encryption-key";
+        issuer = "automation:migration-staging";
+        description = "The migration staging volume's LUKS key, base64";
+        item = "staging-luks-key";
+      }
+      // {
+        required = false;
+      };
+  };
 
   governance.actions.apple = {
     icloudpd-sign-in = {
@@ -155,6 +165,43 @@ in
           name = "migrate";
           program = lib.getExe inner;
           packages = [ ];
+        };
+        # jingzo-host's runner (./_host.nix): the host's own profile and the
+        # Apple login delegated into its vault. Its authorization is the
+        # delegation (hetzner.host.credentials: declared, scoped, dated);
+        # Cedar has no host principal yet (a Gap).
+        migrate-host = pkgs.writeShellApplication {
+          name = "migrate";
+          runtimeInputs = [
+            run
+            config.packages.icloudpd
+            config.packages.rclone
+            config.packages.migration-python
+            config.packages.pass-cli
+            config.packages.secretspec
+            pkgs.coreutils
+            pkgs.gnutar
+            pkgs.gzip
+          ];
+          text = builtins.seq top.migration.checked ''
+            export PROTON_PASS_KEY_PROVIDER=fs
+            export PROTON_PASS_AGENT_REASON="jingzo-host: the migration's exports (migrate $*)"
+            private=$(mktemp -d)
+            chmod 700 "$private"
+            trap 'rm -rf "$private"' EXIT
+            MIGRATE_PRIVATE=$private \
+              MIGRATE_SECRETSPEC_FILE=${config.packages.secretspec-toml} \
+              MIGRATE_PROFILE=icloud-host \
+              MIGRATE_LOGIN_VAULT=${lib.escapeShellArg top.proton.infraVaults.host} \
+              MIGRATE_LOGIN_ITEM=apple-mirazo-login \
+              MIGRATE_APPLE_ID=${account.login.email} \
+              MIGRATE_CODE_FIFO=/run/migrate-2fa-code \
+              MIGRATE_EXPORT_PY=${./_export.py} \
+              MIGRATE_ICLOUDPD_VERSION=${config.packages.icloudpd.version} \
+              MIGRATE_RCLONE_VERSION=${config.packages.rclone.version} \
+              MIGRATE_PYICLOUD_VERSION=${lib.escapeShellArg config.catalog.sources.pyicloud.version} \
+              migrate "$@"
+          '';
         };
       };
     };

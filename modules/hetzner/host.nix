@@ -34,7 +34,9 @@ let
   staging = withSystem "x86_64-linux" (
     { config, ... }:
     import ../migration/_host.nix {
-      inherit (config.packages) migrate secretspec;
+      # The host's runner: its own vault and profile (../migration/export.nix).
+      migrate = config.packages.migrate-host;
+      inherit (config.packages) secretspec;
       secretspecToml = config.packages.secretspec-toml;
       passCli = config.packages.pass-cli;
     }

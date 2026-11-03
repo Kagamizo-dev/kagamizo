@@ -49,10 +49,11 @@ in
   config = {
     hetzner.host.install = {
       publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF4o1biNsiYTdl40/PDI5xOPjGA1H5FFD6wot5JPn3ie jingzo-host install (nixos-anywhere), modules/hetzner/install.nix";
-      # Closed: the first install ran on 2026-11-03 (host-install run
-      # 41568360740, nixos-anywhere, 3 min). Open it again, dated, only to
-      # reinstall.
-      window = null;
+      # The first install ran on 2026-11-03 (host-install run 41568360740,
+      # nixos-anywhere, 3 min). Open again, dated, for the reinstall that
+      # hands the host its credentials (the owner's go, 2026-11-03); null
+      # once it has run.
+      window.until = "2026-11-04";
     };
 
     perSystem =
@@ -63,6 +64,7 @@ in
           runtimeInputs = [
             pkgs.nixos-anywhere
             config.packages.pass-cli
+            pkgs.jq
             pkgs.coreutils
           ];
           text = ''
@@ -70,13 +72,24 @@ in
             export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
             umask 077
             key=$(mktemp)
-            trap 'rm -f "$key"' EXIT
             # From Proton Pass into the file; never onto the screen.
             # An agent's pass-cli states why it reads (pass-cli 2.4.2 refuses otherwise).
             PROTON_PASS_AGENT_REASON="host-install: nixos-anywhere installs jingzo-host at $ip" \
               pass-cli item view --vault-name ${vault} --item-title ${item} --field private_key >"$key"
             [ -s "$key" ] || { echo "host-install: no install key in ${vault}/${item}" >&2; exit 1; }
+            # What the installed host holds from the start (./credentials.nix,
+            # to = "install"): written into the new root by nixos-anywhere.
+            extra=$(mktemp -d)
+            trap 'rm -f "$key"; rm -rf "$extra"' EXIT
+            mkdir -p "$extra/var/lib/kagamizo"
+            chmod 700 "$extra/var/lib/kagamizo"
+            PROTON_PASS_AGENT_REASON="host-install: hand jingzo-host its Proton Pass token" \
+              pass-cli item view --vault-name ${vault} --item-title host-token --output json |
+              jq -j .item.content.note >"$extra/var/lib/kagamizo/host-token"
+            [ -s "$extra/var/lib/kagamizo/host-token" ] || { echo "host-install: no host-token in ${vault}; run host-credentials sync" >&2; exit 1; }
+            chmod 600 "$extra/var/lib/kagamizo/host-token"
             nixos-anywhere -L --flake "$(pwd)#jingzo-host" -i "$key" \
+              --extra-files "$extra" --chown /var/lib/kagamizo 0:0 \
               --ssh-option StrictHostKeyChecking=accept-new "root@$ip"
           '';
         };
