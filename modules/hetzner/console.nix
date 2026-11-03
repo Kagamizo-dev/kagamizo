@@ -6,7 +6,7 @@
 #   nix run .#host-console -- OUT.png
 #       with pass-cli signed in on the host-install agent: Hetzner's token is
 #       read from Kagamizo-Install/hetzner-console (./credentials.nix), into
-#       the environment only.
+#       the environment only. Prints the screen as text (tesseract), too.
 #
 # .github/workflows/host-console.yml runs it when
 # .github/host-console.request changes and keeps the PNG as an artifact.
@@ -31,6 +31,7 @@ in
         runtimeInputs = [
           python
           config.packages.pass-cli
+          pkgs.tesseract
           pkgs.coreutils
         ];
         text = ''
@@ -40,7 +41,11 @@ in
             pass-cli item view --vault-name ${vault} --item-title hetzner-console --field Secret)
           [ -n "$HCLOUD_TOKEN" ] || { echo "host-console: no hetzner-console in ${vault}; run host-credentials sync" >&2; exit 1; }
           export HCLOUD_TOKEN
-          exec python3 -I ${./_console.py} ${name} "$out"
+          python3 -I ${./_console.py} ${name} "$out"
+          unset HCLOUD_TOKEN
+          # The screen as text too, for wherever the PNG cannot be opened.
+          echo "== the console, read by tesseract"
+          tesseract "$out" - 2>/dev/null || true
         '';
       };
     };
