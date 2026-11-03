@@ -435,19 +435,36 @@ applied and declared.
 
 ## Where the 2026-11-03 session left it (read this first)
 
-- **jingzo-host runs NixOS** (2026-11-03, 02:51 UTC): installed by
-  nixos-anywhere from the `host-install` workflow (modules/hetzner/
-  install.nix), replacing the cloud-init first boot that never ran. The
-  install key is a Proton Pass SSH key item in Kagamizo-Install, opened
-  only by the host-install agent (repository secret
-  PROTON_PASS_HOST_INSTALL_TOKEN). The SSH window is closed; the
-  firewall holds one rule admitting nothing (the pinned hcloud provider
-  never clears a last rule). `hetzner-infra plan`: no changes.
-- **Next on the host:** deliver its Proton Pass token
-  (/var/lib/kagamizo/host-token, still a Gap): a reinstall with
-  nixos-anywhere `--extra-files` from Proton Pass is the clean way. Then
-  the iCloud exports run there (notes and reminders hang through this
-  session's proxy on iCloud's CloudKit host; photos 79 GB, Drive 1.8 GB).
+- **jingzo-host is up** (2026-11-03, 05:10 UTC): NixOS from the repository,
+  installed by nixos-anywhere from the `host-install` workflow (no SSH on
+  the installed host; the firewall admits nothing; `hetzner-infra plan`: no
+  changes). It signed in with its delivered Proton Pass token and keeps its
+  staging volume's LUKS key in Kagamizo-Host-State; the 250 GB volume is
+  LUKS, mounted.
+  - Credentials: `hetzner.host.credentials` (typed, scoped, dated):
+    Apple login (read-only, Kagamizo-Host), iCloud session (writable,
+    Kagamizo-Host-State), the host's token (Kagamizo-Install, written to
+    /var/lib/kagamizo/host-token at install), Hetzner's token for the
+    console (until 2026-11-17). `host-credentials sync` copies and expires.
+  - Lessons, each now in code: pass-cli refuses an agent's commands
+    without PROTON_PASS_AGENT_REASON; a second login is refused ("Already
+    authenticated"), so sign in once a boot and clear the session at boot;
+    an agent is read-only in its own vault, so the host writes
+    Kagamizo-Host-State; the hcloud provider never clears a firewall's
+    last rule (a TEST-NET-1 rule closes it); a workflow is dispatchable by
+    hand only once on main (request files start them here).
+  - Seeing the host: `host-console` (screenshot plus tesseract text),
+    `host-rescue <ip> [read|reset-session]` (Hetzner rescue: mounts the
+    disk, prints the journal through NixOS's journalctl). Both need the
+    window open for rescue; the console needs none.
+- **Next on the host:** the nightly export (02:10 UTC) runs notes and
+  reminders from the delegated pyicloud session. Photos and Drive need
+  icloudpd's and rclone's own sessions: `migrate login icloudpd` and
+  `migrate login rclone` here (one Apple code each), then delegate both
+  sessions to Kagamizo-Host-State. Then a typed `machines.<name>`
+  contract for every server, container and device (hardware, disk,
+  install, network, credentials, observability, services), checked by
+  Lean before anything is built.
 - **iCloud:** signed in (the code fixes: the code is now requested, and an
   SMS code is checked with the mode it was sent with). Inventory: 116 GB
   used (photos 79 GB, device backups 35 GB, docs 1.8 GB, mail 0), 3333
