@@ -59,8 +59,9 @@ in
           destination = "proton-drive";
           verify = "note count";
         };
+        # Kept beside the notes, readable as Markdown (the owner, 2026-11-03).
         reminders = {
-          export = "pyicloud reminders, as ICS tasks";
+          export = "pyicloud reminders, every list as JSON, then Markdown beside the notes";
           destination = "proton-drive";
           verify = "reminder count";
         };
@@ -83,8 +84,8 @@ in
       dependants = [
         {
           kind = "login";
-          what = "every service holding a Hide My Email (@icloud.com) relay address";
-          movedTo = "a mirazo.org address or Proton alias per service";
+          what = "the 4 Hide My Email relays (bryanjohnson.com, DuckDuckGo, heb.com, ljsilvers.com; the inventory of 2026-11-03)";
+          movedTo = "none: junk, dropped with the account (the owner, 2026-11-03)";
         }
         {
           kind = "login";
