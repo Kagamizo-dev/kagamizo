@@ -114,6 +114,28 @@ in
         until = "2026-11-17";
         why = "host-console asks Hetzner for jingzo-host's console and screenshots it";
       };
+      # icloudpd's and rclone's own trusted sessions (`migrate login`
+      # here, one Apple code each), for photos and iCloud Drive.
+      icloudpd-session = {
+        from = {
+          vault = config.proton.sessionVaults.mirazo;
+          item = "icloudpd-session";
+          kind = "note";
+        };
+        to = "hostState";
+        until = "2026-12-31";
+        why = "the host's photo export (icloudpd) without a new code";
+      };
+      rclone-icloud-config = {
+        from = {
+          vault = config.proton.sessionVaults.mirazo;
+          item = "rclone-icloud-config";
+          kind = "note";
+        };
+        to = "hostState";
+        until = "2026-12-31";
+        why = "the host's iCloud Drive export (rclone) without a new code";
+      };
       icloud-session = {
         from = {
           vault = config.proton.sessionVaults.mirazo;
