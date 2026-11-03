@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "Where the 2026-11-01 evening session ended": add cache.kagamizo.com and developers.cloudflare.com to modules/claude/_environment.nix and check that this session pulls from the cache; measure the workflows against modules/perf; jingzo-host's first boot (it never ran: diagnose and fix); then `icloud login` (Apple's code) and its inventory, the Phase 3 sign-ins and the notes and reminders exports, and `mailbox senders`; then the module contract with typed sources and environments per module.
+Then, in order, from HANDOFF.md's "Where the 2026-11-03 session left it": add cache.kagamizo.com and developers.cloudflare.com to modules/claude/_environment.nix; deliver jingzo-host's Proton Pass token (nixos-anywhere --extra-files from Proton Pass) and run the iCloud exports there (notes, reminders as Markdown, Drive, photos into Proton Drive); after my OpenRouter key, `openrouter apply` and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). End the session with the full allowlist (if it changed) and the updated start message, each ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -432,6 +432,40 @@ and Lean the proof; C only where a measured record demands it.
 Add `cache.kagamizo.com` (the build cache: sessions pull from it) and
 `developers.cloudflare.com` (Cloudflare's references). Everything else is
 applied and declared.
+
+## Where the 2026-11-03 session left it (read this first)
+
+- **jingzo-host runs NixOS** (2026-11-03, 02:51 UTC): installed by
+  nixos-anywhere from the `host-install` workflow (modules/hetzner/
+  install.nix), replacing the cloud-init first boot that never ran. The
+  install key is a Proton Pass SSH key item in Kagamizo-Install, opened
+  only by the host-install agent (repository secret
+  PROTON_PASS_HOST_INSTALL_TOKEN). The SSH window is closed; the
+  firewall holds one rule admitting nothing (the pinned hcloud provider
+  never clears a last rule). `hetzner-infra plan`: no changes.
+- **Next on the host:** deliver its Proton Pass token
+  (/var/lib/kagamizo/host-token, still a Gap): a reinstall with
+  nixos-anywhere `--extra-files` from Proton Pass is the clean way. Then
+  the iCloud exports run there (notes and reminders hang through this
+  session's proxy on iCloud's CloudKit host; photos 79 GB, Drive 1.8 GB).
+- **iCloud:** signed in (the code fixes: the code is now requested, and an
+  SMS code is checked with the mode it was sent with). Inventory: 116 GB
+  used (photos 79 GB, device backups 35 GB, docs 1.8 GB, mail 0), 3333
+  photos, 446 contacts, 6 calendars, 708 notes, 4 Hide My Email relays
+  (junk, dropped). The JSON stays out of the repository.
+- **Mercury:** mercury-jingzo signed in. `cards plan` now discovers every
+  live card: Research-OpenRouter (••5055, $50/week) and Media (Netflix,
+  ••1975) are declared. `cards vault` stores agentic cards into Proton
+  Pass; neither card is agentic.
+- **Proton Pass items:** owner-issued secrets live in typed items, never
+  notes (Lean: by_hand_in_field). Prepared for the owner to fill:
+  Jingzo-LLC/openrouter (signup), Jingzo-LLC/openrouter-management-key
+  (paste into Secret), Mirazo-Root/icloud-app-password, Mirazo-Root/Chase.
+- **Waiting on the owner:** the OpenRouter signup and key; Easy Switch
+  imports of Gmail and both Outlooks (for the tally of subscriptions);
+  minting the remaining cards after the tally.
+- **Also new:** modules/tokens (the credential graph, Lean-decided),
+  modules/statestore (OpenTofu state in Proton Pass, Lean-proven writes).
 
 ## Where the 2026-11-01 evening session ended (read this first)
 
