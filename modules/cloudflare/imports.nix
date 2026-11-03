@@ -57,5 +57,7 @@
     "cloudflare_dns_record.mirazo-org-proton-verification" =
       "cb57e0ebb1989ae3d67be0b64cc923ae/71e34eb919e90815124cd891ba2d7b81";
     "cloudflare_workers_script.status" = "73f11fa58ac09529a4fb40284b8ce236/kagamizo-status";
+    # Made by the owner's Zero Trust onboarding (2026-11-03), adopted here.
+    "cloudflare_zero_trust_organization.kagamizo" = "73f11fa58ac09529a4fb40284b8ce236";
   };
 }

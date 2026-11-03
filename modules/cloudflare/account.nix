@@ -80,6 +80,11 @@
     held.cloudflare = {
       provider = "cloudflare";
       plan = "free";
+      products.zeroTrust = {
+        on = "2026-11-03";
+        evidence = "GET /accounts/{id}/access/organizations answered success (it had answered access.api.error.not_enabled before)";
+        source = "https://developers.cloudflare.com/cloudflare-one/setup/";
+      };
       products.r2 = {
         on = "2026-11-01";
         evidence = "GET /accounts/{id}/r2/buckets answered success (it had answered 10042 before)";

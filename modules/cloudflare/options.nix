@@ -62,9 +62,9 @@ in
     # how a lost state is rebuilt from Cloudflare without touching it. Once
     # the state holds them, each import is a no-op.
     imports = mkOption {
-      type = types.attrsOf (types.strMatching "[0-9a-f]{32}/[A-Za-z0-9_-]+");
+      type = types.attrsOf (types.strMatching "[0-9a-f]{32}(/[A-Za-z0-9_-]+)?");
       default = { };
-      description = "Resource address -> import id (<zone or account id>/<object id>).";
+      description = "Resource address -> import id (<zone or account id>/<object id>, or the bare account id for an account's one object, as the provider's error states).";
     };
     checked = mkOption {
       type = types.raw;
