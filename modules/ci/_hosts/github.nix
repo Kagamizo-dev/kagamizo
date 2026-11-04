@@ -98,10 +98,13 @@ let
           // lib.optionalAttrs (j.history == "full") { fetch-depth = 0; };
         }
       ]
-      # VM tests need room: the runner's preinstalled toolchains go first.
+      # VM tests need room: the runner's preinstalled toolchains go, in the
+      # background, so the job does not wait the minute and a half the
+      # deletion takes (it took half the checks job, 2026-11-04); the
+      # runner keeps it running until the job ends.
       ++ lib.optional (j.runner == "linux-x86_64-kvm") {
-        name = "Free disk space";
-        run = "sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL && df -h /";
+        name = "Free disk space (in the background)";
+        run = "(sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL >/dev/null 2>&1 &)";
       }
       ++ [
         {

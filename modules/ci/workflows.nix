@@ -39,9 +39,10 @@
     checks = {
       description = "Every flake check (formats, lints, Lean, Cedar, the NixOS VM tests), the workflow files and the commit messages.";
       on = {
-        # main runs these through the yoga-c940 pipeline.
+        # main runs these through the yoga-c940 pipeline. Pushes only: a
+        # pull request's commits are pushes already, and its checks are the
+        # commit's, so a pull_request trigger ran everything twice.
         push.branchesIgnore = [ "main" ];
-        pullRequest = true;
         call = true;
       };
       jobs = {
