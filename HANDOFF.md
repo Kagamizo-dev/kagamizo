@@ -21,9 +21,9 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "Later on 2026-11-03: the always-on agents": confirm the agents tunnel is healthy and agents.jingzo.org and code.jingzo.org answer behind Access; move the host's iCloud exports from staging into Proton Drive; the typed machines.<name> contract; the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order, from HANDOFF.md's "Later on 2026-11-03: the always-on agents": confirm the agents tunnel is healthy (Cloudflare's API) and send me agents.jingzo.org and code.jingzo.org to open myself; move the host's iCloud exports from staging into Proton Drive; the typed machines.<name> contract; the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
-The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). End the session with the full allowlist (if it changed) and the updated start message, each ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
+The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
 ## A new cloud environment
@@ -429,10 +429,13 @@ and Lean the proof; C only where a measured record demands it.
 
 ## The allowlist to apply (one change, all of it)
 
-Declared (2026-11-03): `cache.kagamizo.com`, `developers.cloudflare.com`,
-and the host's agents (`agents.jingzo.org`, `code.jingzo.org`,
-`kagamizo.cloudflareaccess.com`). Paste the full list from
-`nix build .#claude-allowed-domains`.
+None. The owner's decision (2026-11-04): the allowlist is complete; no
+host is added to it from now on. What runs on jingzo-host fetches through
+the host's own network, never this session's proxy; the session checks
+the host through the APIs already allowed (Cloudflare's tunnel status,
+Hetzner's console), and the owner opens agents.jingzo.org and
+code.jingzo.org themselves. A host the session cannot reach is worked
+around, not added.
 
 ## Later on 2026-11-03: the always-on agents (read this first)
 
@@ -453,7 +456,8 @@ and the host's agents (`agents.jingzo.org`, `code.jingzo.org`,
   session's proxy blocks its GitHub tarball).
 - **To check after 04:40 UTC:** the tunnel's status from Cloudflare's API
   (agent profile; `inactive` before the switch, `healthy` after), then
-  `host-console` for the units. If the switch failed, `host-console` shows
+  `host-console` for the units; then send the owner both links to open
+  themselves (the session cannot reach them, by design). If the switch failed, `host-console` shows
   the failed units; reinstalling (dated window, `hetzner-infra reinstall`,
   `host-install`) is the fallback.
 
