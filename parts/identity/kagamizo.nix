@@ -20,7 +20,6 @@
         "legal" # registered agent, state filings, IRS
         "dev" # GitHub and the like
         "automations" # automated mail, events and signups: routed, not read
-        "sourcing" # outreach to shops, labs and facilities, drafted by `sourcing draft`
       ];
     };
   };

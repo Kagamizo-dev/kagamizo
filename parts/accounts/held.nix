@@ -16,31 +16,6 @@
       status = "active";
     };
 
-    # The agent fleet's models, and the sourcing harness's translations. The
-    # key sits in Kagamizo-Agents (secretspec profiles agent and sourcing).
-    openrouter = {
-      provider = "openrouter";
-      plan = "credits";
-      owner = "kagamizo";
-      status = "active";
-    };
-
-    # Marketplace listings and shipping quotes for `sourcing` (parts/sourcing).
-    # Planned: their plan pages are unread and their signup pages unrecorded
-    # (Gaps in parts/cloudflare/README.md). Search works without either.
-    mercadolivre = {
-      provider = "mercadolivre";
-      plan = "developer";
-      owner = "kagamizo";
-      status = "planned";
-    };
-    melhorenvio = {
-      provider = "melhorenvio";
-      plan = "free";
-      owner = "kagamizo";
-      status = "planned";
-    };
-
     # Kagamizo's organization, contact dev@kagamizo.com, created from your
     # own GitHub account (it owns the org; the repo moves over from it).
     github-kagamizo = {
