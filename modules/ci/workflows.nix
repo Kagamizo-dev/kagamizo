@@ -1,6 +1,41 @@
 # The workflows, for every host modules/ci renders.
 {
   ci.workflows = {
+    # The merge gate of the self-update loop (modules/governance/changes.nix):
+    # on every pull request, and again when a review lands, decide the
+    # request by its classes. Required on main (modules/github), so an
+    # agent's request merges only as the classes allow.
+    change-class = {
+      description = "Which classes a pull request touches, and whether it may merge as it stands (the agents' classes alone, or with the owner's approval).";
+      on = {
+        pullRequest = true;
+        pullRequestReview = true;
+      };
+      jobs.decide = {
+        name = "change classes";
+        runner = "linux-x86_64";
+        timeoutMinutes = 10;
+        history = "full";
+        permissions = {
+          contents = "read";
+          pull-requests = "read";
+        };
+        steps = [
+          {
+            name = "changes decide";
+            env = {
+              RANGE.context = "commit-range";
+              BRANCH.context = "branch";
+              PR.context = "pull-request";
+              REPO.context = "repository";
+              GH_TOKEN.context = "token";
+            };
+            run = "nix run .#changes-ci";
+          }
+        ];
+      };
+    };
+
     checks = {
       description = "Every flake check (formats, lints, Lean, Cedar, the NixOS VM tests), the workflow files and the commit messages.";
       on = {

@@ -18,9 +18,10 @@ jobs:
       with:
         extra_nix_config: accept-flake-config = true
     - env:
-        RANGE: ${{ github.event_name == 'pull_request' && format('{0}..{1}', github.event.pull_request.base.sha,
-          github.event.pull_request.head.sha) || (github.event.before == '0000000000000000000000000000000000000000'
-          && github.sha || format('{0}..{1}', github.event.before, github.sha)) }}
+        RANGE: ${{ (github.event_name == 'pull_request' || github.event_name == 'pull_request_review')
+          && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha)
+          || (github.event.before == '0000000000000000000000000000000000000000' &&
+          github.sha || format('{0}..{1}', github.event.before, github.sha)) }}
       name: commit-lint
       run: nix run .#commit-lint -- "$RANGE"
     timeout-minutes: 10

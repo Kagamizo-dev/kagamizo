@@ -23,6 +23,9 @@
 let
   inherit (lib) mkOption types;
   cfg = config.governance.changeClasses;
+  # The owner's own GitHub account: the one whose approval merges an owner
+  # class (the organization's parent, ../github/account.nix).
+  owner = config.accounts.held.${config.github.account}.signup.parent;
   q = builtins.toJSON;
   order = {
     agent = 0;
@@ -167,9 +170,36 @@ in
           doCheck = true;
           meta.mainProgram = "changes";
         };
+        # What CI runs on a pull request: the request's paths from its commit
+        # range, its branch, and whether the owner (the organization's parent
+        # account) approved it, then `changes decide`.
+        ci = pkgs.writeShellApplication {
+          name = "changes-ci";
+          runtimeInputs = [
+            changes
+            pkgs.git
+            pkgs.gh
+            pkgs.jq
+            pkgs.coreutils
+          ];
+          text = ''
+            : "''${RANGE:?}" "''${BRANCH:?}" "''${REPO:?}"
+            mapfile -t paths < <(git diff --name-only "$RANGE")
+            approved=()
+            if [ -n "''${PR:-}" ] && [ -n "''${GH_TOKEN:-}" ]; then
+              if gh api "repos/$REPO/pulls/$PR/reviews" --paginate |
+                jq -e --arg o ${lib.escapeShellArg owner} 'map(select(.state == "APPROVED" and .user.login == $o)) | length > 0' >/dev/null; then
+                approved=(--approved)
+              fi
+            fi
+            changes classify "''${paths[@]}"
+            changes decide --branch "$BRANCH" "''${approved[@]}" "''${paths[@]}"
+          '';
+        };
       in
       {
         packages.changes = changes;
+        packages.changes-ci = ci;
         checks.governance-changes =
           pkgs.runCommand "governance-changes"
             {

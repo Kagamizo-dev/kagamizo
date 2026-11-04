@@ -17,10 +17,14 @@ let
   contexts = {
     commit = "\${{ github.sha }}";
     repository = "\${{ github.repository }}";
-    # PRs: every commit the PR adds. Pushes: every commit pushed; a new
-    # branch (before is all zeros) checks its whole history.
+    branch = "\${{ github.head_ref || github.ref_name }}";
+    pull-request = "\${{ github.event.pull_request.number }}";
+    token = "\${{ github.token }}";
+    # PRs (and their reviews): every commit the PR adds. Pushes: every
+    # commit pushed; a new branch (before is all zeros) checks its whole
+    # history.
     commit-range = lib.concatStringsSep " " [
-      "\${{ github.event_name == 'pull_request'"
+      "\${{ (github.event_name == 'pull_request' || github.event_name == 'pull_request_review')"
       "&& format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha)"
       "|| (github.event.before == '0000000000000000000000000000000000000000' && github.sha"
       "|| format('{0}..{1}', github.event.before, github.sha)) }}"
@@ -45,6 +49,7 @@ let
         // lib.optionalAttrs (t.push.branchesIgnore != null) { branches-ignore = t.push.branchesIgnore; };
     }
     // lib.optionalAttrs t.pullRequest { pull_request = { }; }
+    // lib.optionalAttrs t.pullRequestReview { pull_request_review.types = [ "submitted" ]; }
     // lib.optionalAttrs t.call { workflow_call = { }; }
     // lib.optionalAttrs t.manual { workflow_dispatch = { }; }
     // lib.optionalAttrs (t.schedule != [ ]) { schedule = map (c: { cron = c; }) t.schedule; };

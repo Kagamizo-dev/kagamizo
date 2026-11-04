@@ -32,6 +32,11 @@ let
     "commit-range"
     "commit"
     "repository"
+    # The pull request's branch and number, and the run's own read token
+    # (the change-class gate reads the request's reviews with it).
+    "branch"
+    "pull-request"
+    "token"
   ];
   # A literal, a value only the host knows (`context`), or a secret the host
   # holds for the repository (`secret`, declared in modules/github).
@@ -152,6 +157,11 @@ let
         type = types.bool;
         default = false;
       };
+      pullRequestReview = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Also when a review is submitted on a pull request (the change-class gate re-decides).";
+      };
       call = mkOption {
         type = types.bool;
         default = false;
@@ -193,7 +203,9 @@ let
     def declared : List Workflow := [
     ${lib.concatStringsSep ",\n" (
       lib.mapAttrsToList (w: wf: ''
-        { name := ${q w}, pullRequest := ${lib.boolToString wf.on.pullRequest}, jobs := [
+        { name := ${q w}, pullRequest := ${
+          lib.boolToString (wf.on.pullRequest || wf.on.pullRequestReview)
+        }, jobs := [
         ${lib.concatStringsSep ",\n" (
           lib.mapAttrsToList (
             j: jb:
