@@ -1087,18 +1087,6 @@ as findings on the accounts they concern:
   are not Proton's own (Invalid section name, code 2064), and the repo will
   not pose as one.
 
-## Open questions for the owner
-
-- **arXiv account owner.** arXiv accounts belong to people, not companies:
-  authors register as themselves and give an affiliation. The cleaner model
-  is the account on Zachariah (the author), with affiliation QSearch LLC. The
-  email can stay research@jingzo.org, or be a personal one. An `.edu` address
-  would not avoid endorsement: since 2026-01-21 an institutional address only
-  counts together with prior papers in the same domain.
-- **Northwest** forms in Wyoming online; nothing is filed in person. The EIN
-  can be ordered with it, or taken free from the IRS online after the LLC
-  exists.
-
 ## The approved harness, twin and swarm plan (2026-11-04)
 
 Approved by the owner on 2026-11-04 (the plan file /root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied here). Owner's additions that day: agents must know their budgets and use the cheapest tier that works (rules and small quantized models before any paid model); the twin needs real-world data (geolocation, marketplaces, prices and stock, libraries); the agents report by email and chat (open source and free preferred); an NPC mirrors the owner, from a private persona, with the loadout goal.

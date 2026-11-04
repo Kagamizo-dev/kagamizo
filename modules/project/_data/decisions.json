@@ -1,4 +1,14 @@
 {
+  "arxiv-account-owner": {
+    "answer": null,
+    "asked": "2026-11-04",
+    "decided": null,
+    "options": [
+      "zachariah",
+      "qsearch-llc"
+    ],
+    "question": "Under whose name should the arXiv account be registered?"
+  },
   "epics-14-17": {
     "answer": null,
     "asked": "2026-11-04",
@@ -29,6 +39,16 @@
       "markdown"
     ],
     "question": "Plans, decisions, gaps and handoffs: markdown files, or typed modules and the PM swarm?"
+  },
+  "northwest-ein-timing": {
+    "answer": null,
+    "asked": "2026-11-04",
+    "decided": null,
+    "options": [
+      "with-formation",
+      "after-formation"
+    ],
+    "question": "Should the EIN be ordered with the Northwest formation or taken free from the IRS after the LLC exists?"
   },
   "outreach-sender": {
     "answer": null,
