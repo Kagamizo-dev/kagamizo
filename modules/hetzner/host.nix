@@ -74,10 +74,12 @@ let
     { config, ... }:
     import ./_harness.nix {
       inherit (cfg.agents) zone tier1Port;
-      port =
+      inherit
         (lib.findFirst (
           s: s.name == "harness"
-        ) (throw "hetzner.host.agents: no harness service") cfg.agents.services).port;
+        ) (throw "hetzner.host.agents: no harness service") cfg.agents.services)
+        port
+        ;
       dsh = config.packages.dsh;
       inherit (top.openrouter) models defaultModel;
       smallModel = top.agents.tiers.small.model;
