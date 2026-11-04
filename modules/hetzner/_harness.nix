@@ -17,6 +17,7 @@
   smallModel,
   repoFullName,
   appToken, # packages.github-app-token
+  teamsJson, # agents.teamsJson
 }:
 { pkgs, lib, ... }:
 let
@@ -138,6 +139,8 @@ in
       environment = {
         DSH_HOME = "/var/lib/dsh";
         HOME = "/var/lib/dsh";
+        # The declared teams (../agents/teams.nix), for the agents to read.
+        KAGAMIZO_TEAMS = pkgs.writeText "teams.json" teamsJson;
       };
       serviceConfig = {
         User = "dsh";

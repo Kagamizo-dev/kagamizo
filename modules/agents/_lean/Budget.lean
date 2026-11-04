@@ -47,6 +47,28 @@ theorem within_means_each (keys : List Key) (card : Nat)
     simpa [keysWithin] using h
   exact Nat.le_trans (le_sum_of_mem (List.mem_map_of_mem hk)) hs
 
+/-- An agent team's share of a key, per month. -/
+structure Team where
+  name : String
+  key : String
+  monthlyUsd : Nat
+  deriving DecidableEq, Repr
+
+/-- The shares on each key add up to no more than the key's cap. -/
+def teamsWithin (teams : List Team) (keys : List Key) : Bool :=
+  keys.all fun k => ((teams.filter (·.key == k.name)).map Team.monthlyUsd).sum ≤ k.monthlyUsd
+
+/-- When the shares fit, no one team can spend past its key's cap. -/
+theorem team_le_key (teams : List Team) (keys : List Key) (h : teamsWithin teams keys = true)
+    (t : Team) (ht : t ∈ teams) (k : Key) (hk : k ∈ keys) (hkey : t.key = k.name) :
+    t.monthlyUsd ≤ k.monthlyUsd := by
+  have hall := List.all_eq_true.mp h k hk
+  have hsum : ((teams.filter (·.key == k.name)).map Team.monthlyUsd).sum ≤ k.monthlyUsd := by
+    simpa using hall
+  have hmem : t ∈ teams.filter (·.key == k.name) :=
+    List.mem_filter.mpr ⟨ht, by simp [hkey]⟩
+  exact Nat.le_trans (le_sum_of_mem (List.mem_map_of_mem hmem)) hsum
+
 /-- A frugal task on a paid tier has rank at least 2: the paid tiers are
 reachable only from rank 2 up. -/
 theorem frugal_paid_rank (t : Task) (h : t.frugal = true) (hp : t.tier.paid = true) :

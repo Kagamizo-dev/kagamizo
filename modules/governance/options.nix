@@ -84,6 +84,52 @@ let
         type = types.listOf grant;
         default = [ ];
       };
+      # The plan of 2026-11-04: what each agent runs on and may propose.
+      model = mkOption {
+        type = types.enum config.openrouter.models;
+        default = config.openrouter.defaultModel;
+        defaultText = "openrouter.defaultModel";
+        description = "The model it starts on (tier 2 unless its tasks say otherwise).";
+      };
+      key = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "The OpenRouter key it spends (openrouter.keys); null is its entity's swarm key.";
+      };
+      budgetUsdPerMonth = mkOption {
+        type = types.ints.positive;
+        # Three swarms share each entity's $10 key.
+        default = 3;
+        description = "Its share of the key's monthly cap; Lean checks the shares fit (modules/agents).";
+      };
+      changeClasses = mkOption {
+        type = types.listOf (types.enum (lib.attrNames config.governance.changeClasses));
+        default = [ ];
+        description = "The classes of change it may propose as pull requests (./changes.nix).";
+      };
+      tools = mkOption {
+        type = types.listOf (
+          types.enum [
+            "shell"
+            "web"
+            "repo"
+            "matrix"
+            "twin"
+            "comfy"
+          ]
+        );
+        default = [ ];
+        description = "The tool sets it gets in its harness.";
+      };
+      harness = mkOption {
+        type = types.enum [
+          "dsh"
+          "opencode"
+          "orca"
+        ];
+        default = "orca";
+        description = "Where it runs: DeepSeek Harness teams, OpenCode, or an Orca swarm.";
+      };
     };
   };
 in

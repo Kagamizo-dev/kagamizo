@@ -85,6 +85,7 @@ let
       smallModel = top.agents.tiers.small.model;
       repoFullName = "${top.github.org}/kagamizo";
       appToken = config.packages.github-app-token;
+      inherit (top.agents) teamsJson;
     }
   );
 
