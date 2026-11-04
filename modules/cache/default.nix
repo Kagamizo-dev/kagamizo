@@ -21,6 +21,7 @@
 { lib, config, ... }:
 let
   inherit (lib) mkOption types;
+  top = config;
   cfg = config.cache;
   secret = import ../_lib/secret.nix;
   zone = config.identity.checked.domains.${cfg.zone};
@@ -186,6 +187,12 @@ in
           map (n: ".#checks.${system}.${n}") (lib.attrNames config.checks)
           ++ map (n: ".#packages.${system}.${n}") (
             lib.attrNames (lib.filterAttrs (n: _: !lib.hasPrefix "cache-" n) config.packages)
+          )
+          # The host's whole system, so its autoUpgrade downloads what CI
+          # built (an 8 GB host ran out of memory building Open WebUI,
+          # 2026-11-04).
+          ++ map (n: ".#nixosConfigurations.${n}.config.system.build.toplevel") (
+            lib.filter (n: n == top.hetzner.host.name) (lib.attrNames top.flake.nixosConfigurations)
           );
         store = "s3://${cfg.bucket}?endpoint=https://${accountId}.r2.cloudflarestorage.com&region=auto&compression=zstd";
         pushRun = pkgs.writeShellApplication {

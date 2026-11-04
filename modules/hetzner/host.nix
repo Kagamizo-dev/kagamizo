@@ -149,9 +149,27 @@ let
           '';
         };
       };
-      nix.settings.experimental-features = [
-        "nix-command"
-        "flakes"
+      nix.settings = {
+        experimental-features = [
+          "nix-command"
+          "flakes"
+        ];
+        # What CI built (../cache): the host downloads its system rather than
+        # building it. On 2026-11-04 building Open WebUI (unfree, so not in
+        # cache.nixos.org) here ran the 8 GB host out of memory.
+        extra-substituters = [ "https://${config.cache.host}" ];
+        extra-trusted-public-keys = [ config.cache.publicKey ];
+        # Whatever is still built here, one at a time on two cores.
+        max-jobs = 1;
+        cores = 2;
+      };
+      # Room for a build or a spike: compressed RAM first, then a swap file.
+      zramSwap.enable = true;
+      swapDevices = [
+        {
+          device = "/var/lib/swapfile";
+          size = 8 * 1024;
+        }
       ];
       # The host follows the repository: on a timer it builds its declared
       # configuration and switches to it.
