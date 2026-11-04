@@ -182,6 +182,9 @@ in
             *) echo "$usage" >&2; exit 2 ;;
           esac
           export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+          # Under an agent token (CI's views), pass-cli refuses every command
+          # without a stated reason; statestore's state reads run pass-cli too.
+          export PROTON_PASS_AGENT_REASON="infra $profile: the Cloudflare state and the run's tokens"
           export INFRA_PROFILE=$profile INFRA_SPEC=${config.packages.secretspec-toml}
           exec secretspec run --file "$INFRA_SPEC" --profile "$profile" \
             --reason "''${SECRETSPEC_REASON:-infra $profile $*}" -- ${run}/bin/infra-run "$@"
