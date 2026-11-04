@@ -1,0 +1,45 @@
+name: host-rescue
+
+# Reads jingzo-host's journal from Hetzner's rescue system, then boots NixOS
+# again (modules/hetzner/install.nix, host-rescue). Starts when
+# .github/host-rescue.request changes; needs the install window open.
+on:
+  push:
+    paths:
+      - .github/host-rescue.request
+
+permissions: {}
+
+concurrency:
+  group: host-install
+  cancel-in-progress: false
+
+jobs:
+  rescue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      - name: pass-cli 2.4.2 (the flake's)
+        run: nix profile install .#pass-cli && pass-cli --version
+
+      - name: Log in to Proton Pass (install vault)
+        run: pass-cli login
+        env:
+          PROTON_PASS_KEY_PROVIDER: fs
+          PROTON_PASS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PROTON_PASS_HOST_INSTALL_TOKEN }}
+
+      - name: host-rescue
+        run: nix run .#host-rescue -- $(head -1 .github/host-rescue.request | cut -d' ' -f1,2)
+        env:
+          PROTON_PASS_KEY_PROVIDER: fs

@@ -1,0 +1,15 @@
+{
+  "return": "mirazo",
+  "year": 2026,
+  "accounts": {
+    "biz": { "entity": "jingzo", "legalName": "QSearch LLC", "personal": false },
+    "me": { "entity": "mirazo", "legalName": "Zachariah", "personal": true }
+  },
+  "treatment": {
+    "Software": { "kind": "schedule-c", "line": "18", "percent": 100, "why": "" },
+    "Restaurants": { "kind": "schedule-c", "line": "24b", "percent": 50, "why": "" },
+    "Grocery": { "kind": "personal", "line": null, "percent": 100, "why": "groceries are personal" }
+  },
+  "obligations": [],
+  "unread": []
+}

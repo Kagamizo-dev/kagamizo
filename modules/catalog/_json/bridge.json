@@ -1,0 +1,223 @@
+{
+ "commands": {
+  "all-mail-visibility": {
+   "aliases": []
+  },
+  "all-mail-visibility hide": {
+   "aliases": []
+  },
+  "all-mail-visibility show": {
+   "aliases": []
+  },
+  "bad-event": {
+   "aliases": []
+  },
+  "bad-event logout": {
+   "aliases": []
+  },
+  "bad-event synchronize": {
+   "aliases": []
+  },
+  "cert": {
+   "aliases": []
+  },
+  "cert export": {
+   "aliases": []
+  },
+  "cert import": {
+   "aliases": []
+  },
+  "cert install": {
+   "aliases": []
+  },
+  "cert status": {
+   "aliases": []
+  },
+  "cert uninstall": {
+   "aliases": []
+  },
+  "change": {
+   "aliases": [
+    "ch",
+    "switch"
+   ]
+  },
+  "change change-location": {
+   "aliases": []
+  },
+  "change imap-port": {
+   "aliases": []
+  },
+  "change imap-security": {
+   "aliases": [
+    "ssl-imap",
+    "starttls-imap"
+   ]
+  },
+  "change mode": {
+   "aliases": [
+    "m"
+   ]
+  },
+  "change smtp-port": {
+   "aliases": []
+  },
+  "change smtp-security": {
+   "aliases": [
+    "ssl-smtp",
+    "starttls-smtp"
+   ]
+  },
+  "clear": {
+   "aliases": [
+    "cl"
+   ]
+  },
+  "clear accounts": {
+   "aliases": [
+    "a",
+    "k",
+    "keychain"
+   ]
+  },
+  "clear everything": {
+   "aliases": [
+    "a",
+    "k",
+    "keychain"
+   ]
+  },
+  "configure-apple-mail": {
+   "aliases": []
+  },
+  "credits": {
+   "aliases": []
+  },
+  "debug": {
+   "aliases": []
+  },
+  "debug mailbox-state": {
+   "aliases": []
+  },
+  "delete": {
+   "aliases": [
+    "del",
+    "rm",
+    "remove"
+   ]
+  },
+  "exit": {
+   "aliases": []
+  },
+  "help": {
+   "aliases": []
+  },
+  "info": {
+   "aliases": [
+    "i"
+   ]
+  },
+  "list": {
+   "aliases": [
+    "l",
+    "ls"
+   ]
+  },
+  "log-dir": {
+   "aliases": [
+    "log",
+    "logs"
+   ]
+  },
+  "login": {
+   "aliases": [
+    "add",
+    "a",
+    "con",
+    "connect"
+   ]
+  },
+  "logout": {
+   "aliases": [
+    "d",
+    "disconnect"
+   ]
+  },
+  "manual": {
+   "aliases": [
+    "man"
+   ]
+  },
+  "proxy": {
+   "aliases": []
+  },
+  "proxy allow": {
+   "aliases": []
+  },
+  "proxy disallow": {
+   "aliases": []
+  },
+  "repair": {
+   "aliases": [
+    "rep"
+   ]
+  },
+  "telemetry": {
+   "aliases": []
+  },
+  "telemetry disable": {
+   "aliases": []
+  },
+  "telemetry enable": {
+   "aliases": []
+  },
+  "updates": {
+   "aliases": []
+  },
+  "updates autoupdates": {
+   "aliases": []
+  },
+  "updates autoupdates disable": {
+   "aliases": []
+  },
+  "updates autoupdates enable": {
+   "aliases": []
+  },
+  "updates channel": {
+   "aliases": []
+  },
+  "updates channel early": {
+   "aliases": []
+  },
+  "updates channel stable": {
+   "aliases": []
+  },
+  "updates check": {
+   "aliases": []
+  },
+  "version": {
+   "aliases": []
+  }
+ },
+ "flags": [
+  "cli",
+  "cpu-prof",
+  "disable-keychain-test",
+  "enable-keychain-test",
+  "grpc",
+  "launcher",
+  "log-imap",
+  "log-level",
+  "log-smtp",
+  "mem-prof",
+  "no-window",
+  "noninteractive",
+  "parent-pid",
+  "session-id",
+  "set-hardware-renderer",
+  "set-software-renderer",
+  "software-renderer",
+  "trace-prof",
+  "version"
+ ]
+}

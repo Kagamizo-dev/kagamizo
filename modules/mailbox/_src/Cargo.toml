@@ -1,0 +1,16 @@
+[package]
+name = "mailbox"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+anyhow = "1"
+base64 = "0.22"
+imap = "2.4"
+mailparse = "0.15"
+native-tls = "0.2"
+zeroize = "1"
+
+[profile.release]
+strip = true
