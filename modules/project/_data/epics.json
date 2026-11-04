@@ -1,0 +1,153 @@
+{
+  "agent-mail": {
+    "blockedOn": [
+      "scout"
+    ],
+    "etaHours": 8,
+    "modules": [
+      "modules/mailbox",
+      "modules/hetzner"
+    ],
+    "owner": [
+      "approve-sign-in"
+    ],
+    "serves": "kagamizo",
+    "status": "proposed",
+    "team": "research",
+    "title": "Mail for agents at no new cost: Stalwart on a subdomain, or Bridge from the existing addresses (scout role agent-mail)"
+  },
+  "index": {
+    "blockedOn": [],
+    "etaHours": 4,
+    "modules": [
+      "modules/team",
+      "modules/project",
+      "modules/scout"
+    ],
+    "owner": [],
+    "serves": "kagamizo",
+    "status": "proposed",
+    "team": "pm",
+    "title": "One index of every declaration, searchable (epic 15)"
+  },
+  "inventory": {
+    "blockedOn": [
+      "inventory-store"
+    ],
+    "etaHours": 6,
+    "modules": [
+      "modules/inventory"
+    ],
+    "owner": [
+      "approve-sign-in"
+    ],
+    "serves": "mirazo",
+    "status": "done",
+    "team": null,
+    "title": "The physical twin's ledger: typed schema, items private in Proton Pass"
+  },
+  "markdown-migration": {
+    "blockedOn": [
+      "project"
+    ],
+    "etaHours": 8,
+    "modules": [
+      "modules/project"
+    ],
+    "owner": [],
+    "serves": "kagamizo",
+    "status": "approved",
+    "team": "pm",
+    "title": "HANDOFF.md, the READMEs and the generated READMEs into typed modules, until only CLAUDE.md is left"
+  },
+  "markets": {
+    "blockedOn": [
+      "supply"
+    ],
+    "etaHours": 16,
+    "modules": [],
+    "owner": [],
+    "serves": "jingzo",
+    "status": "proposed",
+    "team": "research",
+    "title": "FX at the real cost per route, price indexes, Wi-Fi and 5G coverage per place (epic 17)"
+  },
+  "project": {
+    "blockedOn": [
+      "team",
+      "no-markdown"
+    ],
+    "etaHours": 4,
+    "modules": [
+      "modules/project"
+    ],
+    "owner": [],
+    "serves": "kagamizo",
+    "status": "done",
+    "team": "pm",
+    "title": "The project as typed data, a PM swarm, and the markdown ratchet"
+  },
+  "review-gate": {
+    "blockedOn": [
+      "epics-14-17",
+      "review-blocks-merge"
+    ],
+    "etaHours": 8,
+    "modules": [
+      "modules/governance",
+      "modules/repo",
+      "modules/ci"
+    ],
+    "owner": [
+      "approve-sign-in"
+    ],
+    "serves": "kagamizo",
+    "status": "proposed",
+    "team": "review",
+    "title": "Pre-commit gate and a review team on every pull request (epic 14)"
+  },
+  "scout": {
+    "blockedOn": [
+      "team",
+      "research-merges"
+    ],
+    "etaHours": 6,
+    "modules": [
+      "modules/scout"
+    ],
+    "owner": [],
+    "serves": "jingzo",
+    "status": "done",
+    "team": "research",
+    "title": "Discovery: typed roles and candidates, the exit and no-new-cost rules, the research team"
+  },
+  "supply": {
+    "blockedOn": [
+      "scout",
+      "inventory",
+      "outreach-sender"
+    ],
+    "etaHours": 16,
+    "modules": [],
+    "owner": [
+      "sign-up"
+    ],
+    "serves": "mirazo",
+    "status": "proposed",
+    "team": null,
+    "title": "Goods, food, parts and facilities near a place, ranked stability first (epic 16)"
+  },
+  "team": {
+    "blockedOn": [],
+    "etaHours": 4,
+    "modules": [
+      "modules/team",
+      "modules/governance"
+    ],
+    "owner": [],
+    "serves": "kagamizo",
+    "status": "done",
+    "team": "pm",
+    "title": "Agent identities typed: teams, tiers, rooms, change classes, proven in Lean, served by `team`"
+  }
+}

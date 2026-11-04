@@ -34,6 +34,10 @@
           cards
           brokerage
           commit-lint
+          team
+          project
+          scout
+          inventory
         ];
       };
     in

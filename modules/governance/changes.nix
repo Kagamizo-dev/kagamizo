@@ -83,8 +83,10 @@ in
         paths = [
           "modules/twin/_items/**"
           "modules/site/_copy/**"
+          "modules/project/_data/**"
+          "modules/scout/_data/**"
         ];
-        why = "the twin's items and the pages' copy: declarations the checks fully decide";
+        why = "the twin's items, the pages' copy and the project's data (epics, decisions, gaps) and scout's candidates: declarations the checks fully decide";
       };
       code = {
         merge = "owner";

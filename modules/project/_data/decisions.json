@@ -1,0 +1,63 @@
+{
+  "epics-14-17": {
+    "answer": null,
+    "asked": "2026-11-04",
+    "decided": null,
+    "options": [
+      "go",
+      "wait"
+    ],
+    "question": "Go for the review gate, the index, supply and markets, in that order?"
+  },
+  "inventory-store": {
+    "answer": "proton-pass",
+    "asked": "2026-11-04",
+    "decided": "2026-11-04",
+    "options": [
+      "proton-pass",
+      "repo",
+      "later"
+    ],
+    "question": "Where do the inventory's items live, the repo being public?"
+  },
+  "no-markdown": {
+    "answer": "typed-modules",
+    "asked": "2026-11-04",
+    "decided": "2026-11-04",
+    "options": [
+      "typed-modules",
+      "markdown"
+    ],
+    "question": "Plans, decisions, gaps and handoffs: markdown files, or typed modules and the PM swarm?"
+  },
+  "outreach-sender": {
+    "answer": null,
+    "asked": "2026-11-04",
+    "decided": null,
+    "options": [
+      "alias-on-mirazo",
+      "zach-at-mirazo"
+    ],
+    "question": "Which address sends supply outreach (shops, labs, universities)?"
+  },
+  "research-merges": {
+    "answer": "candidates-only",
+    "asked": "2026-11-04",
+    "decided": "2026-11-04",
+    "options": [
+      "candidates-only",
+      "owner-approves"
+    ],
+    "question": "May the research team merge new scout candidates on its own (adopting stays the owner's)?"
+  },
+  "review-blocks-merge": {
+    "answer": null,
+    "asked": "2026-11-04",
+    "decided": null,
+    "options": [
+      "block",
+      "flag"
+    ],
+    "question": "Does a high-severity review finding block the merge, or flag it for the owner?"
+  }
+}

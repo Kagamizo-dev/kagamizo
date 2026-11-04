@@ -17,6 +17,54 @@
       attr = "checks.x86_64-linux.tokens-graph";
       method = "Lean deciding the credential graph (every child's scope within its parent's, by List.contains); moves with nodes × scope sizes";
     };
+    inventory-build = {
+      module = "inventory";
+      kind = "build";
+      attr = "packages.x86_64-linux.inventory";
+      method = "cargo build --release of the inventory CLI (std only) and its statestore wrapper; moves with the schema";
+    };
+    inventory-lean = {
+      module = "inventory";
+      kind = "build";
+      attr = "checks.x86_64-linux.inventory-lean";
+      method = "Lean proving use, restock and low (omega) and deciding the schema well formed";
+    };
+    scout-build = {
+      module = "scout";
+      kind = "build";
+      attr = "packages.x86_64-linux.scout";
+      method = "cargo build --release of the discovery CLI (std only, facts as Rust source) and its gh wrapper; moves with the candidates";
+    };
+    scout-lean = {
+      module = "scout";
+      kind = "build";
+      attr = "checks.x86_64-linux.scout-lean";
+      method = "Lean deciding exits, no new cost and evidence over every candidate (decide +kernel); grows with roles times candidates";
+    };
+    project-build = {
+      module = "project";
+      kind = "build";
+      attr = "packages.x86_64-linux.project";
+      method = "cargo build --release of the project CLI (std only, facts as Rust source); moves with the number of epics and decisions";
+    };
+    project-lean = {
+      module = "project";
+      kind = "build";
+      attr = "checks.x86_64-linux.project-lean";
+      method = "Lean deciding the plan coherent, cycle search included (decide +kernel); grows with epics squared";
+    };
+    team-build = {
+      module = "team";
+      kind = "build";
+      attr = "packages.x86_64-linux.team";
+      method = "cargo build --release of the agent-identity CLI (std only, facts as Rust source); moves with the number of agents";
+    };
+    team-lean = {
+      module = "team";
+      kind = "build";
+      attr = "checks.x86_64-linux.team-lean";
+      method = "Lean deciding the identity rules over every agent (decide +kernel); grows with agents times teams";
+    };
     statestore-build = {
       module = "statestore";
       kind = "build";

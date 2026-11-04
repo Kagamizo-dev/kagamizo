@@ -1,0 +1,12 @@
+{
+  "agent-mail": {
+    "closesWith": "agent-mail",
+    "step": "No agent has mail: Proton holds the MX and Unlimited has no SMTP submission; agents report in Matrix",
+    "why": "the transport is chosen through scout's agent-mail role (Stalwart on a subdomain, or Bridge), at no new cost"
+  },
+  "markdown-left": {
+    "closesWith": "markdown-migration",
+    "step": "HANDOFF.md, README.md and the module READMEs are still markdown",
+    "why": "the owner's rule (no-markdown): everything is a typed module; each migrated file leaves modules/project/markdown.nix"
+  }
+}

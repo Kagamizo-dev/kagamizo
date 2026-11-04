@@ -1,0 +1,516 @@
+{
+  "agent-mail": {
+    "proton-bridge": {
+      "api": "cli",
+      "cost": "free",
+      "evidence": [],
+      "license": "GPL-3.0",
+      "provider": "proton",
+      "repo": null,
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://proton.me/mail/bridge",
+      "why": "Bridge already runs headless (modules/mailbox); sends from the existing addresses"
+    },
+    "stalwart": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "AGPL-3.0",
+      "provider": null,
+      "repo": null,
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://stalw.art",
+      "why": "Agent mailboxes on a subdomain, typed and in Rust; needs inbound and outbound SMTP the host does not have yet"
+    }
+  },
+  "bank": {
+    "relay": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://relayfi.com",
+      "why": "Business banking with an API, no monthly fee: an exit from Mercury for an LLC"
+    }
+  },
+  "brokerage": {
+    "alpaca": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://alpaca.markets",
+      "why": "API-first brokerage with paper trading: a third trading backend"
+    }
+  },
+  "code": {
+    "forgejo": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "GPL-3.0",
+      "provider": null,
+      "repo": null,
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://forgejo.org",
+      "why": "Self-hosted forge; modules/ci already renders for it (modules/ci/_hosts/forgejo.nix)"
+    }
+  },
+  "code-review": {
+    "cloudflare-security-audit-skill": {
+      "api": "cli",
+      "cost": "free",
+      "evidence": [
+        {
+          "checked": "2026-11-04",
+          "fact": "released as MIT by Cloudflare, mid 2026",
+          "source": "https://fireup.pro/news/cloudflare-open-sources-its-ai-security-auditor-heres-why-it-matters"
+        }
+      ],
+      "license": "MIT",
+      "provider": null,
+      "repo": null,
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://github.com/cloudflare",
+      "why": "An agent skill that audits for vulnerabilities in phases, for the security reviewer"
+    },
+    "open-code-review": {
+      "api": "cli",
+      "cost": "free",
+      "evidence": [
+        {
+          "checked": "2026-11-04",
+          "fact": "Alibaba's review CLI (ocr), Apache-2.0, GitHub Actions and Claude Code integrations",
+          "source": "https://github.com/alibaba/open-code-review"
+        }
+      ],
+      "license": "Apache-2.0",
+      "provider": null,
+      "repo": "alibaba/open-code-review",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://github.com/alibaba/open-code-review",
+      "why": "Deterministic scope, rules and comment placement; the model only reasons"
+    }
+  },
+  "connectivity": {
+    "ookla-open-data": {
+      "api": "dataset",
+      "cost": "free",
+      "evidence": [],
+      "license": "open-data",
+      "provider": null,
+      "repo": "teamookla/ookla-open-data",
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://github.com/teamookla/ookla-open-data",
+      "why": "Speedtest performance tiles; non-commercial licence"
+    },
+    "opencellid": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "open-data",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://opencellid.org",
+      "why": "Cell tower positions, for 4G and 5G coverage"
+    }
+  },
+  "credit": {
+    "mercury-io": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "proprietary",
+      "provider": "mercury",
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://mercury.com",
+      "why": "Mercury's own card, on an account already held"
+    }
+  },
+  "device": {
+    "ardupilot": {
+      "api": "cli",
+      "cost": "free",
+      "evidence": [],
+      "license": "GPL-3.0",
+      "provider": null,
+      "repo": "ArduPilot/ardupilot",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://ardupilot.org",
+      "why": "Open autopilot for drones, an exit from DJI's closed stack"
+    }
+  },
+  "flights": {
+    "amadeus-self-service": {
+      "api": "rest",
+      "cost": "free-tier",
+      "evidence": [
+        {
+          "checked": "2026-11-04",
+          "fact": "Self-Service decommissioned 2026-07-17; flight search now needs an Enterprise contract",
+          "source": "https://www.phocuswire.com/amadeus-shut-down-self-service-apis-portal-developers"
+        }
+      ],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "rejected",
+      "url": "https://developers.amadeus.com",
+      "why": "Was the free flight-search API"
+    },
+    "duffel": {
+      "api": "rest",
+      "cost": "usage",
+      "evidence": [
+        {
+          "checked": "2026-11-04",
+          "fact": "instant signup; about 3 USD per order plus 1% plus fees",
+          "source": "https://geekflare.com/guides/flight-booking-api/"
+        }
+      ],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://duffel.com",
+      "why": "Self-serve flight search and booking"
+    }
+  },
+  "fx": {
+    "bcb-ptax": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "open-data",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://olinda.bcb.gov.br",
+      "why": "Banco Central do Brasil's official PTAX rates"
+    },
+    "frankfurter": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "MIT",
+      "provider": null,
+      "repo": null,
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://frankfurter.dev",
+      "why": "ECB reference rates, self-hostable"
+    }
+  },
+  "hosting": {
+    "netcup": {
+      "api": "rest",
+      "cost": "subscription",
+      "evidence": [],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://www.netcup.com",
+      "why": "Another European VPS host, priced near Hetzner"
+    }
+  },
+  "inventory": {
+    "grocy": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "MIT",
+      "provider": null,
+      "repo": "grocy/grocy",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://grocy.info",
+      "why": "Food and household stock, best-before dates"
+    },
+    "homebox": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "AGPL-3.0",
+      "provider": null,
+      "repo": "sysadminsmedia/homebox",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://github.com/sysadminsmedia/homebox",
+      "why": "Light home inventory in Go"
+    },
+    "inventree": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "MIT",
+      "provider": null,
+      "repo": "inventree/InvenTree",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://inventree.org",
+      "why": "Parts and stock with a REST API; Django and Postgres, too heavy for the host while it is memory-bound"
+    }
+  },
+  "mail": {
+    "stalwart": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [
+        {
+          "checked": "2026-11-04",
+          "fact": "1.0.0 released 2026-10-26, a new database layout (no in-place upgrade from 0.16)",
+          "source": "https://openalternative.co/stalwart"
+        }
+      ],
+      "license": "AGPL-3.0",
+      "provider": null,
+      "repo": null,
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://stalw.art",
+      "why": "One Rust binary (SMTP, IMAP, JMAP), self-hosted: mail the repo can declare, beyond Proton's 15 addresses"
+    }
+  },
+  "market-data": {
+    "openbb": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "AGPL-3.0",
+      "provider": null,
+      "repo": "OpenBB-finance/OpenBB",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://openbb.co",
+      "why": "Open investment research platform over many data providers"
+    }
+  },
+  "models": {
+    "llama-cpp": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "MIT",
+      "provider": null,
+      "repo": "ggml-org/llama.cpp",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://github.com/ggml-org/llama.cpp",
+      "why": "Local models on the host: already tier 1 (agents.tiers.small); more of the work could move there"
+    }
+  },
+  "osint": {
+    "opencti": {
+      "api": "graphql",
+      "cost": "free",
+      "evidence": [],
+      "license": "Apache-2.0",
+      "provider": null,
+      "repo": "OpenCTI-Platform/opencti",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://filigran.io/solutions/open-cti/",
+      "why": "Threat-intelligence platform"
+    },
+    "spiderfoot": {
+      "api": "cli",
+      "cost": "free",
+      "evidence": [],
+      "license": "MIT",
+      "provider": null,
+      "repo": "smicallef/spiderfoot",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://github.com/smicallef/spiderfoot",
+      "why": "Automated OSINT collection"
+    }
+  },
+  "parts": {
+    "nexar": {
+      "api": "graphql",
+      "cost": "free-tier",
+      "evidence": [
+        {
+          "checked": "2026-11-04",
+          "fact": "free Evaluation plan exists; its match cap is stated as 1,000 parts by Nexar and 100 by a June 2026 review",
+          "source": "https://as.nexar.com/api"
+        }
+      ],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://nexar.com/api",
+      "why": "Octopart's data: price, stock and lead time across distributors"
+    }
+  },
+  "passwords": {
+    "vaultwarden": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "AGPL-3.0",
+      "provider": null,
+      "repo": "dani-garcia/vaultwarden",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://github.com/dani-garcia/vaultwarden",
+      "why": "Self-hosted Bitwarden-compatible server; secretspec could read it as another backend"
+    }
+  },
+  "payments": {
+    "wise": {
+      "api": "rest",
+      "cost": "usage",
+      "evidence": [],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://wise.com",
+      "why": "Multi-currency balances and card, conversion at about the market rate with one visible fee; no subscription"
+    }
+  },
+  "platform": {
+    "nextcloud": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "AGPL-3.0",
+      "provider": null,
+      "repo": "nextcloud/server",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://nextcloud.com",
+      "why": "Self-hosted files, contacts and calendars, for what Apple and Google held"
+    }
+  },
+  "registered-agent": {
+    "registered-agents-inc": {
+      "api": "none",
+      "cost": "subscription",
+      "evidence": [],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://www.registeredagentsinc.com",
+      "why": "Another Wyoming registered agent, should Northwest stop serving"
+    }
+  },
+  "registrar": {
+    "porkbun": {
+      "api": "rest",
+      "cost": "usage",
+      "evidence": [],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://porkbun.com",
+      "why": "Registrar with a JSON API and at-cost-like prices: an exit from Cloudflare Registrar"
+    }
+  },
+  "research": {
+    "openalex": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "open-data",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://openalex.org",
+      "why": "Open index of papers, authors and institutions, no key: an exit from arXiv-only research"
+    }
+  },
+  "search": {
+    "searxng": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "AGPL-3.0",
+      "provider": null,
+      "repo": "searxng/searxng",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://github.com/searxng/searxng",
+      "why": "Self-hosted metasearch, no keys: the research team's search"
+    }
+  },
+  "shipping": {
+    "aisstream": {
+      "api": "websocket",
+      "cost": "free",
+      "evidence": [
+        {
+          "checked": "2026-11-04",
+          "fact": "free API key; a WebSocket stream of AIS messages as JSON, by bounding box",
+          "source": "https://aisstream.io"
+        }
+      ],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://aisstream.io",
+      "why": "Live AIS vessel positions over a WebSocket, filtered by area and MMSI"
+    },
+    "melhor-envio": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://melhorenvio.com.br",
+      "why": "Brazilian carrier quotes (Correios, Jadlog, Loggi) with delivery ranges"
+    }
+  },
+  "shopping": {
+    "mercado-livre": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://www.mercadolivre.com.br",
+      "why": "Latin America's marketplace; its listings carry the fulfillment signal supply ranks highest"
+    }
+  }
+}
