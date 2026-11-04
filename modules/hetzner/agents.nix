@@ -41,10 +41,26 @@ in
               type = types.enum [
                 "agents"
                 "code"
+                "chat"
               ];
-              description = "agents: Open WebUI; code: OpenCode's web interface.";
+              description = "agents: Open WebUI; code: OpenCode's web interface; chat: Element Web and the Matrix homeserver.";
             };
             port = mkOption { type = types.ints.between 1024 65535; };
+            paths = mkOption {
+              type = types.listOf (
+                types.submodule {
+                  options = {
+                    path = mkOption {
+                      type = types.strMatching "\\^/[A-Za-z0-9_./-]*";
+                      description = "A path regex the tunnel matches before the hostname's port.";
+                    };
+                    port = mkOption { type = types.ints.between 1024 65535; };
+                  };
+                }
+              );
+              default = [ ];
+              description = "Paths of this hostname served by another loopback port.";
+            };
           };
         }
       );
@@ -56,6 +72,16 @@ in
         {
           name = "code";
           port = 4096;
+        }
+        {
+          name = "chat";
+          port = 8082;
+          paths = [
+            {
+              path = "^/_matrix";
+              port = 6167;
+            }
+          ];
         }
       ];
     };

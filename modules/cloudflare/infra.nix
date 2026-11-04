@@ -70,6 +70,7 @@ in
               # (../hetzner/agents.nix).
               (lib.optionalAttrs statusOn (
                 import ./_agents.nix {
+                  inherit lib;
                   inherit (top.cloudflare.checked) accountId;
                   inherit (top.hetzner.host.agents) zone viewers services;
                   zoneId = domains.${top.hetzner.host.agents.zone}.zoneId;

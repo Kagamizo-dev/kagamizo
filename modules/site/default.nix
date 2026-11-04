@@ -103,6 +103,7 @@ in
               {
                 agents = "Open WebUI: chat with the open-weight models";
                 code = "OpenCode: the coding agent, in the browser";
+                chat = "Element: talk to the agent teams (Matrix, one room each)";
               }
               .${s.name};
           in

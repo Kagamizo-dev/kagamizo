@@ -11,6 +11,7 @@
 # pass-cli to pass-cli, into the host's vault (host/TUNNEL_TOKEN):
 # `infra-tunnel-token` (./infra.nix).
 {
+  lib,
   accountId,
   zoneId,
   zone,
@@ -30,11 +31,22 @@ in
     cloudflare_zero_trust_tunnel_cloudflared_config.agents = {
       account_id = accountId;
       tunnel_id = "\${cloudflare_zero_trust_tunnel_cloudflared.agents.id}";
+      # A hostname's path rules come before its catch-all.
       config.ingress =
-        map (s: {
-          hostname = hostname s.name;
-          service = "http://localhost:${toString s.port}";
-        }) services
+        lib.concatMap (
+          s:
+          map (p: {
+            hostname = hostname s.name;
+            inherit (p) path;
+            service = "http://localhost:${toString p.port}";
+          }) s.paths
+          ++ [
+            {
+              hostname = hostname s.name;
+              service = "http://localhost:${toString s.port}";
+            }
+          ]
+        ) services
         ++ [ { service = "http_status:404"; } ];
     };
     cloudflare_zero_trust_access_policy.agents-owner = {

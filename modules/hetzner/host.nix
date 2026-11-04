@@ -28,6 +28,7 @@
 }:
 let
   inherit (lib) mkOption types;
+  top = config;
   cfg = config.hetzner.host;
   # The migration's staging and exports on the host (../migration/_host.nix),
   # with the host's own build of the runner and its tools.
@@ -48,6 +49,25 @@ let
     model = config.agents.models.${config.agents.tiers.small.model};
     port = cfg.agents.tier1Port;
   };
+
+  # The agents' chat: Matrix and Element, behind the same tunnel (./_chat.nix).
+  chat = withSystem "x86_64-linux" (
+    { config, ... }:
+    let
+      svc = lib.findFirst (
+        s: s.name == "chat"
+      ) (throw "hetzner.host.agents: no chat service") cfg.agents.services;
+    in
+    import ./_chat.nix {
+      inherit (cfg.agents) zone;
+      elementPort = svc.port;
+      matrixPort = (lib.head svc.paths).port;
+      owner = lib.head (lib.splitString "@" (lib.head cfg.agents.viewers));
+      passCli = config.packages.pass-cli;
+      tokenFile = "/var/lib/kagamizo/host-token";
+      stateVault = top.proton.infraVaults.hostState;
+    }
+  );
 
   # Open WebUI and OpenCode, behind the agents tunnel (./agents.nix).
   agents = withSystem "x86_64-linux" (
@@ -107,6 +127,7 @@ let
         staging
         tier1
         agents
+        chat
       ];
       networking.hostName = cfg.name;
       boot.loader.grub = {

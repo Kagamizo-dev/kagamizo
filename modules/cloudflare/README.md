@@ -206,6 +206,13 @@ The rule for this repo: the only thing you ever do by hand is approve 2FA.
 Each item below breaks that rule today and is to be closed, not documented
 around.
 
+- **Agents cannot email the owner yet.** jingzo.org's mail is Proton's
+  (its MX), so Cloudflare Email Routing and Email Workers are out for that
+  domain, and Proton Unlimited offers no SMTP submission (that is Proton
+  for Business). The agents report in Matrix (chat.jingzo.org,
+  `modules/hetzner/_chat.nix`) until a sending path exists: Proton's
+  business SMTP tokens, or a mail-only subdomain whose MX Cloudflare
+  holds, each a declaration and a capability first.
 - **The GitHub organization itself**: github.com has no API to create one;
   `signup` prepares it from Proton Pass. Everything after (repos, secrets,
   environments, domain verification) is `modules/github`, applied by the
