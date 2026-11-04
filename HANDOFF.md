@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code, chat and harness links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; first "2026-11-04, later: the trading path" (finish C: the research run, a backtest, paper days), then the rest of "The approved harness, twin and swarm plan (2026-11-04)": steps 2–4 and the typed areas (organization.areas) are built, so continue with step 5 (the design system and the page check) and the later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code, chat and harness links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; first "2026-11-04, latest: three modules dispatched and landed" and "2026-11-04, later: the trading path" (on the host: the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)": steps 2–4 and the typed areas (organization.areas) are built, so continue with step 5 (the design system and the page check) and the later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -484,10 +484,16 @@ something runs, Nix pinning, its own check, integrated and committed:
   /run/agents/discord.env when the token and the Matrix bot login exist,
   and admits the SDK's unfree names beside open-webui.
 
-Next in this line: the Proton Drive hop (unblocks iCloud and the camera;
-host work after the reinstall), the Steam/Godot game-dev profile, the
-weather event-contract team (task: a daily take-profit cap in the limits,
-event contracts in the adapter, NWS/NOAA rule signals, paper first).
+Also landed: `modules/gamedev` (d18e4d1: Godot, Blender, JDK/Gradle,
+Rust; Steam off by default, a planned steam-mirazo account; Lean proves
+the profile open source but its platform) and the weather event-contract
+path (8a13fd7: `trading.limits.public.dailyTakeProfitUsd` and
+`maxContractPriceUsd`, event contracts in the adapter, `_weather.py` rule
+signals over NWS/Open-Meteo, strategy `weather-rules` at research,
+checks trading-weather and the extended trading-backtest). Next in this
+line: the Proton Drive hop (unblocks iCloud and the camera; host work
+after the reinstall), the owner's Discord ids and bot token, and the
+first paper days on the host.
 
 ## 2026-11-04, later: the trading path, built to the research loop (read this first)
 
