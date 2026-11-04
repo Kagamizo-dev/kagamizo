@@ -487,9 +487,17 @@ below. Step 2 is code, pushed; two things wait on the owner:
   plugins off (no such key), `dsh` as a fixed user in group `agents`,
   and `github-app-token` on an hourly timer writing /run/agents/github-token
   (root:agents) that the workspace's git credential helper reads: the
-  harness pushes as the App once the App exists. Still to do in 4: the
-  typed team fields on `governance.agents` (model, key, tools, budget,
-  changeClasses, harness) rendered into dsh team profiles.
+  harness pushes as the App once the App exists. **The typed teams (step 4, last piece, 8b0d51c):**
+  `governance.agents` gains model, key, budgetUsdPerMonth, changeClasses,
+  tools and harness (`modules/governance/options.nix`);
+  `modules/agents/teams.nix` declares design, twin, builders, research and
+  upkeep on the orca-fleet key ($4+4+3+5+4 = its $20), and Lean proves
+  every key's shares fit it (`teamsWithin`, checks.agents-budget). The
+  harness reads them from KAGAMIZO_TEAMS (teams.json); every swarm lead's
+  prompt states its model, key, share and classes. `proton apply` would
+  mint the five teams' swarm tokens (only the Orca path needs them; not
+  run). CI: `checks` and `change-class` pass on 0b93b0b; `infra` (the
+  pull-request plan) passes once the agent token is re-synced.
 - **Step 3, the self-update loop, built (commits 34d56f4, cb33a83,
   198cb3a):**
   - `governance.changeClasses` (`modules/governance/changes.nix`): content
