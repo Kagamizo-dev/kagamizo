@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code, chat and harness links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; then the rest of "The approved harness, twin and swarm plan (2026-11-04)": steps 2–4b are built (see "2026-11-04: the plan's step 2"), so continue with the typed teams on governance.agents, then step 5 (the design system and the page check) and the later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code, chat and harness links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; first "2026-11-04, later: the trading path" (finish C: the research run, a backtest, paper days), then the rest of "The approved harness, twin and swarm plan (2026-11-04)": steps 2–4b are built (see "2026-11-04: the plan's step 2"), so continue with the typed teams on governance.agents, then step 5 (the design system and the page check) and the later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -436,6 +436,55 @@ the host through the APIs already allowed (Cloudflare's tunnel status,
 Hetzner's console), and the owner opens agents.jingzo.org and
 code.jingzo.org themselves. A host the session cannot reach is worked
 around, not added.
+
+## 2026-11-04, later: the trading path, built to the research loop (read this first)
+
+The owner's priority of 2026-11-04: Public, NautilusTrader and the
+research-to-trade loop solidified so the personal Mercury money can go to
+work. Built, against "The approved trading plan (2026-11-02)":
+
+- **A, done (24577c4):** `accounts.held.<a>.login.exception`, Cedar holds
+  it against `context.today`, tested; Lean states it. Public's account is
+  admitted on admin@jingzo.org until 2026-11-30. **Public answers live:**
+  `brokerage summary` lists the brokerage account 5OI41709 (MARGIN,
+  options LEVEL_1), a Roth IRA 5OD75475 and the entity account 2OP05949
+  (QSearch LLC's). The brokerage account's cash is $0.00, no positions.
+  The brokerage id is pinned in Mirazo-Root/public-account-id
+  (`trade account` piped it). ca3a45f: secretspec reads a field from
+  whichever item of a title holds it (the login and the credential share
+  the title "Public").
+- **D and E, done (393fde2):** `trading.limits.public` ($100 seed, $25
+  per trade, 1 open position, $25 daily stop, long-call / long-put /
+  debit-spread); `_lean/Risk.lean` proves admissible's guarantees;
+  `_lean/Stages.lean` proves nothing is live without a recorded backtest,
+  5 paper days and the owner's dated decision (`trading.strategies.<s>.
+  stage` and `.promotion`). The adapter knows option expirations, chains,
+  greeks, option orders, placing and reading back; the stub answers them;
+  checks trading-backtest (BUY → a call within the cap, HOLD → nothing,
+  a stopped day refuses, `place` refuses a non-live strategy, the adapter
+  places against the stub), trading-risk, trading-stages. Strategy
+  `spy-agents` (agent-option on SPY, stage research).
+  Commands: `trade propose spy-agents [DATE]`, `trade paper-day`, `trade
+  place proposal.json` (the one spend, controller only).
+- **B, done (d562cdd):** `openrouter.keys.research` ($20/month, profile
+  research, Jingzo-LLC-Sessions/openrouter-research-key), minted; caps
+  now 20+25+20×3+20 = $125 of the card's $200/month; the research-jingzo
+  team spends it.
+- **C, in progress:** `modules/research`: TradingAgents v0.7.1 as a flake
+  input built with nixpkgs' langchain/langgraph (pythonRelaxDeps; the
+  check research-graph builds the graph), `research run|sweep|backtest`
+  on OpenRouter (deep: deepseek-v4-pro, quick: v4-flash), decisions into
+  research/<date>/<ticker>.json for `trade propose`. Data hosts in
+  `research.dataSources` (the host's network; not this session's).
+- **The owner's steps now:** (1) deposit the $100 seed into Public's
+  brokerage account (Public moves no money by API); (2) raise the
+  brokerage account's options level from 1 to 2 in Public (long calls and
+  puts need it; level 1 is covered calls and cash-secured puts); (3) say
+  whether trading is personal (public-mirazo, as declared) or the LLC's
+  (the entity account 2OP05949 exists; then the seed is a contribution).
+- **Then:** `research run SPY <date>` on the host or here, a backtest
+  grid, five paper days (`trade paper-day`), the promotion declaration,
+  `trade propose`, the owner's `trade place`.
 
 ## 2026-11-04: the plan's step 2, built (read this first)
 

@@ -59,6 +59,13 @@
       flake = false;
     };
 
+    # TradingAgents (TauricResearch, Apache-2.0): the research-to-trade
+    # loop's research agents (modules/research), pinned at a release.
+    tradingagents = {
+      url = "git+https://github.com/TauricResearch/TradingAgents?ref=refs/tags/v0.7.1";
+      flake = false;
+    };
+
     # Agent personas for the Orca swarms (modules/governance), MIT; pinned
     # to a commit since the repository has no releases.
     agency-agents = {
