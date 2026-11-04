@@ -772,6 +772,101 @@ Supersedes the evening notes below where they disagree.
 - **Performance**: `modules/perf` (records per module, Lean-decided,
   measured by CI's cache workflow); the Cedar check 305 s to 1 s.
 
+## Proposed 2026-11-04: the team, the index, the review gate, supply
+
+From the session on `claude/inventory-discovery-cli-sz30u2` (merged from
+this branch, so it holds everything here). Waiting on the owner's go;
+epics 14 to 17 in the Roadmap.
+
+### Where things stand (evaluated, not read by eye)
+
+- **Domains:** jingzo.org (Jingzo, Cloudflare Registrar), kagamizo.com
+  (Kagamizo, external registrar), mirazo.org (Mirazo, Cloudflare
+  Registrar).
+- **Mailboxes:** 14 on the three domains plus the account's own address:
+  **15 of Proton Unlimited's 15.** Every new identity (an agent team, an
+  outreach sender) is a Proton Pass alias, never a mailbox.
+- **Vaults:** 13 (three entity vaults, their -Sessions vaults, seven
+  Kagamizo infra vaults).
+- **Accounts:** 19 active, 5 planned, 4 retiring.
+- **Agents:** the legal, accounting and governance swarms for each of the
+  three identities (`modules/governance/swarms.nix`), on the tiers of
+  `modules/agents/tiers.nix`.
+- **Gating that exists:** change classes (`changes decide`, Lean-proven),
+  `commit-lint` as a commit-msg hook, `nix flake check` in CI. Missing: a
+  pre-commit gate and any review of a change by someone other than its
+  author.
+
+### The team
+
+Every team is a set of `governance.agents` serving one entity, with a Pass
+alias on that entity's domain (mail), a Matrix room (chat, step 2 of the
+harness plan), a tier budget, and the change classes it may propose.
+
+| Team | Serves | Does | New |
+|---|---|---|---|
+| legal, accounting, governance | each identity | as declared | — |
+| design, twin, builders, research, upkeep | as the harness plan says | as the harness plan says | — |
+| **review** (QA) | Kagamizo (the repo) | reviews every change, never its own | yes |
+| **supply** (logistics) | Mirazo | finds and ranks goods, food, parts, facilities; drafts outreach | yes |
+| **markets** | Jingzo | FX, prices, market data for research | yes |
+
+### The review gate: every change reviewed by someone else
+
+1. **Pre-commit, on every commit** (rule tier, a few seconds, no model):
+   `commit-lint`; nixfmt, statix, deadnix on staged Nix; `cargo fmt
+   --check` and clippy on touched crates; a secret scan of the staged diff;
+   `changes classify` printing the class the commit falls in. Installed by
+   the session hook, like `commit-lint`'s.
+2. **Review, on every pull request** (flash tier, capped key):
+   - **Scope:** [Open Code Review](https://github.com/alibaba/open-code-review)
+     (Alibaba, Apache-2.0), pinned and mapped like every tool. It decides
+     deterministically which files and rules apply and where a comment
+     goes; the model only reasons.
+   - **Reviewers:** after Cloudflare's "Orchestrating AI Code Review at
+     scale" (2026-04-20): one per dimension (correctness, security with
+     Cloudflare's security-audit-skill, governance (change classes,
+     Cedar), performance (`modules/perf`), docs and handoff), then a
+     coordinator that dedupes, grades severity and posts one review.
+   - **The gate:** one required check, `review`. A finding of high
+     severity blocks the merge until it is fixed or the owner overrides it
+     in the request.
+3. **Separation, proven:** a Cedar policy and a Lean theorem that a change's
+   author team is never its reviewer, and that `review` may comment but
+   never merge or push.
+4. **The owner** still approves `code`, `tool`, `mod` and `page-design`
+   requests with one tap; the review lands first, so the tap is informed.
+
+### The index
+
+`index`, a Rust tool over one SQLite file built by Nix from the evaluated
+declarations, with full-text search across all of it: `index search
+finance`, `index sql 'select ...'`, `index team review`. Lean proves the
+invariants before the file is written: every mailbox's domain belongs to a
+declared entity, addresses fit the plan, every agent serves exactly one
+entity, every grant names a held account. It replaces nothing:
+`identity-status` and `identity-audit` keep reading live state.
+
+### Supply, markets, connectivity
+
+The design from this session's first pass carries over, in Rust:
+- typed places, sources with their inventory signal, and a policy
+  (stability first, at most a 15% premium for it; landed cost includes
+  shipping or the trip);
+- sources unverified until a live response matches the parser;
+- runs on the host as twin data, so the session allowlist stays as it is;
+- outreach drafted in the place's language with an English copy beside it;
+  sending is a governed `write` action only the owner runs.
+
+### Owner's decisions needed
+
+1. Go for epics 14 to 17, in that order (review gate first, so everything
+   after is reviewed).
+2. The outreach sender: an alias on mirazo.org (personal supply), or
+   zach@mirazo.org itself.
+3. Whether the review team's high-severity findings block merges outright,
+   or only flag them for the owner.
+
 ## Roadmap
 
 ETAs are working time for a session once nothing blocks it; "you" is the
@@ -792,6 +887,10 @@ owner's part, always an approval. Order is the order of work.
 | 10 | **Kagamizo LLC** | Formation and EIN through Northwest; Mercury's business application; its own cards | 8 | signature and SSN in Northwest's portal (a Gap); the pay link | 1 day of work, weeks of state and IRS time |
 | 11 | **The host and swarms** | Hetzner (signup is ID and selfie, a Gap; console behind proof-of-work), Open WebUI, OpenCode, Bridge on a private domain; agents' audit record | 3, 7 | Hetzner's ID check | 2–3 days |
 | 12 | **Trading live** | Public adapter's first real run, live as a governed spend action, IBKR as a second backend | 6, 9 | — | 2–3 days |
+| 14 | **Review team and commit gate** (proposed) | Pre-commit gate (rule tier, seconds); `review` team: Open Code Review for scope and placement, five reviewers and a coordinator (Cloudflare's pattern), one required check; Cedar and Lean: an author is never its own reviewer | 3 (agents' GitHub credential) for posting; the gate itself none | approve the plan | 1 day |
+| 15 | **The index** (proposed) | `index`: every declaration (entities, domains, mailboxes, aliases' slots, vaults, accounts and capabilities, agents, teams, grants, change classes, actions, sources) built into one SQLite file with full-text search; Lean proves its invariants | — | — | 4 h |
+| 16 | **Supply** (proposed) | `supply`: goods, food, parts and facilities near a place, ranked stability first with a capped premium; twin data sources (Mercado Livre, Open Prices, OSM, fablabs.io, Melhor Envio), on the host | 11 for live runs | data sign-ups | 2 days |
+| 17 | **Markets and connectivity** (proposed) | FX at the real cost per route (card, Wise, wire, cash; BCB PTAX, ECB), price indexes; Wi-Fi and 5G coverage per place (Ookla open data, OpenCelliD, Anatel) | 16 | — | 2 days |
 | 13 | **The PR into `main`** | Review, CI green | when you ask | — | 1 h |
 
 Total before the PR: about 2 weeks of session time, with Kagamizo's
