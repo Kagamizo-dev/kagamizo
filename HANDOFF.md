@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code and chat links; then step 3 of "The approved harness, twin and swarm plan (2026-11-04)" (the self-update loop), then its later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code and chat links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; then step 4 of "The approved harness, twin and swarm plan (2026-11-04)" (dsh, pinned and wrapped) and its later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -467,9 +467,34 @@ below. Step 2 is code, pushed; two things wait on the owner:
   Kagamizo-Host-State (`matrix-zach`, `matrix-agents`): the owner signs in to
   Element with Proton Pass autofill. Rooms per team come with the bots
   (step 4). Email from the agents is a Gap (modules/cloudflare/README.md).
-- **Next (step 3):** the self-update loop: the agents' GitHub token (the
-  owner's console-credential step, item prepared first), typed change
-  classes in Cedar and Lean, CI's page and twin checks.
+- **Step 3, the self-update loop, built (commits 34d56f4, cb33a83,
+  198cb3a):**
+  - `governance.changeClasses` (`modules/governance/changes.nix`): content
+    (agents merge), code / tool / mod / page-design (the owner approves in
+    the request), infra / secret / spend (never from agents/*). Lean
+    (`_lean/Changes.lean`) proves a request agents may merge is never a
+    refused one and that adding a path never widens their leave;
+    `changes` (Rust, std only) classes paths and decides;
+    `checks.governance-changes`.
+  - The gate: workflow `change-class` on every pull request and review
+    (`ci.workflows.change-class`, `changes-ci`): reads the request's reviews
+    for the owner's (presentatou) approval. New CI contexts branch,
+    pull-request, token; trigger pullRequestReview (Lean: a PR job).
+  - The agents' GitHub identity is an App (`github.agentsApp`,
+    `modules/github/agents-app.nix`), made by GitHub's manifest flow from
+    one click on `github-app-manifest` (a page sent as a file card) whose
+    redirect lands on chat.jingzo.org/_github/app (the host's
+    `github-app-redirect`, `modules/hetzner/_github-app.nix`), which keeps
+    id and key as the note Kagamizo-Host-State/github-agents-app;
+    `github-app-token OUT` mints hour-long installation tokens.
+  - Rulesets (`modules/github/rulesets.nix`, applied by github-bootstrap):
+    main-gated (pull request + the four checks, the owner bypasses) and
+    agents-branches (only agents/* for anyone but the owner).
+  - **Order once the owner says go:** `infra ci apply` (chat), the
+    reinstall, `host-console` to see matrix-seed and github-app-redirect
+    up, then send the manifest card, then the github-bootstrap request
+    file for the rulesets. Then step 4 (dsh, pinned and wrapped, pushing
+    as the App).
 
 ## Later on 2026-11-03: the always-on agents (read this first)
 
