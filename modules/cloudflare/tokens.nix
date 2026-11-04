@@ -46,6 +46,7 @@
     "Cloudflare Tunnel Write" = "argotunnel.write";
     "Access: Apps and Policies Read" = "access.read";
     "Access: Apps and Policies Write" = "access.write";
+    "Access: Organizations, Identity Providers, and Groups Read" = "access.read";
     "Access: Organizations, Identity Providers, and Groups Write" = "access.write";
   };
 
@@ -70,6 +71,9 @@
         "D1 Read"
         "Cloudflare Tunnel Read"
         "Access: Apps and Policies Read"
+        # The Zero Trust organization and its sign-in method, so a
+        # pull-request plan can refresh them (2026-11-04).
+        "Access: Organizations, Identity Providers, and Groups Read"
       ];
     };
 

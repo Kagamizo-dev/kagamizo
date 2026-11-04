@@ -149,13 +149,19 @@ in
           # served for this run; only `ci` may lock and write it.
           mode=()
           [ "$INFRA_PROFILE" = ci ] || mode=(--read-only)
+          # The agents tunnel's token can only be read by a token that may
+          # write tunnels: the read-only view plans around it (its output
+          # shows as unknown), and only `ci` reads it (infra-tunnel-token).
+          exclude=()
+          [ "$INFRA_PROFILE" = ci ] || [ "''${1:-}" != plan ] ||
+            exclude=(-exclude=data.cloudflare_zero_trust_tunnel_cloudflared_token.agents)
           status=0
           # The script's $0 and $@ are its own arguments, expanded inside.
           # shellcheck disable=SC2016
           statestore-run cloudflare "''${mode[@]}" -- bash -c '
             # stderr keeps stdout clean for `output -raw`.
             tofu -chdir="$0" init -input=false >&2 && tofu -chdir="$0" "$@"
-          ' "$work" "$@" || status=$?
+          ' "$work" "$@" "''${exclude[@]}" || status=$?
           exit "$status"
         '';
       };

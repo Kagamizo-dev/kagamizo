@@ -442,7 +442,11 @@ around, not added.
 Approved plan: "The approved harness, twin and swarm plan (2026-11-04)"
 below. Step 2 is code, pushed; two things wait on the owner:
 
-- **Waiting on the owner:** (1) "go" for the reinstall of jingzo-host (the
+- **Waiting on the owner:** (0) `bootstrap apply`: a permissions-only
+  sync of the read-only agent token (it gains "Access: Organizations,
+  Identity Providers, and Groups Read" so pull-request plans can refresh
+  the Zero Trust organization; `bootstrap plan` lists it, plus two older
+  permissions-only syncs). (1) "go" for the reinstall of jingzo-host (the
   04:40 switch failed out of memory; the fix is in; a reinstall delivers it:
   dated window, `hetzner-infra reinstall`, `host-install`, close). (2) The
   Cloudflare apply for chat.jingzo.org (`infra ci plan`: 2 to add, 2 to
