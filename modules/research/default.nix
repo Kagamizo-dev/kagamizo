@@ -119,7 +119,10 @@ in
           version = "0.6.10";
           hash = "sha256-qKjRQF1MkK7fOx+82aIWNxOtla38P/txBbGjklmOTiA=";
         };
-        build-system = [ py.setuptools ];
+        build-system = [
+          py.setuptools
+          py.setuptools-scm
+        ];
         dependencies = [
           py.numpy
           py.pandas
