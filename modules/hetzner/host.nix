@@ -117,8 +117,9 @@ let
       opencodeConfig = config.packages.opencode-config;
       tokenFile = "/var/lib/kagamizo/host-token";
       stateVault = top.proton.infraVaults.hostState;
-      # The Android SDK's packages (../android), unfree in nixpkgs.
-      alsoUnfree = top.android.unfreeNames;
+      # The Android SDK's packages (../android) and, when the owner enables
+      # it, Steam's (../gamedev), unfree in nixpkgs.
+      alsoUnfree = top.android.unfreeNames ++ top.gamedev.unfreeNames;
     }
   );
 
@@ -164,6 +165,9 @@ let
       screen = config.packages.android-twin-screen;
     }
   );
+
+  # Steam's tools, only while gamedev.steam.enable is (../gamedev/_host.nix).
+  gamedev = import ../gamedev/_host.nix { inherit (top.gamedev.steam) enable; };
 
   # The disk Hetzner Cloud gives an x86 server (virtio-scsi, /dev/sda),
   # GPT with a BIOS boot partition and an ESP, so GRUB boots either way.
@@ -216,6 +220,7 @@ let
         harness
         media
         androidTwin
+        gamedev
       ];
       networking.hostName = cfg.name;
       boot.loader.grub = {

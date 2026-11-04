@@ -13,6 +13,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | catalog | `catalog-coverage` | build | none yet | none yet | 10% | Python walking every source file against 7 catalogs; moves with the number of sources and the regexes |
 | ci | `ci-pipeline` | build | none yet | none yet | 10% | Lean deciding every workflow sound |
 | discord | `discord-relay` | build | none yet | none yet | 10% | Lean deciding the relay rule on the declared ids, plus the crate's tests |
+| gamedev | `gamedev-profile` | build | none yet | none yet | 10% | Lean deciding the profile open source but its declared platform, plus the versions listing |
 | governance | `governance-cedar` | build | none yet | none yet | 10% | Cedar's test runner over every generated test (6169); moves with accounts × actions × agents |
 | governance | `governance-changes` | build | none yet | none yet | 10% | Lean deciding the change-class table's shape, plus the Rust tool's tests; moves with the table |
 | lean | `lean-api-pyicloud` | build | none yet | none yet | 10% | Lean deciding pyicloud's model (184 classes); moves with the catalog |

@@ -131,6 +131,12 @@
       attr = "checks.x86_64-linux.android-twin";
       method = "Lean deciding every base, app and setting pinned and typed, plus the rendered AVD config read back";
     };
+    gamedev-profile = {
+      module = "gamedev";
+      kind = "build";
+      attr = "checks.x86_64-linux.gamedev-profile";
+      method = "Lean deciding the profile open source but its declared platform, plus the versions listing";
+    };
     agents-budget = {
       module = "agents";
       kind = "build";
