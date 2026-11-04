@@ -137,6 +137,8 @@ in
           entity's controller. Write what needs doing for them as a PR to the
           kagamizo repo, or as a note in your reply. A refusal from
           `governance` is final; do not look for another way round it.
+
+          ${top.agents.policyText}
         '';
 
       opencode =

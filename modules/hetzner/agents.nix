@@ -28,6 +28,11 @@ in
       type = types.listOf (types.strMatching "[^@ ]+@[^@ ]+");
       default = [ "zach@mirazo.org" ];
     };
+    tier1Port = mkOption {
+      type = types.ints.between 1024 65535;
+      default = 8081;
+      description = "llama.cpp's loopback port for the small model (./_tier1.nix).";
+    };
     services = mkOption {
       type = types.listOf (
         types.submodule {

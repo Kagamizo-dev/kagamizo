@@ -13,6 +13,7 @@
 {
   services,
   zone,
+  tier1Port,
   passCli,
   secretspec,
   secretspecToml,
@@ -60,7 +61,10 @@ in
         mkdir -p /run/agents
         get() { secretspec get "$1" --file ${secretspecToml} --profile host --reason "agents-secrets: $1"; }
         key=$(get OPENROUTER_API_KEY)
-        printf 'OPENAI_API_KEY=%s\nOPENROUTER_API_KEY=%s\n' "$key" "$key" >/run/agents/openrouter.env
+        # Open WebUI takes every endpoint at once: OpenRouter, then the
+        # host's free tier-1 model (llama.cpp needs no key; "local" is a
+        # placeholder, not a secret).
+        printf 'OPENAI_API_KEY=%s\nOPENROUTER_API_KEY=%s\nOPENAI_API_KEYS=%s;local\n' "$key" "$key" "$key" >/run/agents/openrouter.env
         unset key
         get TUNNEL_TOKEN >/run/agents/tunnel-token
         [ -s /run/agents/tunnel-token ] || { echo "agents-secrets: no tunnel token yet (infra-tunnel-token)" >&2; exit 1; }
@@ -68,7 +72,7 @@ in
     };
 
     open-webui = {
-      inherit after;
+      after = after ++ [ "llama-cpp.service" ];
       requires = [ "agents-secrets.service" ];
     };
 
@@ -112,7 +116,7 @@ in
     port = port "agents";
     environmentFile = "/run/agents/openrouter.env";
     environment = {
-      OPENAI_API_BASE_URL = "https://openrouter.ai/api/v1";
+      OPENAI_API_BASE_URLS = "https://openrouter.ai/api/v1;http://127.0.0.1:${toString tier1Port}/v1";
       ENABLE_OLLAMA_API = "False";
       WEBUI_URL = "https://agents.${zone}";
       # Access has signed the viewer in: Open WebUI takes its address.

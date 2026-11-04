@@ -89,5 +89,11 @@
       attr = "checks.x86_64-linux.operations-boundary";
       method = "Lean deciding every declared secret well-formed";
     };
+    agents-budget = {
+      module = "agents";
+      kind = "build";
+      attr = "checks.x86_64-linux.agents-budget";
+      method = "Lean deciding every task's tier frugal and the keys' caps within the card (decide +kernel over the rendered lists); moves with tasks × keys";
+    };
   };
 }

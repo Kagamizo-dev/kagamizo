@@ -1,4 +1,6 @@
-# `nix run .#openrouter -- <plan|apply|models|credits>`: see ./openrouter.nix.
+# `nix run .#openrouter -- <plan|apply|models|credits|usage>`: see ./openrouter.nix.
+# `usage` prints the keys' ledger (cap, left, used, reset) as JSON: what an
+# agent reads before it spends (modules/agents/tiers.nix).
 # OpenRouter has no CLI of its own, so this speaks its management API
 # (https://openrouter.ai/docs/api/api-reference/api-keys/create-keys) with
 # curl, under the secretspec profile `openrouter`.
@@ -108,8 +110,16 @@ in
             credits)
               api GET /credits | jq -r '.data | "credits \(.total_credits), used \(.total_usage), left \(.total_credits - .total_usage)"'
               ;;
+            usage)
+              # The ledger every agent reads before it acts (modules/agents):
+              # each declared key's cap, what is left of it, and when it resets.
+              live | jq --argjson k "$keys" '[.[] | .name as $l | {
+                key: ($k | to_entries[] | select(.value.label == $l) | .key),
+                profile: ($k | to_entries[] | select(.value.label == $l) | .value.profile),
+                capUsd: .limit, leftUsd: .limit_remaining, usedUsd: (.usage // 0), reset: .limit_reset }]'
+              ;;
             *)
-              echo "usage: openrouter <plan|apply|models|credits>" >&2
+              echo "usage: openrouter <plan|apply|models|credits|usage>" >&2
               exit 2
               ;;
           esac

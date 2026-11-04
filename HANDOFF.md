@@ -859,6 +859,362 @@ as findings on the accounts they concern:
   can be ordered with it, or taken free from the IRS online after the LLC
   exists.
 
+## The approved harness, twin and swarm plan (2026-11-04)
+
+Approved by the owner on 2026-11-04 (the plan file /root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied here). Owner's additions that day: agents must know their budgets and use the cheapest tier that works (rules and small quantized models before any paid model); the twin needs real-world data (geolocation, marketplaces, prices and stock, libraries); the agents report by email and chat (open source and free preferred); an NPC mirrors the owner, from a private persona, with the loadout goal.
+
+(The earlier trading plan from this file is kept in HANDOFF.md, under
+"The approved trading plan (2026-11-02)".)
+
+### Context
+
+The owner wants one system, used from the browser on phone and desktop with
+no app-store apps:
+
+- **A harness that updates itself:** agents change their own tools, skills
+  and pages through the repository, and every change goes through Nix, Lean
+  and Cedar like everything else.
+- **DeepSeek first, open source:** light models for text and code;
+  multimodal for images and video.
+- **Agent swarms and Orca fleets**, given typed tools, budgets and models.
+- **A digital twin of the owner's real inventory** as a Minecraft world.
+  Each object is a typed item. CAD models pass into the game through our own
+  mods. Rust is the core runtime, and Nix wraps every mod.
+- **Pages designed by agents:** a design-swarm decision, never a thrown-together
+  page. Mobile is first-class.
+- **Rule:** adopt stable open-source projects, ranked by stability and
+  capability, and don't rebuild what exists.
+
+What exists today:
+- jingzo-host: a cx33 with 8 GB and no GPU, behind a Cloudflare Tunnel and Access.
+- Open WebUI and OpenCode, declared but not yet running. They wait on the
+  reinstall the owner has to approve.
+- Capped OpenRouter keys, the Orca and swarm declarations
+  (`modules/governance/orca.nix`), Cedar governance, and the status homepage.
+
+### The choices, ranked (stability × capability)
+
+| Need | Adopt | Why | Watch |
+|---|---|---|---|
+| Harness, self-extending | **DeepSeek Harness (dsh)**: MIT, Aug 2026, plugin runtime (Cordis), web UI, Agent Teams, subagents | Its own plugins are editable by its agents: the "updates itself" ask | Developer preview, breaking changes: pin by commit, one Nix wrapper, upgrade only through a PR that passes checks |
+| Chat and multimodal front | **Open WebUI** (already declared) | Stable; PWA on phones; tools, functions, MCP | Branding clause (kept) |
+| Coding agent | **OpenCode** (declared), with dsh delegating to it | Stable, OpenRouter-native | – |
+| Text and code models | DeepSeek V4 Flash (default), V4 Pro: OpenRouter | Cheapest strong open weights | Caps per key |
+| Image understanding and generation | **Janus-Pro-7B** (DeepSeek, MIT); **Qwen-Image** or FLUX.1-schnell (Apache) for quality | Open weights; Janus keeps it DeepSeek | Needs a GPU |
+| Video | **Wan 2.2** (Apache-2.0) | The most permissive strong model | GPU, 24 GB+ |
+| Image and video runtime | **ComfyUI** with its MCP server | The standard; agents drive it as a tool | – |
+| Minecraft server on Nix | **nix-minecraft** (Infinidoge), **Fabric + Polymer** (server-side custom items with a resource pack, so vanilla clients and the browser viewer see them) | Declarative servers and mods; replaces the earlier Paper note in HANDOFF (Paper plugins can't carry the Rust/JNI mod design as cleanly) | Mods built into one derivation |
+| Agents in the world | **Mindcraft** (Mineflayer, DeepSeek supported; the community fork **mindcraft-ce** is maintained) | LLM bots that build, craft and cooperate | The README warns of code execution: sandboxed, private server only |
+| Rust in Minecraft | A Fabric mod with a thin Java shim, plus a Rust core over JNI (`jni` crate; Oxidizium proves the pattern) | Rust is the runtime; Java only binds | – |
+| Rust server, later | **Pumpkin** (active, but not complete) | A full Rust stack someday | Not for the twin's first world |
+| CAD | **build123d** (CAD as code, STEP and glTF export), **FreeCAD** (GUI, and headless through `freecadcmd`) | Declarative models fit Nix | – |
+| Reverse engineering | **REA** (Reverse Engineer Anything, MIT, Apr 2026): already a flake input, wrapped in `modules/rea` | Maps undocumented tools and devices into typed catalogs; reused, not re-added | Its own exclusions (no DRM or anti-cheat work), and runs only on what the owner owns |
+
+### Architecture
+
+```
+phone/desktop browser
+  └─ Cloudflare Access (one sign-in: a code mailed to zach@mirazo.org)
+       ├─ home.*    the homepage: generated from declarations, designed by the design swarm
+       ├─ agents.*  Open WebUI   ── tools ──┐
+       ├─ harness.* dsh web UI   ── teams ──┤── OpenRouter (DeepSeek), capped keys
+       ├─ code.*    OpenCode                │── ComfyUI on a GPU (image, video)
+       └─ twin.*    the world's web map     │── MCP: repo, Proton (read), Cloudflare (read), twin
+                                            │
+jingzo-host (NixOS): the Minecraft server (Fabric, our mods), Mindcraft bots,
+the twin service (Rust), dsh, Open WebUI, OpenCode, cloudflared
+```
+
+### How the harness updates itself, safely
+
+1. An agent (dsh, OpenCode or an Orca fleet member) writes a change:
+   a plugin, a tool, a page, a mod or an item. It always lands on a branch
+   `agents/<team>/<topic>`, never on the owner's branch.
+2. Its GitHub credential is new, because no agent can push today:
+   - **The credential:** a fine-grained token, `contents: write` plus
+     `pull-requests: write` on kagamizo only, and a ruleset so agent
+     tokens can push only `agents/*` branches.
+   - **Who makes it:** the owner, as a console-credential human step, the
+     same way as `GITHUB_TOKEN`. The item is prepared in Proton Pass
+     beforehand; the owner pastes the token into it.
+   - **Delivery:** it's handed to the host like every other host credential
+     (`hetzner.host.credentials`).
+3. CI runs everything: `nix flake check`, Lean, Cedar tests, the page
+   design check, and the twin's item proofs.
+4. Merge is typed by change class (a Cedar policy plus a Lean theorem):
+   - `content` (twin items, page copy): the agent may merge when checks pass.
+   - `code`, `tool`, `mod`, `page-design`: needs the owner's approval in the
+     PR. That's one tap on a phone, so it counts as an approve-sign-in
+     human step.
+   - `infra`, `secret`, `spend`: never an agent's.
+5. The host's autoUpgrade then pulls what CI already built
+   (cache.kagamizo.com), so nothing builds on the host.
+
+This keeps "updates itself" true while the owner's boundary holds: every
+change is code, every power is a typed Cedar action, and Lean proves no
+agent class can merge `infra`, `secret` or `spend`.
+
+### Agent swarms and Orca fleets, typed
+
+This builds on what exists; nothing here is rebuilt.
+- `governance.agents.<n>` (`modules/governance/options.nix`): serves one
+  entity, has personas, and Cedar grants that are read or write only.
+- `orca.nix`: per-agent OpenCode configs, Proton tokens that expire in a
+  month, and $10 swarm keys.
+
+It gains, on each agent:
+- `model`: an enum from `openrouter.models`;
+- `key`: a capped OpenRouter key; the caps sum to at most the card's limit
+  (that's checked);
+- `tools`: an enum of MCP servers and dsh plugins;
+- `budget`: per day;
+- `changeClasses`: what it may propose;
+- `harness`: one of `dsh`, `opencode` or `orca`.
+
+Teams to start with:
+- **design:** proposes each page's layout and reviews it against a mobile and
+  desktop screenshot rubric.
+- **twin:** turns inventory and CAD into items.
+- **builders:** Mindcraft bots in the world.
+- **research:** the trading plan's TradingAgents.
+- **upkeep:** bumps pinned projects and reads changelogs; REA maps new tools.
+
+### Budget-aware agents: the cheapest thing that works
+
+Every task is typed with a **tier**, and the coordinator must pick the
+lowest tier that can do it. A higher tier needs a stated reason, and the
+reason is logged.
+
+| Tier | What | Where | Cost |
+|---|---|---|---|
+| 0 rule | Deterministic code: Rust rules, statistics, lookups, parsers | the host | $0 |
+| 1 small | A quantized small model (e.g. Qwen3 1.7B–4B or a DeepSeek distill, Q4) for classification, extraction and routing | llama.cpp on jingzo-host's CPU, about 3 GB, behind a local OpenAI-compatible endpoint | $0 |
+| 2 flash | DeepSeek V4 Flash | OpenRouter, capped key | cents |
+| 3 pro | DeepSeek V4 Pro, or a vision or GPU model | OpenRouter or serverless GPU | the most |
+
+- **Awareness:** every agent's context starts with its own ledger, so it
+  sees its constraints before it acts. The ledger holds:
+  - the day's budget and what's left (read from OpenRouter's key-usage
+    API);
+  - the tier policy;
+  - the team's open tasks.
+- **Enforcement:**
+  - the coordinator refuses a call that would pass the cap;
+  - a key's hard cap at OpenRouter stops it anyway;
+  - Lean proves the declared caps sum within the paying card's limit, and
+    that a tier-0 or tier-1 task can never reach a paid key.
+- **Visibility:** spend per team shows on the homepage.
+
+### Reality ↔ twin: the data the agents may use
+
+Each source is a declared account with its capabilities, or a free public
+API. They run on the host, not this session, so the allowlist stays as it
+is.
+
+- **Where:**
+  - geolocation from the browser itself (the PWA asks the owner, once per
+    use; it's never tracked in the background);
+  - places from OpenStreetMap (Nominatim and Overpass, free);
+  - weather and daylight from Open-Meteo, which is free.
+- **What things cost and where they're in stock:**
+  - the eBay Browse API (free developer account: a sign-up step);
+  - Best Buy's product and store-availability API (free key: a sign-up
+    step);
+  - Open Food Facts and Open Prices (open);
+  - more marketplaces as declared accounts, each adopted only after it is
+    mapped from its own API.
+  - **Typing:** each observation is typed: `twin.prices.<item>` gives
+    source, place, date, price and stock. Stale prices are flagged.
+- **Knowledge:**
+  - Open Library and WorldCat search for books;
+  - public university catalogs and repositories, through OAI-PMH and
+    arXiv, which is already used;
+  - library holdings near the owner's location.
+- **Where the loop runs:**
+  - a photo or receipt (or the Mercury transaction) becomes the item;
+  - the market price and stock nearby are filled in;
+  - the twin updates;
+  - the agents propose replacements or reproductions, each with real
+    costs.
+
+### Talking to the agents: email and chat
+
+- **Email:**
+  - **Sending:** agents send from `agents@jingzo.org` to the owner. A
+    Cloudflare Email Worker sends only to verified addresses, which here
+    is the owner's alone; it's free and declared in OpenTofu.
+  - **Replying:** the owner's replies come back through Email Routing to
+    the agents' inbox Worker, then to the coordinator.
+  - **Content:** drafts, plans and pictures go out as attachments.
+- **Chat (recommended): Matrix,** which is open source, free and self-hosted.
+  - **The server:** tuwunel, a Rust homeserver, on the host behind the
+    tunnel, with federation off.
+  - **The client:** Element Web at chat.* behind Access. It works in the
+    phone browser.
+  - **Rooms:** one room per team; agents post progress, images and drafts,
+    and the owner talks to them there.
+  - **Bots:** built with matrix-rust-sdk.
+  - Discord is free but neither open source nor declarable end to end;
+    keep it out unless asked.
+- **The homepage** links every room and shows each team's last message and
+  spend.
+
+### The owner's NPC, and the loadout
+
+- **A persona, private:**
+  - **The schema** is public. It declares
+    `identity.entities.mirazo.persona`: education, skills, body
+    (height, weight, fitness), resume and preferences, each typed.
+  - **The values** stay in Proton (a Pass item plus Drive for the resume),
+    never in the repo, because the repo is public.
+  - **At runtime** the twin service reads them on the host.
+- **In the world:**
+  - an NPC with the owner's skin and attributes;
+  - its inventory is the declared real inventory: a backpack is a
+    container, and devices are items;
+  - its skills come from the resume, and it gates what the NPC can craft
+    or "know".
+- **The loadout goal:**
+  - a typed optimization: carry the declared capabilities with the least
+    mass, volume and cost;
+  - the twin team proposes swaps (a device for a wearable, a bought part
+    for a CAD-made one), each with real prices and stock nearby;
+  - REA (`modules/rea`) maps the devices and software to reproduce, within
+    its exclusions;
+  - Lean proves the proposed loadout still covers every declared
+    capability.
+
+### Pages: decided by the design swarm, mobile first
+
+- **Design:** each page is a typed spec (`site.pages.<p>`): its purpose,
+  data sources, and primary actions.
+  - The design team proposes the layout: three candidates, a critique, then
+    a pick.
+  - The design team keeps a shared design system: tokens, components, and
+    light and dark themes.
+- **Check:** CI renders every page in Chromium at 390×844 and 1280×800 and
+  checks:
+  - no horizontal scroll;
+  - tap targets of at least 44 px;
+  - contrast;
+  - that the screenshots are kept.
+- **PWA:** Open WebUI and the homepage install from the browser to the home
+  screen. That covers it; no app-store builds.
+
+### The digital twin
+
+1. **Inventory, typed** (`twin.items.<id>`, Lean-checked):
+   - kind, owner entity, location (home, bag, device), quantity, condition
+     and value;
+   - an optional CAD source, a photo, and a link to the Mercury transaction
+     that bought it;
+   - the Minecraft representation: item, block or entity, with texture
+     and model.
+   - Lean proves every item has one owner, one place, and a representation.
+2. **Capture:** a photo in Open WebUI, read by a vision model, becomes a
+   proposed item (a `content` change). CAD comes from build123d scripts or
+   FreeCAD files and is exported to glTF, then converted into a Blockbench or
+   JSON item model.
+3. **World:**
+   - a Fabric server through nix-minecraft, the world seeded from the
+     declarations;
+   - our mod `kagamizo-twin`: a Java shim plus a Rust core over JNI;
+   - the mod registers every declared item, places rooms and bags as
+     containers, and exposes an RPC (Unix socket) that the twin service and
+     agents call.
+4. **Passing CAD and simulations through:** the Rust core calls out to CAD and
+   simulation (FreeCAD FEM, build123d) as Nix-wrapped tools and shows the
+   results in the world: a part's stress map as a texture, an assembly as a
+   multiblock.
+5. **Game environments:** a world template is a declaration (seed, rules,
+   items, bots, goal). A new environment is a PR, built by CI and started on
+   the host. Templates are typed, so they can be generated rapidly by the twin
+   team.
+6. **Seeing it:**
+   - **The default (the owner's earlier choice, kept):** prismarine-viewer
+     at twin.*, behind Access, shows the world and the bots in the browser
+     on a phone.
+   - **The mode:** offline, with no Mojang account.
+   - **Later:** a Java client can join, but raw TCP through Cloudflare needs
+     Spectrum, which is paid; that's decided later.
+
+### What needs a GPU, and the cost decision
+
+jingzo-host has no GPU. Text and code run through OpenRouter. Images and
+video need one:
+- **(a) Serverless per-second GPU:** Modal ($30/month free credit) or RunPod
+  running ComfyUI. You pay only while generating, for roughly $0 to $20/month at
+  light use. Recommended to start; a Mercury card is locked to the provider.
+- **(b) A dedicated Hetzner GPU (GEX45, RTX PRO 4000 Blackwell, 24 GB):**
+  about €184+/month plus setup. Only once usage is steady.
+
+### Order of work
+
+1. **Finish what's in flight:**
+   - the reinstall (waiting on the owner's go), so Open WebUI and OpenCode run;
+   - send the links;
+   - move the homepage to home.jingzo.org as well.
+2. **The budget ledger and the tier policy:** llama.cpp tier 1 on the host,
+   OpenRouter usage reads, the coordinator's refusals, and the Lean caps.
+   Then Matrix (tuwunel and Element) and the agents' email Worker, so
+   everything after this reports to the owner.
+3. **The self-update loop:**
+   - the `agents/*` GitHub App or token;
+   - typed change classes (Cedar and Lean);
+   - CI's page and twin checks.
+4. **dsh, pinned and wrapped:**
+   - the plugins Agent Teams, Shell (sandboxed: systemd DynamicUser, no
+     network but the declared hosts) and Subagent;
+   - behind Access at harness.*;
+   - the new typed fields on `governance.agents`, with the design and upkeep
+     teams first.
+5. **The design system and the page check;** the homepage redesigned by the
+   design team.
+6. **The twin, first world:**
+   - `twin.items` with Lean proofs;
+   - nix-minecraft with Fabric;
+   - `kagamizo-twin` with a Rust core;
+   - prismarine-viewer;
+   - Mindcraft bots on DeepSeek, sandboxed, in the private world only.
+7. **CAD pass-through:** build123d and FreeCAD exports to item models;
+   then simulation overlays.
+8. **Multimodal:**
+   - ComfyUI on serverless GPU (the owner's card decision);
+   - Janus-Pro and Qwen-Image or FLUX for images, Wan 2.2 for video;
+   - tools in Open WebUI and dsh.
+9. **REA** (already in `modules/rea`) as an upkeep skill; **Orca fleets**
+   run on the same typed teams.
+
+Each step is its own module: an option, a Rust crate where something runs,
+Lean proofs as checks, and a perf record, following `modules/statestore`.
+
+### Owner's decisions needed
+
+1. **Go for the reinstall** (in flight).
+2. **GPU:** serverless first (a new Mercury card for Modal or RunPod, about
+   $20/month), or a dedicated GEX45 later.
+3. **Merging:** the owner approves `code`, `tool`, `mod` and `page-design` PRs;
+   agents merge `content` alone. (Recommended.)
+4. **Chat:** Matrix (tuwunel and Element, open source, self-hosted;
+   recommended) or Discord.
+5. **Data sign-ups:** eBay and Best Buy developer keys (free, the owner's
+   sign-up step), when the twin reaches prices.
+6. **Inventory:** what the owner will put in first (devices, bags, home), and
+   whether photos stay in Proton Drive (recommended) rather than the repo,
+   which is public.
+
+### Verification
+
+- `nix flake check`: Lean (items, change classes, team budgets), Cedar
+  tests, the page check (two viewports), the twin mod's build and a headless
+  server smoke test (the server starts, registers the items, and answers
+  the RPC).
+- On the host:
+  - the tunnel reports healthy;
+  - the owner opens home, agents, harness, code and twin on a phone.
+- The loop: an agent's `content` PR merges on green, and a `code` PR waits
+  for the owner. The host picks both up on its next upgrade from the cache.
+
 ## The approved trading plan (2026-11-02)
 
 ### Options trading on Public: research agents → backtest → paper → gated live

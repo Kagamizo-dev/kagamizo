@@ -42,11 +42,18 @@ let
     }
   );
 
+  # Tier 1: the small model on the CPU (../agents/tiers.nix).
+  tier1 = import ./_tier1.nix {
+    name = config.agents.tiers.small.model;
+    model = config.agents.models.${config.agents.tiers.small.model};
+    port = cfg.agents.tier1Port;
+  };
+
   # Open WebUI and OpenCode, behind the agents tunnel (./agents.nix).
   agents = withSystem "x86_64-linux" (
     { config, ... }:
     import ./_agents.nix {
-      inherit (cfg.agents) services zone;
+      inherit (cfg.agents) services zone tier1Port;
       inherit (config.packages) secretspec;
       secretspecToml = config.packages.secretspec-toml;
       passCli = config.packages.pass-cli;
@@ -98,6 +105,7 @@ let
         inputs.disko.nixosModules.disko
         disk
         staging
+        tier1
         agents
       ];
       networking.hostName = cfg.name;
