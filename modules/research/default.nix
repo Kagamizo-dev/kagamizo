@@ -101,8 +101,13 @@ in
         };
         stocktwits.hosts = [ "api.stocktwits.com" ];
         reddit.hosts = [ "www.reddit.com" ];
+        # The weather rules' forecasts and observations (modules/trading/
+        # _weather.py): the NWS (free, no key, a User-Agent header
+        # required) and Open-Meteo (free, no key).
+        nws.hosts = [ "api.weather.gov" ];
+        open_meteo.hosts = [ "api.open-meteo.com" ];
       };
-      description = "Where TradingAgents reads from (its dataflows/vendors, v0.7.1), for the host's own network; this session's allowlist is closed.";
+      description = "Where TradingAgents (its dataflows/vendors, v0.7.1) and the trading rules read from, for the host's own network; this session's allowlist is closed.";
     };
   };
 

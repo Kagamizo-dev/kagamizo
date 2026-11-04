@@ -12,6 +12,7 @@
       historyApi = "flag";
       scopedSecrets = "flag";
       documentsApi = "flag";
+      eventContractsApi = "flag";
     };
 
     plans.public.individual = {
@@ -56,6 +57,17 @@
           value = false;
           source = "https://public.com/api/docs";
         };
+        # Event contracts (Kalshi's, as KALSHI.<series>): summaries by
+        # category, an event's outcomes and YES/NO prices, bars, quotes and
+        # orders on the EVENTCONTRACT instrument type, all in the pinned
+        # CLI's generated client (1.3.7, `event-contracts`). Whether the
+        # account itself has event-contract trading turned on is not
+        # readable through the API that we know of; the preflight is the
+        # check, and turning it on is a Gap (modules/cloudflare/README.md).
+        eventContractsApi = {
+          value = true;
+          source = "https://public.com/api/docs";
+        };
       };
     };
 
@@ -90,6 +102,10 @@
           source = "https://public.com/api/docs/templates/get-access-token";
         };
         documentsApi = {
+          value = false;
+          source = "https://public.com/api/docs";
+        };
+        eventContractsApi = {
           value = false;
           source = "https://public.com/api/docs";
         };

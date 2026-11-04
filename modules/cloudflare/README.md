@@ -308,6 +308,12 @@ around.
 - **Public's personal secret** (`Mirazo-Root/public-personal-secret`) is
   made in its settings, and funding Public has no API at all: deposits are
   started from Public's side.
+- **Event contracts on Public's brokerage account.** The API lists and
+  trades them (`trade propose weather-rules`, `modules/trading`), but
+  whether the account has event-contract trading turned on is not readable
+  through the API that the pinned CLI exposes, and turning it on, if Public
+  asks, is a page in Public's app. The preflight (which places nothing) is
+  the check: a refusal there is this gap.
 - **Discord's bot token** (`modules/discord`, `host/DISCORD_BOT_TOKEN`):
   Discord makes a bot only in its developer portal, where the token is
   shown once, so it is a console credential: the owner makes the

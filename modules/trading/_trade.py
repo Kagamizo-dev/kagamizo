@@ -12,11 +12,21 @@
                                      venue, and preflight at Public the
                                      orders of its last bar (--all: every
                                      order), which places nothing
-  trade propose STRATEGY [DATE]      an agent-option strategy: the day's
+  trade propose STRATEGY [DATE] [--forecasts FILE]
+                                     an agent-option strategy: the day's
                                      research decision into one option order
-                                     within the limits, preflighted; the
-                                     proposal as JSON (nothing placed)
-  trade paper-day STRATEGY [DATE]    propose, and record the day as paper
+                                     within the limits, preflighted; an
+                                     event-rule strategy: Public's open event
+                                     contracts in its category, each question
+                                     the weather rules answer (_weather.py)
+                                     priced against its forecast, the best
+                                     edge into one order within the limits,
+                                     preflighted; the proposal as JSON
+                                     (nothing placed). --forecasts reads the
+                                     typed forecasts file instead of fetching
+                                     the declared source (paper runs, checks)
+  trade paper-day STRATEGY [DATE] [--forecasts FILE]
+                                     propose, and record the day as paper
                                      evidence under <decisions>/paper/
   trade place PROPOSAL.json          the one spend: the risk check and the
                                      preflight again, then the order, then
@@ -41,6 +51,7 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _propose  # noqa: E402
 import _public  # noqa: E402
+import _weather  # noqa: E402
 
 from nautilus_trader.backtest.engine import BacktestEngine, BacktestEngineConfig
 from nautilus_trader.config import LoggingConfig
@@ -263,12 +274,14 @@ def limits_for(decl):
 
 def day_state(decl):
     """Where the day stands: <decisions>/state.json, written by `place` and
-    the day's close; zeros when there is none yet."""
+    the day's close ({"openPositions", "lossUsd", "gainUsd"}, the shape of
+    Kagamizo.Risk.Day); zeros when there is none yet."""
     path = os.path.join(decl["decisions"], "state.json")
+    day = {"openPositions": 0, "lossUsd": 0, "gainUsd": 0}
     if os.path.exists(path):
         with open(path) as f:
-            return json.load(f)
-    return {"openPositions": 0, "lossUsd": 0}
+            day.update(json.load(f))
+    return day
 
 
 def decision_for(decl, date):
@@ -279,18 +292,39 @@ def decision_for(decl, date):
         return json.load(f)
 
 
-def propose(name, date=None, record=False):
+def forecasts_for(decl, today, path=None):
+    """The event-rule strategy's data: the typed file when given, else the
+    declared source, fetched live for the cities the rules know."""
+    if path:
+        try:
+            return _weather.load_data(path)
+        except (OSError, ValueError) as e:
+            die(str(e))
+    try:
+        return _weather.live_data(list(_weather.CITIES), today, decl["event"]["source"])
+    except (OSError, RuntimeError, ValueError) as e:
+        die(f"fetching forecasts from {decl['event']['source']}: {e}")
+
+
+def propose(name, date=None, record=False, forecasts=None):
     decl = declared(name)
-    if decl["kind"] != "agent-option":
-        die(f"{name} is {decl['kind']}, not agent-option")
     import datetime
 
     today = datetime.date.fromisoformat(date) if date else datetime.date.today()
-    out = _propose.propose(decl, limits_for(decl), decision_for(decl, today.isoformat()), day_state(decl), _public.Public(), today)
+    if decl["kind"] == "agent-option":
+        if forecasts:
+            die(f"{name} is agent-option; --forecasts is for an event-rule strategy")
+        out = _propose.propose(decl, limits_for(decl), decision_for(decl, today.isoformat()), day_state(decl), _public.Public(), today)
+        record_as = decl["symbol"]
+    elif decl["kind"] == "event-rule":
+        out = _propose.propose_event(decl, limits_for(decl), forecasts_for(decl, today, forecasts), day_state(decl), _public.Public(), today)
+        record_as = name
+    else:
+        die(f"{name} is {decl['kind']}, which proposes nothing (agent-option and event-rule do)")
     if record:
         folder = os.path.join(decl["decisions"], "paper")
         os.makedirs(folder, exist_ok=True)
-        with open(os.path.join(folder, f"{today.isoformat()}-{decl['symbol']}.json"), "w") as f:
+        with open(os.path.join(folder, f"{today.isoformat()}-{record_as}.json"), "w") as f:
             json.dump(out, f, indent=2)
         out["recorded"] = True
     emit(out)
@@ -342,9 +376,26 @@ def place(proposal_path):
 
 USAGE = (
     "usage: trade <backtest STRATEGY BARS.csv | strategies | bars SYMBOL STEP [PERIOD]"
-    " | paper STRATEGY [BARS.csv] [--all] | propose STRATEGY [DATE] | paper-day STRATEGY [DATE]"
-    " | place PROPOSAL.json>"
+    " | paper STRATEGY [BARS.csv] [--all] | propose STRATEGY [DATE] [--forecasts FILE]"
+    " | paper-day STRATEGY [DATE] [--forecasts FILE] | place PROPOSAL.json>"
 )
+
+
+def propose_args(argv):
+    """STRATEGY [DATE] [--forecasts FILE] -> (strategy, date, forecasts)."""
+    rest, forecasts = [], None
+    args = list(argv)
+    while args:
+        a = args.pop(0)
+        if a == "--forecasts":
+            if not args or forecasts:
+                die(USAGE, 2)
+            forecasts = args.pop(0)
+        else:
+            rest.append(a)
+    if not 1 <= len(rest) <= 2:
+        die(USAGE, 2)
+    return rest[0], (rest[1] if len(rest) == 2 else None), forecasts
 
 
 def main(argv):
@@ -369,10 +420,9 @@ def main(argv):
         if len(rest) > 1:
             die(USAGE, 2)
         paper(argv[1], rest[0] if rest else None, every)
-    elif argv[0] == "propose" and len(argv) in (2, 3):
-        propose(argv[1], argv[2] if len(argv) == 3 else None)
-    elif argv[0] == "paper-day" and len(argv) in (2, 3):
-        propose(argv[1], argv[2] if len(argv) == 3 else None, record=True)
+    elif argv[0] in ("propose", "paper-day") and len(argv) >= 2:
+        name, date, forecasts = propose_args(argv[1:])
+        propose(name, date, record=argv[0] == "paper-day", forecasts=forecasts)
     elif argv[0] == "place" and len(argv) == 2:
         place(argv[1])
     else:

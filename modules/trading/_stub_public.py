@@ -59,6 +59,99 @@ def chain(symbol, expiration):
     return {"baseSymbol": symbol, "calls": [quote("C", k) for k in strikes], "puts": [quote("P", k) for k in strikes]}
 
 
+# A few weather event contracts, shaped as the details endpoint's DTOs
+# (eventSymbol, outcomes with YES and NO contracts, prices in dollars
+# 0.00-1.00): two open events and one resolved. The dates are fixed to the
+# checks' forecasts fixture (modules/trading/_json/forecasts.json, as of
+# 2026-11-04). The subcategory of a daily-temperature market is a name the
+# stub makes up; Public's real ones come from `event-contracts categories`.
+WEATHER = "Climate and Weather"
+
+
+def contract(outcome_id, yes_ask, no_ask):
+    return [
+        {"symbol": f"{outcome_id}.Y", "predictedOutcome": "YES", "bid": f"{yes_ask - 0.02:.2f}", "ask": f"{yes_ask:.2f}", "last": f"{yes_ask - 0.01:.2f}", "openInterest": "120", "probability": f"{yes_ask - 0.01:.2f}"},
+        {"symbol": f"{outcome_id}.N", "predictedOutcome": "NO", "bid": f"{no_ask - 0.02:.2f}", "ask": f"{no_ask:.2f}", "last": f"{no_ask - 0.01:.2f}", "openInterest": "120", "probability": f"{1 - (yes_ask - 0.01):.2f}"},
+    ]
+
+
+def outcome(outcome_id, title, yes_ask, no_ask, state="STATE_OPEN", trading="BUY_AND_SELL", close="2026-11-07T04:59:00Z", settled="SETTLED_OUTCOME_UNSPECIFIED"):
+    return {
+        "outcomeId": outcome_id,
+        "title": title,
+        "rules": f"Resolves YES if the question's observation falls in the band: {title}.",
+        "volume": "4000",
+        "state": state,
+        "timeline": {"openTime": "2026-10-30T14:00:00Z", "closeTime": close, "expectedExpirationTime": close},
+        "settledOutcome": settled,
+        "trading": trading,
+        "contracts": contract(outcome_id, yes_ask, no_ask),
+    }
+
+
+EVENTS = {
+    "KALSHI.KXHIGHNY-26NOV06": {
+        "title": "Highest temperature in New York on Nov 6?",
+        "subcategories": ["Temperature"],
+        "resolutionTime": "2026-11-07T04:59:00Z",
+        "resolved": False,
+        "outcomes": [
+            outcome("KALSHI.KXHIGHNY-26NOV06-T72", "72° or above", 0.20, 0.82),
+            outcome("KALSHI.KXHIGHNY-26NOV06-B66", "66° to 71°", 0.50, 0.52),
+            outcome("KALSHI.KXHIGHNY-26NOV06-T65", "65° or below", 0.30, 0.72),
+        ],
+    },
+    "KALSHI.KXRAINCHI-26NOV": {
+        "title": "Rain in Chicago in November?",
+        "subcategories": ["Snow and rain"],
+        "resolutionTime": "2026-12-01T05:59:00Z",
+        "resolved": False,
+        "outcomes": [outcome("KALSHI.KXRAINCHI-26NOV-3", "Above 3 inches", 0.55, 0.50, close="2026-12-01T05:59:00Z")],
+    },
+    "KALSHI.KXRAINMIA-26OCT": {
+        "title": "Rain in Miami in October?",
+        "subcategories": ["Snow and rain"],
+        "resolutionTime": "2026-11-01T04:59:00Z",
+        "resolved": True,
+        "outcomes": [outcome("KALSHI.KXRAINMIA-26OCT-5", "Above 5 inches", 0.99, 0.01, state="STATE_SETTLED", trading="DISABLED", close="2026-11-01T04:59:00Z", settled="SETTLED_OUTCOME_YES")],
+    },
+}
+
+
+def event_summary(symbol, e):
+    return {
+        "title": e["title"],
+        "eventSymbol": symbol,
+        "volume": str(sum(int(o["volume"]) for o in e["outcomes"])),
+        "category": WEATHER,
+        "subcategories": e["subcategories"],
+        "symbols": [c["symbol"] for o in e["outcomes"] for c in o["contracts"]],
+        "resolutionTime": e["resolutionTime"],
+        "resolved": e["resolved"],
+        "halted": False,
+    }
+
+
+def event_details(symbol, e):
+    return {
+        "eventSymbol": symbol,
+        "exchange": "KALSHI",
+        "title": e["title"],
+        "category": WEATHER,
+        "volume": event_summary(symbol, e)["volume"],
+        "subcategories": e["subcategories"],
+        "cftcContract": {"prohibitions": [], "resolutionSources": [{"name": "NWS", "url": "https://www.weather.gov"}], "contractTermsUrl": "https://kalshi.com/terms"},
+        "outcomeCount": len(e["outcomes"]),
+        "outcomes": e["outcomes"],
+        "resolved": e["resolved"],
+        "halted": False,
+    }
+
+
+def contracts_by_symbol():
+    return {c["symbol"]: c for e in EVENTS.values() for o in e["outcomes"] for c in o["contracts"]}
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *_):
         pass
@@ -80,21 +173,23 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.authed():
             return
-        if self.path.startswith(f"/userapigateway/option-details/{ACCOUNT}/greeks?"):
-            from urllib.parse import parse_qs, urlparse
+        from urllib.parse import parse_qs, urlparse
 
-            syms = parse_qs(urlparse(self.path).query).get("osiSymbols", [])
+        url = urlparse(self.path)
+        query = parse_qs(url.query)
+        if url.path == f"/userapigateway/option-details/{ACCOUNT}/greeks":
+            syms = query.get("osiSymbols", [])
             self.reply(200, {"greeks": [{"instrument": {"symbol": s, "type": "OPTION"}, **greeks_of(s)} for s in syms]})
-        elif self.path.startswith(f"/userapigateway/trading/{ACCOUNT}/order/"):
-            order_id = self.path.rsplit("/", 1)[-1]
+        elif url.path.startswith(f"/userapigateway/trading/{ACCOUNT}/order/"):
+            order_id = url.path.rsplit("/", 1)[-1]
             o = ORDERS.get(order_id)
             if o is None:
                 self.reply(404, {"message": "no such order"})
             else:
                 self.reply(200, {**o, "status": "FILLED"})
-        elif self.path == "/userapigateway/trading/account":
+        elif url.path == "/userapigateway/trading/account":
             self.reply(200, {"accounts": [{"accountId": ACCOUNT, "accountType": "BROKERAGE"}]})
-        elif self.path == "/userapigateway/historicdata/EQUITY/SPY/FIVE_YEARS/ONE_DAY":
+        elif url.path == "/userapigateway/historicdata/EQUITY/SPY/FIVE_YEARS/ONE_DAY":
             empty = {"expectedBars": 0, "bars": []}
             self.reply(
                 200,
@@ -107,6 +202,28 @@ class Handler(BaseHTTPRequestHandler):
                     "afterMarket": empty,
                 },
             )
+        elif url.path.startswith("/userapigateway/eventcontract/details/"):
+            symbol = url.path.rsplit("/", 1)[-1]
+            if symbol not in EVENTS:
+                self.reply(404, {"message": f"no event {symbol}"})
+            else:
+                self.reply(200, event_details(symbol, EVENTS[symbol]))
+        elif url.path.startswith("/userapigateway/historicdata/event-contracts/") and "/bars/" in url.path:
+            period = url.path.rsplit("/", 1)[-1]
+            known = contracts_by_symbol()
+            charts = []
+            for s in query.get("symbols", [""])[0].split(","):
+                if s in known:
+                    price = float(known[s]["last"])
+                    charts.append(
+                        {
+                            "symbol": s,
+                            "previousClosePrice": f"{price:.2f}",
+                            "currentPrice": f"{price:.2f}",
+                            "bars": [{"timestamp": "2026-11-03T00:00:00Z", "open": f"{price:.2f}", "high": f"{price:.2f}", "low": f"{price:.2f}", "close": f"{price:.2f}", "value": f"{price:.2f}", "volume": 10}],
+                        }
+                    )
+            self.reply(200, {"period": period, "charts": charts})
         else:
             self.reply(404, {"message": f"no {self.path}"})
 
@@ -123,6 +240,15 @@ class Handler(BaseHTTPRequestHandler):
             if body["instrument"]["type"] == "OPTION":
                 cost = f'{float(body["limitPrice"]) * 100 * int(body["quantity"]):.2f}'
                 self.reply(200, {"instrument": body["instrument"], "orderValue": cost, "estimatedCost": cost})
+            elif body["instrument"]["type"] == "EVENTCONTRACT":
+                known = contracts_by_symbol()
+                if body["instrument"]["symbol"] not in known:
+                    self.reply(400, {"message": "unknown event contract"})
+                elif body["orderSide"] == "SELL":
+                    self.reply(400, {"message": "no contracts held"})
+                else:
+                    cost = f'{float(body["limitPrice"]) * int(body["quantity"]):.2f}'
+                    self.reply(200, {"instrument": body["instrument"], "orderValue": cost, "estimatedCost": cost, "estimatedQuantity": body["quantity"]})
             elif body["orderSide"] == "SELL":
                 self.reply(400, {"message": "insufficient shares"})
             else:
@@ -135,6 +261,32 @@ class Handler(BaseHTTPRequestHandler):
             if not self.authed():
                 return
             self.reply(200, chain(body["instrument"]["symbol"], body["expirationDate"]))
+        elif self.path == f"/userapigateway/marketdata/{ACCOUNT}/quotes":
+            if not self.authed():
+                return
+            known = contracts_by_symbol()
+            quotes = []
+            for i in body.get("instruments", []):
+                c = known.get(i["symbol"]) if i["type"] == "EVENTCONTRACT" else None
+                if c is None:
+                    quotes.append({"instrument": i, "outcome": "UNKNOWN"})
+                else:
+                    quotes.append({"instrument": i, "outcome": "SUCCESS", "last": c["last"], "bid": c["bid"], "ask": c["ask"], "bidSize": 50, "askSize": 50, "volume": 100})
+            self.reply(200, {"quotes": quotes})
+        elif self.path == "/userapigateway/eventcontract/summary":
+            if not self.authed():
+                return
+            if body.get("sortingMode") not in ("VOLUME", "EXPIRATION", "RECENTLY_ADDED"):
+                self.reply(400, {"message": "sortingMode is required"})
+                return
+            content = [
+                event_summary(s, e)
+                for s, e in EVENTS.items()
+                if body.get("category") in (None, WEATHER)
+                and (body.get("subcategory") is None or body["subcategory"] in e["subcategories"])
+                and (body.get("displayResolvedEvents") or not e["resolved"])
+            ]
+            self.reply(200, {"content": content})
         elif self.path == f"/userapigateway/trading/{ACCOUNT}/order":
             if not self.authed():
                 return

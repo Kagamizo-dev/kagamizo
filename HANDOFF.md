@@ -528,6 +528,37 @@ work. Built, against "The approved trading plan (2026-11-02)":
   on OpenRouter (deep: deepseek-v4-pro, quick: v4-flash), decisions into
   research/<date>/<ticker>.json for `trade propose`. Data hosts in
   `research.dataSources` (the host's network; not this session's).
+- **F, built (uncommitted in this session): the weather event-contract
+  team.** `trading.limits.public` gains `dailyTakeProfitUsd` ($25) and
+  `maxContractPriceUsd` ($10) and the kinds `event-yes` / `event-no`;
+  `_lean/Risk.lean`'s `Day` carries `gainUsd`, `admissible` needs the day
+  under its take-profit, `taken_profit_day_refuses` is proved, the sanity
+  check holds take-profit ≤ seed and contract cap ≤ premium cap.
+  `_public.py` maps the pinned CLI's event endpoints (summary POST with
+  sortingMode/category/subcategory/displayResolvedEvents/filters, details
+  GET, bars GET, quotes POST, orders on instrument type EVENTCONTRACT with
+  BUY/SELL and the contract's `.Y`/`.N` symbol; the price unit 0.00–1.00
+  dollars is the bars endpoint's statement, the preflight is the check).
+  `_weather.py`: typed questions ("Rain/Snow in <City> in <Month>?" with
+  inch bands, "Highest temperature in <City> on <Mon D>?" with degree
+  bands; anything else is None), probabilities by declared rules from a
+  typed forecasts file or Open-Meteo / NWS (User-Agent set), `edge`; unit
+  tests `_weather_test.py` over `_json/forecasts.json`
+  (`checks.trading-weather`). Strategy `weather-rules` (kind event-rule,
+  category "Climate and Weather", minEdge 0.15, 10 contracts, stage
+  research); `trade propose|paper-day weather-rules [DATE] [--forecasts
+  FILE]`; the wrapper authorizes public:event-contracts-summary/-details
+  and market-quotes. `checks.trading-backtest` runs it against the stub
+  (a large edge proposed and accepted at $2.00, small edges nothing, a day
+  at take-profit refused, paper-day recorded, the adapter's event
+  endpoints). `research.dataSources` gains `nws` (api.weather.gov) and
+  `open_meteo` (api.open-meteo.com): the host's network, not this
+  session's. Public's plan gains the capability `eventContractsApi`, and
+  the strategy demands it; whether the account has event contracts turned
+  on is a Gap (modules/cloudflare/README.md). Next: a backtest over
+  settled contracts (`event_contract_bars` and `event_contract_summary`
+  with include_resolved), then paper days on the host with live
+  forecasts, then the commodity ETF options leg.
 - **The owner's steps now:** (1) deposit the $100 seed into Public's
   brokerage account (Public moves no money by API); (2) raise the
   brokerage account's options level from 1 to 2 in Public (long calls and

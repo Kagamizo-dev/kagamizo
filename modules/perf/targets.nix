@@ -137,6 +137,12 @@
       attr = "checks.x86_64-linux.gamedev-profile";
       method = "Lean deciding the profile open source but its declared platform, plus the versions listing";
     };
+    trading-weather = {
+      module = "trading";
+      kind = "build";
+      attr = "checks.x86_64-linux.trading-weather";
+      method = "The weather signal engine's unit tests over forecast fixtures (parsers, probabilities, edge)";
+    };
     agents-budget = {
       module = "agents";
       kind = "build";

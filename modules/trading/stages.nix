@@ -101,8 +101,13 @@ in
   config = {
     # The engine's reference example stays a backtest; the agents' strategy
     # starts at research until its first recorded backtest.
-    trading.strategies.ema-cross-spy.stage = "backtest";
-    trading.strategies.spy-agents.stage = "research";
+    trading.strategies = {
+      ema-cross-spy.stage = "backtest";
+      spy-agents.stage = "research";
+      # The weather rules: paper first (the owner's framing of 2026-11-04),
+      # and paper only after a recorded backtest over settled contracts.
+      weather-rules.stage = "research";
+    };
 
     perSystem =
       { pkgs, ... }:

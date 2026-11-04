@@ -30,6 +30,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | tokens | `tokens-graph` | build | none yet | none yet | 10% | Lean deciding the credential graph (every child's scope within its parent's, by List.contains); moves with nodes × scope sizes |
 | trading | `trading-risk` | build | none yet | none yet | 10% | Lean proving what admissible guarantees (omega over Nat) and deciding the declared limits sane |
 | trading | `trading-stages` | build | none yet | none yet | 10% | Lean deciding every strategy's stage carries its evidence |
+| trading | `trading-weather` | build | none yet | none yet | 10% | The weather signal engine's unit tests over forecast fixtures (parsers, probabilities, edge) |
 
 ## Baseline
 
