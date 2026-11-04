@@ -481,8 +481,15 @@ below. Step 2 is code, pushed; two things wait on the owner:
   naming OpenRouter (the chat-and-code key) with the declared models, the
   host's free tier-1 model, and the default model. State in /var/lib/dsh.
   The Cloudflare plan is now 4 to add, 2 to change (chat and harness).
-  Next (4b): dsh's Agent Teams and Shell plugins sandboxed, its sessions
-  pushing as the GitHub App, and the typed fields on `governance.agents`.
+  **4b, built:** the shell on, inside dsh's sandbox (`workspace-write`
+  on /var/lib/dsh/work, a checkout of the repository by `dsh-work`), the
+  experimental Agent Team plugins inserted, the DeepSeek-official web
+  plugins off (no such key), `dsh` as a fixed user in group `agents`,
+  and `github-app-token` on an hourly timer writing /run/agents/github-token
+  (root:agents) that the workspace's git credential helper reads: the
+  harness pushes as the App once the App exists. Still to do in 4: the
+  typed team fields on `governance.agents` (model, key, tools, budget,
+  changeClasses, harness) rendered into dsh team profiles.
 - **Step 3, the self-update loop, built (commits 34d56f4, cb33a83,
   198cb3a):**
   - `governance.changeClasses` (`modules/governance/changes.nix`): content
