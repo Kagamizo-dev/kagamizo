@@ -75,6 +75,38 @@ let
       }
       // state;
 
+      # `sourcing` (parts/sourcing): every source's key, read with the agent
+      # view. All optional: a source without its key is skipped or runs
+      # anonymously, as it declares.
+      sourcing = {
+        defaults.providers = [ "agents" ];
+        SOURCING_DELIVERY_POSTCODE =
+          secret "Where shipping is quoted to; places only hold a city centre" "sourcing-delivery-postcode"
+          // {
+            required = false;
+          };
+      }
+      // lib.listToAttrs (
+        map (
+          s:
+          lib.nameValuePair s.secret (
+            secret "Key for the sourcing source(s) using it" (
+              lib.toLower (lib.replaceStrings [ "_" ] [ "-" ] s.secret)
+            )
+            // {
+              required = false;
+            }
+          )
+        ) (lib.filter (s: s.secret != null) (lib.attrValues config.sourcing.sources))
+      );
+
+      # `sourcing send`: mail goes out as Kagamizo, so the Bridge password
+      # sits in Kagamizo's vault, outside the agents' reach.
+      outreach = {
+        defaults.providers = [ "kagamizo" ];
+        PROTON_BRIDGE_PASSWORD = secret "Proton Bridge SMTP password for sourcing.outreach.from" "proton-bridge-password";
+      };
+
       # Yours: the Proton Pass agent tokens `proton apply` creates, kept until
       # they are handed to their consumer (GitHub Actions secrets, Orca).
       proton-agents = {

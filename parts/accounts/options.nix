@@ -48,6 +48,21 @@ let
       workersRequestsPerDay = Limit;
       kvWritesPerDay = Limit;
     };
+    # Chat completions for translation and outreach drafts (parts/sourcing).
+    openrouter = {
+      chatCompletions = Flag;
+      jsonMode = Flag;
+    };
+    # Marketplace listings: price, stock and whether the marketplace itself
+    # holds the stock (fulfillment), the strongest inventory signal there is.
+    mercadolivre = {
+      searchApi = Flag;
+      fulfillmentSignal = Flag;
+    };
+    # Shipping quotes across Brazilian carriers, with delivery ranges.
+    melhorenvio = {
+      shippingQuotes = Flag;
+    };
     github = {
       privateRepos = Limit;
       actionsMinutesPrivate = Limit;
@@ -63,8 +78,11 @@ let
     types.submodule {
       options = {
         checked = mkOption {
-          type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
-          description = "When the sources were last read.";
+          type = types.nullOr (types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}");
+          description = ''
+            When the sources were last read; null while nobody has. An
+            account may be planned on an unread plan, never active on one.
+          '';
         };
         capabilities = lib.mapAttrs (_: t: mkOption { type = t; }) capabilities.${provider};
       };
@@ -167,8 +185,16 @@ let
       )
     ) cfg.held
   );
+  unreadProblems = lib.concatLists (
+    lib.mapAttrsToList (
+      name: a:
+      lib.optional (a.status == "active" && cfg.plans.${a.provider}.${a.plan}.checked == null)
+        "accounts.held.${name} is active on ${a.provider} ${a.plan}, whose sources nobody has read (checked = null)"
+    ) cfg.held
+  );
   problems =
     signupProblems
+    ++ unreadProblems
     ++ lib.concatMap (
       d:
       let

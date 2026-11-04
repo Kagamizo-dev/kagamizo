@@ -58,6 +58,52 @@
       };
     };
 
+    # Credits bought ahead, spent per token; no subscription.
+    openrouter.credits = {
+      checked = "2026-11-04";
+      capabilities = {
+        chatCompletions = {
+          value = true;
+          source = "https://openrouter.ai/docs/api-reference/overview";
+        };
+        jsonMode = {
+          value = true;
+          source = "https://openrouter.ai/docs/api-reference/overview";
+        };
+      };
+    };
+
+    # Not read yet: developers.mercadolivre.com.br and melhorenvio.com.br are
+    # outside the session allowlist until the `sourcing` group is pasted
+    # (parts/claude/_environment.nix). The values are what the CLI assumes;
+    # `checked` stays null, so neither account can be marked active until
+    # someone reads the pages and dates them.
+    mercadolivre.developer = {
+      checked = null;
+      capabilities = {
+        # Public resources need no credential; search is public by the docs'
+        # own split, so a token only adds rate headroom.
+        searchApi = {
+          value = true;
+          source = "https://developers.mercadolivre.com.br/en_us/about-us";
+        };
+        fulfillmentSignal = {
+          value = true;
+          source = "https://developers.mercadolivre.com.br/en_us/about-us";
+        };
+      };
+    };
+
+    melhorenvio.free = {
+      checked = null;
+      capabilities = {
+        shippingQuotes = {
+          value = true;
+          source = "https://docs.melhorenvio.com.br/reference/calculo-de-fretes-por-produtos";
+        };
+      };
+    };
+
     github.free-org = {
       checked = "2026-10-20";
       capabilities = {
