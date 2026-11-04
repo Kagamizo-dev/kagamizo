@@ -116,6 +116,14 @@ root vault.
   quant trading. Mirazo: the owner, personal portfolio and retirement.
   Three GitHub organizations, one per identity.
 
+- **2026-11-04 (late):** no deposit into Public until paper trading is
+  validated (a recorded backtest, five paper days, the promotion). Matrix
+  is the core chat; Discord (bot API) is the share-from-phone channel;
+  WhatsApp, TikTok, X and HelloTalk wait. Whisper (small, tier 1)
+  transcribes media. A Nix-based Steam/game-dev profile. An Android
+  emulator as the digital twin of the owner's Pixel 9a on GrapheneOS: a
+  base image that rarely changes, everything else as settings
+  configuration and custom apps, declared.
 ## Where this session left it (2026-10-22)
 
 - Proton Pass signed in (`pass-cli login`, approved).
