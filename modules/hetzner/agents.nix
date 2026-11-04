@@ -81,6 +81,11 @@ in
               path = "^/_matrix";
               port = 6167;
             }
+            # GitHub's App manifest flow lands here (./_github-app.nix).
+            {
+              path = "^/_github/";
+              port = 8083;
+            }
           ];
         }
       ];

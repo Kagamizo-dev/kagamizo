@@ -63,6 +63,7 @@ in
           unset GH_TOKEN GITHUB_TOKEN
           org=${lib.escapeShellArg cfg.org}
           repos=${lib.escapeShellArg (builtins.toJSON cfg.repos)}
+          rulesets=${lib.escapeShellArg (builtins.toJSON cfg.rulesetsJson)}
           domains=${lib.escapeShellArg (builtins.toJSON cfg.verifiedDomains)}
           spec=${config.packages.secretspec-toml}
           reason="github-bootstrap: configure $org from modules/github"
@@ -286,6 +287,20 @@ in
                 repo.shell = "$full";
               }}
               echo "  variable $v"
+            done
+            # Rulesets (./rulesets.nix), by name: created, or replaced whole.
+            live=$(${
+              cli.gh "api" { endpoint.shell = "repos/$full/rulesets"; }
+            } | jq -c 'map({key: .name, value: .id}) | from_entries')
+            jq -c --arg n "$name" '.[$n] // [] | .[]' <<<"$rulesets" | while read -r rs; do
+              rname=$(jq -r .name <<<"$rs")
+              id=$(jq -r --arg n "$rname" '.[$n] // empty' <<<"$live")
+              if [ -n "$id" ]; then
+                ${api "PUT" "repos/$full/rulesets/$id"} <<<"$rs" >/dev/null
+              else
+                ${api "POST" "repos/$full/rulesets"} <<<"$rs" >/dev/null
+              fi
+              echo "  ruleset $rname"
             done
           done
 

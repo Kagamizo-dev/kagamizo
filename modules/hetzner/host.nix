@@ -69,6 +69,23 @@ let
     }
   );
 
+  # The end of GitHub's App manifest flow (../github/agents-app.nix).
+  githubApp = withSystem "x86_64-linux" (
+    { config, ... }:
+    let
+      svc = lib.findFirst (
+        s: s.name == "chat"
+      ) (throw "hetzner.host.agents: no chat service") cfg.agents.services;
+    in
+    import ./_github-app.nix {
+      inherit (lib.findFirst (p: p.path == "^/_github/") (throw "no _github path") svc.paths) port;
+      inherit (top.github.agentsApp) item;
+      stateVault = top.proton.infraVaults.hostState;
+      passCli = config.packages.pass-cli;
+      tokenFile = "/var/lib/kagamizo/host-token";
+    }
+  );
+
   # Open WebUI and OpenCode, behind the agents tunnel (./agents.nix).
   agents = withSystem "x86_64-linux" (
     { config, ... }:
@@ -128,6 +145,7 @@ let
         tier1
         agents
         chat
+        githubApp
       ];
       networking.hostName = cfg.name;
       boot.loader.grub = {
