@@ -27,6 +27,20 @@ in
       // {
         required = false;
       };
+    # The research loops' key (modules/research): jingzo's, in its sessions vault.
+    research = {
+      defaults.providers = [ "jingzo-sessions" ];
+      OPENROUTER_API_KEY =
+        secret {
+          kind = "api-token";
+          issuer = "automation:openrouter";
+          description = "OpenRouter key for the research loops, minted by `openrouter apply`";
+          item = "openrouter-research-key";
+        }
+        // {
+          required = false;
+        };
+    };
     host.OPENROUTER_API_KEY =
       secret {
         kind = "api-token";

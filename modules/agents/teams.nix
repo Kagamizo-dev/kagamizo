@@ -63,7 +63,8 @@ in
         "matrix"
       ];
       changeClasses = [ "content" ];
-      budgetUsdPerMonth = 5;
+      key = "research";
+      budgetUsdPerMonth = 20;
       harness = "dsh";
     };
     design =
