@@ -86,6 +86,7 @@ in
         </style></head><body><div class="wrap">
         <nav>
           <b>Start</b><a href="#apps">Apps</a><a href="#infra">Infrastructure</a>
+          <b>Teams</b><a href="#areas">Who owns what</a>
           <b>Money</b><a href="#cards">Cards</a><a href="#ai">AI keys</a><a href="#credit">Credit lines</a><a href="#tax">Tax</a>
           <b>Records</b><a href="#entities">Entities</a><a href="#domains">Domains</a><a href="#accounts">Accounts</a><a href="#gaps">Gaps</a><a href="#steps">Your steps</a><a href="#migration">Migration</a><a href="#ci">CI</a><a href="#catalogs">Catalogs</a>
         </nav>
@@ -139,6 +140,27 @@ in
             <dt>Cedar</dt><dd>authorizes every account action</dd>
             <dt>OpenTofu</dt><dd>applies Cloudflare and Hetzner</dd></dl></div>
         </div>
+
+        <h2 id="areas">Who owns what</h2>
+        <p class="lede">Every area is a mailbox role: one owning team, reviewers that are never the owner, the controller who signs off, and the change classes it may propose. Lean proves the shape (modules/organization).</p>
+        ${table [ "Address" "Owner" "Reviewers" "May propose" "Signs off" "Purpose" ] (
+          lib.concatLists (
+            lib.mapAttrsToList (
+              entity: areas:
+              lib.mapAttrsToList (
+                mailbox: a:
+                row [
+                  "${mailbox}@${lib.head (lib.attrNames (lib.filterAttrs (_: d: d.entity == entity) domains))}"
+                  (if a.owner == null then "the person" else a.owner)
+                  (if a.reviewers == [ ] then "—" else lib.concatStringsSep ", " a.reviewers)
+                  (if a.changeClasses == [ ] then "—" else lib.concatStringsSep ", " a.changeClasses)
+                  a.controller
+                  a.purpose
+                ]
+              ) areas
+            ) top.organization.areas
+          )
+        )}
 
         <h2 id="cards">Mercury cards</h2>
         ${table [ "Card" "Limit" "Pays" "On" "Locked to" "Booked" ] (

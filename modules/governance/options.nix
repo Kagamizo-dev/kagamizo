@@ -9,17 +9,9 @@
 #       write, spend, destroy, session (signing in), or move-login (moving an
 #       account's login onto its declared address: the one kind of action
 #       the login rule lets a controller run on a mismatched account)
-#   governance.agents.<name> = { serves; purpose; personas; grants; team;
-#                                tier; harness; changeClasses; room; mail;
-#                                reviews; }
+#   governance.agents.<name> = { serves; purpose; personas; grants; }
 #       an agent identity: one Proton Pass agent token, one Cedar principal,
-#       serving exactly one entity, holding only the grants listed, in one
-#       team, on one tier, proposing only the change classes listed
-#   governance.teams.<team> = { purpose; serves; review; tierCap; }
-#       what a team is for; a team that serves one entity holds only that
-#       entity's agents; a review team comments and never merges
-#
-# ../team proves the identities sound in Lean and serves them as `team`.
+#       serving exactly one entity, holding only the grants listed
 #
 # The base layer (./cedar.nix) holds whatever is declared here: an agent
 # never spends, destroys or signs in, and never touches another entity's
@@ -92,65 +84,51 @@ let
         type = types.listOf grant;
         default = [ ];
       };
-      team = mkOption {
-        type = types.enum (lib.attrNames cfg.teams);
-        description = "The team it works in (governance.teams).";
+      # The plan of 2026-11-04: what each agent runs on and may propose.
+      model = mkOption {
+        type = types.enum config.openrouter.models;
+        default = config.openrouter.defaultModel;
+        defaultText = "openrouter.defaultModel";
+        description = "The model it starts on (tier 2 unless its tasks say otherwise).";
       };
-      tier = mkOption {
-        type = types.enum (lib.attrNames config.agents.tiers);
-        default = "flash";
-        description = "Its usual tier (agents.tiers); never above its team's tierCap.";
+      key = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "The OpenRouter key it spends (openrouter.keys); null is its entity's swarm key.";
+      };
+      budgetUsdPerMonth = mkOption {
+        type = types.ints.positive;
+        # Three swarms share each entity's $10 key.
+        default = 3;
+        description = "Its share of the key's monthly cap; Lean checks the shares fit (modules/agents).";
+      };
+      changeClasses = mkOption {
+        type = types.listOf (types.enum (lib.attrNames config.governance.changeClasses));
+        default = [ ];
+        description = "The classes of change it may propose as pull requests (./changes.nix).";
+      };
+      tools = mkOption {
+        type = types.listOf (
+          types.enum [
+            "shell"
+            "web"
+            "repo"
+            "matrix"
+            "twin"
+            "comfy"
+          ]
+        );
+        default = [ ];
+        description = "The tool sets it gets in its harness.";
       };
       harness = mkOption {
         type = types.enum [
-          "orca"
-          "opencode"
           "dsh"
+          "opencode"
+          "orca"
         ];
         default = "orca";
-        description = "What runs it: an Orca swarm (./orca.nix), OpenCode on the host, or DeepSeek Harness.";
-      };
-      changeClasses = mkOption {
-        type = types.listOf (types.enum (lib.attrNames cfg.changeClasses));
-        default = [ ];
-        description = "The change classes it may propose (./changes.nix); empty proposes nothing.";
-      };
-      room = mkOption {
-        type = types.strMatching "#[a-z0-9-]+";
-        description = "Its Matrix room on chat.jingzo.org, where it reports.";
-      };
-      mail = mkOption {
-        type = types.enum [
-          "none"
-          "matrix-only"
-        ];
-        default = "matrix-only";
-        description = "How it reaches the owner. No agent has mail yet (modules/cloudflare/README.md, Gaps); the transport is a scout role (agent-mail).";
-      };
-      reviews = mkOption {
-        type = types.listOf (types.enum (lib.attrNames cfg.teams));
-        default = [ ];
-        description = "The teams whose changes it reviews; never its own.";
-      };
-    };
-  };
-
-  team = types.submodule {
-    options = {
-      purpose = mkOption { type = types.str; };
-      serves = mkOption {
-        type = types.nullOr (types.enum (lib.attrNames entities));
-        default = null;
-        description = "The one entity all its agents serve; null for a team every entity has (legal, accounting, governance).";
-      };
-      review = mkOption {
-        type = types.bool;
-        default = false;
-        description = "A review team: its agents review other teams and propose no change.";
-      };
-      tierCap = mkOption {
-        type = types.enum (lib.attrNames config.agents.tiers);
-        description = "The highest tier its agents run on.";
+        description = "Where it runs: DeepSeek Harness teams, OpenCode, or an Orca swarm.";
       };
     };
   };
@@ -172,10 +150,6 @@ in
     };
     agents = mkOption {
       type = types.attrsOf agent;
-      default = { };
-    };
-    teams = mkOption {
-      type = types.attrsOf team;
       default = { };
     };
     problems = mkOption {

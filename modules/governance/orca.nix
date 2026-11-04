@@ -76,7 +76,9 @@ in
     entity: _:
     lib.nameValuePair "swarms-${entity}" {
       profile = "swarm-${entity}";
-      limitUsd = 10;
+      # Legal, accounting and governance at $3 each; jingzo's research at
+      # $5; mirazo's twin at $4 and builders at $3.
+      limitUsd = 20;
       why = "${entity}'s legal, accounting and governance swarms";
     }
   ) served;
@@ -139,6 +141,15 @@ in
           `governance` is final; do not look for another way round it.
 
           ${top.agents.policyText}
+          Your model is ${a.model} on the key ${
+            if a.key != null then a.key else "swarms-${a.serves}"
+          }, of which ''$${toString a.budgetUsdPerMonth} a month is yours. You may propose
+          changes of ${
+            if a.changeClasses == [ ] then
+              "no class: notes only"
+            else
+              "these classes: " + lib.concatStringsSep ", " a.changeClasses
+          }.
         '';
 
       opencode =
@@ -146,7 +157,7 @@ in
         pkgs.writeText "opencode-${name}.json" (
           builtins.toJSON {
             "$schema" = "https://opencode.ai/config.json";
-            model = "openrouter/${top.openrouter.defaultModel}";
+            model = "openrouter/${a.model}";
             enabled_providers = [ "openrouter" ];
             provider.openrouter.models = lib.genAttrs top.openrouter.models (_: { });
             default_agent = name;

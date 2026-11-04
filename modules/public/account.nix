@@ -108,6 +108,16 @@
       login = {
         item = "Public";
         email = "finance@mirazo.org";
+        # The account was opened on admin@jingzo.org; moving its login
+        # waits on Public's profile change (the owner's pending item).
+        # Until then the declared address holds and this one is admitted,
+        # dated (the owner's decision, 2026-11-02).
+        exception = {
+          email = "admin@jingzo.org";
+          until = "2026-11-30";
+          because = "opened on the company address; Public's profile change is still pending";
+          decided = "2026-11-02";
+        };
       };
       credential = {
         item = "Public";

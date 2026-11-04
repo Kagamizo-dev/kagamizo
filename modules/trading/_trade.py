@@ -3,6 +3,7 @@
   trade backtest STRATEGY BARS.csv   run a declared strategy over bars and
                                      print the result as JSON
   trade strategies                   the declared strategies, as JSON
+  trade account                      the one BROKERAGE account's id
   trade bars SYMBOL STEP [PERIOD]    Public's bars as BARS.csv (STEP like
                                      1-DAY; PERIOD as Public names it)
   trade paper STRATEGY [BARS.csv] [--all]
@@ -11,6 +12,15 @@
                                      venue, and preflight at Public the
                                      orders of its last bar (--all: every
                                      order), which places nothing
+  trade propose STRATEGY [DATE]      an agent-option strategy: the day's
+                                     research decision into one option order
+                                     within the limits, preflighted; the
+                                     proposal as JSON (nothing placed)
+  trade paper-day STRATEGY [DATE]    propose, and record the day as paper
+                                     evidence under <decisions>/paper/
+  trade place PROPOSAL.json          the one spend: the risk check and the
+                                     preflight again, then the order, then
+                                     its status; the controller's only
 
 BARS.csv has a header and one bar per row: timestamp (ISO 8601, UTC), open,
 high, low, close, volume. Strategies come from TRADE_STRATEGIES (JSON, made
@@ -29,6 +39,7 @@ from decimal import Decimal
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _propose  # noqa: E402
 import _public  # noqa: E402
 
 from nautilus_trader.backtest.engine import BacktestEngine, BacktestEngineConfig
@@ -242,9 +253,97 @@ def paper(name, bars_path=None, every=False):
     emit(result)
 
 
+def limits_for(decl):
+    try:
+        limits = json.loads(os.environ["TRADE_LIMITS"])
+    except (KeyError, json.JSONDecodeError):
+        die("TRADE_LIMITS is not set; run trade through its wrapper", 2)
+    return limits.get(decl["backend"]) or die(f"no trading.limits.{decl['backend']}", 2)
+
+
+def day_state(decl):
+    """Where the day stands: <decisions>/state.json, written by `place` and
+    the day's close; zeros when there is none yet."""
+    path = os.path.join(decl["decisions"], "state.json")
+    if os.path.exists(path):
+        with open(path) as f:
+            return json.load(f)
+    return {"openPositions": 0, "lossUsd": 0}
+
+
+def decision_for(decl, date):
+    path = os.path.join(decl["decisions"], date, f"{decl['symbol']}.json")
+    if not os.path.exists(path):
+        die(f"no research decision at {path}")
+    with open(path) as f:
+        return json.load(f)
+
+
+def propose(name, date=None, record=False):
+    decl = declared(name)
+    if decl["kind"] != "agent-option":
+        die(f"{name} is {decl['kind']}, not agent-option")
+    import datetime
+
+    today = datetime.date.fromisoformat(date) if date else datetime.date.today()
+    out = _propose.propose(decl, limits_for(decl), decision_for(decl, today.isoformat()), day_state(decl), _public.Public(), today)
+    if record:
+        folder = os.path.join(decl["decisions"], "paper")
+        os.makedirs(folder, exist_ok=True)
+        with open(os.path.join(folder, f"{today.isoformat()}-{decl['symbol']}.json"), "w") as f:
+            json.dump(out, f, indent=2)
+        out["recorded"] = True
+    emit(out)
+
+
+def place(proposal_path):
+    """The spend. The proposal is checked again against the limits and the
+    day, preflighted again, placed, then read back until it is no longer
+    NEW. The day's state records the open position."""
+    with open(proposal_path) as f:
+        proposal = json.load(f)
+    name = proposal["strategy"]
+    decl = declared(name)
+    # The stage is the declaration's (modules/trading/stages.nix, proved by
+    # Lean to carry its evidence): only a live strategy places.
+    if decl.get("stage") != "live":
+        die(f"{name} is at stage {decl.get('stage')}, not live: nothing is placed")
+    p = proposal.get("proposal") or die("the proposal holds no order")
+    limits = limits_for(decl)
+    day = day_state(decl)
+    ok, why = _propose.admissible(limits, day, p["kind"], p["max_loss_usd"])
+    if not ok:
+        die("refused: " + "; ".join(why))
+    api = _public.Public()
+    order = p["order"]
+    try:
+        preflight = api.preflight(order)
+    except _public.PublicError as e:
+        die(f"Public refused the preflight: {e} {e.body}")
+    try:
+        placed = api.place(order)
+    except _public.PublicError as e:
+        die(f"Public refused the order: {e} {e.body}")
+    order_id = placed.get("orderId") or order.get("orderId")
+    import time
+
+    status = None
+    for _ in range(20):
+        status = api.order(order_id)
+        if status.get("status") not in (None, "NEW", "PENDING"):
+            break
+        time.sleep(3)
+    day["openPositions"] = day.get("openPositions", 0) + 1
+    os.makedirs(decl["decisions"], exist_ok=True)
+    with open(os.path.join(decl["decisions"], "state.json"), "w") as f:
+        json.dump(day, f, indent=2)
+    emit({"strategy": name, "order_id": order_id, "preflight": preflight, "placed": placed, "status": status, "day": day})
+
+
 USAGE = (
     "usage: trade <backtest STRATEGY BARS.csv | strategies | bars SYMBOL STEP [PERIOD]"
-    " | paper STRATEGY [BARS.csv] [--all]>"
+    " | paper STRATEGY [BARS.csv] [--all] | propose STRATEGY [DATE] | paper-day STRATEGY [DATE]"
+    " | place PROPOSAL.json>"
 )
 
 
@@ -255,6 +354,13 @@ def main(argv):
         emit(strategies())
     elif argv[0] == "backtest" and len(argv) == 3:
         backtest(argv[1], argv[2])
+    elif argv[0] == "account" and len(argv) == 1:
+        # The brokerage account's id (an identifier, not a secret): piped
+        # into its vault item once, so Public's CLI knows which account.
+        try:
+            print(_public.Public().account())
+        except (_public.PublicError, RuntimeError) as e:
+            die(f"{e} {getattr(e, 'body', '')}".strip())
     elif argv[0] == "bars" and len(argv) in (3, 4):
         bars_csv(*argv[1:])
     elif argv[0] == "paper" and 2 <= len(argv) <= 4:
@@ -263,6 +369,12 @@ def main(argv):
         if len(rest) > 1:
             die(USAGE, 2)
         paper(argv[1], rest[0] if rest else None, every)
+    elif argv[0] == "propose" and len(argv) in (2, 3):
+        propose(argv[1], argv[2] if len(argv) == 3 else None)
+    elif argv[0] == "paper-day" and len(argv) in (2, 3):
+        propose(argv[1], argv[2] if len(argv) == 3 else None, record=True)
+    elif argv[0] == "place" and len(argv) == 2:
+        place(argv[1])
     else:
         die(USAGE, 2)
 

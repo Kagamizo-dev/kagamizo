@@ -92,8 +92,15 @@ in
         # Orca's agents, started under `secretspec run --profile agent`.
         orca-fleet = {
           profile = "agent";
+          limitUsd = 25;
+          why = "the Orca agent fleet and the Kagamizo teams (modules/agents/teams.nix)";
+        };
+        # The research-to-trade loop (modules/research), the plan of
+        # 2026-11-02: the owner's research budget.
+        research = {
+          profile = "research";
           limitUsd = 20;
-          why = "the Orca agent fleet";
+          why = "the research loops of the trading plan (research-jingzo)";
         };
       };
     };

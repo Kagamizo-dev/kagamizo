@@ -12,6 +12,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | catalog | `catalog-coverage` | build | none yet | none yet | 10% | Python walking every source file against 7 catalogs; moves with the number of sources and the regexes |
 | ci | `ci-pipeline` | build | none yet | none yet | 10% | Lean deciding every workflow sound |
 | governance | `governance-cedar` | build | none yet | none yet | 10% | Cedar's test runner over every generated test (6169); moves with accounts × actions × agents |
+| governance | `governance-changes` | build | none yet | none yet | 10% | Lean deciding the change-class table's shape, plus the Rust tool's tests; moves with the table |
 | inventory | `inventory-build` | build | none yet | none yet | 10% | cargo build --release of the inventory CLI (std only) and its statestore wrapper; moves with the schema |
 | inventory | `inventory-lean` | build | none yet | none yet | 10% | Lean proving use, restock and low (omega) and deciding the schema well formed |
 | lean | `lean-api-pyicloud` | build | none yet | none yet | 10% | Lean deciding pyicloud's model (184 classes); moves with the catalog |
@@ -21,6 +22,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | migration | `migrate-build` | build | none yet | none yet | 10% | cargo build --release of the runner; crates vendored by Nix; moves with the dependency set and codegen settings (LTO, codegen-units) |
 | migration | `migration-lean` | build | none yet | none yet | 10% | Lean deciding closedRightly over the declared sources |
 | operations | `operations-boundary` | build | none yet | none yet | 10% | Lean deciding every declared secret well-formed |
+| organization | `organization-areas` | build | none yet | none yet | 10% | Lean deciding every area separated, scoped and every mergeable class covered; moves with areas × classes |
 | project | `project-build` | build | none yet | none yet | 10% | cargo build --release of the project CLI (std only, facts as Rust source); moves with the number of epics and decisions |
 | project | `project-lean` | build | none yet | none yet | 10% | Lean deciding the plan coherent, cycle search included (decide +kernel); grows with epics squared |
 | scout | `scout-build` | build | none yet | none yet | 10% | cargo build --release of the discovery CLI (std only, facts as Rust source) and its gh wrapper; moves with the candidates |
@@ -30,6 +32,8 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | team | `team-build` | build | none yet | none yet | 10% | cargo build --release of the agent-identity CLI (std only, facts as Rust source); moves with the number of agents |
 | team | `team-lean` | build | none yet | none yet | 10% | Lean deciding the identity rules over every agent (decide +kernel); grows with agents times teams |
 | tokens | `tokens-graph` | build | none yet | none yet | 10% | Lean deciding the credential graph (every child's scope within its parent's, by List.contains); moves with nodes × scope sizes |
+| trading | `trading-risk` | build | none yet | none yet | 10% | Lean proving what admissible guarantees (omega over Nat) and deciding the declared limits sane |
+| trading | `trading-stages` | build | none yet | none yet | 10% | Lean deciding every strategy's stage carries its evidence |
 
 ## Baseline
 

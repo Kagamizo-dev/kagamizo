@@ -87,7 +87,7 @@ let
       namespace ${ns} {
         entity Person;
         entity Entity { kind: String, controllers: Set<Person>, domains: Set<String> };
-        entity Account in [Entity] { owner: Entity, provider: String, login: String, loginDomain: String, credential: String, retiring: Bool };
+        entity Account in [Entity] { owner: Entity, provider: String, login: String, loginDomain: String, credential: String, retiring: Bool, exceptionLogin: String, exceptionUntil: Long };
         entity Agent { serves: Entity, purpose: String };
 
         action ${lib.concatMapStringsSep ", " str cfg.effects};
@@ -100,7 +100,7 @@ let
       ${
         lib.concatMapStrings (a: ''
           action ${str a.id} in [${str "${a.provider}:${a.effect}"}]
-            appliesTo { principal: [Person, Agent], resource: [Account], context: { login?: String, credential?: String } };
+            appliesTo { principal: [Person, Agent], resource: [Account], context: { login?: String, credential?: String, today?: Long } };
         '') actionList
       }}
     '';
@@ -117,12 +117,21 @@ let
       resource
     );
 
+    // A declared exception admits one other address until a date
+    // (accounts.held.<a>.login.exception): the login seen must be that
+    // address and the day must not be past it.
     @id("logins-say-whose-they-are")
     forbid (principal, action, resource is ${ns}::Account)
     unless {
-      (resource.owner.domains.contains(resource.loginDomain) || resource.retiring) &&
+      (
+        resource.owner.domains.contains(resource.loginDomain) || resource.retiring ||
+        (context has login && context has today &&
+          context.login == resource.exceptionLogin && context.today <= resource.exceptionUntil)
+      ) &&
       (
         (context has login && context.login == resource.login) ||
+        (context has login && context has today &&
+          context.login == resource.exceptionLogin && context.today <= resource.exceptionUntil) ||
         (resource.retiring && resource.login == "") ||
         (principal is ${ns}::Person && action in ${act "move-login"})
       ) &&
@@ -185,6 +194,10 @@ let
         # Being emptied and closed (migration.sources): its login may still
         # be off its owner's domains, but must still be the declared one.
         retiring = a.status == "retiring";
+        # A dated exception (login.exception): another address, until a day
+        # (YYYYMMDD as a number, compared with context.today).
+        exceptionLogin = if a.login.exception == null then "" else a.login.exception.email;
+        exceptionUntil = if a.login.exception == null then 0 else dateNum a.login.exception.until;
       };
       parents = [ (uid "Entity" a.owner).__entity ];
     }) accounts
@@ -220,6 +233,70 @@ let
       context = context account;
     };
   };
+  dateNum = d: lib.toInt (lib.replaceStrings [ "-" ] [ "" ] d);
+  # Every declared exception: admitted on its last day, refused the day
+  # after, and refused for any other address on that day.
+  exceptionTests = lib.concatLists (
+    lib.mapAttrsToList (
+      acc: a:
+      let
+        e = a.login.exception;
+        x = lib.findFirst (x: x.provider == a.provider) null actionList;
+        person = lib.head (controllers a.owner);
+        cred = lib.optionalAttrs (a.credential != null) { credential = credentialOf a; };
+      in
+      lib.optionals (e != null && x != null) [
+        (testAs
+          (
+            _:
+            cred
+            // {
+              login = e.email;
+              today = dateNum e.until;
+            }
+          )
+          "${person} may run ${x.id} on ${acc} as ${e.email} on the exception's last day"
+          (ref "Person" person)
+          x.id
+          acc
+          "allow"
+          [ "controllers" ]
+        )
+        (testAs
+          (
+            _:
+            cred
+            // {
+              login = e.email;
+              today = dateNum e.until + 1;
+            }
+          )
+          "${person} may not run ${x.id} on ${acc} as ${e.email} after the exception"
+          (ref "Person" person)
+          x.id
+          acc
+          "deny"
+          [ "logins-say-whose-they-are" ]
+        )
+        (testAs
+          (
+            _:
+            cred
+            // {
+              login = "someone@example.com";
+              today = dateNum e.until;
+            }
+          )
+          "${person} may not run ${x.id} on ${acc} as another address under the exception"
+          (ref "Person" person)
+          x.id
+          acc
+          "deny"
+          [ "logins-say-whose-they-are" ]
+        )
+      ]
+    ) accounts
+  );
   neverEffects = [
     "spend"
     "destroy"
@@ -400,7 +477,9 @@ in
         cat ${pkgs.writeText "base.cedar" base} ${pkgs.writeText "grants.cedar" grants} > $out/policies.cedar
         cp ${pkgs.writeText "entities.json" (builtins.toJSON entityJson)} $out/entities.json
         cp ${
-          pkgs.writeText "tests.json" (builtins.toJSON (tests ++ loginTests ++ flowTests ++ actionTests))
+          pkgs.writeText "tests.json" (
+            builtins.toJSON (tests ++ loginTests ++ flowTests ++ actionTests ++ exceptionTests)
+          )
         } $out/tests.json
       '';
     in
@@ -451,9 +530,10 @@ in
           if [ -n "$template" ] && [ "$(pass-credential "$vault" "$citem" "$template")" = ok ]; then
             confirmed=$template
           fi
-          jq -n --arg l "$seen" --arg c "$confirmed" \
+          # Today (UTC, YYYYMMDD): what a dated login exception is held against.
+          jq -n --arg l "$seen" --arg c "$confirmed" --argjson t "$(date -u +%Y%m%d)" \
             '(if ($l != "" and ($l | split("\n") | length) == 1) then {login: $l} else {} end)
-             + (if $c != "" then {credential: $c} else {} end)' >"$context"
+             + (if $c != "" then {credential: $c} else {} end) + {today: $t}' >"$context"
           who=''${KAGAMIZO_PRINCIPAL:-person:${root}}
           case "$who" in
             agent:*) principal="${ns}::Agent::\"''${who#agent:}\"" ;;

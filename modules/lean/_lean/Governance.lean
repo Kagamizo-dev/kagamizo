@@ -63,4 +63,23 @@ def Action.typed (apis : List Api) (a : Action) : Bool :=
   | .command api op => apis.any fun x => x.name == api && (x.find op).isSome
   | .wrapper _ => true
 
+/-- A dated login exception (accounts.held.<a>.login.exception): one other
+address, until a day (YYYYMMDD). -/
+structure LoginException where
+  email : String
+  lastDay : Nat
+  deriving DecidableEq, Repr
+
+/-- What the Cedar rule admits under an exception: that address, on or
+before that day. -/
+def LoginException.admits (e : LoginException) (login : String) (today : Nat) : Bool :=
+  login == e.email && today ≤ e.lastDay
+
+/-- An exception never admits another address, nor its own after its day. -/
+theorem exception_tight (e : LoginException) (login : String) (today : Nat)
+    (h : e.admits login today = true) : login = e.email ∧ today ≤ e.lastDay := by
+  unfold LoginException.admits at h
+  have := (Bool.and_eq_true _ _).mp h
+  exact ⟨by simpa using this.1, by simpa using this.2⟩
+
 end Kagamizo.Governance

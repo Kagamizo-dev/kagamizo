@@ -46,8 +46,8 @@ let
       title = mkOption { type = types.str; };
       serves = mkOption { type = types.enum (lib.attrNames config.identity.checked.entities); };
       team = mkOption {
-        type = types.nullOr (types.enum (lib.attrNames config.governance.teams));
-        description = "The team that does it; null until one exists for it.";
+        type = types.nullOr (types.enum (lib.attrNames config.governance.agents));
+        description = "The agent team that owns it (governance.agents); null until one exists for it.";
       };
       status = mkOption { type = types.enum statuses; };
       blockedOn = mkOption {

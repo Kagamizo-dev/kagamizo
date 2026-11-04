@@ -137,6 +137,30 @@
       attr = "checks.x86_64-linux.operations-boundary";
       method = "Lean deciding every declared secret well-formed";
     };
+    trading-risk = {
+      module = "trading";
+      kind = "build";
+      attr = "checks.x86_64-linux.trading-risk";
+      method = "Lean proving what admissible guarantees (omega over Nat) and deciding the declared limits sane";
+    };
+    trading-stages = {
+      module = "trading";
+      kind = "build";
+      attr = "checks.x86_64-linux.trading-stages";
+      method = "Lean deciding every strategy's stage carries its evidence";
+    };
+    organization-areas = {
+      module = "organization";
+      kind = "build";
+      attr = "checks.x86_64-linux.organization-areas";
+      method = "Lean deciding every area separated, scoped and every mergeable class covered; moves with areas × classes";
+    };
+    governance-changes = {
+      module = "governance";
+      kind = "build";
+      attr = "checks.x86_64-linux.governance-changes";
+      method = "Lean deciding the change-class table's shape, plus the Rust tool's tests; moves with the table";
+    };
     agents-budget = {
       module = "agents";
       kind = "build";

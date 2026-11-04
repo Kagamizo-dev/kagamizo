@@ -13,7 +13,7 @@
     ],
     "serves": "kagamizo",
     "status": "proposed",
-    "team": "research",
+    "team": "upkeep",
     "title": "Mail for agents at no new cost: Stalwart on a subdomain, or Bridge from the existing addresses (scout role agent-mail)"
   },
   "index": {
@@ -43,7 +43,7 @@
     ],
     "serves": "mirazo",
     "status": "done",
-    "team": null,
+    "team": "twin",
     "title": "The physical twin's ledger: typed schema, items private in Proton Pass"
   },
   "markdown-migration": {
@@ -69,7 +69,7 @@
     "owner": [],
     "serves": "jingzo",
     "status": "proposed",
-    "team": "research",
+    "team": "research-jingzo",
     "title": "FX at the real cost per route, price indexes, Wi-Fi and 5G coverage per place (epic 17)"
   },
   "project": {
@@ -118,7 +118,7 @@
     "owner": [],
     "serves": "jingzo",
     "status": "done",
-    "team": "research",
+    "team": "research-jingzo",
     "title": "Discovery: typed roles and candidates, the exit and no-new-cost rules, the research team"
   },
   "supply": {
@@ -134,7 +134,7 @@
     ],
     "serves": "mirazo",
     "status": "proposed",
-    "team": null,
+    "team": "twin",
     "title": "Goods, food, parts and facilities near a place, ranked stability first (epic 16)"
   },
   "team": {

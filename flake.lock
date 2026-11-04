@@ -295,7 +295,8 @@
         "publicdotcom-cli": "publicdotcom-cli",
         "pyicloud-src": "pyicloud-src",
         "rea": "rea",
-        "secretspec-src": "secretspec-src"
+        "secretspec-src": "secretspec-src",
+        "tradingagents": "tradingagents"
       }
     },
     "secretspec-src": {
@@ -313,6 +314,23 @@
         "ref": "refs/tags/v0.21.1",
         "type": "git",
         "url": "https://github.com/cachix/secretspec"
+      }
+    },
+    "tradingagents": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793090320,
+        "narHash": "sha256-21ljDPzQrljf7ZeVntbOaNBMECvpXoswPArFt/AQHlg=",
+        "ref": "refs/tags/v0.7.1",
+        "rev": "c4544913a14ed3df5f1ed7b9e8483270ce20682a",
+        "revCount": 515,
+        "type": "git",
+        "url": "https://github.com/TauricResearch/TradingAgents"
+      },
+      "original": {
+        "ref": "refs/tags/v0.7.1",
+        "type": "git",
+        "url": "https://github.com/TauricResearch/TradingAgents"
       }
     }
   },

@@ -10,13 +10,21 @@ NautilusTrader Python:
   bars        historic bars of one session, as rows for the backtest CSV
   preflight   what an order would cost and whether Public would take it;
               Public places nothing for a preflight
+  option_expirations, option_chain, greeks
+              an underlying's listed expirations, one expiration's chain
+              (calls and puts, each with its OSI symbol, bid, ask, strike
+              and, when Public has them, greeks), and greeks by OSI symbol
+  place       one single-leg order, as `trade place` sends it (a spend
+              action: the controller's, after the risk check and a fresh
+              preflight); order() reads it back by its id
 
-Nothing here places, replaces or cancels an order.
+Only `place` places; nothing replaces or cancels.
 """
 
 import json
 import os
 import urllib.error
+import urllib.parse
 import urllib.request
 
 BASE_URL = os.environ.get("PUBLIC_API_BASE_URL", "https://api.public.com").rstrip("/")
@@ -123,6 +131,42 @@ class Public:
         """Public's preflight of one single-leg order body; places nothing."""
         return self._request("POST", f"/userapigateway/trading/{self.account()}/preflight/single-leg", order)
 
+    def option_expirations(self, symbol, kind="EQUITY"):
+        """The expiration dates (YYYY-MM-DD) listed on an underlying."""
+        out = self._request(
+            "POST",
+            f"/userapigateway/marketdata/{self.account()}/option-expirations",
+            {"instrument": {"symbol": symbol.upper(), "type": kind}},
+        )
+        return sorted(out.get("expirations") or out.get("expirationDates") or [])
+
+    def option_chain(self, symbol, expiration, kind="EQUITY"):
+        """One expiration's chain: {"calls": [...], "puts": [...]}, each quote
+        with instrument.symbol (OSI), bid, ask and optionDetails.strikePrice."""
+        return self._request(
+            "POST",
+            f"/userapigateway/marketdata/{self.account()}/option-chain",
+            {"instrument": {"symbol": symbol.upper(), "type": kind}, "expirationDate": expiration},
+        )
+
+    def greeks(self, osi_symbols):
+        """Greeks by OSI symbol: {symbol: {"delta": ..., ...}}."""
+        query = "&".join("osiSymbols=" + urllib.parse.quote(s) for s in osi_symbols)
+        out = self._request("GET", f"/userapigateway/option-details/{self.account()}/greeks?{query}")
+        found = {}
+        for g in out.get("greeks") or []:
+            sym = (g.get("instrument") or {}).get("symbol") or g.get("osiSymbol") or g.get("symbol")
+            if sym:
+                found[sym] = {k: g.get(k) for k in ("delta", "gamma", "theta", "vega", "rho", "impliedVolatility")}
+        return found
+
+    def place(self, order):
+        """Places one single-leg order; the one call here that moves money."""
+        return self._request("POST", f"/userapigateway/trading/{self.account()}/order", order)
+
+    def order(self, order_id):
+        return self._request("GET", f"/userapigateway/trading/{self.account()}/order/{order_id}")
+
 
 def order_body(symbol, side, order_type, quantity, time_in_force, limit_price=None, stop_price=None, expire_time=None):
     """One single-leg equity order as Public's API takes it.
@@ -157,4 +201,29 @@ def order_body(symbol, side, order_type, quantity, time_in_force, limit_price=No
         if stop_price is None:
             raise ValueError(f"a {order_type} order needs a stop price")
         body["stopPrice"] = str(stop_price)
+    return body
+
+
+def option_order_body(osi_symbol, side, limit_price, quantity, open_close="OPEN", order_id=None):
+    """One single-leg option order, LIMIT and DAY: what the limits allow.
+
+    side is BUY or SELL; open_close OPEN to enter, CLOSE to exit. A market
+    order on an option is never built: the limit is the risk check's
+    premium, and Public takes limit orders on options.
+    """
+    if side not in ("BUY", "SELL"):
+        raise ValueError(f"Public has no order side {side}")
+    if open_close not in ("OPEN", "CLOSE"):
+        raise ValueError(f"openCloseIndicator is OPEN or CLOSE, not {open_close}")
+    body = {
+        "instrument": {"symbol": osi_symbol, "type": "OPTION"},
+        "orderSide": side,
+        "orderType": "LIMIT",
+        "expiration": {"timeInForce": "DAY"},
+        "quantity": str(quantity),
+        "limitPrice": f"{float(limit_price):.2f}",
+        "openCloseIndicator": open_close,
+    }
+    if order_id:
+        body["orderId"] = order_id
     return body

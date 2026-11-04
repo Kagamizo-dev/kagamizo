@@ -103,6 +103,11 @@ let
     ) keys}
     ]
 
+    /-- Every agent team's share of its key, per month (../governance). -/
+    def teams : List Team := [
+    ${lib.concatStringsSep ",\n" teams}
+    ]
+
     /-- The paying card's allowance, per month (mercury.cards.openrouter). -/
     def card : Nat := ${toString cardMonthly}
 
@@ -116,9 +121,17 @@ let
     theorem each_key_within : ∀ k ∈ keys, k.monthlyUsd ≤ card :=
       within_means_each keys card keys_within
 
+    /-- The teams' shares fit their keys. -/
+    theorem teams_within : teamsWithin teams keys = true := by decide +kernel
+
     end Kagamizo.Budget
   '';
 
+  # Each agent's key: its own, or its entity's swarm key (../governance/orca.nix).
+  keyOf = a: if a.key != null then a.key else "swarms-${a.serves}";
+  teams = lib.mapAttrsToList (
+    n: a: "  { name := ${q n}, key := ${q (keyOf a)}, monthlyUsd := ${toString a.budgetUsdPerMonth} }"
+  ) config.governance.agents;
   byRank = lib.sort (a: b: a.rank < b.rank) (lib.attrValues cfg.tiers);
   tasksOf = tn: lib.attrNames (lib.filterAttrs (_: t: t == tn) cfg.tasks);
 in
@@ -137,6 +150,11 @@ in
       type = types.str;
       readOnly = true;
       description = "The tier policy as prose, for every agent's prompt.";
+    };
+    teamsJson = mkOption {
+      type = types.str;
+      readOnly = true;
+      description = "Every agent team as JSON (name, purpose, personas, model, key, budget, tools, classes), for the harness.";
     };
     models = mkOption {
       type = types.attrsOf (
@@ -213,6 +231,20 @@ in
         vision = "pro";
         design = "pro";
       };
+      teamsJson = builtins.toJSON (
+        lib.mapAttrs (_: a: {
+          inherit (a)
+            purpose
+            personas
+            model
+            tools
+            changeClasses
+            harness
+            ;
+          key = keyOf a;
+          inherit (a) budgetUsdPerMonth;
+        }) config.governance.agents
+      );
       policyText = ''
         Spend as little as the task allows. The tiers, cheapest first:
         ${lib.concatMapStrings (

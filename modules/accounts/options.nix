@@ -296,6 +296,33 @@ let
               needs no code. Only on a plan with the passkeys capability.
             '';
           };
+          exception = mkOption {
+            type = types.nullOr (
+              types.submodule {
+                options = {
+                  email = mkOption {
+                    type = types.strMatching "[a-z0-9._+-]+@[a-z0-9.-]+";
+                    description = "The one other address the account may be signed in with.";
+                  };
+                  until = mkOption {
+                    type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+                    description = "The last day it is admitted (governance-authorize passes the day).";
+                  };
+                  because = mkOption { type = types.str; };
+                  decided = mkOption {
+                    type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+                    description = "The owner's decision date.";
+                  };
+                };
+              }
+            );
+            default = null;
+            description = ''
+              A typed, dated exception to the login rule: while the account's
+              login is still another address (one the owner opened it on),
+              that address is admitted until the day given, and no other.
+            '';
+          };
         };
       };
     }

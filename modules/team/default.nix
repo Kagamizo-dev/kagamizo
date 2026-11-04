@@ -1,82 +1,58 @@
-# Agent identities, typed in Nix, proven in Lean, served by Rust. Every
-# agent (governance.agents) is in one team (governance.teams), serves one
-# entity, runs on one tier and one capped model key, reports in one room and
-# proposes only the change classes it lists.
+# The agent teams as one readable view: every governance agent (a team, in
+# ../agents/teams.nix's sense) with what it runs on (model, key and share,
+# harness, tools), what it may propose, the areas it owns and reviews
+# (organization.areas) and the Proton token it signs in with.
 #
 #   nix run .#team -- list [--json]
 #   nix run .#team -- show <agent> [--json]
-#   nix run .#team -- tree [--json]        entities -> teams -> agents
+#   nix run .#team -- tree [--json]        entity -> area -> owner, reviewers
 #   nix run .#team -- whoami [--json]      the agent KAGAMIZO_PRINCIPAL names
 #                                          (orca-swarm sets agent:<name>)
 #
-# checks.team-lean has Lean decide the rules of ./_lean/Team.lean over every
-# declared agent (own entity, tier within the team's cap, no self-review,
-# reviewers propose nothing, own entity's key); checks.team-tests runs the
-# crate's tests over the same facts. Read-only: no account, no secret.
+# checks.team-lean proves, over every agent and area, that work is
+# delegated: every agent owns or reviews some area, so none is idle, and
+# every area but the owner's own address (zach@) has an owner. ../organization's Lean holds
+# the rest (no self-review, classes within the owner's); ../agents' holds
+# the budgets. Read-only: no account, no secret.
 { lib, config, ... }:
 let
-  gov = config.governance;
-  inherit (config.agents) tiers;
+  agents = config.governance.agents;
+  areas = config.organization.areas;
   q = builtins.toJSON;
-  keyOf = a: "swarms-${a.serves}";
-  key = a: config.openrouter.keys.${keyOf a};
-  token = name: config.proton.agents."swarm-${name}";
+  keyOf = a: if a.key != null then a.key else "swarms-${a.serves}";
+  token = name: config.proton.agents."swarm-${name}" or null;
 
-  problems = lib.concatLists (
+  flatAreas = lib.concatLists (
     lib.mapAttrsToList (
-      n: a:
-      let
-        t = gov.teams.${a.team};
-      in
-      lib.optional (
-        t.serves != null && t.serves != a.serves
-      ) "governance.agents.${n}: team ${a.team} serves ${t.serves}, the agent ${a.serves}"
-      ++ lib.optional (
-        tiers.${a.tier}.rank > tiers.${t.tierCap}.rank
-      ) "governance.agents.${n}: tier ${a.tier} is above team ${a.team}'s cap (${t.tierCap})"
-      ++ lib.optional (lib.elem a.team a.reviews) "governance.agents.${n}: reviews its own team ${a.team}"
-      ++ lib.optional (
-        t.review && (a.changeClasses != [ ] || a.reviews == [ ])
-      ) "governance.agents.${n}: a ${a.team} agent reviews some team and proposes no change class"
-      ++ lib.optional (
-        !(config.openrouter.keys ? ${keyOf a})
-      ) "governance.agents.${n}: no OpenRouter key ${keyOf a}"
-    ) gov.agents
+      entity: as: lib.mapAttrsToList (mailbox: a: a // { inherit entity mailbox; }) as
+    ) areas
   );
+  # The owner's own address on any domain (zach@, zach+tag@): the one kind
+  # of area that has no agent owner by design (organization.areas).
+  ownersOwn = m: m == "zach" || lib.hasPrefix "zach+" m;
+  owns = n: map (a: "${a.entity}/${a.mailbox}") (lib.filter (a: a.owner == n) flatAreas);
+  reviews = n: map (a: "${a.entity}/${a.mailbox}") (lib.filter (a: lib.elem n a.reviewers) flatAreas);
 
   lean = ''
     namespace Kagamizo.Team
 
-    /-- Every team, rendered by modules/team. -/
-    def teams : List Team := [
-    ${lib.concatStringsSep ",\n" (
-      lib.mapAttrsToList (
-        n: t:
-        "  { name := ${q n}, serves := ${
-            if t.serves == null then "none" else "some ${q t.serves}"
-          }, review := ${lib.boolToString t.review}, capRank := ${toString tiers.${t.tierCap}.rank} }"
-      ) gov.teams
-    )}
+    def agents : List String := ${q (lib.attrNames agents)}
+
+    def areas : List Area := [
+    ${lib.concatMapStringsSep ",\n" (
+      a:
+      "  { name := ${q "${a.entity}/${a.mailbox}"}, owner := ${
+          if a.owner == null then "none" else "some ${q a.owner}"
+        }, reviewers := ${q a.reviewers}, personal := ${lib.boolToString (ownersOwn a.mailbox)} }"
+    ) flatAreas}
     ]
 
-    /-- Every agent. -/
-    def agents : List Agent := [
-    ${lib.concatStringsSep ",\n" (
-      lib.mapAttrsToList (
-        n: a:
-        "  { name := ${q n}, serves := ${q a.serves}, team := ${q a.team}, tierRank := ${toString tiers.${a.tier}.rank}, keyProfile := ${q (key a).profile}, changeClasses := ${q a.changeClasses}, reviews := ${q a.reviews} }"
-      ) gov.agents
-    )}
-    ]
-
-    theorem declared_sound : sound teams agents = true := by decide +kernel
+    theorem declared_delegated : delegated agents areas = true := by decide +kernel
 
     end Kagamizo.Team
   '';
 
-  # The same facts as Rust source, for the CLI: string slices only.
   strs = xs: "&[${lib.concatMapStringsSep ", " q xs}]";
-  opt = v: if v == null then "None" else "Some(${q v})";
   rust = ''
     pub const ENTITIES: &[(&str, &str)] = &[${
       lib.concatStringsSep ", " (
@@ -84,50 +60,56 @@ let
       )
     }];
 
-    pub const TEAMS: &[Team] = &[
+    pub const AREAS: &[Area] = &[
     ${
-      lib.concatStrings (
-        lib.mapAttrsToList (n: t: ''
-          Team { name: ${q n}, purpose: ${q t.purpose}, serves: ${opt t.serves}, review: ${lib.boolToString t.review}, tier_cap: ${q t.tierCap} },
-        '') gov.teams
-      )
+      lib.concatMapStrings (a: ''
+        Area { entity: ${q a.entity}, mailbox: ${q a.mailbox}, owner: ${
+          if a.owner == null then "None" else "Some(${q a.owner})"
+        }, reviewers: ${strs a.reviewers}, classes: ${strs a.changeClasses}, purpose: ${q a.purpose} },
+      '') flatAreas
     }];
 
     pub const AGENTS: &[Agent] = &[
     ${
       lib.concatStrings (
-        lib.mapAttrsToList (n: a: ''
-          Agent {
-            name: ${q n}, serves: ${q a.serves}, team: ${q a.team}, purpose: ${q a.purpose},
-            tier: ${q a.tier}, tier_rank: ${toString tiers.${a.tier}.rank}, paid: ${
-              lib.boolToString (tiers.${a.tier}.runs != "host")
+        lib.mapAttrsToList (
+          n: a:
+          let
+            k = config.openrouter.keys.${keyOf a} or null;
+            t = token n;
+          in
+          ''
+            Agent {
+              name: ${q n}, serves: ${q a.serves}, purpose: ${q a.purpose},
+              model: ${q a.model}, key: ${q (keyOf a)}, key_limit_usd: ${
+                toString (if k == null then 0 else k.limitUsd)
+              }, key_reset: ${q (if k == null then "" else k.reset)}, share_usd: ${toString a.budgetUsdPerMonth},
+              harness: ${q a.harness}, tools: ${strs a.tools}, change_classes: ${strs a.changeClasses},
+              personas: ${strs a.personas},
+              token: ${q (if t == null then "" else "swarm-${n}")}, token_vault: ${
+                q (if t == null then "" else t.vault)
+              },
+              owns: ${strs (owns n)}, reviews: ${strs (reviews n)},
+              grants: &[${
+                lib.concatMapStringsSep ", " (
+                  g: "Grant { account: ${q g.account}, effects: ${strs g.effects}, why: ${q g.why} }"
+                ) a.grants
+              }],
             },
-            model: ${opt tiers.${a.tier}.model},
-            key: ${q (keyOf a)}, key_limit_usd: ${toString (key a).limitUsd}, key_reset: ${q (key a).reset},
-            harness: ${q a.harness}, room: ${q a.room}, mail: ${q a.mail},
-            token: ${q "swarm-${n}"}, token_vault: ${q (token n).vault}, token_expires: ${q (token n).expiration},
-            personas: ${strs a.personas}, change_classes: ${strs a.changeClasses}, reviews: ${strs a.reviews},
-            grants: &[${
-              lib.concatMapStringsSep ", " (
-                g: "Grant { account: ${q g.account}, effects: ${strs g.effects}, why: ${q g.why} }"
-              ) a.grants
-            }],
-          },
-        '') gov.agents
+          ''
+        ) agents
       )
     }];
   '';
 in
 {
-  governance.problems = problems;
-
   perSystem =
     { pkgs, ... }:
     let
       facts = pkgs.writeText "team-facts.rs" rust;
       team = pkgs.rustPlatform.buildRustPackage {
         pname = "team";
-        version = "0.1.0";
+        version = "0.2.0";
         src = ./_src;
         cargoLock.lockFile = ./_src/Cargo.lock;
         TEAM_FACTS = facts;
@@ -137,7 +119,6 @@ in
     {
       packages.team = team;
       checks.team-lean =
-        assert lib.assertMsg (problems == [ ]) (lib.concatStringsSep "\n" problems);
         pkgs.runCommand "team-lean"
           {
             nativeBuildInputs = [ pkgs.lean4 ];

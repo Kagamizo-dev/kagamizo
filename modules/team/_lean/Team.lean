@@ -1,110 +1,42 @@
 /-
-Agent identities, proven sound. Every agent (governance.agents) is in one
-team (governance.teams); ../default.nix renders both lists and has Lean
-decide `sound` over them, so a declaration that breaks a rule fails
-`checks.team-lean`, naming nothing but the rule: the Nix side names the
-field (governance.problems).
-
-The rules, for every agent:
-  * it serves its team's entity, when the team serves one;
-  * its tier is at or below its team's cap;
-  * it never reviews its own team;
-  * an agent of a review team reviews some team and proposes no change;
-  * its model key is its own entity's (the profile swarm-<entity>).
+Delegation, proven complete. Every area of work (organization.areas: an
+entity's mailbox role) has an owner agent unless it is a person's own
+(zach@), and every agent owns or reviews some area, so no team sits idle
+and no area is nobody's. ../default.nix renders both and Lean decides it.
+No self-review and classes within the owner's are ../organization's
+theorems; budgets are ../agents'.
 -/
 namespace Kagamizo.Team
 
-structure Team where
+structure Area where
   name : String
-  serves : Option String
-  review : Bool
-  capRank : Nat
+  owner : Option String
+  reviewers : List String
+  /-- The owner's own address (zach@), which has no agent owner by design. -/
+  personal : Bool
 
-structure Agent where
-  name : String
-  serves : String
-  team : String
-  tierRank : Nat
-  keyProfile : String
-  changeClasses : List String
-  reviews : List String
+def hasWork (as : List Area) (agent : String) : Bool :=
+  as.any fun a => a.owner == some agent || a.reviewers.contains agent
 
-def teamOf (ts : List Team) (a : Agent) : Option Team :=
-  ts.find? (·.name == a.team)
+def owned (a : Area) : Bool := a.personal || a.owner.isSome
 
-/-- It serves its team's entity (any entity, for a team every entity has). -/
-def inTeamEntity (ts : List Team) (a : Agent) : Bool :=
-  match teamOf ts a with
-  | none => false
-  | some t => match t.serves with
-    | none => true
-    | some e => e == a.serves
+def delegated (agents : List String) (as : List Area) : Bool :=
+  agents.all (hasWork as) && as.all owned
 
-def withinCap (ts : List Team) (a : Agent) : Bool :=
-  match teamOf ts a with
-  | none => false
-  | some t => decide (a.tierRank ≤ t.capRank)
+theorem delegated_no_idle (agents : List String) (as : List Area)
+    (h : delegated agents as = true) (n : String) (hn : n ∈ agents) :
+    hasWork as n = true := by
+  simp only [delegated, Bool.and_eq_true] at h
+  exact List.all_eq_true.mp h.1 n hn
 
-def noSelfReview (a : Agent) : Bool :=
-  !(a.reviews.contains a.team)
+-- What the rule refuses, on stand-ins.
 
-/-- A reviewer reviews someone and proposes nothing. -/
-def reviewerOnlyReviews (ts : List Team) (a : Agent) : Bool :=
-  match teamOf ts a with
-  | none => false
-  | some t => !t.review || (a.changeClasses.isEmpty && !a.reviews.isEmpty)
-
-def ownKey (a : Agent) : Bool :=
-  a.keyProfile == "swarm-" ++ a.serves
-
-def agentSound (ts : List Team) (a : Agent) : Bool :=
-  inTeamEntity ts a && withinCap ts a && noSelfReview a &&
-    reviewerOnlyReviews ts a && ownKey a
-
-def sound (ts : List Team) (as : List Agent) : Bool :=
-  as.all (agentSound ts)
-
-/-- Soundness gives each rule for every agent; here, the one the review gate
-rests on: no agent of a sound declaration reviews its own team. -/
-theorem sound_no_self_review (ts : List Team) (as : List Agent)
-    (h : sound ts as = true) (a : Agent) (ha : a ∈ as) :
-    noSelfReview a = true := by
-  have := List.all_eq_true.mp h a ha
-  simp only [agentSound, Bool.and_eq_true] at this
-  exact this.1.1.2
-
-/-- ... and no agent of a sound declaration uses another entity's key. -/
-theorem sound_own_key (ts : List Team) (as : List Agent)
-    (h : sound ts as = true) (a : Agent) (ha : a ∈ as) :
-    ownKey a = true := by
-  have := List.all_eq_true.mp h a ha
-  simp only [agentSound, Bool.and_eq_true] at this
-  exact this.2
-
--- What the rules refuse, on stand-ins.
-private def tRev : Team := { name := "review", serves := some "k", review := true, capRank := 2 }
-private def tWork : Team := { name := "work", serves := some "k", review := false, capRank := 2 }
-
-/-- An agent reviewing its own team is refused. -/
-example : sound [tRev, tWork]
-    [{ name := "a", serves := "k", team := "work", tierRank := 2,
-       keyProfile := "swarm-k", changeClasses := [], reviews := ["work"] }] = false := by
+/-- An agent with no area. -/
+example : delegated ["idle"] [{ name := "k/dev", owner := some "upkeep", reviewers := [], personal := false }] = false := by
   decide
 
-/-- A reviewer that proposes a change is refused. -/
-example : sound [tRev, tWork]
-    [{ name := "r", serves := "k", team := "review", tierRank := 2,
-       keyProfile := "swarm-k", changeClasses := ["content"], reviews := ["work"] }] = false := by
-  decide
-
-/-- An agent above its team's cap, or on another entity's key, is refused. -/
-example : sound [tWork]
-    [{ name := "a", serves := "k", team := "work", tierRank := 3,
-       keyProfile := "swarm-k", changeClasses := [], reviews := [] }] = false := by
-  decide
-example : sound [tWork]
-    [{ name := "a", serves := "k", team := "work", tierRank := 2,
-       keyProfile := "swarm-j", changeClasses := [], reviews := [] }] = false := by
+/-- An area that is nobody's. -/
+example : delegated [] [{ name := "k/admin", owner := none, reviewers := [], personal := false }] = false := by
   decide
 
 end Kagamizo.Team

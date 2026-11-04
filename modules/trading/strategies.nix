@@ -54,8 +54,40 @@ let
   strategy = types.submodule {
     options = {
       kind = mkOption {
-        type = types.enum [ "ema-cross" ];
+        type = types.enum [
+          "ema-cross"
+          # The day's research decision into one defined-risk option within
+          # the limits (./_propose.py, ./limits.nix).
+          "agent-option"
+        ];
         description = "A strategy _trade.py knows how to build.";
+      };
+      option = mkOption {
+        type = types.nullOr (
+          types.submodule {
+            options = {
+              expiryDaysMin = mkOption {
+                type = types.ints.positive;
+                default = 7;
+              };
+              expiryDaysMax = mkOption {
+                type = types.ints.positive;
+                default = 21;
+              };
+              minAbsDelta = mkOption {
+                type = types.numbers.between 0.0 1.0;
+                default = 0.15;
+              };
+            };
+          }
+        );
+        default = null;
+        description = "For agent-option: how the contract is chosen.";
+      };
+      decisions = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "For agent-option: the directory of research decisions, <dir>/<date>/<symbol>.json.";
       };
       backend = mkOption { type = types.enum (lib.attrNames cfg.backends); };
       symbol = mkOption { type = types.strMatching "[A-Z][A-Z0-9.]*"; };
@@ -70,13 +102,17 @@ let
         description = "The simulated balance a backtest starts with.";
       };
       params = mkOption {
-        type = types.submodule {
-          options = {
-            tradeSize = mkOption { type = types.ints.positive; };
-            fastPeriod = mkOption { type = types.ints.positive; };
-            slowPeriod = mkOption { type = types.ints.positive; };
-          };
-        };
+        type = types.nullOr (
+          types.submodule {
+            options = {
+              tradeSize = mkOption { type = types.ints.positive; };
+              fastPeriod = mkOption { type = types.ints.positive; };
+              slowPeriod = mkOption { type = types.ints.positive; };
+            };
+          }
+        );
+        default = null;
+        description = "For ema-cross.";
       };
     };
   };
@@ -85,15 +121,22 @@ let
     lib.mapAttrsToList (
       name: s:
       lib.optional (
-        s.params.fastPeriod >= s.params.slowPeriod
-      ) "trading.strategies.${name}: fastPeriod must be below slowPeriod"
+        s.kind == "ema-cross" && (s.params == null || s.params.fastPeriod >= s.params.slowPeriod)
+      ) "trading.strategies.${name}: ema-cross needs params with fastPeriod below slowPeriod"
+      ++ lib.optional (
+        s.kind == "agent-option" && (s.option == null || s.decisions == null)
+      ) "trading.strategies.${name}: agent-option needs option and decisions"
+      ++ lib.optional (
+        s.kind == "agent-option" && !(cfg.limits ? ${s.backend})
+      ) "trading.strategies.${name}: no trading.limits.${s.backend}"
     ) cfg.strategies
   );
 
   declared = lib.mapAttrs (
-    _: s:
+    name: s:
     s
     // {
+      inherit name;
       venue = lib.toUpper (lib.replaceStrings [ "-" ] [ "_" ] s.backend);
     }
   ) cfg.strategies;
@@ -121,14 +164,26 @@ in
 
     # The engine's own example, kept as the reference every backtest check
     # runs: it proves the packaged engine trades end to end.
-    trading.strategies.ema-cross-spy = {
-      kind = "ema-cross";
-      backend = "public";
-      symbol = "SPY";
-      params = {
-        tradeSize = 10;
-        fastPeriod = 10;
-        slowPeriod = 20;
+    trading.strategies = {
+      ema-cross-spy = {
+        kind = "ema-cross";
+        backend = "public";
+        symbol = "SPY";
+        params = {
+          tradeSize = 10;
+          fastPeriod = 10;
+          slowPeriod = 20;
+        };
+      };
+      # The plan of 2026-11-02: the research teams' daily decision on SPY,
+      # as one long call or put within the limits; placed only by the
+      # owner (`trade place`), and only once the strategy's stage is live.
+      spy-agents = {
+        kind = "agent-option";
+        backend = "public";
+        symbol = "SPY";
+        option = { };
+        decisions = "research";
       };
     };
 
@@ -139,6 +194,7 @@ in
         scripts = pkgs.linkFarm "trade-scripts" {
           "trade.py" = ./_trade.py;
           "_public.py" = ./_public.py;
+          "_propose.py" = ./_propose.py;
         };
         # The engine itself, with whatever Public credentials the caller set.
         run = pkgs.writeShellApplication {
@@ -146,6 +202,7 @@ in
           runtimeInputs = [ python ];
           text = builtins.seq (lib.assertMsg (problems == [ ]) (lib.concatStringsSep "\n" problems)) ''
             export TRADE_STRATEGIES=${lib.escapeShellArg (builtins.toJSON declared)}
+            export TRADE_LIMITS=${lib.escapeShellArg (builtins.toJSON cfg.limits)}
             exec python3 -I ${scripts}/trade.py "$@"
           '';
         };
@@ -158,11 +215,24 @@ in
             config.packages.governance-authorize
           ];
           text = builtins.seq top.accounts.checked ''
+            account=${top.trading.backends.public.account}
             case "''${1:-}" in
-              bars | paper)
+              account | bars | paper | propose | paper-day | place)
                 export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
-                governance-authorize public:historicdata-bars ${top.trading.backends.public.account}
-                [ "$1" = bars ] || governance-authorize public:order-preflight-single ${top.trading.backends.public.account}
+                case "$1" in
+                  account) governance-authorize public:accounts-list "$account" ;;
+                  bars) governance-authorize public:historicdata-bars "$account" ;;
+                  paper)
+                    governance-authorize public:historicdata-bars "$account"
+                    governance-authorize public:order-preflight-single "$account" ;;
+                  propose | paper-day)
+                    governance-authorize public:market-option-chain "$account"
+                    governance-authorize public:order-preflight-single "$account" ;;
+                  # The one spend: the controller's, never an agent's (modules/governance).
+                  place)
+                    governance-authorize public:order-preflight-single "$account"
+                    governance-authorize public:order-place "$account" ;;
+                esac
                 exec secretspec run --file ${config.packages.secretspec-toml} --profile public \
                   --reason "trade $*" -- trade-run "$@"
                 ;;
@@ -213,7 +283,41 @@ in
                 and (.preflight | length) >= 2
                 and any(.preflight[]; .accepted and .preflight.estimatedCost == "1000.00")
                 and any(.preflight[]; (.accepted | not) and .refused_by == "public" and .status == 400)' paper.json
-              jq -s '{backtest: .[0], paper: .[1]}' result.json paper.json > $out
+
+              # The agent-option strategy against the stub's chain: a BUY
+              # decision becomes one call within the $25 cap at |delta| ≥
+              # 0.15, preflighted and accepted; HOLD proposes nothing; a
+              # stopped day refuses; `place` places and reads it back.
+              last=$(tail -1 bars.csv | cut -d, -f1 | cut -c1-10)
+              mkdir -p research/$last
+              echo '{"decision": "BUY", "rationale": "the check"}' > research/$last/SPY.json
+              trade-run propose spy-agents "$last" > proposal.json
+              jq -e --argjson cap ${toString cfg.limits.public.maxPremiumUsd} \
+                '.proposal.admissible and .proposal.accepted and .proposal.max_loss_usd <= $cap
+                 and (.proposal.contract.delta | fabs) >= 0.15 and .proposal.kind == "long-call"
+                 and .proposal.order.instrument.type == "OPTION" and .proposal.order.orderType == "LIMIT"' proposal.json
+              echo '{"decision": "HOLD"}' > research/$last/SPY.json
+              trade-run propose spy-agents "$last" | jq -e '.proposal == null'
+              echo '{"decision": "SELL", "rationale": "the check"}' > research/$last/SPY.json
+              echo '{"openPositions": 0, "lossUsd": ${toString cfg.limits.public.dailyLossStopUsd}}' > research/state.json
+              trade-run propose spy-agents "$last" | jq -e '.proposal.kind == "long-put" and (.proposal.admissible | not)'
+              rm research/state.json
+              # The gate: the strategy is at research (./stages.nix), so
+              # `place` refuses it whatever the proposal says.
+              if trade-run place proposal.json 2>refused; then exit 1; fi
+              grep -q "not live: nothing is placed" refused
+              # The adapter's own placing and reading back, against the stub.
+              ${pkgs.python313}/bin/python3 -I - > placed.json <<'EOF'
+              import json, sys
+              sys.path.insert(0, "${scripts}")
+              import _public
+              order = json.load(open("proposal.json"))["proposal"]["order"]
+              api = _public.Public()
+              placed = api.place(order)
+              print(json.dumps({"placed": placed, "status": api.order(placed["orderId"])}))
+              EOF
+              jq -e '.status.status == "FILLED" and .placed.orderId == .status.orderId' placed.json
+              jq -s '{backtest: .[0], paper: .[1], proposal: .[2], placed: .[3]}' result.json paper.json proposal.json placed.json > $out
             '';
       };
   };
