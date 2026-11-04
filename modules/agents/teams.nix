@@ -8,7 +8,7 @@
 #   design     proposes each page's layout against the mobile rubric
 #   twin       turns inventory and CAD into the twin's items
 #   builders   the bots in the world
-#   research   the trading plan's research loops
+#   review     reads every code or tool pull request
 #   upkeep     bumps pinned projects and reads changelogs
 { lib, config, ... }:
 let
@@ -24,9 +24,48 @@ let
     budgetUsdPerMonth = budget;
     harness = "dsh";
   };
+  # The twin is the person's: its teams serve mirazo on mirazo's swarm key.
+  personal = personas: tools: changeClasses: budget: purpose: {
+    serves = "mirazo";
+    inherit
+      personas
+      tools
+      changeClasses
+      purpose
+      ;
+    budgetUsdPerMonth = budget;
+    harness = "dsh";
+  };
 in
 {
   governance.agents = {
+    # Reviews the repository's code and tools before the owner approves:
+    # never an owner of an area, so it never reviews its own work.
+    review =
+      team
+        [
+          "engineering/engineering-code-reviewer"
+          "testing/testing-reality-checker"
+        ] [ "repo" "matrix" ] [ ]
+        3
+        "the review team: reads every pull request of code or tools against the checks and the plan";
+    # Jingzo's research: the research-to-trade loop (research@jingzo.org).
+    research-jingzo = {
+      serves = "jingzo";
+      purpose = "the research team: the trading plan's research loops, read-only on markets";
+      personas = [
+        "research/research-synthesist"
+        "finance/finance-fpa-analyst"
+      ];
+      tools = [
+        "web"
+        "repo"
+        "matrix"
+      ];
+      changeClasses = [ "content" ];
+      budgetUsdPerMonth = 5;
+      harness = "dsh";
+    };
     design =
       team
         [
@@ -37,7 +76,7 @@ in
         4
         "the design team: three layouts, a critique, a pick; every page checked on a phone and a desktop";
     twin =
-      team
+      personal
         [
           "game-development/technical-artist"
           "engineering/engineering-rust-refactoring-specialist"
@@ -45,18 +84,10 @@ in
         ] [ "shell" "repo" "twin" "matrix" ] [ "content" "mod" ]
         4
         "the twin team: the owner's inventory and CAD into typed items and the world's mod";
-    builders = team [
+    builders = personal [
       "game-development/game-designer"
       "game-development/level-designer"
     ] [ "twin" "matrix" ] [ "content" ] 3 "the builders: the bots that build, craft and keep the world";
-    research =
-      team
-        [
-          "research/research-synthesist"
-          "engineering/engineering-data-engineer"
-        ] [ "web" "repo" "matrix" ] [ "content" ]
-        5
-        "the research team: the trading plan's research loops, read-only on markets";
     upkeep =
       team
         [
