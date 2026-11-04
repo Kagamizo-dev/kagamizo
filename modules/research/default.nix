@@ -220,10 +220,12 @@ in
             ];
           }
           ''
-            export HOME=$TMPDIR OPENAI_API_KEY=unused
+            # The client builds its TLS context at once; the sandbox's
+            # SSL_CERT_FILE names nothing.
+            export HOME=$TMPDIR OPENAI_API_KEY=unused SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
             python3 -I - <<'EOF'
             import json, os, sys
-            os.environ["RESEARCH_CONFIG"] = json.dumps(${lib.escapeShellArg made}).replace("$HOME", os.environ["HOME"])
+            os.environ["RESEARCH_CONFIG"] = ${lib.escapeShellArg made}.replace("$HOME", os.environ["HOME"])
             os.environ["OPENROUTER_API_KEY"] = "unused"
             sys.argv = ["research"]
             sys.path.insert(0, "${./.}")
