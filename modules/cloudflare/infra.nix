@@ -86,6 +86,15 @@ in
                   name = "kagamizo";
                   auth_domain = "kagamizo.cloudflareaccess.com";
                 };
+                # How the owner signs in: a one-time code mailed to the
+                # address the policy names (declared, not Access's
+                # implicit fallback).
+                resource.cloudflare_zero_trust_access_identity_provider.otp = {
+                  account_id = top.cloudflare.checked.accountId;
+                  name = "One-time PIN";
+                  type = "onetimepin";
+                  config = { };
+                };
               }
               # What the state adopts from Cloudflare (./imports.nix).
               {
