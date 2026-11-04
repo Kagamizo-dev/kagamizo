@@ -34,6 +34,8 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | tokens | `tokens-graph` | build | none yet | none yet | 10% | Lean deciding the credential graph (every child's scope within its parent's, by List.contains); moves with nodes × scope sizes |
 | trading | `trading-risk` | build | none yet | none yet | 10% | Lean proving what admissible guarantees (omega over Nat) and deciding the declared limits sane |
 | trading | `trading-stages` | build | none yet | none yet | 10% | Lean deciding every strategy's stage carries its evidence |
+| unit | `unit-build` | build | none yet | none yet | 10% | cargo build --release of the unit runner (serde_json) and its secretspec wrapper |
+| unit | `unit-lean` | build | none yet | none yet | 10% | Lean deciding every unit's cap fits its owner's share (decide +kernel); grows with units |
 
 ## Baseline
 

@@ -38,6 +38,7 @@
           project
           scout
           inventory
+          unit
         ];
       };
     in

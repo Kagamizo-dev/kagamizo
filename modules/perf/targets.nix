@@ -17,6 +17,18 @@
       attr = "checks.x86_64-linux.tokens-graph";
       method = "Lean deciding the credential graph (every child's scope within its parent's, by List.contains); moves with nodes × scope sizes";
     };
+    unit-build = {
+      module = "unit";
+      kind = "build";
+      attr = "packages.x86_64-linux.unit";
+      method = "cargo build --release of the unit runner (serde_json) and its secretspec wrapper";
+    };
+    unit-lean = {
+      module = "unit";
+      kind = "build";
+      attr = "checks.x86_64-linux.unit-lean";
+      method = "Lean deciding every unit's cap fits its owner's share (decide +kernel); grows with units";
+    };
     inventory-build = {
       module = "inventory";
       kind = "build";
