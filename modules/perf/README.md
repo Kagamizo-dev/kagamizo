@@ -8,6 +8,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 
 | Module | Target | Kind | Record (ms) | Latest (ms) | Tolerance | Method |
 |---|---|---|---|---|---|---|
+| agents | `agents-budget` | build | none yet | none yet | 10% | Lean deciding every task's tier frugal and the keys' caps within the card (decide +kernel over the rendered lists); moves with tasks × keys |
 | catalog | `catalog-coverage` | build | none yet | none yet | 10% | Python walking every source file against 7 catalogs; moves with the number of sources and the regexes |
 | ci | `ci-pipeline` | build | none yet | none yet | 10% | Lean deciding every workflow sound |
 | governance | `governance-cedar` | build | none yet | none yet | 10% | Cedar's test runner over every generated test (6169); moves with accounts × actions × agents |
