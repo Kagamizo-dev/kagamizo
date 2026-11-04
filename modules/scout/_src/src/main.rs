@@ -193,8 +193,9 @@ fn stability(r: &Repo, today: i64) -> (f64, Vec<String>) {
     (alive * push * release * licence, why)
 }
 
-fn gh(args: &[&str]) -> Result<String, String> {
-    let out = Command::new("gh").args(args).output().map_err(|e| format!("gh: {e}"))?;
+/// `gh api <path> --jq <filter>`: the one gh command scout runs.
+fn gh(path: &str, filter: &str) -> Result<String, String> {
+    let out = Command::new("gh").args(["api", path, "--jq", filter]).output().map_err(|e| format!("gh: {e}"))?;
     if out.status.success() {
         Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
     } else {
@@ -203,17 +204,15 @@ fn gh(args: &[&str]) -> Result<String, String> {
 }
 
 fn fetch(repo: &str) -> Result<Repo, String> {
-    let row = gh(&[
-        "api",
+    let row = gh(
         &format!("repos/{repo}"),
-        "--jq",
         "[.archived, .pushed_at, (.license.spdx_id // \"none\"), .stargazers_count] | @tsv",
-    ])?;
+    )?;
     let f: Vec<&str> = row.split('\t').collect();
     if f.len() != 4 {
         return Err(format!("{repo}: unexpected answer {row:?}"));
     }
-    let release = gh(&["api", &format!("repos/{repo}/releases/latest"), "--jq", ".published_at"]).ok();
+    let release = gh(&format!("repos/{repo}/releases/latest"), ".published_at").ok();
     Ok(Repo {
         archived: f[0] == "true",
         pushed: f[1].to_string(),
