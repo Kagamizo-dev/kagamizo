@@ -9,14 +9,17 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | Module | Target | Kind | Record (ms) | Latest (ms) | Tolerance | Method |
 |---|---|---|---|---|---|---|
 | agents | `agents-budget` | build | none yet | none yet | 10% | Lean deciding every task's tier frugal and the keys' caps within the card (decide +kernel over the rendered lists); moves with tasks × keys |
+| android | `android-twin` | build | none yet | none yet | 10% | Lean deciding every base, app and setting pinned and typed, plus the rendered AVD config read back |
 | catalog | `catalog-coverage` | build | none yet | none yet | 10% | Python walking every source file against 7 catalogs; moves with the number of sources and the regexes |
 | ci | `ci-pipeline` | build | none yet | none yet | 10% | Lean deciding every workflow sound |
+| discord | `discord-relay` | build | none yet | none yet | 10% | Lean deciding the relay rule on the declared ids, plus the crate's tests |
 | governance | `governance-cedar` | build | none yet | none yet | 10% | Cedar's test runner over every generated test (6169); moves with accounts × actions × agents |
 | governance | `governance-changes` | build | none yet | none yet | 10% | Lean deciding the change-class table's shape, plus the Rust tool's tests; moves with the table |
 | lean | `lean-api-pyicloud` | build | none yet | none yet | 10% | Lean deciding pyicloud's model (184 classes); moves with the catalog |
 | lean | `lean-api-rclone` | build | none yet | none yet | 10% | Lean deciding rclone's model closed (101 commands, 1100 global flags on one operation); moves with the catalog's size and the proof's shape |
 | lean | `lean-governance` | build | none yet | none yet | 10% | Lean deciding every governed action typed and every grant allowed (decide +kernel) |
 | mailbox | `mailbox-build` | build | none yet | none yet | 10% | cargo build --release of the IMAP reader and keychain stand-in; moves with native-tls/openssl linking |
+| media | `media-clips` | build | none yet | none yet | 10% | Lean proving a cut list's bounds and deciding the declared maximum, plus the crate's tests (a synthetic index and a byte-identical double render) |
 | migration | `migrate-build` | build | none yet | none yet | 10% | cargo build --release of the runner; crates vendored by Nix; moves with the dependency set and codegen settings (LTO, codegen-units) |
 | migration | `migration-lean` | build | none yet | none yet | 10% | Lean deciding closedRightly over the declared sources |
 | operations | `operations-boundary` | build | none yet | none yet | 10% | Lean deciding every declared secret well-formed |

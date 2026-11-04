@@ -113,6 +113,24 @@
       attr = "checks.x86_64-linux.governance-changes";
       method = "Lean deciding the change-class table's shape, plus the Rust tool's tests; moves with the table";
     };
+    media-clips = {
+      module = "media";
+      kind = "build";
+      attr = "checks.x86_64-linux.media-clips";
+      method = "Lean proving a cut list's bounds and deciding the declared maximum, plus the crate's tests (a synthetic index and a byte-identical double render)";
+    };
+    discord-relay = {
+      module = "discord";
+      kind = "build";
+      attr = "checks.x86_64-linux.discord-relay";
+      method = "Lean deciding the relay rule on the declared ids, plus the crate's tests";
+    };
+    android-twin = {
+      module = "android";
+      kind = "build";
+      attr = "checks.x86_64-linux.android-twin";
+      method = "Lean deciding every base, app and setting pinned and typed, plus the rendered AVD config read back";
+    };
     agents-budget = {
       module = "agents";
       kind = "build";

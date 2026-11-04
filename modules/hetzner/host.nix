@@ -116,6 +116,52 @@ let
       passCli = config.packages.pass-cli;
       opencodeConfig = config.packages.opencode-config;
       tokenFile = "/var/lib/kagamizo/host-token";
+      stateVault = top.proton.infraVaults.hostState;
+      # The Android SDK's packages (../android), unfree in nixpkgs.
+      alsoUnfree = top.android.unfreeNames;
+    }
+  );
+
+  # The share-from-phone relay, Discord into the Matrix room (../discord).
+  discord = withSystem "x86_64-linux" (
+    { config, ... }:
+    let
+      svc = lib.findFirst (
+        s: s.name == "chat"
+      ) (throw "hetzner.host.agents: no chat service") cfg.agents.services;
+    in
+    import ../discord/_host.nix {
+      relay = config.packages.discord-relay;
+      inherit (top.discord) channelId ownerUserId;
+      matrixPort = (lib.head svc.paths).port;
+      inherit (cfg.agents) zone;
+      room = top.discord.matrixRoom;
+      owner = lib.head (lib.splitString "@" (lib.head cfg.agents.viewers));
+    }
+  );
+
+  # The media pipeline: the indexer and the renderer (../media/_host.nix).
+  media = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ../media/_host.nix {
+      mediaIndex = config.packages.media-index;
+      mediaRender = config.packages.media-render;
+      inherit (top.media)
+        whisperModel
+        incoming
+        catalog
+        cuts
+        renders
+        ;
+    }
+  );
+
+  # The phone's twin, the declared Android emulator (../android/_host.nix).
+  androidTwin = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ../android/_host.nix {
+      twin = config.packages.android-twin;
+      screen = config.packages.android-twin-screen;
     }
   );
 
@@ -165,8 +211,11 @@ let
         tier1
         agents
         chat
+        discord
         githubApp
         harness
+        media
+        androidTwin
       ];
       networking.hostName = cfg.name;
       boot.loader.grub = {

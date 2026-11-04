@@ -445,6 +445,50 @@ Hetzner's console), and the owner opens agents.jingzo.org and
 code.jingzo.org themselves. A host the session cannot reach is worked
 around, not added.
 
+## 2026-11-04, latest: three modules dispatched and landed (read this first)
+
+The owner's decisions (standing decisions, 2026-11-04 late) built by three
+dispatched builders, each a module with its rule in Lean, Rust where
+something runs, Nix pinning, its own check, integrated and committed:
+
+- **`modules/media`** (d58ac2b): the clip catalog (`media.clips`, typed),
+  `media-index` (ffprobe, scene cuts, whisper.cpp small.en pinned by hash)
+  and `media-render` (deterministic ffmpeg; the check renders twice,
+  byte-identical); `_lean/Clips.lean` proves a valid cut list never reads
+  past a clip and never exceeds the declared maximum. Host units in
+  `_host.nix`: index on a path watch and a 15-minute timer, render on
+  demand (`media-render@NAME`). Incoming footage lands in
+  /var/lib/media/incoming/<date>/ (the Proton Drive hop writes there).
+- **`modules/discord`** (764146c): account discord-mirazo (plan free, typed
+  capabilities), the `discord-relay` crate (gateway with the two intents,
+  one declared channel, only the owner's messages into the Matrix room
+  `#share`, replies back; chunked at 2000 chars); `_lean/Relay.lean`
+  proves nothing but the owner's reaches Matrix. The bot token is the one
+  console-credential paste (Gaps). `discord.channelId / ownerUserId /
+  guildId` are null until the owner gives them; the host unit appears
+  only then.
+- **`modules/android`** (this commit): the phone twin. `android.devices.
+  pixel-9a`: AOSP base (platform 36, google_apis x86_64, the image's sha1
+  as nixpkgs' repo.json states it), profile pixel_9a 1080x2424@420,
+  2 GB, automation settings, apps pinned by hash (none yet);
+  `base.kind = "grapheneos"` typed and refused until the job
+  android-grapheneos-image exists. `android-twin` boots it headless
+  (KVM when present), applies settings, installs apps; `android-twin-screen`
+  screenshots. `_lean/Twin.lean` proves a device's state is base plus
+  declared settings plus declared apps and nothing else. The SDK
+  (dl.google.com) is fetched by CI's cache-push, not this session (the
+  allowlist is closed by the owner's rule); the host pulls it from the
+  cache.
+- **Host wiring:** `modules/hetzner/host.nix` imports media, discord and
+  androidTwin beside tier1, chat and the harness; `_agents.nix` writes
+  /run/agents/discord.env when the token and the Matrix bot login exist,
+  and admits the SDK's unfree names beside open-webui.
+
+Next in this line: the Proton Drive hop (unblocks iCloud and the camera;
+host work after the reinstall), the Steam/Godot game-dev profile, the
+weather event-contract team (task: a daily take-profit cap in the limits,
+event contracts in the adapter, NWS/NOAA rule signals, paper first).
+
 ## 2026-11-04, later: the trading path, built to the research loop (read this first)
 
 The owner's priority of 2026-11-04: Public, NautilusTrader and the
