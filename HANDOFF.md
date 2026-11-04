@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code and chat links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; then step 4 of "The approved harness, twin and swarm plan (2026-11-04)" (dsh, pinned and wrapped) and its later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code, chat and harness links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; then step 4 of "The approved harness, twin and swarm plan (2026-11-04)" (dsh, pinned and wrapped) and its later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -467,6 +467,18 @@ below. Step 2 is code, pushed; two things wait on the owner:
   Kagamizo-Host-State (`matrix-zach`, `matrix-agents`): the owner signs in to
   Element with Proton Pass autofill. Rooms per team come with the bots
   (step 4). Email from the agents is a Gap (modules/cloudflare/README.md).
+- **Step 4a, DeepSeek Harness, pinned and on the host (aef4b02, 42e6070,
+  and the harness commit):** `modules/dsh`: the published
+  `@deepseek-ai/dsh` 0.2.1-rc.5 by lockfile and hash, run on Node's
+  official 24.21.0 build (nixpkgs' Node fails its native loader's V8
+  getter check); `dsh` and `dsh-lock`. `modules/hetzner/_harness.nix`:
+  `dsh --profile web` at harness.jingzo.org through the tunnel behind
+  Access, with a rendered patch (validated offline by `dsh --dump-config`)
+  naming OpenRouter (the chat-and-code key) with the declared models, the
+  host's free tier-1 model, and the default model. State in /var/lib/dsh.
+  The Cloudflare plan is now 4 to add, 2 to change (chat and harness).
+  Next (4b): dsh's Agent Teams and Shell plugins sandboxed, its sessions
+  pushing as the GitHub App, and the typed fields on `governance.agents`.
 - **Step 3, the self-update loop, built (commits 34d56f4, cb33a83,
   198cb3a):**
   - `governance.changeClasses` (`modules/governance/changes.nix`): content

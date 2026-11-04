@@ -42,8 +42,9 @@ in
                 "agents"
                 "code"
                 "chat"
+                "harness"
               ];
-              description = "agents: Open WebUI; code: OpenCode's web interface; chat: Element Web and the Matrix homeserver.";
+              description = "agents: Open WebUI; code: OpenCode's web interface; chat: Element Web and the Matrix homeserver; harness: DeepSeek Harness's web UI.";
             };
             port = mkOption { type = types.ints.between 1024 65535; };
             paths = mkOption {
@@ -72,6 +73,10 @@ in
         {
           name = "code";
           port = 4096;
+        }
+        {
+          name = "harness";
+          port = 3080;
         }
         {
           name = "chat";

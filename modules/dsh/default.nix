@@ -57,27 +57,28 @@ in
       };
     in
     {
-      packages.dsh = pkgs.writeShellApplication {
-        name = "dsh";
-        text = ''
-          exec ${nodeOfficial}/bin/node ${pinned}/lib/node_modules/dsh-pin/node_modules/@deepseek-ai/dsh/lib/bin.js "$@"
-        '';
-      };
-      packages.nodejs-official = nodeOfficial;
-
-      packages.dsh-lock = pkgs.writeShellApplication {
-        name = "dsh-lock";
-        runtimeInputs = [
-          nodejs
-          pkgs.prefetch-npm-deps
-          pkgs.coreutils
-        ];
-        text = ''
-          cd modules/dsh/_pin
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          echo "npmDepsHash for modules/dsh/default.nix:"
-          prefetch-npm-deps package-lock.json
-        '';
+      packages = {
+        dsh = pkgs.writeShellApplication {
+          name = "dsh";
+          text = ''
+            exec ${nodeOfficial}/bin/node ${pinned}/lib/node_modules/dsh-pin/node_modules/@deepseek-ai/dsh/lib/bin.js "$@"
+          '';
+        };
+        nodejs-official = nodeOfficial;
+        dsh-lock = pkgs.writeShellApplication {
+          name = "dsh-lock";
+          runtimeInputs = [
+            nodejs
+            pkgs.prefetch-npm-deps
+            pkgs.coreutils
+          ];
+          text = ''
+            cd modules/dsh/_pin
+            npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+            echo "npmDepsHash for modules/dsh/default.nix:"
+            prefetch-npm-deps package-lock.json
+          '';
+        };
       };
     };
 }

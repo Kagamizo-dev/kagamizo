@@ -69,6 +69,21 @@ let
     }
   );
 
+  # DeepSeek Harness's web UI (../dsh, ./_harness.nix).
+  harness = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ./_harness.nix {
+      inherit (cfg.agents) zone tier1Port;
+      port =
+        (lib.findFirst (
+          s: s.name == "harness"
+        ) (throw "hetzner.host.agents: no harness service") cfg.agents.services).port;
+      dsh = config.packages.dsh;
+      inherit (top.openrouter) models defaultModel;
+      smallModel = top.agents.tiers.small.model;
+    }
+  );
+
   # The end of GitHub's App manifest flow (../github/agents-app.nix).
   githubApp = withSystem "x86_64-linux" (
     { config, ... }:
@@ -146,6 +161,7 @@ let
         agents
         chat
         githubApp
+        harness
       ];
       networking.hostName = cfg.name;
       boot.loader.grub = {
