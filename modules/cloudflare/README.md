@@ -308,6 +308,14 @@ around.
 - **Public's personal secret** (`Mirazo-Root/public-personal-secret`) is
   made in its settings, and funding Public has no API at all: deposits are
   started from Public's side.
+- **Discord's bot token** (`modules/discord`, `host/DISCORD_BOT_TOKEN`):
+  Discord makes a bot only in its developer portal, where the token is
+  shown once, so it is a console credential: the owner makes the
+  application, turns on its Message Content intent, and pastes the token
+  into the prepared `discord-bot-token` item. The server, the channel and
+  the owner's user id are then declared (`discord.channelId`,
+  `discord.ownerUserId`, `discord.guildId`) and the host's relay starts
+  itself; nothing else is done by hand.
 - **`mail login` is refused by Proton's API** (Invalid section name, code
   2064) for a client that is not Proton's own, and this repo does not pose
   as one; so jingzo.org, like kagamizo.com, was added and its addresses made
