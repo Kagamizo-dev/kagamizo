@@ -470,9 +470,9 @@ work. Built, against "The approved trading plan (2026-11-02)":
   research, Jingzo-LLC-Sessions/openrouter-research-key), minted; caps
   now 20+25+20×3+20 = $125 of the card's $200/month; the research-jingzo
   team spends it.
-- **C, in progress:** `modules/research`: TradingAgents v0.7.1 as a flake
-  input built with nixpkgs' langchain/langgraph (pythonRelaxDeps; the
-  check research-graph builds the graph), `research run|sweep|backtest`
+- **C, built (024bcf5, 009c12a):** `modules/research`: TradingAgents v0.7.1
+  as a flake input built with nixpkgs' langchain/langgraph
+  (pythonRelaxDeps; the check research-graph builds the graph and passes), `research run|sweep|backtest`
   on OpenRouter (deep: deepseek-v4-pro, quick: v4-flash), decisions into
   research/<date>/<ticker>.json for `trade propose`. Data hosts in
   `research.dataSources` (the host's network; not this session's).
@@ -482,7 +482,9 @@ work. Built, against "The approved trading plan (2026-11-02)":
   puts need it; level 1 is covered calls and cash-secured puts); (3) say
   whether trading is personal (public-mirazo, as declared) or the LLC's
   (the entity account 2OP05949 exists; then the seed is a contribution).
-- **Then:** `research run SPY <date>` on the host or here, a backtest
+- **Then:** `research run SPY <date>` on jingzo-host (its data hosts are
+  not in this session's allowlist, by the owner's rule; the host's network
+  is open), as a research-jingzo job once the host is reinstalled, a backtest
   grid, five paper days (`trade paper-day`), the promotion declaration,
   `trade propose`, the owner's `trade place`.
 
