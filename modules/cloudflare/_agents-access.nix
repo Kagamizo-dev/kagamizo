@@ -99,47 +99,52 @@ let
 
 in
 {
-  inherit agentPolicyRefs;
+  # Layer configuration for OpenTofu (resource blocks and outputs).
+  # infra.nix merges only this .layer into the cloudflare layer, keeping
+  # helper attributes (mapping, policyRefs) out of the rendered JSON.
+  layer = {
+    resource =
+      let
+        # Service tokens — built as resource.<type>.<name> per the check's
+        # expectation (two-level nesting: resource.cloudflare_* = { name = … }).
+        tokenType = lib.mapAttrs' (name: _: lib.nameValuePair "agents-${name}" {
+          account_id = accountId;
+          name = "agents-${name}";
+        }) agentsWithApps;
 
-  resource =
-    let
-      # Service tokens — built as resource.<type>.<name> per the check's
-      # expectation (two-level nesting: resource.cloudflare_* = { name = … }).
-      tokenType = lib.mapAttrs' (name: _: lib.nameValuePair "agents-${name}" {
-        account_id = accountId;
-        name = "agents-${name}";
-      }) agentsWithApps;
-
-      # Policies that include the service token (decision = non_identity).
-      policyType = lib.mapAttrs' (name: _: lib.nameValuePair "agents-${name}" {
-        account_id = accountId;
-        name = "agents: ${name}";
-        decision = "non_identity";
-        include = [
-          {
-            service_token = {
-              token_id = "\${cloudflare_zero_trust_access_service_token.agents-${name}.id}";
-            };
-          }
-        ];
-      }) agentsWithApps;
-    in
-    {
-      cloudflare_zero_trust_access_service_token = tokenType;
-      cloudflare_zero_trust_access_policy = policyType;
-    };
-
-  # OpenTofu outputs for the CI apply to capture and store in Proton Pass.
-  output = lib.mapAttrs' (name: _: {
-    name = "agents-service-token-${name}";
-    value = {
-      value = {
-        client_id = "\${cloudflare_zero_trust_access_service_token.agents-${name}.client_id}";
-        client_secret = "\${cloudflare_zero_trust_access_service_token.agents-${name}.client_secret}";
+        # Policies that include the service token (decision = non_identity).
+        policyType = lib.mapAttrs' (name: _: lib.nameValuePair "agents-${name}" {
+          account_id = accountId;
+          name = "agents: ${name}";
+          decision = "non_identity";
+          include = [
+            {
+              service_token = {
+                token_id = "\${cloudflare_zero_trust_access_service_token.agents-${name}.id}";
+              };
+            }
+          ];
+        }) agentsWithApps;
+      in
+      {
+        cloudflare_zero_trust_access_service_token = tokenType;
+        cloudflare_zero_trust_access_policy = policyType;
       };
-      sensitive = true;
-    };
-  }) agentsWithApps;
+
+    # OpenTofu outputs for the CI apply to capture and store in Proton Pass.
+    output = lib.mapAttrs' (name: _: {
+      name = "agents-service-token-${name}";
+      value = {
+        value = {
+          client_id = "\${cloudflare_zero_trust_access_service_token.agents-${name}.client_id}";
+          client_secret = "\${cloudflare_zero_trust_access_service_token.agents-${name}.client_secret}";
+        };
+        sensitive = true;
+      };
+    }) agentsWithApps;
+  };
+
+  inherit agentPolicyRefs;
 
   # ---------------------------------------------------------------
   # Exported for the Lean check: agent→application-key mapping.

@@ -86,7 +86,7 @@ in
                   inherit (top.hetzner.host.agents) zone viewers services;
                   inherit agentPolicyRefs;
                   zoneId = domains.${top.hetzner.host.agents.zone}.zoneId;
-                }) agentsAccess
+                }) agentsAccess.layer
               ))
               # The build cache's bucket and its domain (../cache).
               top.cache.layer
