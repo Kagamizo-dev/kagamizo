@@ -40,6 +40,8 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | trading | `trading-stages` | build | none yet | none yet | 10% | Lean deciding every strategy's stage carries its evidence |
 | unit | `unit-build` | build | none yet | none yet | 10% | cargo build --release of the unit runner (serde_json) and its secretspec wrapper |
 | unit | `unit-lean` | build | none yet | none yet | 10% | Lean deciding every unit's cap fits its owner's share (decide +kernel); grows with units |
+| yubikey | `yubikey-build` | build | none yet | none yet | 10% | cargo build --release of the 2FA-map CLI (std only); moves with the factor count |
+| yubikey | `yubikey-lean` | build | none yet | none yet | 10% | Lean proving every key factor names a declared key and every SMS factor has a reason (decide +kernel) |
 
 ## Baseline
 

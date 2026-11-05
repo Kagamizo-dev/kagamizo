@@ -145,6 +145,67 @@
       "why": "Mercury's own card, on an account already held"
     }
   },
+  "delegation": {
+    "biscuit": {
+      "api": "cli",
+      "cost": "free",
+      "evidence": [
+        {
+          "checked": "2026-11-05",
+          "fact": "biscuit-auth 6.0.0, an Eclipse project; Rust, Datalog authz, public-key offline attenuation (narrow-only)",
+          "source": "https://projects.eclipse.org/projects/technology.biscuit/releases/biscuit-auth-6.0.0/review"
+        },
+        {
+          "checked": "2026-11-05",
+          "fact": "2026 pattern: OAuth/JWT at the edge, RFC 8693 exchange to a Biscuit inside the trust domain",
+          "source": "https://securityboulevard.com/2026/08/oauth-2-0-token-exchange-rfc-8693-for-agent-delegation-a-worked-example/"
+        }
+      ],
+      "license": "Apache-2.0",
+      "provider": null,
+      "repo": "eclipse-biscuit/biscuit",
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://www.biscuitsec.org",
+      "why": "attenuable, offline-verifiable agent capability tokens that can only narrow; fits Rust+Cedar+Lean"
+    },
+    "macaroons": {
+      "api": "cli",
+      "cost": "free",
+      "evidence": [
+        {
+          "checked": "2026-11-05",
+          "fact": "HMAC caveat chaining: the verifier needs the root secret, so every verifier can forge",
+          "source": "https://arxiv.org/pdf/2609.06500"
+        }
+      ],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": true,
+      "status": "rejected",
+      "url": "https://research.google/pubs/pub41892/",
+      "why": "rejected: symmetric, so no proof of possession; biscuit's public-key model supersedes it"
+    },
+    "oauth-token-exchange": {
+      "api": "rest",
+      "cost": "free",
+      "evidence": [
+        {
+          "checked": "2026-11-05",
+          "fact": "RFC 8693 narrows a token only by contacting the authorization server; no holder-side offline attenuation",
+          "source": "https://datatracker.ietf.org/doc/html/draft-niyikiza-oauth-attenuating-agent-tokens-01"
+        }
+      ],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": false,
+      "status": "candidate",
+      "url": "https://datatracker.ietf.org/doc/html/rfc8693",
+      "why": "the standard, but every attenuation is a server round-trip; an edge layer, not the offline agent token"
+    }
+  },
   "device": {
     "ardupilot": {
       "api": "cli",
@@ -465,6 +526,31 @@
       "status": "candidate",
       "url": "https://github.com/searxng/searxng",
       "why": "Self-hosted metasearch, no keys: the research team's search"
+    }
+  },
+  "security-key": {
+    "yubikey-5": {
+      "api": "cli",
+      "cost": "usage",
+      "evidence": [
+        {
+          "checked": "2026-11-05",
+          "fact": "5 Series covers FIDO2/WebAuthn, PIV and OATH-TOTP via ykman; Security Key series is FIDO2/U2F only",
+          "source": "https://docs.yubico.com/software/yubikey/tools/ykman/webdocs.pdf"
+        },
+        {
+          "checked": "2026-11-05",
+          "fact": "Proton accepts FIDO2/U2F security keys for web sign-in; desktop/mobile planned",
+          "source": "https://proton.me/blog/security-keys"
+        }
+      ],
+      "license": "proprietary",
+      "provider": null,
+      "repo": null,
+      "selfHost": true,
+      "status": "candidate",
+      "url": "https://www.yubico.com/products/yubikey-5-overview/",
+      "why": "one key as primary 2FA: FIDO2 for logins, OATH-TOTP on-key to retire SMS, PIV for secrets"
     }
   },
   "shipping": {

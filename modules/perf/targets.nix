@@ -17,6 +17,18 @@
       attr = "checks.x86_64-linux.tokens-graph";
       method = "Lean deciding the credential graph (every child's scope within its parent's, by List.contains); moves with nodes × scope sizes";
     };
+    yubikey-build = {
+      module = "yubikey";
+      kind = "build";
+      attr = "packages.x86_64-linux.yubikey";
+      method = "cargo build --release of the 2FA-map CLI (std only); moves with the factor count";
+    };
+    yubikey-lean = {
+      module = "yubikey";
+      kind = "build";
+      attr = "checks.x86_64-linux.yubikey-lean";
+      method = "Lean proving every key factor names a declared key and every SMS factor has a reason (decide +kernel)";
+    };
     cost-build = {
       module = "cost";
       kind = "build";

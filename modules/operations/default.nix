@@ -140,6 +140,7 @@ in
         request-export = "asking a provider for its full data copy, where it offers one only in its own console (a Gap; by mail from the repo where accepted)";
         close-account = "closing an account at its provider, once Lean proves it emptied (modules/migration)";
         handle-device = "hands on hardware: flashing a phone, moving an eSIM, signing a phone out of iMessage";
+        enroll-security-key = "registering or removing a hardware security key (a tap on the key): FIDO2, PIV or OATH on a YubiKey (modules/yubikey)";
         enable-product = "turning on a product its provider sells only in its own console, once per account (accounts.held.<a>.products; Cloudflare R2: its API answers 10042)";
       };
       secretKinds = [

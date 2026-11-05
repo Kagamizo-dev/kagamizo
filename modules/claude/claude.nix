@@ -41,6 +41,7 @@
           unit
           market
           cost
+          yubikey
         ];
       };
     in

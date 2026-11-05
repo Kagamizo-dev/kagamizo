@@ -239,6 +239,8 @@ in
         "osint"
         "connectivity"
         "search"
+        "delegation"
+        "security-key"
       ];
       candidates = lib.importJSON ./_data/candidates.json;
     };
