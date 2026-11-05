@@ -228,6 +228,8 @@ in
     ./_treatment.nix
     ./_obligations.nix
     ./_credit.nix
+    ./_flows.nix
+    ./_ledger.nix
   ];
 
   options.money = {

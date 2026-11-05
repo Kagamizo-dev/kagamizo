@@ -143,6 +143,42 @@
       attr = "checks.x86_64-linux.trading-weather";
       method = "The weather signal engine's unit tests over forecast fixtures (parsers, probabilities, edge)";
     };
+    compliance-rules = {
+      module = "compliance";
+      kind = "build";
+      attr = "checks.x86_64-linux.compliance-rules";
+      method = "Lean deciding every strategy against the day-trade rule and its options level on its observed account";
+    };
+    legal-record = {
+      module = "legal";
+      kind = "build";
+      attr = "checks.x86_64-linux.legal-record";
+      method = "Lean deciding each legal record complete for its status, plus eleven Typst renders with placeholders";
+    };
+    research-papers = {
+      module = "research";
+      kind = "build";
+      attr = "checks.x86_64-linux.research-papers";
+      method = "Lean deciding every paper's facts allowed, then Pandoc and Typst renders scanned for the denylist; moves with the prose and the Lean files' size";
+    };
+    public-endpoints = {
+      module = "public";
+      kind = "build";
+      attr = "checks.x86_64-linux.public-endpoints";
+      method = "The declared endpoints held against the pinned client's generated modules";
+    };
+    money-flows = {
+      module = "money";
+      kind = "build";
+      attr = "checks.x86_64-linux.money-flows";
+      method = "Lean deciding every flow booked and none executable without approval";
+    };
+    cards-declared = {
+      module = "mercury";
+      kind = "build";
+      attr = "checks.x86_64-linux.cards-declared";
+      method = "Lean deciding the committed card discovery against the declarations";
+    };
     agents-budget = {
       module = "agents";
       kind = "build";

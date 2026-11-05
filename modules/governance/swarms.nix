@@ -42,7 +42,10 @@ in
   };
 
   # Public's personal secret trades as well as reads, so no swarm holds it:
-  # brokerage stays with its owner until Public offers a read-only credential.
+  # the secret stays in the owner's root vault. The accounting swarm's grant
+  # below is Cedar's read permit for the nightly ledger (modules/money,
+  # money.ledger, off until the owner allows it); the secret still only
+  # reaches it when Public offers a read-only credential (a Gap).
 
   governance.agents = lib.mkMerge [
     (swarm "kagamizo")
@@ -66,6 +69,13 @@ in
           account = "mercury-jingzo";
           effects = [ "read" ];
           why = "balances and card spend, for the books";
+        }
+      ];
+      accounting-mirazo.grants = [
+        {
+          account = "public-mirazo";
+          effects = [ "read" ];
+          why = "the brokerage's portfolio, history, orders and tax lots, for the nightly ledger (money.ledger)";
         }
       ];
       # Reads only: changing the company's record stays with its controller.

@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code, chat and harness links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; first "2026-11-04, latest: three modules dispatched and landed" and "2026-11-04, later: the trading path" (on the host: the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)": steps 2–4 and the typed areas (organization.areas) are built, so continue with step 5 (the design system and the page check) and the later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code, chat and harness links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; first "2026-11-05: the four hyperfix builders landed", then "2026-11-04, latest: three modules dispatched and landed" and "2026-11-04, later: the trading path" (on the host: the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)": steps 2–4 and the typed areas (organization.areas) are built, so continue with step 5 (the design system and the page check) and the later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -444,6 +444,49 @@ the host through the APIs already allowed (Cloudflare's tunnel status,
 Hetzner's console), and the owner opens agents.jingzo.org and
 code.jingzo.org themselves. A host the session cannot reach is worked
 around, not added.
+
+## 2026-11-05: the four hyperfix builders landed (read this first)
+
+The owner's ask of 2026-11-04 (Public and Mercury fully fleshed out, the
+governance typed, the legal identity stored, papers per strategy), built
+by four dispatched builders and committed after verification:
+
+- **`modules/compliance`** (070f452): FINRA 4210 PDT, 2360, Reg T, SEC
+  15c3-3, IRS §1091/§1256 and Forms 8949/6781, CFTC/Kalshi, Public's and
+  Apex's agreements, as typed rules with sources; `compliance.observed`
+  holds the live account facts (5OI41709 margin, options level 1, equity
+  $0); Lean holds every strategy to the day-trade rule (both strategies now
+  `holdDays = 1`) and to its options level at paper/live (spy-agents needs
+  level 2; `debit-spread` would need level 3). `compliance-index` prints
+  the table; the homepage shows it.
+- **`modules/legal`** (4dc4f23): `legal.records.<e>` typed and proved
+  complete per status; `legal-prepare apply jingzo` makes the Proton Pass
+  items the owner fills (Jingzo-LLC: `ein-jingzo` Secret = the EIN;
+  `formation-jingzo` Secret = the filing number, Permissions = `US-XX
+  YYYY-MM-DD`; three `doc-*-jingzo` notes for the PDFs or Drive links);
+  `legal-documents render jingzo <fact-sheet|kyc-letter|w9-prefill|
+  operating-agreement> OUT.pdf` under the `legal` profile; `legal-sync`
+  reads Northwest (needs `northwest login`). Not run live yet.
+- **`modules/research/papers.nix`** (053bd09): a paper per strategy from
+  typed public facts (Lean proves the render holds only public ones; the
+  check scans the output), Pandoc → Typst → PDF/HTML; prose under
+  `_papers/<strategy>/` is `content` (agents may merge); `site-research`
+  bundles them for the homepage (serving them is the next infra step).
+- **Public and Mercury** (this commit): `public/authorization.nix` (30
+  endpoints with states; `checks.public-endpoints` holds them against the
+  pinned client), the `brokerage` wrapper skips global options and passes
+  the stored account id; `ledger public [DATE]` (typed portfolio, history,
+  orders, tax lots into /var/lib/money; `money.ledger.enable = false`;
+  the host cannot read Public's secret: a Gap); `money.flows` (public-seed
+  $100 after five paper days, public-sweep above $100 keeping $100; Lean:
+  booked across entities, never executable unapproved); `cards discover`
+  and `checks.cards-declared`. Observed live, read-only: portfolio, history,
+  order search (all empty), the three accounts.
+
+Owner's steps now: the "go" for the host; the four wiring answers; the
+EIN and filing number pastes after `legal-prepare apply jingzo`; `cards
+discover` and `legal-sync` runs from the owner's session (Mercury and
+Northwest sessions).
 
 ## 2026-11-04, latest: three modules dispatched and landed (read this first)
 

@@ -166,6 +166,22 @@ let
     }
   );
 
+  # The brokerage's nightly ledger, only while money.ledger.enable is
+  # (../money/_host.nix).
+  money = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ../money/_host.nix {
+      inherit (top.money.ledger)
+        enable
+        dir
+        at
+        agent
+        ;
+      inherit (config.packages) ledger;
+      passCli = config.packages.pass-cli;
+    }
+  );
+
   # Steam's tools, only while gamedev.steam.enable is (../gamedev/_host.nix).
   gamedev = import ../gamedev/_host.nix { inherit (top.gamedev.steam) enable; };
 
@@ -221,6 +237,7 @@ let
         media
         androidTwin
         gamedev
+        money
       ];
       networking.hostName = cfg.name;
       boot.loader.grub = {

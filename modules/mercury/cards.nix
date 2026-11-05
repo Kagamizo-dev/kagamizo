@@ -7,6 +7,9 @@
 #   (mercury.cards.<vendor>.account, mercury.account by default):
 #
 #   cards plan              declared cards against the live ones
+#   cards discover          record the live cards (id, limit, lock; never
+#                           the number) in _json/cards.json, which
+#                           checks.cards-declared holds the declarations to
 #   cards spend [YYYY-MM]   each card's spend this month against its limit
 #   cards funds             the balances the cards draw from
 #   cards apply [--prune]   refused: the owner mints and cancels cards
@@ -177,6 +180,7 @@ in
           config.packages.secretspec
           pkgs.coreutils
           pkgs.jq
+          pkgs.git
         ];
         text = ''
           # shellcheck source=/dev/null
@@ -187,7 +191,7 @@ in
           account=''${CARDS_ACCOUNT:?}
           cards=$(jq -c --arg a "$account" 'with_entries(select(.value.account == $a))' <<<${lib.escapeShellArg (builtins.toJSON cards)})
           vault=$(jq -r --arg a "$account" '.[$a] // empty' <<<${lib.escapeShellArg (builtins.toJSON vaults)})
-          usage="usage: cards <plan|spend [YYYY-MM]|funds|vault <name>|--all|apply [--prune]|freeze <name>|unfreeze <name>>"
+          usage="usage: cards <plan|discover|spend [YYYY-MM]|funds|vault <name>|--all|apply [--prune]|freeze <name>|unfreeze <name>>"
 
           # Each line of jsonl output is a card, or a page holding cards.
           declared=$cards
@@ -350,6 +354,26 @@ in
                 echo "  $name: \$$spent of \$$(jq -r .limitUsd <<<"$c")/$(jq -r .interval <<<"$c") in $month"
               done
               ;;
+            discover)
+              # The live virtual cards into the repo's record
+              # (./discovery.nix): the books' fields only, never the number.
+              f=$(git rev-parse --show-toplevel)/modules/mercury/_json/cards.json
+              now=$(date -u +%FT%TZ)
+              ${
+                cli.mercury "cards list" {
+                  type = [ "virtual" ];
+                  format = "jsonl";
+                }
+              } | jq -s --arg a "$account" --arg now "$now" --slurpfile cur "$f" '
+                [.[] | if has("cards") then .cards[] else . end
+                 | {id, nickname, status, kind, isAgentCard: (.isAgentCard // false), account: $a,
+                    limitCents: .spendLimit.amountCents, period: .spendLimit.interval, merchantLock: .merchantLock.name}] as $mine
+                | $cur[0]
+                | .discovered[$a] = $now
+                | .cards = ([.cards[] | select(.account != $a)] + $mine | sort_by(.account, .nickname, .id))' >"$f.new"
+              mv "$f.new" "$f"
+              echo "cards: $(jq -r --arg a "$account" '[.cards[] | select(.account == $a)] | length' "$f") live cards of $account recorded in modules/mercury/_json/cards.json; commit it, and checks.cards-declared compares"
+              ;;
             funds)
               ${cli.mercury "accounts list" { format = "jsonl"; }} |
                 jq -rs '.[] | if has("accounts") then .accounts[] else . end
@@ -469,7 +493,7 @@ in
           done
           case "''${1:-}" in
             apply) if [ "''${2:-}" = --prune ]; then action=cards-prune; else action=cards-apply; fi ;;
-            plan | spend | funds | vault | freeze | unfreeze) action=cards-$1 ;;
+            plan | spend | funds | vault | freeze | unfreeze | discover) action=cards-$1 ;;
             *) action= ;;
           esac
           if [ -n "$action" ]; then
