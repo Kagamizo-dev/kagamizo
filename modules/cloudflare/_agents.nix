@@ -12,6 +12,9 @@
 # The tunnel's token leaves OpenTofu as a sensitive output and goes,
 # pass-cli to pass-cli, into the host's vault (host/TUNNEL_TOKEN):
 # `infra-tunnel-token` (./infra.nix).
+#
+# Agent team Access service tokens and policies (./_agents-access.nix) inject
+# additional policy refs into each application's policies list.
 {
   lib,
   accountId,
@@ -19,6 +22,9 @@
   zone,
   viewers,
   services,
+  # Optional: agent policy refs keyed by application resource key, each a list
+  # of { id; precedence; } to append to the application's policies.
+  agentPolicyRefs ? { },
 }:
 let
   hostname = name: "${name}.${zone}";
@@ -58,22 +64,31 @@ in
       include = map (e: { email.email = e; }) viewers;
     };
     cloudflare_zero_trust_access_application = builtins.listToAttrs (
-      map (s: {
-        name = "agents-${s.name}";
-        value = {
-          account_id = accountId;
-          type = "self_hosted";
-          name = "jingzo-host ${s.name}";
-          domain = hostname s.name;
-          session_duration = "24h";
-          policies = [
+      map (
+        s:
+        let
+          appKey = "agents-${s.name}";
+          basePolicies = [
             {
               id = "\${cloudflare_zero_trust_access_policy.agents-owner.id}";
               precedence = 1;
             }
           ];
-        };
-      }) services
+          extraPolicies = if agentPolicyRefs ? ${appKey} then agentPolicyRefs.${appKey} else [ ];
+          allPolicies = basePolicies ++ extraPolicies;
+        in
+        {
+          name = appKey;
+          value = {
+            account_id = accountId;
+            type = "self_hosted";
+            name = "jingzo-host ${s.name}";
+            domain = hostname s.name;
+            session_duration = "24h";
+            policies = allPolicies;
+          };
+        }
+      ) services
     );
     cloudflare_dns_record = builtins.listToAttrs (
       map (s: {

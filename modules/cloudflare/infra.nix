@@ -68,14 +68,25 @@ in
                 }
               ))
               # jingzo-host's agents, through their tunnel behind Access
-              # (../hetzner/agents.nix).
+              # (../hetzner/agents.nix).  Agent team service tokens and
+              # policies (./_agents-access.nix) attach agent-svc tokens to
+              # the applications the agents' tools justify.
               (lib.optionalAttrs statusOn (
-                import ./_agents.nix {
+                let
+                  agentsAccess = import ./_agents-access.nix {
+                    inherit lib;
+                    inherit (top.cloudflare.checked) accountId;
+                    agents = top.governance.agents;
+                  };
+                  agentPolicyRefs = agentsAccess.agentPolicyRefs;
+                in
+                lib.recursiveUpdate (import ./_agents.nix {
                   inherit lib;
                   inherit (top.cloudflare.checked) accountId;
                   inherit (top.hetzner.host.agents) zone viewers services;
+                  inherit agentPolicyRefs;
                   zoneId = domains.${top.hetzner.host.agents.zone}.zoneId;
-                }
+                }) agentsAccess
               ))
               # The build cache's bucket and its domain (../cache).
               top.cache.layer
@@ -209,5 +220,76 @@ in
         '') (lib.attrNames configs)}
         touch $out
       '';
+
+      # Lean check: every agent team's Access service-token policy is attached
+      # only to applications its tools justify, the owner's policy precedes
+      # every token policy, and no token policy reaches the status page
+      # (the owner's page only).
+      checks.cloudflare-access =
+        let
+          q = builtins.toJSON;
+          agentsAccess = import ./_agents-access.nix {
+            inherit lib;
+            inherit (top.cloudflare.checked) accountId;
+            agents = top.governance.agents;
+          };
+
+          # Render a Lean Option String: some "x" or none.
+          opt = v: if v == null then "none" else "some ${q v}";
+
+          # Render a Lean ToolMapping value.
+          renderTool = tool: app:
+            "{ tool := ${q tool}, app := ${opt app} }";
+
+          # Render a Lean AgentPolicy value.
+          renderPolicy = agent: apps:
+            "{ agent := ${q agent}, apps := [${lib.concatMapStringsSep ", " q apps}] }";
+
+          toolAppData = lib.mapAttrsToList (tool: app: renderTool tool app) agentsAccess._toolAppMapping;
+          agentPolicyData = lib.mapAttrsToList (agent: apps: renderPolicy agent apps) agentsAccess._agentAccessMapping;
+          statusApp = "cloudflare_zero_trust_access_application.status";
+          facts = ''
+            namespace Kagamizo.Cloudflare
+
+            /-- Every tool and the application it maps to, rendered by modules/cloudflare/infra.nix. -/
+            def toolApp : List ToolMapping := [
+            ${lib.concatMapStringsSep ",\n" (v: "  ${v}") toolAppData}
+            ]
+
+            /-- Every dsh agent and the application resource keys its policy reaches. -/
+            def agentPolicies : List AgentPolicy := [
+            ${lib.concatMapStringsSep ",\n" (v: "  ${v}") agentPolicyData}
+            ]
+
+            /-- The status page application resource key. -/
+            def statusApp : String := ${q statusApp}
+
+            /-- Every service token policy is attached only to applications the team's tools map to. -/
+            theorem sound_access : sound toolApp agentPolicies statusApp = true := by
+              decide +kernel
+
+            /-- The owner's policy precedes every token policy (structural: owner at 1, agents at 2). -/
+            theorem owner_first : ownerFirst agentPolicies = true := by
+              decide +kernel
+
+            /-- No token policy is attached to the status page (the owner's page only). -/
+            theorem no_status : noStatusToken agentPolicies statusApp = true := by
+              decide +kernel
+
+            end Kagamizo.Cloudflare
+          '';
+        in
+        pkgs.runCommand "cloudflare-access"
+          {
+            nativeBuildInputs = [ pkgs.lean4 ];
+            inherit facts;
+            passAsFile = [ "facts" ];
+          }
+          ''
+            printf '%s\n' "$(cat ${./_lean/Access.lean})" > Check.lean
+            cat "$factsPath" >> Check.lean
+            lean Check.lean
+            touch $out
+          '';
     };
 }

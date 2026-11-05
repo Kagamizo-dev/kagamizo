@@ -185,5 +185,11 @@
       attr = "checks.x86_64-linux.agents-budget";
       method = "Lean deciding every task's tier frugal and the keys' caps within the card (decide +kernel over the rendered lists); moves with tasks × keys";
     };
+    cloudflare-access = {
+      module = "cloudflare";
+      kind = "build";
+      attr = "checks.x86_64-linux.cloudflare-access";
+      method = "Lean deciding every agent's Access token policy attached only to apps its tools justify, the owner first, none on status (decide +kernel over the rendered lists); moves with agents × tools";
+    };
   };
 }
