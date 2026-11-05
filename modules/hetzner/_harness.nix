@@ -1,20 +1,17 @@
 # DeepSeek Harness on jingzo-host (../dsh): its web UI on the loopback,
 # reached through the agents tunnel at harness.<zone> behind Access. Its
-# profile is the shipped `web` one under a patch this file renders from
-# the declarations: OpenRouter as the provider with the declared
-# open-weight models (the capped chat-and-code key from /run/agents, the
-# same Open WebUI holds), the host's free tier-1 model beside it, and the
-# default model the repo names. The harness's own state (sessions, the
-# plugins its agents add) lives in /var/lib/dsh; what should outlive the
-# host goes to the repository as a pull request (modules/governance/changes.nix).
+# profile is the shipped `web` one under a patch rendered by the dsh
+# module (../dsh/patch.nix) from the same `config.openrouter` declarations
+# a headless session uses, with the host-only tier-1 provider and the
+# experimental agent-team plugins added. The harness's own state (sessions,
+# the plugins its agents add) lives in /var/lib/dsh; what should outlive
+# the host goes to the repository as a pull request
+# (modules/governance/changes.nix).
 {
   zone,
   port,
-  tier1Port,
   dsh,
-  models,
-  defaultModel,
-  smallModel,
+  patch,    # config.dsh.renderPatch { ... } from host.nix
   repoFullName,
   appToken, # packages.github-app-token
   teamsJson, # agents.teamsJson
@@ -22,89 +19,6 @@
 { pkgs, lib, ... }:
 let
   host = "harness.${zone}";
-  model = id: {
-    inherit id;
-    name = id;
-  };
-  patch = pkgs.writeText "kagamizo.patch.json" (
-    builtins.toJSON [
-      {
-        id = "llm";
-        config.providers = {
-          openrouter = {
-            displayName = "OpenRouter (Jingzo's capped key)";
-            api = "openai-completions";
-            baseURL = "https://openrouter.ai/api/v1";
-            apiKeyEnv = "OPENROUTER_API_KEY";
-            models = map model models;
-            compat.thinkingFormat = "openrouter";
-          };
-          host = {
-            displayName = "jingzo-host tier 1 (free)";
-            api = "openai-completions";
-            baseURL = "http://127.0.0.1:${toString tier1Port}/v1";
-            apiKey = "local";
-            models = [ (model smallModel) ];
-            defaultContextWindow = 8192;
-            defaultMaxTokens = 2048;
-          };
-        };
-      }
-      {
-        id = "agent-default-model";
-        config = {
-          provider = "openrouter";
-          model = defaultModel;
-        };
-      }
-      # The shell, inside the sandbox: the agents' workspace is a checkout
-      # of the repository they may change (agents/* branches), nothing
-      # else of the host is theirs to write.
-      {
-        id = "sandbox-policy";
-        config = {
-          mode = "workspace-write";
-          workspaceRoot = work;
-        };
-      }
-      {
-        id = "tool-bash";
-        disabled = false;
-      }
-      # Agent teams (experimental in this release): the plan's teams.
-      # Agent teams (experimental in this release): the plan's teams, added
-      # to the profile (a patch inserts what the base lacks).
-      {
-        insert = [
-          {
-            id = "agent-team";
-            name = "@deepseek-ai/dsh-experimental-agent-team";
-          }
-          {
-            id = "agent-team-profile";
-            name = "@deepseek-ai/dsh-experimental-agent-team-profile";
-          }
-          {
-            id = "tool-agent-team";
-            name = "@deepseek-ai/dsh-experimental-tool-agent-team";
-          }
-          {
-            id = "ui-agent-team";
-            name = "@deepseek-ai/dsh-experimental-client-ui-agent-team";
-          }
-        ];
-      }
-      # No DeepSeek-official key: its search and API plugins stay off.
-      {
-        id = "web-search-deepseek";
-        disabled = true;
-      }
-      {
-        id = "web-deepseek-api";
-        disabled = true;
-      }
-    ]
-  );
   work = "/var/lib/dsh/work";
   repo = "https://github.com/${repoFullName}.git";
 in

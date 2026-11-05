@@ -72,8 +72,60 @@ let
   # DeepSeek Harness's web UI (../dsh, ./_harness.nix).
   harness = withSystem "x86_64-linux" (
     { config, ... }:
+    let
+      model = id: {
+        inherit id;
+        name = id;
+      };
+      patch = config.dsh.renderPatch {
+        providers = {
+          openrouter = {
+            displayName = "OpenRouter (Jingzo's capped key)";
+            api = "openai-completions";
+            baseURL = "https://openrouter.ai/api/v1";
+            apiKeyEnv = "OPENROUTER_API_KEY";
+            models = map model top.openrouter.models;
+            compat.thinkingFormat = "openrouter";
+          };
+          host = {
+            displayName = "jingzo-host tier 1 (free)";
+            api = "openai-completions";
+            baseURL = "http://127.0.0.1:${toString cfg.agents.tier1Port}/v1";
+            apiKey = "local";
+            models = [ (model top.agents.tiers.small.model) ];
+            defaultContextWindow = 8192;
+            defaultMaxTokens = 2048;
+          };
+        };
+        inherit (top.openrouter) defaultModel;
+        workspaceRoot = "/var/lib/dsh/work";
+        extra = [
+          # Agent teams (experimental): the plan's teams, added to the profile.
+          {
+            insert = [
+              {
+                id = "agent-team";
+                name = "@deepseek-ai/dsh-experimental-agent-team";
+              }
+              {
+                id = "agent-team-profile";
+                name = "@deepseek-ai/dsh-experimental-agent-team-profile";
+              }
+              {
+                id = "tool-agent-team";
+                name = "@deepseek-ai/dsh-experimental-tool-agent-team";
+              }
+              {
+                id = "ui-agent-team";
+                name = "@deepseek-ai/dsh-experimental-client-ui-agent-team";
+              }
+            ];
+          }
+        ];
+      };
+    in
     import ./_harness.nix {
-      inherit (cfg.agents) zone tier1Port;
+      inherit (cfg.agents) zone;
       inherit
         (lib.findFirst (
           s: s.name == "harness"
@@ -81,8 +133,7 @@ let
         port
         ;
       dsh = config.packages.dsh;
-      inherit (top.openrouter) models defaultModel;
-      smallModel = top.agents.tiers.small.model;
+      inherit patch;
       repoFullName = "${top.github.org}/kagamizo";
       appToken = config.packages.github-app-token;
       inherit (top.agents) teamsJson;
