@@ -9,8 +9,8 @@
 # $XDG_STATE_HOME/kagamizo/dispatch/<team>-<topic> on branch
 # agents/<team>/<topic>, renders a dsh patch for the team (OpenRouter
 # only, sandboxed to the worktree, tool-bash enabled, web-search and
-# web-api disabled), runs the task under `secretspec run --profile agent`,
-# and writes the JSON event stream to
+# web-api disabled), runs the task under `secretspec run --profile agent`
+# from the worktree directory, and writes the JSON event stream to
 # <state>/log/<team>-<topic>.jsonl, printing the `final` event's text at
 # the end.
 #
@@ -96,9 +96,12 @@ in
           state=''${XDG_STATE_HOME:-''${HOME}/.local/state}/kagamizo/dispatch
           worktree="$state/$team-$topic"
           logdir="$state/log"
+          basedir="$state/base"
           branch="agents/$team/$topic"
 
-          mkdir -p "$state" "$logdir"
+          mkdir -p "$state" "$logdir" "$basedir"
+
+          basefile="$basedir/$team-$topic"
 
           # Create or reuse the worktree.
           if [ -d "$worktree/.git" ]; then
@@ -107,6 +110,13 @@ in
           if ! git worktree add "$worktree" "$branch" 2>/dev/null; then
             git worktree add -B "$branch" "$worktree" HEAD
           fi
+
+          # Record the base commit when this worktree was created (first run
+          # only; subsequent runs reuse the recorded base).
+          if [ ! -f "$basefile" ]; then
+            git -C "$worktree" rev-parse HEAD > "$basefile"
+          fi
+          base=$(cat "$basefile")
 
           # The team's model from the Nix declarations (store path).
           model=$(jq -r --arg t "$team" '.[$t].model // empty' "${agentModelsJson}")
@@ -137,7 +147,12 @@ in
           export GIT_COMMITTER_EMAIL="agents@jingzo.org"
           export GIT_CONFIG_NOSYSTEM=1
 
-          # Run the task.
+          # Change into the worktree so dsh's cwd, sandbox root and git
+          # all agree.
+          cd "$worktree" || exit 2
+
+          # Run the task.  The JSON log stays under the state dir, so the
+          # worktree is not polluted.
           DSH_HOME="$state" \
           secretspec run --file ${config.packages.secretspec-toml} --profile agent \
             --reason "dispatch: $team/$topic" -- \
@@ -149,11 +164,11 @@ in
           jq -r 'select(.type == "final") | .text // .' "$logdir/$team-$topic.jsonl" 2>/dev/null || \
             echo "(no final event in $logdir/$team-$topic.jsonl)"
 
-          # Report the worktree state.
+          # Report the worktree state against the recorded base.
           echo "---"
           git -C "$worktree" status --short 2>/dev/null || true
           echo "---"
-          git -C "$worktree" log --oneline "$branch" --not --remotes 2>/dev/null || true
+          git -C "$worktree" log --oneline "$base"..HEAD 2>/dev/null || true
         '';
       };
     };
