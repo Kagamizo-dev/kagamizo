@@ -424,7 +424,7 @@ in
         optionsLevel = 1;
         equityUsd = 0;
         observed = "2026-11-04";
-        by = "brokerage summary (the account list (brokerage accounts list) list, portfolio show)";
+        by = "brokerage summary (accounts list, portfolio show)";
         others.roth-ira = {
           brokerageId = "5OD75475";
           margin = false;
