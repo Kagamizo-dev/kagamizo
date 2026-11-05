@@ -105,13 +105,15 @@ let
   };
 
   # ── agent → district ──────────────────────────────────────────────────
-  agentDistrict = name:
+  agentDistrict =
+    name:
     let
       serves = agents.${name}.serves;
       agentAreas = areas.${serves} or { };
       # Find the area that owns this agent, default to agents district.
       areaNames = lib.filter (a: agentAreas.${a}.owner == name) (lib.attrNames agentAreas);
-      districtOfArea = a:
+      districtOfArea =
+        a:
         if lib.hasPrefix "admin" a then
           "home"
         else if lib.hasPrefix "finance" a || lib.hasPrefix "billing" a then
@@ -127,10 +129,7 @@ let
         else
           "agents";
     in
-    if builtins.length areaNames > 0 then
-      districtOfArea (builtins.head areaNames)
-    else
-      "agents";
+    if builtins.length areaNames > 0 then districtOfArea (builtins.head areaNames) else "agents";
 
   # ── buildings per module ──────────────────────────────────────────────
   moduleNames = lib.unique (map (t: t.module) (lib.attrValues targets));
@@ -142,7 +141,9 @@ let
       in
       lib.nameValuePair "building-${m}" {
         kind = "building";
-        of = { module = m; };
+        of = {
+          module = m;
+        };
         place = dist;
         status = "running";
         sprite = buildingSprite;
@@ -157,7 +158,9 @@ let
       n:
       lib.nameValuePair "character-${n}" {
         kind = "character";
-        of = { team = n; };
+        of = {
+          team = n;
+        };
         place = agentDistrict n;
         status = "running";
         sprite = characterSprite;
@@ -172,7 +175,9 @@ let
       n:
       lib.nameValuePair "key-${n}" {
         kind = "item";
-        of = { asset = "openrouter:${n}"; };
+        of = {
+          asset = "openrouter:${n}";
+        };
         place = "infra";
         status = "running";
         sprite = coinSprite;
@@ -187,7 +192,9 @@ let
       n:
       lib.nameValuePair "card-${n}" {
         kind = "item";
-        of = { asset = "mercury:${n}"; };
+        of = {
+          asset = "mercury:${n}";
+        };
         place = "money";
         status = "running";
         sprite = coinSprite;

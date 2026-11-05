@@ -238,15 +238,16 @@ in
           opt = v: if v == null then "none" else "some ${q v}";
 
           # Render a Lean ToolMapping value.
-          renderTool = tool: app:
-            "{ tool := ${q tool}, app := ${opt app} }";
+          renderTool = tool: app: "{ tool := ${q tool}, app := ${opt app} }";
 
           # Render a Lean AgentPolicy value.
-          renderPolicy = agent: apps:
-            "{ agent := ${q agent}, apps := [${lib.concatMapStringsSep ", " q apps}] }";
+          renderPolicy =
+            agent: apps: "{ agent := ${q agent}, apps := [${lib.concatMapStringsSep ", " q apps}] }";
 
           toolAppData = lib.mapAttrsToList (tool: app: renderTool tool app) agentsAccess._toolAppMapping;
-          agentPolicyData = lib.mapAttrsToList (agent: apps: renderPolicy agent apps) agentsAccess._agentAccessMapping;
+          agentPolicyData = lib.mapAttrsToList (
+            agent: apps: renderPolicy agent apps
+          ) agentsAccess._agentAccessMapping;
           statusApp = "cloudflare_zero_trust_access_application.status";
           facts = ''
             namespace Kagamizo.Cloudflare

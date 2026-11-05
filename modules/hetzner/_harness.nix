@@ -11,7 +11,7 @@
   zone,
   port,
   dsh,
-  patch,    # config.dsh.renderPatch { ... } from host.nix
+  patch, # config.dsh.renderPatch { ... } from host.nix
   repoFullName,
   appToken, # packages.github-app-token
   teamsJson, # agents.teamsJson

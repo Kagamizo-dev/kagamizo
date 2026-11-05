@@ -54,7 +54,8 @@ let
   ];
 
   # The secretspec variable name for a team: upper case, hyphens -> underscores.
-  svcTokenVar = name: lib.toUpper (builtins.replaceStrings [ "-" ] [ "_" ] name) + "_ACCESS_SERVICE_TOKEN";
+  svcTokenVar =
+    name: lib.toUpper (builtins.replaceStrings [ "-" ] [ "_" ] name) + "_ACCESS_SERVICE_TOKEN";
 in
 {
   # Open WebUI's licence (BSD-3 with a branding clause, nixpkgs: unfree)
@@ -103,21 +104,23 @@ in
         [ -s /run/agents/tunnel-token ] || { echo "agents-secrets: no tunnel token yet (infra-tunnel-token)" >&2; exit 1; }
         # Each dsh team's Access service token: JSON {client_id, client_secret}
         # in a note, parsed into CF_ACCESS_CLIENT_ID / CF_ACCESS_CLIENT_SECRET.
-        ${lib.concatStringsSep "\n" (builtins.map (team: ''
-        token=$(get ${svcTokenVar team} 2>/dev/null || true)
-        if [ -n "$token" ]; then
-          cid=$(jq -r '.client_id // empty' <<<"$token")
-          cs=$(jq -r '.client_secret // empty' <<<"$token")
-          if [ -n "$cid" ] && [ -n "$cs" ]; then
-            printf 'CF_ACCESS_CLIENT_ID=%s\nCF_ACCESS_CLIENT_SECRET=%s\n' "$cid" "$cs" >/run/agents/${team}.env
-          else
-            echo "agents-secrets: ${team} Access service token is missing client_id or client_secret" >&2
-          fi
-        else
-          echo "agents-secrets: no ${team} Access service token yet (infra-service-tokens)" >&2
-        fi
-        unset token cid cs
-        '') dshAgentTeams)}
+        ${lib.concatStringsSep "\n" (
+          builtins.map (team: ''
+            token=$(get ${svcTokenVar team} 2>/dev/null || true)
+            if [ -n "$token" ]; then
+              cid=$(jq -r '.client_id // empty' <<<"$token")
+              cs=$(jq -r '.client_secret // empty' <<<"$token")
+              if [ -n "$cid" ] && [ -n "$cs" ]; then
+                printf 'CF_ACCESS_CLIENT_ID=%s\nCF_ACCESS_CLIENT_SECRET=%s\n' "$cid" "$cs" >/run/agents/${team}.env
+              else
+                echo "agents-secrets: ${team} Access service token is missing client_id or client_secret" >&2
+              fi
+            else
+              echo "agents-secrets: no ${team} Access service token yet (infra-service-tokens)" >&2
+            fi
+            unset token cid cs
+          '') dshAgentTeams
+        )}
         # The Discord relay (modules/discord): the bot's token, pasted by the
         # owner, and the agents' Matrix login (matrix-seed's item). Without
         # either there is no file, and the relay's unit waits.

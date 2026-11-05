@@ -29,17 +29,12 @@ let
 
   # A full sprite: exactly 16 rows.
   spriteType = types.nullOr (
-    types.addCheck
-      (types.listOf spriteRowType)
-      (rows: builtins.length rows == 16)
+    types.addCheck (types.listOf spriteRowType) (rows: builtins.length rows == 16)
   );
 
   flattenActions = lib.concatLists (
     lib.mapAttrsToList (
-      provider: as:
-      lib.mapAttrsToList (
-        name: _: "${provider}:${name}"
-      ) as
+      provider: as: lib.mapAttrsToList (name: _: "${provider}:${name}") as
     ) config.governance.actions
   );
 
@@ -234,49 +229,76 @@ in
       trading = {
         label = "Trading";
         order = 1;
-        color = { light = "#d4e8d4"; dark = "#1e3a1e"; };
+        color = {
+          light = "#d4e8d4";
+          dark = "#1e3a1e";
+        };
       };
       money = {
         label = "Money";
         order = 2;
-        color = { light = "#e8d4c4"; dark = "#3a2a1e"; };
+        color = {
+          light = "#e8d4c4";
+          dark = "#3a2a1e";
+        };
       };
       legal = {
         label = "Legal";
         order = 3;
-        color = { light = "#d0d8ee"; dark = "#1e2a4a"; };
+        color = {
+          light = "#d0d8ee";
+          dark = "#1e2a4a";
+        };
       };
       compliance = {
         label = "Compliance";
         order = 4;
-        color = { light = "#e8d0e8"; dark = "#3a1e3a"; };
+        color = {
+          light = "#e8d0e8";
+          dark = "#3a1e3a";
+        };
       };
       research = {
         label = "Research";
         order = 5;
-        color = { light = "#d0eee8"; dark = "#1e3a34"; };
+        color = {
+          light = "#d0eee8";
+          dark = "#1e3a34";
+        };
       };
       agents = {
         label = "Agents";
         order = 6;
-        color = { light = "#e8e0c4"; dark = "#3a341e"; };
+        color = {
+          light = "#e8e0c4";
+          dark = "#3a341e";
+        };
       };
       infra = {
         label = "Infrastructure";
         order = 7;
-        color = { light = "#d0d0d0"; dark = "#2a2a2a"; };
+        color = {
+          light = "#d0d0d0";
+          dark = "#2a2a2a";
+        };
       };
       media = {
         label = "Media";
         order = 8;
-        color = { light = "#f0d4d4"; dark = "#4a2a2a"; };
+        color = {
+          light = "#f0d4d4";
+          dark = "#4a2a2a";
+        };
       };
       home = {
         label = "Home";
         order = 9;
-        color = { light = "#d4e8e0"; dark = "#1e342e"; };
+        color = {
+          light = "#d4e8e0";
+          dark = "#1e342e";
+        };
       };
     };
   };
 
-  }
+}

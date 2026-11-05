@@ -58,8 +58,7 @@ in
       # Every dsh agent's declared model, as JSON for runtime lookup.
       agentModelsJson = pkgs.writeText "agent-models.json" (
         builtins.toJSON (
-          lib.mapAttrs (_: a: { inherit (a) model; })
-          (lib.filterAttrs (_: a: a.harness == "dsh") cfg.agents)
+          lib.mapAttrs (_: a: { inherit (a) model; }) (lib.filterAttrs (_: a: a.harness == "dsh") cfg.agents)
         )
       );
     in

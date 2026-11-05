@@ -661,15 +661,16 @@ in
         </main></div></body></html>
       '';
       html = pkgs.writeText "index.html" htmlText;
-      site = pkgs.runCommand "site-status"
-        {
-          twinWorld = config.packages.twin-world;
-        }
-        ''
-        mkdir $out
-        cp ${html} $out/index.html
-        cp $twinWorld/twin.html $out/
-      '';
+      site =
+        pkgs.runCommand "site-status"
+          {
+            twinWorld = config.packages.twin-world;
+          }
+          ''
+            mkdir $out
+            cp ${html} $out/index.html
+            cp $twinWorld/twin.html $out/
+          '';
       # The homepage with the public papers beside it, where its links point.
       research = pkgs.runCommand "site-research" { } ''
         mkdir -p $out/papers

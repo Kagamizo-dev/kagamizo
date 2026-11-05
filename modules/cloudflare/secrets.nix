@@ -21,7 +21,8 @@ let
   };
 
   # The team variable name for secretspec: upper case, hyphens -> underscores.
-  svcTokenVar = name: lib.toUpper (builtins.replaceStrings [ "-" ] [ "_" ] name) + "_ACCESS_SERVICE_TOKEN";
+  svcTokenVar =
+    name: lib.toUpper (builtins.replaceStrings [ "-" ] [ "_" ] name) + "_ACCESS_SERVICE_TOKEN";
 
   # DSH agent teams that get Access service tokens (matching _agents-access.nix).
   dshAgentTeams = [
@@ -110,7 +111,9 @@ in
             description = "Cloudflare Access service token (client_id, client_secret JSON) for team ${team}";
             item = "access-service-token-${team}";
           }
-          // { required = false; }
+          // {
+            required = false;
+          }
         )
       ) dshAgentTeams
     ));

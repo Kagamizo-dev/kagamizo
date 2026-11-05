@@ -30,7 +30,8 @@ let
   ];
 
   # The team variable name for secretspec: upper case, hyphens -> underscores.
-  svcTokenVar = name: lib.toUpper (builtins.replaceStrings [ "-" ] [ "_" ] name) + "_ACCESS_SERVICE_TOKEN";
+  svcTokenVar =
+    name: lib.toUpper (builtins.replaceStrings [ "-" ] [ "_" ] name) + "_ACCESS_SERVICE_TOKEN";
 in
 {
   options.hetzner.host.agents = {
@@ -148,17 +149,19 @@ in
           text = ''
             export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
             spec=${config.packages.secretspec-toml}
-            ${lib.concatStringsSep "\n" (builtins.map (team: ''
-              var="${svcTokenVar team}"
-              # OpenTofu's structured output as JSON, extract the inner value
-              # (client_id, client_secret) and pipe it into secretspec's stdin.
-              infra ci output -json agents-service-token-${team} |
-                jq -r '.value' |
-                secretspec set "$var" --file "$spec" --profile host \
-                  --from-file - \
-                  --reason "infra-service-tokens: store team ${team} Access service token" >/dev/null
-              echo "infra-service-tokens: stored host/$var"
-            '') dshAgentTeams)}
+            ${lib.concatStringsSep "\n" (
+              builtins.map (team: ''
+                var="${svcTokenVar team}"
+                # OpenTofu's structured output as JSON, extract the inner value
+                # (client_id, client_secret) and pipe it into secretspec's stdin.
+                infra ci output -json agents-service-token-${team} |
+                  jq -r '.value' |
+                  secretspec set "$var" --file "$spec" --profile host \
+                    --from-file - \
+                    --reason "infra-service-tokens: store team ${team} Access service token" >/dev/null
+                echo "infra-service-tokens: stored host/$var"
+              '') dshAgentTeams
+            )}
           '';
         };
       };
