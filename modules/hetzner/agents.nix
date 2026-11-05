@@ -17,6 +17,20 @@ let
   cfg = config.hetzner.host.agents;
   names = map (s: s.name) cfg.services;
   ports = map (s: s.port) cfg.services;
+
+  # DSH agent teams that get Access service tokens.
+  # Must match the teams in _agents-access.nix (harness == "dsh" with apps).
+  dshAgentTeams = [
+    "review"
+    "research-jingzo"
+    "design"
+    "twin"
+    "builders"
+    "upkeep"
+  ];
+
+  # The team variable name for secretspec: upper case, hyphens -> underscores.
+  svcTokenVar = name: lib.toUpper (builtins.replaceStrings [ "-" ] [ "_" ] name) + "_ACCESS_SERVICE_TOKEN";
 in
 {
   options.hetzner.host.agents = {
@@ -118,6 +132,34 @@ in
                   --from-file - --reason "infra-tunnel-token: the agents tunnel's token for jingzo-host" >/dev/null
               echo "infra-tunnel-token: stored host/TUNNEL_TOKEN"
             '';
+        };
+
+        # After `infra ci apply`: each dsh team's Access service token, from
+        # OpenTofu's structured output (client_id, client_secret JSON) straight
+        # into the host's vault (host/ACCESS_SERVICE_TOKEN_<team>), never
+        # printed. The host reads it at its next boot or switch.
+        packages.infra-service-tokens = pkgs.writeShellApplication {
+          name = "infra-service-tokens";
+          runtimeInputs = [
+            config.packages.infra
+            config.packages.secretspec
+            pkgs.jq
+          ];
+          text = ''
+            export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+            spec=${config.packages.secretspec-toml}
+            ${lib.concatStringsSep "\n" (builtins.map (team: ''
+              var="${svcTokenVar team}"
+              # OpenTofu's structured output as JSON, extract the inner value
+              # (client_id, client_secret) and pipe it into secretspec's stdin.
+              infra ci output -json agents-service-token-${team} |
+                jq -r '.value' |
+                secretspec set "$var" --file "$spec" --profile host \
+                  --from-file - \
+                  --reason "infra-service-tokens: store team ${team} Access service token" >/dev/null
+              echo "infra-service-tokens: stored host/$var"
+            '') dshAgentTeams)}
+          '';
         };
       };
   };

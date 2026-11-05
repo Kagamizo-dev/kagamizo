@@ -6,7 +6,7 @@
 #
 #   agents.jingzo.org  Open WebUI (localhost:8080)
 #   code.jingzo.org    OpenCode's web interface (localhost:4096)
-#   harness.jingzo.org  DeepSeek Harness (localhost:4097)
+#   harness.jingzo.org  DeepSeek Harness (localhost:3080)
 #   chat.jingzo.org    Chat: tuwunel Matrix at 127.0.0.1:6167, Element Web at 8082
 #
 # The tunnel's token leaves OpenTofu as a sensitive output and goes,
@@ -74,7 +74,7 @@ in
               precedence = 1;
             }
           ];
-          extraPolicies = if agentPolicyRefs ? ${appKey} then agentPolicyRefs.${appKey} else [ ];
+          extraPolicies = agentPolicyRefs.${appKey} or [ ];
           allPolicies = basePolicies ++ extraPolicies;
         in
         {

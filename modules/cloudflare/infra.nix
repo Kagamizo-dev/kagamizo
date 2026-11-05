@@ -78,7 +78,7 @@ in
                     inherit (top.cloudflare.checked) accountId;
                     agents = top.governance.agents;
                   };
-                  agentPolicyRefs = agentsAccess.agentPolicyRefs;
+                  inherit (agentsAccess) agentPolicyRefs;
                 in
                 lib.recursiveUpdate (import ./_agents.nix {
                   inherit lib;

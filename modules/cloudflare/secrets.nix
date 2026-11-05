@@ -4,7 +4,7 @@
 # ../statestore): CI holds it as editor, plans and agents as
 # viewer (proton.agents). The same variable names everywhere, so what a
 # process can do depends only on which vault resolved it.
-_:
+{ lib, ... }:
 let
   secret = import ../_lib/secret.nix;
   state = {
@@ -19,6 +19,19 @@ let
         providers = [ "state" ];
       };
   };
+
+  # The team variable name for secretspec: upper case, hyphens -> underscores.
+  svcTokenVar = name: lib.toUpper (builtins.replaceStrings [ "-" ] [ "_" ] name) + "_ACCESS_SERVICE_TOKEN";
+
+  # DSH agent teams that get Access service tokens (matching _agents-access.nix).
+  dshAgentTeams = [
+    "review"
+    "research-jingzo"
+    "design"
+    "twin"
+    "builders"
+    "upkeep"
+  ];
 in
 {
   secrets.profiles = {
@@ -81,6 +94,25 @@ in
         // {
           required = false;
         };
-    };
+    }
+    # Agent team service tokens: each is a JSON value {client_id, client_secret}
+    # stored in a single Proton Pass item per team (title access-service-token-<team>).
+    # Written by infra ci apply's after-apply step; read by jingzo-host's
+    # agents-secrets unit and exposed as CF_ACCESS_CLIENT_ID/CF_ACCESS_CLIENT_SECRET
+    # per team in /run/agents/<team>.env.
+    // (builtins.listToAttrs (
+      builtins.map (
+        team:
+        lib.nameValuePair (svcTokenVar team) (
+          secret {
+            kind = "api-token";
+            issuer = "automation:infra";
+            description = "Cloudflare Access service token (client_id, client_secret JSON) for team ${team}";
+            item = "access-service-token-${team}";
+          }
+          // { required = false; }
+        )
+      ) dshAgentTeams
+    ));
   };
 }

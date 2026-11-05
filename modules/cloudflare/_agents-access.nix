@@ -63,7 +63,7 @@ let
   # policy should be attached to.  toolApp already uses full resource keys
   # (agents-<name>), so we collect them directly from each non-null entry.
   agentAppKeys = lib.mapAttrs (
-    name: agent:
+    _name: agent:
     let
       fromTools = lib.filter (t: toolApp.${t} != null) agent.tools;
       apps = lib.unique (map (t: toolApp.${t}) fromTools);
