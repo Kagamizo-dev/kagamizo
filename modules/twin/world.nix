@@ -18,6 +18,8 @@ let
   districts = lib.mapAttrsToList (n: d: { name = n; } // d) cfg.districts;
   sortedDistricts = lib.sort (a: b: a.order < b.order) districts;
 
+  # District colour lookup for the legend swatches.
+
   # Load sprite: use the explicit sprite or a default based on kind.
   defaultSpriteOf = kind:
     let
@@ -92,27 +94,33 @@ let
   #search { flex:1; border:1px solid var(--line); border-radius:6px; padding:6px 10px; background:var(--card); color:var(--fg); font-size:14px; min-width:0; }
   #search:focus { outline:none; border-color:var(--accent); }
   #world-wrap { flex:1; position:relative; overflow:hidden; touch-action:none; }
-  #world-canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; }
-  #panel { position:fixed; bottom:0; left:0; right:0; max-height:60dvh; background:var(--card); border-top:2px solid var(--line); border-radius:12px 12px 0 0; padding:12px 16px; overflow-y:auto; transform:translateY(100%); transition:transform .25s ease; z-index:10; box-shadow:0 -4px 20px rgba(0,0,0,.15); }
+  #world-canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; position:absolute; top:0; left:0; }
+  #legend { position:absolute; top:8px; left:8px; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:11px; z-index:5; max-width:160px; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  #legend b { display:block; margin-bottom:3px; font-size:12px; }
+  #legend span { display:inline-block; margin:1px 4px 1px 0; }
+  .legend-s { width:10px;height:10px;display:inline-block;border-radius:2px;vertical-align:middle;margin-right:3px; }
+  #panel { position:fixed; bottom:0; left:0; right:0; max-height:70dvh; background:var(--card); border-top:2px solid var(--line); border-radius:12px 12px 0 0; padding:14px 16px 16px; overflow-y:auto; transform:translateY(100%); transition:transform .25s ease; z-index:10; box-shadow:0 -4px 20px rgba(0,0,0,.15); }
   #panel.open { transform:translateY(0); }
-  #panel h2 { font-size:16px; margin:0 0 4px; }
+  #panel .panel-hdr { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  #panel .panel-hdr .sprite4x { width:64px; height:64px; image-rendering:pixelated; image-rendering:crisp-edges; border:1px solid var(--line); border-radius:4px; flex-shrink:0; }
+  #panel .panel-hdr h2 { font-size:17px; margin:0; }
+  #panel .close { margin-left:auto; background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; padding:0 4px; line-height:1; }
   #panel .sub { color:var(--muted); font-size:13px; margin-bottom:8px; }
-  #panel .close { float:right; background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:0 4px; }
-  #panel .recipe { background:var(--bg); border-radius:6px; padding:8px 10px; margin:6px 0; }
-  #panel .recipe h3 { margin:0 0 2px; font-size:13px; }
-  #panel .recipe p { margin:0; font-size:12px; color:var(--muted); }
   #panel .status { display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; }
   .status-declared { background:var(--line); color:var(--muted); }
   .status-running { background:var(--ok); color:#fff; }
   .status-paused { background:var(--accent); color:#fff; }
   .status-gap { background:var(--gap); color:#fff; }
-  #legend { position:absolute; top:8px; right:8px; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:11px; z-index:5; max-width:140px; }
-  #legend b { display:block; margin-bottom:2px; }
-  #legend span { display:inline-block; margin:1px 4px 1px 0; }
-  .legend-b { width:10px;height:10px;display:inline-block;border-radius:2px;vertical-align:middle;margin-right:2px; }
-  .district-label { font-size:10px; color:var(--muted); position:absolute; pointer-events:none; }
+  /* JEI-style recipe grid */
+  .recipe-grid { display:flex; flex-wrap:wrap; gap:10px; margin:8px 0; }
+  .recipe-card { background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:8px; display:flex; align-items:center; gap:6px; font-size:12px; }
+  .recipe-card .arrow { color:var(--muted); font-size:14px; padding:0 2px; }
+  .recipe-tile { width:36px; height:36px; image-rendering:pixelated; image-rendering:crisp-edges; border:1px solid var(--line); border-radius:3px; display:inline-flex; align-items:center; justify-content:center; font-size:9px; overflow:hidden; position:relative; background:var(--card); }
+  .recipe-tile img { width:100%; height:100%; object-fit:contain; }
+  .recipe-tile .badge { position:absolute; bottom:0; right:0; font-size:8px; background:var(--card); padding:0 2px; border:1px solid var(--line); border-radius:2px; line-height:1.2; }
+  .hint { color:var(--muted); font-size:13px; font-style:italic; }
   @media (min-width:800px) {
-    #panel { left:auto; right:16px; bottom:16px; width:360px; max-height:80vh; border-radius:12px; border:1px solid var(--line); }
+    #panel { left:auto; right:16px; bottom:16px; width:380px; max-height:80vh; border-radius:12px; border:1px solid var(--line); }
   }
 </style></head><body>
 <div id="app">
@@ -128,322 +136,394 @@ let
 <div id="panel"></div>
 <script>
 (function(){
-  'use strict';
+  "use strict";
 
-  // ── world data ─────────────────────────────────────────────────────
+  // -- world data -------------------------------------------
   const world = ${worldJson};
-
-  // Build palette map: char -> colour.
-  const palette = world.palette || {};
-
-  // The representations lookup: name -> rep
+  const pal = world.palette || {};
   const repByName = {};
-  world.representations.forEach(r => { repByName[r.n] = r; });
-
-  // The districts, sorted.
+  world.representations.forEach(function(r) { repByName[r.n] = r; });
   const districts = world.districts;
 
-  // ── canvas state ───────────────────────────────────────────────────
-  const canvas = document.getElementById('world-canvas');
-  const wrap = document.getElementById('world-wrap');
-  const panel = document.getElementById('panel');
-  const search = document.getElementById('search');
-  const legend = document.getElementById('legend');
+  // -- dom refs ---------------------------------------------
+  var canvas = document.getElementById("world-canvas");
+  var wrap = document.getElementById("world-wrap");
+  var panel = document.getElementById("panel");
+  var search = document.getElementById("search");
+  var legend = document.getElementById("legend");
 
-  const TILE = 44;          // px per tile at 1x
-  const SPRITE_PX = 16;     // sprite is 16x16 "pixels"
+  var SPR = 16;
 
-  let scale = 1;
-  let panX = 0, panY = 0;
-  let dragging = false, dragStartX, dragStartY, panStartX, panStartY;
-  let selected = null;
-
-  // ── build the map ──────────────────────────────────────────────────
+  // -- build map data ---------------------------------------
   function buildMap() {
-    // Each district is a horizontal strip.
-    // Layout: districts as columns, each as wide as its representations.
-    const perDistrict = {};
-    world.representations.forEach(r => {
-      if (!perDistrict[r.place]) perDistrict[r.place] = [];
-      perDistrict[r.place].push(r);
+    var byDist = {};
+    world.representations.forEach(function(r) {
+      if (!byDist[r.place]) byDist[r.place] = [];
+      byDist[r.place].push(r);
     });
-
-    const cols = [];
-    districts.forEach(d => {
-      const reps = perDistrict[d.name] || [];
-      // Sort: buildings first, then characters, then items/blocks.
-      reps.sort((a,b) => {
-        const o = {building:0, character:1, item:2, block:3};
+    return districts.map(function(d) {
+      var reps = byDist[d.name] || [];
+      reps.sort(function(a,b) {
+        var o = {building:0, character:1, item:2, block:3};
         return (o[a.kind]||9) - (o[b.kind]||9);
       });
-      cols.push({ district: d, reps });
+      var n = reps.length;
+      var cols = Math.max(1, Math.ceil(Math.sqrt(n)));
+      var rows = Math.ceil(n / cols);
+      reps.forEach(function(r, i) {
+        r._gx = (i % cols) * SPR;
+        r._gy = Math.floor(i / cols) * SPR;
+      });
+      return { d: d, reps: reps, cols: cols, rows: rows };
     });
+  }
+  var mapData = buildMap();
 
-    // Calculate total grid size.
-    let totalW = 0, maxH = 0;
-    const colData = cols.map(c => {
-      const n = c.reps.length;
-      const w = Math.max(1, Math.ceil(Math.sqrt(n)));
-      const h = Math.ceil(n / w);
-      const cw = w * SPRITE_PX;
-      const ch = h * SPRITE_PX;
-      const x = totalW;
-      totalW += cw + 4; // 4px gap
-      maxH = Math.max(maxH, ch);
-      return { ...c, gridW: w, gridH: h, x, y: 0, cw, ch };
-    });
-
-    // Add district labels (2 rows worth of height)
-    const labelH = 2 * SPRITE_PX;
-    const mapH = maxH + labelH + 2;
-
-    // Render each column
-    const W = totalW;
-    const H = mapH;
-    const imgData = new Array(W * H).fill('0');
-    function setPx(x, y, ch) {
-      if (x >= 0 && x < W && y >= 0 && y < H) imgData[y * W + x] = ch;
-    }
-    function drawSprite(sprite, dx, dy) {
-      if (!sprite || !sprite.length) return;
-      for (let row = 0; row < 16 && dy + row < H; row++) {
-        const line = sprite[row];
-        if (!line) continue;
-        for (let col = 0; col < 16 && dx + col < W; col++) {
-          const ch = line[col];
-          if (ch && ch !== '0') setPx(dx + col, dy + row, ch);
+  // -- draw a sprite onto a canvas context ------------------
+  function drawSprite(ctx, sprite, x, y, sc, dim) {
+    if (!sprite || !sprite.length) return;
+    var sz = SPR * sc;
+    var osc = document.createElement("canvas");
+    osc.width = sz; osc.height = sz;
+    var octx = osc.getContext("2d");
+    octx.imageSmoothingEnabled = false;
+    for (var row = 0; row < SPR; row++) {
+      var line = sprite[row];
+      if (!line) continue;
+      for (var col = 0; col < SPR; col++) {
+        var ch = line[col];
+        if (ch && ch !== "0") {
+          octx.fillStyle = pal[ch] || "#000";
+          octx.fillRect(col * sc, row * sc, sc, sc);
         }
       }
     }
+    ctx.imageSmoothingEnabled = false;
+    if (dim) ctx.globalAlpha = 0.25;
+    ctx.drawImage(osc, x, y);
+    ctx.globalAlpha = 1.0;
+  }
 
-    colData.forEach(c => {
-      // District label strip
-      const label = c.district.label;
-      for (let i = 0; i < label.length && i < 14; i++) {
-        setPx(c.x + i, 0, 'f'); // gold label area
+  // -- render sprite to data URL at 4x ----------------------
+  function spriteDataURL(sprite, mult) {
+    if (!sprite || !sprite.length) return "";
+    var m = mult || 4;
+    var sz = SPR * m;
+    var osc = document.createElement("canvas");
+    osc.width = sz; osc.height = sz;
+    var octx = osc.getContext("2d");
+    octx.imageSmoothingEnabled = false;
+    for (var row = 0; row < SPR; row++) {
+      var line = sprite[row];
+      if (!line) continue;
+      for (var col = 0; col < SPR; col++) {
+        var ch = line[col];
+        if (ch && ch !== "0") {
+          octx.fillStyle = pal[ch] || "#000";
+          octx.fillRect(col * m, row * m, m, m);
+        }
       }
+    }
+    return osc.toDataURL();
+  }
 
-      // Representations
-      c.reps.forEach((r, idx) => {
-        const gx = c.x + (idx % c.gridW) * SPRITE_PX;
-        const gy = labelH + Math.floor(idx / c.gridW) * SPRITE_PX;
-        drawSprite(r.sprite, gx, gy);
-        // Store position on the rep object
-        r._x = gx;
-        r._y = gy;
-        r._col = c;
+  // -- render -----------------------------------------------
+  function render() {
+    var rect = wrap.getBoundingClientRect();
+    var vw = rect.width;
+    var vh = rect.height;
+    var spriteScale = vw >= 600 ? 3 : 2;
+    var tilePx = SPR * spriteScale;
+    var GAP = Math.round(SPR * spriteScale * 0.35);
+    var HALIGN = SPR * spriteScale;
+
+    var distLayout = [];
+    var cursorX = 0;
+    var maxH = 0;
+    mapData.forEach(function(md) {
+      var w = md.cols * tilePx;
+      var h = md.rows * tilePx;
+      var labH = Math.round(SPR * spriteScale * 0.75);
+      var totalH = h + labH + Math.round(SPR * spriteScale * 0.25);
+      var x = cursorX;
+      distLayout.push({
+        md: md, x: x, y: 0, w: w, h: h, labH: labH, totalH: totalH,
+        groundW: w + tilePx,
+        groundH: totalH + Math.round(SPR * spriteScale * 0.15)
+      });
+      cursorX += Math.max(w + GAP, HALIGN);
+      if (totalH > maxH) maxH = totalH;
+    });
+    var mapW = cursorX;
+    var canvasW = Math.ceil(mapW);
+    var canvasH = Math.ceil(maxH);
+
+    canvas.width = canvasW;
+    canvas.height = canvasH;
+    canvas.style.width = canvasW + "px";
+    canvas.style.height = canvasH + "px";
+
+    var offX = Math.max(0, Math.floor((vw - canvasW) / 2));
+    canvas.style.left = offX + "px";
+    canvas.style.top = "0px";
+
+    var ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    var isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    distLayout.forEach(function(dl) {
+      var gx = dl.x, gy = dl.y;
+      var d = dl.md.d;
+      var groundCol = isDark ? d.color.dark : d.color.light;
+      ctx.fillStyle = groundCol;
+      ctx.fillRect(gx, gy, dl.groundW, dl.groundH);
+      ctx.fillStyle = isDark ? "#ecebe8" : "#1d1c1a";
+      ctx.font = "900 " + Math.round(SPR * spriteScale * 0.5) + "px system-ui,sans-serif";
+      ctx.textBaseline = "top";
+      ctx.fillText(d.label, gx + Math.round(SPR * spriteScale * 0.2), gy + Math.round(SPR * spriteScale * 0.15));
+      dl.md.reps.forEach(function(r) {
+        var sx = gx + r._gx * spriteScale;
+        var sy = gy + (dl.labH + r._gy * spriteScale);
+        drawSprite(ctx, r.sprite, sx, sy, spriteScale, r._filtered);
       });
     });
 
-    return { imgData, W, H, colData };
+    legend.innerHTML = "<b>Districts</b>" +
+      districts.map(function(d) {
+        return '<span><span class="legend-s" style="background:' +
+          (isDark ? d.color.dark : d.color.light) +
+          '"></span>' + d.label + '</span>';
+      }).join("");
+
+    if (search.value.trim()) applyFilter(search.value.trim());
+
+    window.__distLayout = distLayout;
+    window.__spriteScale = spriteScale;
+    window.__canvasOffX = offX;
   }
 
-  let mapData = buildMap();
+  // -- search / filter --------------------------------------
+  function applyFilter(q) {
+    var lowerQ = q.toLowerCase();
+    var matches = [];
+    world.representations.forEach(function(r) {
+      var match = r.n.toLowerCase().indexOf(lowerQ) !== -1 ||
+        r.place.toLowerCase().indexOf(lowerQ) !== -1 ||
+        r.kind.toLowerCase().indexOf(lowerQ) !== -1 ||
+        (r.module && r.module.toLowerCase().indexOf(lowerQ) !== -1) ||
+        (r.team && r.team.toLowerCase().indexOf(lowerQ) !== -1);
+      r._filtered = !match;
+      if (match) matches.push(r);
+    });
 
-  // ── render: nearest-neighbour scaled ────────────────────────────────
-  function render() {
-    const rect = wrap.getBoundingClientRect();
-    const vw = rect.width;
-    const vh = rect.height;
+    var spriteScale = window.__spriteScale || 2;
+    var isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var distLayout = window.__distLayout;
+    if (!distLayout) return;
 
-    // Calculate scale to fit the map comfortably, cap at 2x
-    const fitX = vw / (mapData.W);
-    const fitY = vh / (mapData.H);
-    scale = Math.min(fitX, fitY, 2.0);
-    if (scale < 0.25) scale = 0.25;
+    var ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
 
-    canvas.width = Math.ceil(mapData.W * scale);
-    canvas.height = Math.ceil(mapData.H * scale);
-    canvas.style.width = canvas.width + 'px';
-    canvas.style.height = canvas.height + 'px';
+    distLayout.forEach(function(dl) {
+      var gx = dl.x, gy = dl.y;
+      var d = dl.md.d;
+      var groundCol = isDark ? d.color.dark : d.color.light;
+      ctx.fillStyle = groundCol;
+      ctx.fillRect(gx, gy, dl.groundW, dl.groundH);
+      ctx.fillStyle = isDark ? "#ecebe8" : "#1d1c1a";
+      ctx.font = "900 " + Math.round(SPR * spriteScale * 0.5) + "px system-ui,sans-serif";
+      ctx.textBaseline = "top";
+      ctx.fillText(d.label, gx + Math.round(SPR * spriteScale * 0.2), gy + Math.round(SPR * spriteScale * 0.15));
+      dl.md.reps.forEach(function(r) {
+        var sx = gx + r._gx * spriteScale;
+        var sy = gy + (dl.labH + r._gy * spriteScale);
+        drawSprite(ctx, r.sprite, sx, sy, spriteScale, r._filtered);
+      });
+    });
 
-    const ctx = canvas.getContext('2d');
-    const img = ctx.createImageData(canvas.width, canvas.height);
-    const d = img.data;
-
-    for (let y = 0; y < canvas.height; y++) {
-      const srcY = Math.floor(y / scale);
-      for (let x = 0; x < canvas.width; x++) {
-        const srcX = Math.floor(x / scale);
-        const ch = mapData.imgData[srcY * mapData.W + srcX] || '0';
-        const col = palette[ch] || '#000000';
-        const idx = (y * canvas.width + x) * 4;
-        d[idx] = parseInt(col.slice(1,3), 16);
-        d[idx+1] = parseInt(col.slice(3,5), 16);
-        d[idx+2] = parseInt(col.slice(5,7), 16);
-        d[idx+3] = 255;
+    if (matches.length > 0) {
+      var first = matches[0];
+      var dl = distLayout.find(function(dl) { return dl.md.d.name === first.place; });
+      if (dl) {
+        var sx = dl.x + first._gx * spriteScale;
+        var sy = dl.y + (dl.labH + first._gy * spriteScale);
+        ctx.strokeStyle = isDark ? "#f0c040" : "#d4a017";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(sx - 2, sy - 2, SPR * spriteScale + 4, SPR * spriteScale + 4);
       }
     }
-    ctx.putImageData(img, 0, 0);
-
-    // Update legend
-    legend.innerHTML = '<b>Districts</b>' +
-      districts.map(d => '<span><span class="legend-b" style="background:'+(palette['f']||'#f0c040')+'"></span>' + d.label + '</span>').join("");
-
-    // Centre the canvas initially if pan hasn't been set
-    if (panX === 0 && panY === 0) {
-      panX = Math.max(0, (vw - canvas.width) / 2);
-      panY = Math.max(0, (vh - canvas.height) / 2);
-    }
-    canvas.style.marginLeft = panX + 'px';
-    canvas.style.marginTop = panY + 'px';
   }
 
-  // ── hit testing ────────────────────────────────────────────────────
-  function hitTest(cx, cy) {
-    // cx, cy are client coordinates relative to wrap
-    const rect = wrap.getBoundingClientRect();
-    const mx = (cx - rect.left - panX) / scale;
-    const my = (cy - rect.top - panY) / scale;
+  search.addEventListener("input", function() {
+    var q = this.value.trim();
+    if (!q) {
+      world.representations.forEach(function(r) { r._filtered = false; });
+      render();
+      return;
+    }
+    applyFilter(q);
+  });
 
-    for (const r of world.representations) {
-      if (r._x !== undefined) {
-        const rx = r._x;
-        const ry = r._y;
-        if (mx >= rx && mx < rx + SPRITE_PX && my >= ry && my < ry + SPRITE_PX) {
-          return r;
+  // -- panel -------------------------------------------------
+  var selected = null;
+  function openPanel(r) {
+    selected = r;
+    var kindIcon = { building:"🏢", item:"💎", block:"🧱", character:"🧑" };
+    var icon = kindIcon[r.kind] || "📦";
+    var what = r.module || r.team || r.account || r.asset || "-";
+    var whatLabel = r.module ? "Module" : r.team ? "Team" : r.account ? "Account" : "Asset";
+    var dataUrl = spriteDataURL(r.sprite, 4);
+
+    var hdr = '<div class="panel-hdr">';
+    if (dataUrl) {
+      hdr += '<img class="sprite4x" src="' + dataUrl + '" alt="">';
+    } else {
+      hdr += '<div class="sprite4x" style="display:flex;align-items:center;justify-content:center;font-size:28px">' + icon + '</div>';
+    }
+    hdr += '<h2>' + r.n + '</h2>';
+    hdr += '<button class="close" onclick="document.getElementById(\'panel\').classList.remove(\'open\')">\u2715</button>';
+    hdr += '</div>';
+
+    panel.innerHTML = hdr +
+      '<div class="sub">' + r.kind + ' &mdash; ' + whatLabel + ': ' + what + '</div>' +
+      '<span class="status status-' + r.status + '">' + r.status + '</span>' +
+      '<div style="margin:8px 0 0"><strong>District:</strong> ' + r.place + '</div>';
+
+    if (r.recipes && r.recipes.length) {
+      panel.innerHTML += '<div style="margin:10px 0 4px;font-size:13px;font-weight:600">Recipes</div>';
+      panel.innerHTML += '<div class="recipe-grid">';
+      r.recipes.forEach(function(rec) {
+        panel.innerHTML += '<div class="recipe-card">';
+        if (rec.inputs && rec.inputs.length) {
+          rec.inputs.forEach(function(inp) {
+            var tr = repByName[inp];
+            var tu = tr && tr.sprite ? spriteDataURL(tr.sprite, 2) : "";
+            panel.innerHTML += '<div class="recipe-tile"' +
+              (tu ? ' style="background-image:url(' + tu + ');background-size:contain"' : "") +
+              ' title="' + inp + '">' +
+              (!tu ? inp.slice(0,3) : "") + '</div>';
+          });
+        }
+        panel.innerHTML += '<span class="arrow">\u2192</span>';
+        if (rec.outputs && rec.outputs.length) {
+          rec.outputs.forEach(function(out) {
+            var tr = repByName[out];
+            var tu = tr && tr.sprite ? spriteDataURL(tr.sprite, 2) : "";
+            panel.innerHTML += '<div class="recipe-tile"' +
+              (tu ? ' style="background-image:url(' + tu + ');background-size:contain"' : "") +
+              ' title="' + out + '">' +
+              (!tu ? out.slice(0,3) : "") + '</div>';
+          });
+        }
+        panel.innerHTML += '</div>';
+      });
+      panel.innerHTML += '</div>';
+    } else {
+      panel.innerHTML += '<p class="hint" style="margin-top:10px">No recipes declared for this ' + r.kind + '.</p>';
+    }
+
+    panel.classList.add("open");
+  }
+
+  // -- hit testing -------------------------------------------
+  function hitTest(cx, cy) {
+    var rect = wrap.getBoundingClientRect();
+    var mapX = cx - rect.left;
+    var mapY = cy - rect.top;
+    var dl = window.__distLayout;
+    var sc = window.__spriteScale || 2;
+    var ox = window.__canvasOffX || 0;
+    var cx2 = mapX - ox;
+    var cy2 = mapY;
+    if (!dl) return null;
+    for (var i = 0; i < dl.length; i++) {
+      var d = dl[i];
+      if (cx2 >= d.x && cx2 < d.x + d.groundW && cy2 >= d.y && cy2 < d.y + d.groundH) {
+        for (var j = 0; j < d.md.reps.length; j++) {
+          var r = d.md.reps[j];
+          var sx = d.x + r._gx * sc;
+          var sy = d.y + (d.labH + r._gy * sc);
+          if (cx2 >= sx && cx2 < sx + SPR * sc && cy2 >= sy && cy2 < sy + SPR * sc) {
+            return r;
+          }
         }
       }
     }
     return null;
   }
 
-  // ── panel ──────────────────────────────────────────────────────────
-  function openPanel(r) {
-    selected = r;
-    const kindIcon = { building:'🏢', item:'💎', block:'🧱', character:'🧑' };
-    const icon = kindIcon[r.kind] || '📦';
-    const what = r.module || r.team || r.account || r.asset || '—';
-    const whatLabel = r.module ? 'Module' : r.team ? 'Team' : r.account ? 'Account' : 'Asset';
-
-    panel.innerHTML = '<button class="close" onclick="document.getElementById(\'panel\').classList.remove(\'open\')">✕</button>' +
-      '<h2>' + icon + ' ' + r.n + '</h2>' +
-      '<div class="sub">' + r.kind + ' — ' + whatLabel + ': ' + what + '</div>' +
-      '<span class="status status-' + r.status + '">' + r.status + '</span>' +
-      '<div style="margin:10px 0 0"><strong>District:</strong> ' + r.place + '</div>';
-
-    if (r.recipes && r.recipes.length) {
-      panel.innerHTML += '<div style="margin:10px 0 6px;font-size:13px;color:var(--muted)">Recipes</div>';
-      r.recipes.forEach(rec => {
-        panel.innerHTML += '<div class="recipe"><h3>⚡ ' + rec.action + '</h3>' +
-          (rec.inputs && rec.inputs.length ? '<p>Inputs: ' + rec.inputs.join(', ') + '</p>' : "") +
-          (rec.outputs && rec.outputs.length ? '<p>Outputs: ' + rec.outputs.join(', ') + '</p>' : "") +
-          '</div>';
-      });
-    } else {
-      panel.innerHTML += '<p style="color:var(--muted);font-size:13px;margin-top:8px">No recipes declared</p>';
-    }
-
-    panel.classList.add('open');
-  }
-
-  // ── search ─────────────────────────────────────────────────────────
-  search.addEventListener('input', function() {
-    const q = this.value.toLowerCase().trim();
-    if (!q) return;
-    const matches = world.representations.filter(r =>
-      r.n.toLowerCase().includes(q) ||
-      r.place.toLowerCase().includes(q) ||
-      r.kind.toLowerCase().includes(q) ||
-      (r.module && r.module.toLowerCase().includes(q)) ||
-      (r.team && r.team.toLowerCase().includes(q))
-    );
-    if (matches.length === 1) {
-      openPanel(matches[0]);
-    } else if (matches.length > 1) {
-      // Show first match
-      openPanel(matches[0]);
-    }
+  // -- mouse events ------------------------------------------
+  var dragState = null;
+  wrap.addEventListener("mousedown", function(e) {
+    dragState = { startX: e.clientX, startY: e.clientY, moved: false };
   });
-
-  // ── mouse/touch events ─────────────────────────────────────────────
-  wrap.addEventListener('mousedown', function(e) {
-    dragging = true;
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    panStartX = panX;
-    panStartY = panY;
+  window.addEventListener("mousemove", function(e) {
+    if (!dragState) return;
+    if (Math.abs(e.clientX - dragState.startX) > 4 ||
+        Math.abs(e.clientY - dragState.startY) > 4) dragState.moved = true;
   });
-  window.addEventListener('mousemove', function(e) {
-    if (!dragging) return;
-    const dx = e.clientX - dragStartX;
-    const dy = e.clientY - dragStartY;
-    panX = panStartX + dx;
-    panY = panStartY + dy;
-    canvas.style.marginLeft = panX + 'px';
-    canvas.style.marginTop = panY + 'px';
-  });
-  window.addEventListener('mouseup', function(e) {
-    if (!dragging) return;
-    dragging = false;
-    const dx = Math.abs(e.clientX - dragStartX);
-    const dy = Math.abs(e.clientY - dragStartY);
-    if (dx < 5 && dy < 5) {
-      const hit = hitTest(e.clientX, e.clientY);
+  window.addEventListener("mouseup", function(e) {
+    if (!dragState) return;
+    var was = dragState.moved;
+    dragState = null;
+    if (!was) {
+      var hit = hitTest(e.clientX, e.clientY);
       if (hit) openPanel(hit);
     }
   });
 
-  // Touch events
-  let touchStartX, touchStartY, touchPanX, touchPanY, touching = false;
-  wrap.addEventListener('touchstart', function(e) {
+  // -- touch events ------------------------------------------
+  var touchState = null;
+  wrap.addEventListener("touchstart", function(e) {
     if (e.touches.length === 1) {
-      touching = true;
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-      touchPanX = panX;
-      touchPanY = panY;
+      touchState = { startX: e.touches[0].clientX, startY: e.touches[0].clientY, moved: false };
     }
   }, { passive: true });
-  wrap.addEventListener('touchmove', function(e) {
-    if (e.touches.length === 1 && touching) {
-      panX = touchPanX + (e.touches[0].clientX - touchStartX);
-      panY = touchPanY + (e.touches[0].clientY - touchStartY);
-      canvas.style.marginLeft = panX + 'px';
-      canvas.style.marginTop = panY + 'px';
+  wrap.addEventListener("touchmove", function(e) {
+    if (e.touches.length === 1 && touchState) {
+      if (Math.abs(e.touches[0].clientX - touchState.startX) > 8 ||
+          Math.abs(e.touches[0].clientY - touchState.startY) > 8) touchState.moved = true;
     }
   }, { passive: true });
-  wrap.addEventListener('touchend', function(e) {
-    if (touching) {
-      touching = false;
-      const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
-      const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
-      if (dx < 8 && dy < 8) {
-        const hit = hitTest(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+  wrap.addEventListener("touchend", function(e) {
+    if (touchState) {
+      var was = touchState.moved;
+      if (!was && e.changedTouches.length > 0) {
+        var hit = hitTest(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
         if (hit) openPanel(hit);
       }
+      touchState = null;
     }
   }, { passive: true });
 
-  // ── runtime state (__twinState) ────────────────────────────────────
+  // -- __twinState runtime ------------------------------------
   if (window.__twinState) {
-    const state = window.__twinState;
-    if (state.agents) {
-      Object.keys(state.agents).forEach(name => {
-        const a = state.agents[name];
-        // Update agent info on the world - displayed in the search bar area
-        const info = document.createElement('div');
-        info.style.cssText = 'position:absolute;bottom:8px;left:8px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:11px;z-index:5;';
-        info.innerHTML = '<b>' + name + '</b>' +
-          (a.lastMessage ? '<br>' + a.lastMessage : "") +
-          (a.spendUsd != null ? '<br>$' + a.spendUsd.toFixed(2) + ' spent' : "");
+    var st = window.__twinState;
+    if (st.agents) {
+      Object.keys(st.agents).forEach(function(name) {
+        var a = st.agents[name];
+        var info = document.createElement("div");
+        info.style.cssText = "position:absolute;bottom:8px;left:8px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:11px;z-index:5;";
+        info.innerHTML = "<b>" + name + "</b>" +
+          (a.lastMessage ? "<br>" + a.lastMessage : "") +
+          (a.spendUsd != null ? "<br>$" + a.spendUsd.toFixed(2) + " spent" : "");
         wrap.appendChild(info);
       });
     }
   }
 
-  // ── init ───────────────────────────────────────────────────────────
-  render();
-  window.addEventListener('resize', render);
+  // -- dark mode listener -------------------------------------
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function() { render(); });
 
-// ── deep-link support ──────────────────────────────────────────────
-  // ?open=<name> opens that representation's panel on load.
+  // -- init ---------------------------------------------------
+  render();
+  window.addEventListener("resize", render);
+
+  // -- deep-link support --------------------------------------
   (function() {
-    const params = new URLSearchParams(window.location.search);
-    const openName = params.get('open');
-    if (openName && repByName[openName]) {
-      openPanel(repByName[openName]);
-    }
+    var params = new URLSearchParams(window.location.search);
+    var n = params.get("open");
+    if (n && repByName[n]) openPanel(repByName[n]);
   })();
 
 })();
@@ -482,7 +562,7 @@ ${lib.concatMapStringsSep ",\n" (
 /-- The districts, rendered by the same. -/
 def districts : List (String × District) := [
 ${lib.concatMapStringsSep ",\n" (
-  d: "  (${q d.name}, { label := ${q d.label}, order := ${toString d.order} })"
+  d: "  (${q d.name}, { label := ${q d.label}, order := ${toString d.order}, color := { light := ${q d.color.light}, dark := ${q d.color.dark} } })"
 ) sortedDistricts}
 ]
 

@@ -171,10 +171,10 @@ in
 
         <h2 id="world">World</h2>
         <p class="lede">The digital twin: every module, agent, key and card as a 2D pixel world. Tap or click a thing to open its recipes (JEI-style).</p>
-        <div style="width:100%;max-width:780px;height:480px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)">
+        <div style="width:100%;max-width:780px;height:540px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)">
           <iframe src="twin.html" style="width:100%;height:100%;border:none" title="Digital twin world" loading="lazy"></iframe>
         </div>
-        <p style="font-size:13px;color:var(--muted);margin-top:6px">A static world — <a href="twin.html" target="_blank">open full screen</a> to see live agents when <code>window.__twinState</code> is set.</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px">A static world — <a href="twin.html" target="_blank">open full screen</a> to see live agents when <code>window.__twinState</code> is set and for the full phone-optimised view.</p>
 
         <h2 id="areas">Who owns what</h2>
         <p class="lede">Every area is a mailbox role: one owning team, reviewers that are never the owner, the controller who signs off, and the change classes it may propose. Lean proves the shape (modules/organization).</p>

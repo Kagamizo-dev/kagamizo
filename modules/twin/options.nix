@@ -66,6 +66,21 @@ in
               type = types.ints.unsigned;
               description = "Render order (lower is earlier/left).";
             };
+            color = mkOption {
+              type = types.submodule {
+                options = {
+                  light = mkOption {
+                    type = types.strMatching "#[0-9a-fA-F]{6}";
+                    description = "Ground tint in light mode.";
+                  };
+                  dark = mkOption {
+                    type = types.strMatching "#[0-9a-fA-F]{6}";
+                    description = "Ground tint in dark mode.";
+                  };
+                };
+              };
+              description = "District ground-tint colours for light and dark mode.";
+            };
           };
         }
       );
@@ -219,38 +234,47 @@ in
       trading = {
         label = "Trading";
         order = 1;
+        color = { light = "#d4e8d4"; dark = "#1e3a1e"; };
       };
       money = {
         label = "Money";
         order = 2;
+        color = { light = "#e8d4c4"; dark = "#3a2a1e"; };
       };
       legal = {
         label = "Legal";
         order = 3;
+        color = { light = "#d0d8ee"; dark = "#1e2a4a"; };
       };
       compliance = {
         label = "Compliance";
         order = 4;
+        color = { light = "#e8d0e8"; dark = "#3a1e3a"; };
       };
       research = {
         label = "Research";
         order = 5;
+        color = { light = "#d0eee8"; dark = "#1e3a34"; };
       };
       agents = {
         label = "Agents";
         order = 6;
+        color = { light = "#e8e0c4"; dark = "#3a341e"; };
       };
       infra = {
         label = "Infrastructure";
         order = 7;
+        color = { light = "#d0d0d0"; dark = "#2a2a2a"; };
       };
       media = {
         label = "Media";
         order = 8;
+        color = { light = "#f0d4d4"; dark = "#4a2a2a"; };
       };
       home = {
         label = "Home";
         order = 9;
+        color = { light = "#d4e8e0"; dark = "#1e342e"; };
       };
     };
   };

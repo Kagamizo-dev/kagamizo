@@ -34,10 +34,17 @@ structure Sprite where
   rows : List String
   deriving DecidableEq, Repr
 
+/-- Ground-tint colour for a district, one per mode. -/
+structure DistrictColor where
+  light : String
+  dark : String
+  deriving DecidableEq, Repr
+
 /-- A district in the world. -/
 structure District where
   label : String
   order : Nat
+  color : DistrictColor
   deriving DecidableEq, Repr
 
 /-- A recipe wrapping a governance action. -/
