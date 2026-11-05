@@ -12,9 +12,7 @@
 #                           screenshot (site-status/status.png in the build)
 #   packages.site-research  the homepage with the research papers beside it
 #                           (papers/<strategy>.{pdf,html}, ../research/papers.nix),
-#                           the bundle a worker serves; serving it is the
-#                           design team's and infra's next step (the status
-#                           worker, ../cloudflare/_status.nix, is unchanged)
+#                           the bundle a worker serves
 #
 # Served at status.mirazo.org by a Worker behind Cloudflare Access, only to
 # the owner (../cloudflare/_status.nix; the owner's go, 2026-11-01).
@@ -64,8 +62,8 @@ in
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Kagamizo home</title>
         <style>
-          :root { --bg:#fbfaf8; --card:#ffffff; --fg:#1d1c1a; --muted:#6b6862; --line:#e4e1db; --accent:#2b5fa8; --gap:#b4441f; --ok:#2f6f4f; }
-          @media (prefers-color-scheme: dark) { :root { --bg:#151514; --card:#1e1e1c; --fg:#ecebe8; --muted:#a3a09a; --line:#34322f; --accent:#8db4ee; --gap:#ef8a64; --ok:#7fc4a0; } }
+          :root { --bg:#fbfaf8; --card:#ffffff; --fg:#1d1c1a; --muted:#6b6862; --line:#e4e1db; --accent:#2b5fa8; --gap:#b4441f; --ok:#2f6f4f; --ci-queued:#b0a99a; --ci-inprogress:#2b5fa8; --ci-success:#2f6f4f; --ci-failure:#b4441f; --ci-cancelled:#8a7f72; --ci-skip:#e4e1db; }
+          @media (prefers-color-scheme: dark) { :root { --bg:#151514; --card:#1e1e1c; --fg:#ecebe8; --muted:#a3a09a; --line:#34322f; --accent:#8db4ee; --gap:#ef8a64; --ok:#7fc4a0; --ci-queued:#8a867a; --ci-inprogress:#8db4ee; --ci-success:#7fc4a0; --ci-failure:#ef8a64; --ci-cancelled:#6b6862; --ci-skip:#34322f; } }
           * { box-sizing:border-box }
           body { background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; margin:0; }
           a { color:var(--accent); text-decoration:none } a:hover { text-decoration:underline }
@@ -88,12 +86,26 @@ in
           th { color:var(--muted); font-weight:600 }
           td:has(+ td), th { white-space:nowrap }
           .gap { color:var(--gap) } .ok { color:var(--ok) }
+          .chip { display:inline-block; font-size:11.5px; font-weight:600; padding:1px 7px; border-radius:4px; line-height:1.6; white-space:nowrap; min-width:44px; text-align:center }
+          .chip-queued { background:var(--ci-queued); color:#fff }
+          .chip-inprogress { background:var(--ci-inprogress); color:#fff }
+          .chip-success { background:var(--ci-success); color:#fff }
+          .chip-failure { background:var(--ci-failure); color:#fff }
+          .chip-cancelled { background:var(--ci-cancelled); color:#fff }
+          .chip-skip { background:var(--ci-skip); color:var(--muted) }
+          .pipeline-table-wrap { overflow-x:auto }
+          .pipeline-table-wrap td { vertical-align:middle }
+          .pipeline-run { display:flex; align-items:center; gap:6px; flex-wrap:wrap }
+          .pipeline-timeline { display:flex; gap:3px; flex-wrap:wrap }
+          .tl-dot { display:inline-block; width:12px; height:12px; border-radius:50%; border:1px solid transparent; flex-shrink:0 }
+          .tl-dot:hover { border-color:var(--accent); transform:scale(1.3) }
+          @media (max-width:560px) { .pipeline-timeline { gap:4px } .tl-dot { width:20px; height:20px } }
         </style></head><body><div class="wrap">
         <nav>
           <b>Start</b><a href="#apps">Apps</a><a href="#infra">Infrastructure</a><a href="#research">Research</a>
           <b>Teams</b><a href="#areas">Who owns what</a>
           <b>Money</b><a href="#cards">Cards</a><a href="#ai">AI keys</a><a href="#credit">Credit lines</a><a href="#tax">Tax</a><a href="#rules">Rules</a>
-          <b>Records</b><a href="#entities">Entities</a><a href="#legal">Legal record</a><a href="#domains">Domains</a><a href="#accounts">Accounts</a><a href="#gaps">Gaps</a><a href="#steps">Your steps</a><a href="#migration">Migration</a><a href="#ci">CI</a><a href="#catalogs">Catalogs</a>
+          <b>Records</b><a href="#entities">Entities</a><a href="#legal">Legal record</a><a href="#domains">Domains</a><a href="#accounts">Accounts</a><a href="#gaps">Gaps</a><a href="#steps">Your steps</a><a href="#migration">Migration</a><a href="#ci">CI</a><a href="#pipelines">Pipelines</a><a href="#catalogs">Catalogs</a>
         </nav>
         <main>
         <h1>Kagamizo</h1>
@@ -476,6 +488,157 @@ in
             ]
           ) top.ci.workflows
         )}
+
+        <h2 id="pipelines">Pipelines</h2>
+        <p class="lede">Live CI/CD run status, fetched from GitHub Actions. Shows the latest run on <code>main</code> and on the current working branch, for each declared workflow, plus a timeline of the last 20 runs. Offline or when served from a build: no runs loaded.</p>
+        <div id="pipelines-root">
+          <p style="color:var(--muted);font-size:13px">Loading CI data…</p>
+        </div>
+        <script>
+        (function(){
+          var DECLARED = ${builtins.toJSON (lib.attrNames top.ci.workflows)};
+          var BRANCH_HINT = "main";
+          var FAIL_MSG = "no runs loaded";
+
+          function chip(status, conclusion) {
+            var cls = "pending";
+            var label = status;
+            if (status === "completed") {
+              if (conclusion === "success") { cls = "success"; label = "passed"; }
+              else if (conclusion === "failure") { cls = "failure"; label = "failed"; }
+              else if (conclusion === "cancelled") { cls = "cancelled"; label = "cancelled"; }
+              else if (conclusion === "skipped") { cls = "skip"; label = "skipped"; }
+              else if (conclusion === "neutral") { cls = "skip"; label = "neutral"; }
+              else { cls = "failure"; label = conclusion || "errored"; }
+            } else if (status === "in_progress") { cls = "inprogress"; label = "running"; }
+            else if (status === "queued" || status === "waiting") { cls = "queued"; label = "queued"; }
+            return "<span class=\"chip chip-" + cls + "\">" + label + "</span>";
+          }
+
+          function relTime(iso) {
+            if (!iso) return "—";
+            var diff = Date.now() - new Date(iso).getTime();
+            var sec = Math.floor(diff / 1000);
+            if (sec < 60) return "just now";
+            var min = Math.floor(sec / 60);
+            if (min < 60) return min + "m ago";
+            var hr = Math.floor(min / 60);
+            if (hr < 24) return hr + "h ago";
+            var d = Math.floor(hr / 24);
+            if (d < 30) return d + "d ago";
+            return new Date(iso).toLocaleDateString();
+          }
+
+          function duration(started, updated) {
+            if (!started || !updated) return "—";
+            var ms = new Date(updated).getTime() - new Date(started).getTime();
+            if (ms < 0) return "—";
+            var sec = Math.floor(ms / 1000);
+            if (sec < 60) return sec + "s";
+            var min = Math.floor(sec / 60);
+            sec = sec % 60;
+            if (min < 60) return min + "m " + sec + "s";
+            var hr = Math.floor(min / 60);
+            min = min % 60;
+            return hr + "h " + min + "m";
+          }
+
+          function timelineColor(run) {
+            if (run.status === "in_progress") return "var(--ci-inprogress)";
+            if (run.status === "queued" || run.status === "waiting") return "var(--ci-queued)";
+            if (run.conclusion === "success") return "var(--ci-success)";
+            if (run.conclusion === "failure") return "var(--ci-failure)";
+            if (run.conclusion === "cancelled") return "var(--ci-cancelled)";
+            return "var(--ci-skip)";
+          }
+
+          function render(data) {
+            var root = document.getElementById("pipelines-root");
+            if (!data || !data.runs || data.runs.length === 0) {
+              root.innerHTML = "<p style=\"color:var(--muted);font-size:13px\">" + FAIL_MSG + "</p>";
+              return;
+            }
+            var runs = data.runs;
+            var byWorkflow = {};
+            runs.forEach(function(r){
+              var wf = r.workflow || "unknown";
+              if (!byWorkflow[wf]) byWorkflow[wf] = [];
+              byWorkflow[wf].push(r);
+            });
+            var byName = {};
+            runs.forEach(function(r){
+              var n = r.name || r.workflow || "unknown";
+              if (!byName[n]) byName[n] = [];
+              byName[n].push(r);
+            });
+
+            // For each declared workflow find main's latest and branch's latest
+            var html = "<div class=\"pipeline-table-wrap\"><table><thead><tr><th>Workflow</th><th>main</th><th>branch</th><th>Timeline</th></tr></thead><tbody>";
+
+            var allDisplay = [];
+            DECLARED.forEach(function(wfName){
+              var runsFor = byName[wfName] || byWorkflow[wfName] || [];
+              allDisplay.push({ name: wfName, runs: runsFor, declared: true });
+            });
+            // Undeclared workflows from the API
+            var seenDeclared = {};
+            DECLARED.forEach(function(d){ seenDeclared[d] = true; });
+            runs.forEach(function(r){
+              var n = r.name || r.workflow || "unknown";
+              if (!seenDeclared[n]) {
+                seenDeclared[n] = true;
+                allDisplay.push({ name: n, runs: byName[n] || byWorkflow[n] || [], declared: false });
+              }
+            });
+
+            allDisplay.forEach(function(item){
+              var runsFor = item.runs;
+              // sort descending by number
+              runsFor.sort(function(a,b){ return b.number - a.number; });
+              var latest = runsFor[0] || null;
+              var main = null;
+              var branch = null;
+              runsFor.forEach(function(r){
+                if (r.branch === BRANCH_HINT && !main) main = r;
+                if (r.branch !== BRANCH_HINT && !branch) branch = r;
+              });
+              // timeline: up to 20 most recent runs for this workflow
+              var timeline = runsFor.slice(0, 20);
+
+              var nameDisplay = item.name;
+              if (!item.declared) nameDisplay += " <span style=\"color:var(--muted);font-size:13px\">(other)</span>";
+
+              function runCell(run) {
+                if (!run) return "<td>—</td>";
+                var ch = chip(run.status, run.conclusion);
+                var dur = duration(run.started, run.updated);
+                var rel = relTime(run.updated);
+                var shaLink = "<a href=\"" + run.url + "\">" + run.sha + "</a>";
+                return "<td><div class=\"pipeline-run\">" + ch + " <span style=\"color:var(--muted);font-size:13px\">" + shaLink + " " + rel + " · " + dur + "</span></div></td>";
+              }
+
+              var timelineHtml = "<div class=\"pipeline-timeline\">";
+              timeline.forEach(function(r){
+                timelineHtml += "<a href=\"" + r.url + "\" class=\"tl-dot\" style=\"background:" + timelineColor(r) + "\" title=\"" + (r.name || r.workflow) + " #" + r.number + " (" + (r.conclusion || r.status) + ")\"></a>";
+              });
+              timelineHtml += "</div>";
+
+              html += "<tr><td>" + nameDisplay + "</td>" + runCell(main) + runCell(branch) + "<td>" + timelineHtml + "</td></tr>";
+            });
+
+            html += "</tbody></table></div>";
+            html += "<p style=\"color:var(--muted);font-size:13px;margin-top:4px\">Fetched " + relTime(data.fetched) + " · " + runs.length + " runs</p>";
+            root.innerHTML = html;
+          }
+
+          fetch("/api/ci").then(function(r){
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
+          }).then(render).catch(function(){
+            render(null);
+          });
+        })();
+        </script>
 
         <h2 id="catalogs">Pinned catalogs</h2>
         ${table [ "Catalog" "From" "Version" ] (

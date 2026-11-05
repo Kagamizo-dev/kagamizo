@@ -64,6 +64,7 @@ in
                   hostname = "status.mirazo.org";
                   viewers = [ "zach@mirazo.org" ];
                   html = config.site.statusHtml;
+                  repoFullName = "${top.github.org}/kagamizo";
                 }
               ))
               # jingzo-host's agents, through their tunnel behind Access
