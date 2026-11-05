@@ -206,6 +206,15 @@ The rule for this repo: the only thing you ever do by hand is approve 2FA.
 Each item below breaks that rule today and is to be closed, not documented
 around.
 
+- **OpenCode (v2.2.5) does not support a trusted-header auth mode.** Its web
+  interface (`opencode web`) has no `Cf-Access-Authenticated-User-Email` or
+  similar proxy-auth setting, so each user authenticates with OpenCode itself
+  rather than relying on Access. Closing this means adding a trusted-header
+  plugin or waiting for an upstream feature.
+- **dsh (v0.2.1-rc.5) does not support a trusted-header auth mode.** The
+  developer-preview harness has `--trusted-host` for session binding only,
+  not for delegating auth to a reverse proxy. Closing this means adding a
+  plugin or waiting for an upstream feature.
 - **Agents cannot email the owner yet.** jingzo.org's mail is Proton's
   (its MX), so Cloudflare Email Routing and Email Workers are out for that
   domain, and Proton Unlimited offers no SMTP submission (that is Proton

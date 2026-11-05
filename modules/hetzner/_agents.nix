@@ -2,6 +2,18 @@
 # OpenCode on the loopback, reached only through the agents tunnel behind
 # Access (../cloudflare/_agents.nix). No port is open.
 #
+# Owner single sign-on (Cloudflare Access):
+#   Open WebUI trusts the Cf-Access-Authenticated-User-Email header that
+#   cloudflared sets after Access verifies the viewer.  Because the app then
+#   trusts a header for auth, it must be reachable only through cloudflared
+#   on the loopback — which it is (host = 127.0.0.1, port opened only by the
+#   tunnel's ingress).  ENABLE_SIGNUP=off keeps sign-ups closed, but the
+#   trusted header path admits Access-verified identities regardless.
+#   OpenCode (v2.2.5) and dsh (v0.2.1-rc.5) do not support a trusted-header
+#   auth mode; see Gaps in modules/cloudflare/README.md.
+#   Element/tuwunel keep Matrix accounts (the seeded login is the owner's);
+#   no change needed.
+#
 #   agents-secrets   once a boot: the OpenRouter key (chat-and-code, capped)
 #                    and the tunnel token, from the host's read-only vault,
 #                    into /run/agents (mode 600, never printed); and the
@@ -136,8 +148,13 @@ in
       OPENAI_API_BASE_URLS = "https://openrouter.ai/api/v1;http://127.0.0.1:${toString tier1Port}/v1";
       ENABLE_OLLAMA_API = "False";
       WEBUI_URL = "https://agents.${zone}";
-      # Access has signed the viewer in: Open WebUI takes its address.
+      # Owner single sign-on: Cloudflare Access has verified the viewer, so
+      # Open WebUI trusts the header instead of running its own login.
+      # Reachable only on 127.0.0.1 through cloudflared (the tunnel sets this
+      # header from Access's JWT), so no external actor can forge it.
       WEBUI_AUTH_TRUSTED_EMAIL_HEADER = "Cf-Access-Authenticated-User-Email";
+      # ENABLE_SIGNUP off except for the trusted-header path, which the docs
+      # say bypasses this gate for Access-verified identities.
       ENABLE_SIGNUP = "False";
       ANONYMIZED_TELEMETRY = "False";
       DO_NOT_TRACK = "True";
