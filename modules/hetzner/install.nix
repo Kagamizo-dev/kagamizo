@@ -59,7 +59,9 @@ in
       # 41568360740 to 41582003588) and read from rescue (host-rescue) until
       # it signed in and kept its volume key. Open it again, dated, only to
       # reinstall or rescue.
-      window = null;
+      # Open for the reinstall that delivers the cached system (the owner's
+      # go, 2026-11-05); closed again once host-install has run.
+      window.until = "2026-11-06";
     };
 
     perSystem =
