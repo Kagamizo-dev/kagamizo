@@ -15,16 +15,89 @@ ticked) and the start message below, kept current.
 Start message for the next session:
 
 ```
-Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; HANDOFF.md's "The owner's standing decisions" holds what I've already decided, and its Roadmap is the order of work.
+Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; HANDOFF.md's "The owner's standing decisions" holds what I've already decided, and its Roadmap is the order of work. Claude orchestrates only: every code, page and image change is a dsh job run through `nix run .#dispatch -- <team>/<topic> <task-file>`, gated by the checks in the session; Claude never writes code.
 
 Before anything else, check the network: `nix build .#session-tools` must reach cache.nixos.org. If the proxy refuses it (403), the session is not in the Kagamizo environment (see HANDOFF.md's "midday session"): stop and tell me, run nothing.
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code, chat and harness links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; first "2026-11-05: the four hyperfix builders landed", then "2026-11-04, latest: three modules dispatched and landed" and "2026-11-04, later: the trading path" (on the host: the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)": steps 2–4 and the typed areas (organization.areas) are built, so continue with step 5 (the design system and the page check) and the later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code, chat and harness links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; first "2026-11-05: the four hyperfix builders landed", then "2026-11-05, later: orchestration only; the harness codes", then "2026-11-04, latest: three modules dispatched and landed" and "2026-11-04, later: the trading path" (on the host: the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)": steps 2–4 and the typed areas (organization.areas) are built, so continue with step 5 (the design system and the page check) and the later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
+
+## 2026-11-05, later: orchestration only; the harness codes
+
+### The owner's rule
+
+Claude orchestrates and gates; every code, page and image change is written
+by a DeepSeek harness (dsh) job. `packages.dispatch`
+(`modules/dsh/dispatch.nix`) runs one headless job per
+`agents/<team>/<topic>` branch in a worktree under the fleet key; the
+sandbox cannot build or commit, so the gate (format, statix, deadnix, the
+named checks, the infra plan) runs in the session and commits what passes
+under the team's name.
+
+### What landed today on the session branch
+
+Live CI pipelines on the status page (Worker `/api/ci`); the audit's fixes;
+the harness provider-id fix and dispatch package; the owner SSO notes and
+per-team Access service tokens with the Lean check `cloudflare-access`; their
+storage at apply (`infra-service-tokens`) and hand-out on the host; the
+`twin` module with the World section (`checks.twin-world`,
+`checks.twin-view`).
+
+Commits:
+
+```
+f737dd2 feat(status): Serve live CI/CD runs on the status page
+35c6d11 fix(agents): Put the dsh teams on the key the host spends
+0443a56 docs(agents): Correct the stale budget and hostname notes
+095cba7 fix(dsh): Route providers through the pi-ai adapter
+1d94ad4 feat(dsh): Dispatch headless jobs on agents/* branches
+1af8836 fix(dsh): Run the dispatched job inside its worktree
+7548d1d docs(hetzner): State the owner's sign-on path behind Access
+7cdea1b feat(cloudflare): Scope each dsh team to its apps by service token
+9741b08 feat(cloudflare): Store and hand out each team's Access token
+0df9d79 feat(twin): Type the digital twin's representations
+f8ba639 feat(twin): Draw the world on the status page
+7d9c136 perf(twin): Measure the twin world's proof
+2dc7fcb docs(perf): Render the README for the two new targets
+```
+
+### The audit's findings in short
+
+All 15 agents (every one declared), the six hostnames (agents.jingzo.org,
+code.jingzo.org, harness.jingzo.org, chat.jingzo.org behind Access;
+status.mirazo.org behind Access, the owner only; cache.kagamizo.com public on
+purpose), keys summing to $125 under a $50/week card (`checks.agents-budget`).
+The two mirazo swarms (`swarm-legal-mirazo`, `swarm-accounting-mirazo`) are
+reviewing mirazo's area.
+
+### Gaps and next steps
+
+- **SSO apply** (6 service tokens, 6 Access policies) waits on the owner's
+  go, like the chat/harness apply.
+- **OpenCode and dsh have no trusted-header mode.** When Access sits in front,
+  the apps need `Cf-Access-Authenticated-User-Email` to identify the user;
+  neither reads it. Recorded in `modules/cloudflare/README.md` (Gaps).
+- **The twin view's design pass** is dispatched to the design team.
+- **The status page's pre-existing horizontal overflow at 390 px** (a long
+  bold string) is the design team's — not a new regression from this
+  session's changes.
+- **The harness on the host still needs the reinstall** (waiting on the
+  owner's go).
+
+### The owner's go list (kept from earlier; see "2026-11-05: the four hyperfix builders landed" above)
+
+Owner's steps now: the "go" for the host; the four wiring answers; the
+EIN and filing number pastes after `legal-prepare apply jingzo`; `cards
+discover` and `legal-sync` runs from the owner's session (Mercury and
+Northwest sessions).
+
+And the four wiring questions: whether trading is personal or the company's;
+which Mercury account Public draws from; automated capped sweeps with a tap,
+or manual; nightly ledger reads.
 
 ## A new cloud environment
 
