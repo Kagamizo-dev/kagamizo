@@ -191,5 +191,11 @@
       attr = "checks.x86_64-linux.cloudflare-access";
       method = "Lean deciding every agent's Access token policy attached only to apps its tools justify, the owner first, none on status (decide +kernel over the rendered lists); moves with agents × tools";
     };
+    twin-world = {
+      module = "twin";
+      kind = "build";
+      attr = "checks.x86_64-linux.twin-world";
+      method = "Lean deciding the world's shape: every module has a building, every agent a character, every recipe's action declared";
+    };
   };
 }
