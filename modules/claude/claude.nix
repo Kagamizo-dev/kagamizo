@@ -42,6 +42,7 @@
           market
           cost
           yubikey
+          delegation
         ];
       };
     in

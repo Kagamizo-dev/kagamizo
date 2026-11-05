@@ -17,6 +17,18 @@
       attr = "checks.x86_64-linux.tokens-graph";
       method = "Lean deciding the credential graph (every child's scope within its parent's, by List.contains); moves with nodes × scope sizes";
     };
+    delegation-build = {
+      module = "delegation";
+      kind = "build";
+      attr = "packages.x86_64-linux.delegation";
+      method = "cargo build --release of the capability CLI (std only); moves with the grant count";
+    };
+    delegation-lean = {
+      module = "delegation";
+      kind = "build";
+      attr = "checks.x86_64-linux.delegation-lean";
+      method = "Lean proving attenuation never escalates and is transitive, over every grant (decide +kernel)";
+    };
     yubikey-build = {
       module = "yubikey";
       kind = "build";

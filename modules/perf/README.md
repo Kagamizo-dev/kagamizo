@@ -13,6 +13,8 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | ci | `ci-pipeline` | build | none yet | none yet | 10% | Lean deciding every workflow sound |
 | cost | `cost-build` | build | none yet | none yet | 10% | cargo build --release of the cost report (std only); moves with the card count |
 | cost | `cost-lean` | build | none yet | none yet | 10% | Lean proving every card's draw fits its limit and the committed total stays under the ceiling (decide +kernel) |
+| delegation | `delegation-build` | build | none yet | none yet | 10% | cargo build --release of the capability CLI (std only); moves with the grant count |
+| delegation | `delegation-lean` | build | none yet | none yet | 10% | Lean proving attenuation never escalates and is transitive, over every grant (decide +kernel) |
 | governance | `governance-cedar` | build | none yet | none yet | 10% | Cedar's test runner over every generated test (6169); moves with accounts × actions × agents |
 | governance | `governance-changes` | build | none yet | none yet | 10% | Lean deciding the change-class table's shape, plus the Rust tool's tests; moves with the table |
 | inventory | `inventory-build` | build | none yet | none yet | 10% | cargo build --release of the inventory CLI (std only) and its statestore wrapper; moves with the schema |
