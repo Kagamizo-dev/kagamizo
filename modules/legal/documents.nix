@@ -112,7 +112,7 @@ let
       "w9-prefill"
     ]
     ++ lib.optional (r.kind != "person") "operating-agreement";
-  catalog = lib.mapAttrs (_: r: docsOf r) records;
+  catalog = lib.mapAttrs (_: docsOf) records;
 in
 {
   options.legal.public = lib.mkOption {

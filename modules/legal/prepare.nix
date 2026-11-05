@@ -102,6 +102,7 @@ in
         text = ''
           usage="usage: legal-prepare plan | apply [<entity>]"
           export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+          # shellcheck disable=SC2016 # backticks in the items' notes, not commands
           items=${lib.escapeShellArg (builtins.toJSON items)}
 
           exists() { # vault title
