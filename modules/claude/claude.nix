@@ -39,6 +39,7 @@
           scout
           inventory
           unit
+          market
         ];
       };
     in

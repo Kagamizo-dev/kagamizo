@@ -17,6 +17,18 @@
       attr = "checks.x86_64-linux.tokens-graph";
       method = "Lean deciding the credential graph (every child's scope within its parent's, by List.contains); moves with nodes × scope sizes";
     };
+    market-build = {
+      module = "market";
+      kind = "build";
+      attr = "packages.x86_64-linux.market";
+      method = "cargo build --release of the market CLI (serde_json); moves with the rate count";
+    };
+    market-lean = {
+      module = "market";
+      kind = "build";
+      attr = "checks.x86_64-linux.market-lean";
+      method = "Lean deciding every chosen rate is within the capped premium (decide +kernel); grows with rates";
+    };
     unit-build = {
       module = "unit";
       kind = "build";

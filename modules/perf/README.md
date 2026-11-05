@@ -19,6 +19,8 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | lean | `lean-api-rclone` | build | none yet | none yet | 10% | Lean deciding rclone's model closed (101 commands, 1100 global flags on one operation); moves with the catalog's size and the proof's shape |
 | lean | `lean-governance` | build | none yet | none yet | 10% | Lean deciding every governed action typed and every grant allowed (decide +kernel) |
 | mailbox | `mailbox-build` | build | none yet | none yet | 10% | cargo build --release of the IMAP reader and keychain stand-in; moves with native-tls/openssl linking |
+| market | `market-build` | build | none yet | none yet | 10% | cargo build --release of the market CLI (serde_json); moves with the rate count |
+| market | `market-lean` | build | none yet | none yet | 10% | Lean deciding every chosen rate is within the capped premium (decide +kernel); grows with rates |
 | migration | `migrate-build` | build | none yet | none yet | 10% | cargo build --release of the runner; crates vendored by Nix; moves with the dependency set and codegen settings (LTO, codegen-units) |
 | migration | `migration-lean` | build | none yet | none yet | 10% | Lean deciding closedRightly over the declared sources |
 | operations | `operations-boundary` | build | none yet | none yet | 10% | Lean deciding every declared secret well-formed |

@@ -1,0 +1,85 @@
+{
+  "cpu": [
+    {
+      "held": true,
+      "note": "4 vCPU, 8 GB, 9.99 USD/mo in fsn1; single-sourced",
+      "provider": "hetzner/cx33",
+      "source": "https://www.hetzner.com/cloud",
+      "unit": "per vCPU-month",
+      "usd": 2.5,
+      "verified": null
+    }
+  ],
+  "domains": [
+    {
+      "held": true,
+      "note": "at wholesale cost, no markup",
+      "provider": "cloudflare/registrar",
+      "source": "https://developers.cloudflare.com/registrar/",
+      "unit": "per .com-year",
+      "usd": 10.44,
+      "verified": null
+    },
+    {
+      "held": false,
+      "note": "an at-cost-like alternative registrar",
+      "provider": "porkbun",
+      "source": "https://porkbun.com/products/domains",
+      "unit": "per .com-year",
+      "usd": 11.06,
+      "verified": null
+    }
+  ],
+  "egress": [
+    {
+      "held": true,
+      "note": "R2 charges no egress; that is why the cache lives there",
+      "provider": "cloudflare/r2",
+      "source": "https://developers.cloudflare.com/r2/pricing/",
+      "unit": "per GB",
+      "usd": 0.0,
+      "verified": null
+    }
+  ],
+  "gpu": [],
+  "storage": [
+    {
+      "held": true,
+      "note": "no egress fee; the build cache's bucket",
+      "provider": "cloudflare/r2",
+      "source": "https://developers.cloudflare.com/r2/pricing/",
+      "unit": "per GB-month",
+      "usd": 0.015,
+      "verified": null
+    }
+  ],
+  "tokens": [
+    {
+      "held": true,
+      "note": "the agents' default flash model",
+      "provider": "openrouter/deepseek-v4-flash",
+      "source": "https://openrouter.ai/api/v1/models",
+      "unit": "per 1M output tokens",
+      "usd": 0.182,
+      "verified": "2026-11-04"
+    },
+    {
+      "held": true,
+      "note": "cheapest; adds batch latency",
+      "provider": "openrouter/deepseek-v4.1-flash:batch",
+      "source": "https://openrouter.ai/api/v1/models",
+      "unit": "per 1M output tokens",
+      "usd": 0.15,
+      "verified": "2026-11-04"
+    },
+    {
+      "held": true,
+      "note": "alternative flash family",
+      "provider": "openrouter/qwen3.5-flash",
+      "source": "https://openrouter.ai/api/v1/models",
+      "unit": "per 1M output tokens",
+      "usd": 0.26,
+      "verified": "2026-11-04"
+    }
+  ]
+}
