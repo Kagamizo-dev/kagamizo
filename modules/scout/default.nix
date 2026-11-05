@@ -227,6 +227,7 @@ in
   config = {
     scout = {
       needs = [
+        "research"
         "inventory"
         "parts"
         "shipping"

@@ -148,13 +148,6 @@ in
           "models.dev"
         ];
       };
-      arxiv = {
-        reason = "Jingzo's and Mirazo's research: the query API (modules/arxiv, paused)";
-        hosts = [
-          "arxiv.org"
-          "export.arxiv.org"
-        ];
-      };
       # Pages the declared signups, capabilities and findings cite, so a session
       # can re-read them (and browser automation can reach the signups).
       sources = {
@@ -167,8 +160,6 @@ in
           "accounts.hetzner.com"
           "docs.hetzner.cloud"
           "docs.hetzner.com"
-          "info.arxiv.org"
-          "blog.arxiv.org"
           # Wyoming's business search: Kagamizo's filing and standing
           "wyobiz.wyo.gov"
         ];
@@ -229,8 +220,6 @@ in
           # Substack: research publishing, and its assets
           "substack.com"
           "substackcdn.com"
-          # arXiv's web assets
-          "static.arxiv.org"
         ];
       };
       # Moving a login off qsearchllc_wy@outlook.com confirms at that

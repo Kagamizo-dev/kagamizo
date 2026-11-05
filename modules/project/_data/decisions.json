@@ -1,14 +1,4 @@
 {
-  "arxiv-account-owner": {
-    "answer": null,
-    "asked": "2026-11-04",
-    "decided": null,
-    "options": [
-      "zachariah",
-      "qsearch-llc"
-    ],
-    "question": "Under whose name should the arXiv account be registered?"
-  },
   "epics-14-17": {
     "answer": null,
     "asked": "2026-11-04",
@@ -51,9 +41,9 @@
     "question": "Should the EIN be ordered with the Northwest formation or taken free from the IRS after the LLC exists?"
   },
   "outreach-sender": {
-    "answer": null,
+    "answer": "alias-on-mirazo",
     "asked": "2026-11-04",
-    "decided": null,
+    "decided": "2026-11-05",
     "options": [
       "alias-on-mirazo",
       "zach-at-mirazo"
@@ -71,13 +61,14 @@
     "question": "May the research team merge new scout candidates on its own (adopting stays the owner's)?"
   },
   "review-blocks-merge": {
-    "answer": null,
+    "answer": "reconcile-then-escalate",
     "asked": "2026-11-04",
-    "decided": null,
+    "decided": "2026-11-05",
     "options": [
       "block",
-      "flag"
+      "flag",
+      "reconcile-then-escalate"
     ],
-    "question": "Does a high-severity review finding block the merge, or flag it for the owner?"
+    "question": "A high-severity review finding: block the merge, flag it, or have the review agents reconcile it and escalate only an architectural or information-pattern break to the owner?"
   }
 }
