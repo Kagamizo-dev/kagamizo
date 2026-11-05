@@ -6,6 +6,8 @@
 #
 #   agents.jingzo.org  Open WebUI (localhost:8080)
 #   code.jingzo.org    OpenCode's web interface (localhost:4096)
+#   harness.jingzo.org  DeepSeek Harness (localhost:4097)
+#   chat.jingzo.org    Chat: tuwunel Matrix at 127.0.0.1:6167, Element Web at 8082
 #
 # The tunnel's token leaves OpenTofu as a sensitive output and goes,
 # pass-cli to pass-cli, into the host's vault (host/TUNNEL_TOKEN):

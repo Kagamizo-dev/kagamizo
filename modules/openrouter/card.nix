@@ -1,8 +1,8 @@
 # OpenRouter's card. It is Jingzo's (QSearch LLC's) card until Kagamizo has a
 # bank account of its own: the owner's call, 2026-10-23. Its limit is the
-# owner's $5 a month (2026-10-24), the first top-up; the keys' caps
-# (openrouter.keys) add up to more, and the limit rises to their sum only
-# when the owner says so and the keys are live.
+# owner's $50 a week (2026-11-02), today enough for all the keys' caps
+# (openrouter.keys: $125/month ≤ $50/week × 4 = $200/month); Lean proves
+# keys_within and teams_within (modules/agents/tiers.nix).
 { lib, config, ... }:
 let
   keyCaps = lib.foldl' (n: k: n + k.limitUsd) 0 (lib.attrValues config.openrouter.keys);

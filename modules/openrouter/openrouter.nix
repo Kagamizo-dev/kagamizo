@@ -87,7 +87,7 @@ in
         chat-and-code = {
           profile = "host";
           limitUsd = 20;
-          why = "chat.kagamizo.com and code.kagamizo.com";
+          why = "agents.jingzo.org and code.jingzo.org";
         };
         # Orca's agents, started under `secretspec run --profile agent`.
         orca-fleet = {

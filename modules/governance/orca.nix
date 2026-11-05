@@ -76,8 +76,8 @@ in
     entity: _:
     lib.nameValuePair "swarms-${entity}" {
       profile = "swarm-${entity}";
-      # Legal, accounting and governance at $3 each; jingzo's research at
-      # $5; mirazo's twin at $4 and builders at $3.
+      # Legal, accounting and governance at $3 each; jingzo's research on
+      # the research key at $20; mirazo's twin at $4 and builders at $3.
       limitUsd = 20;
       why = "${entity}'s legal, accounting and governance swarms";
     }

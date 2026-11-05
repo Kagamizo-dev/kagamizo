@@ -1,4 +1,4 @@
-# OpenCode's config, shared by the host (code.kagamizo.com) and the Orca
+# OpenCode's config, shared by the host (code.jingzo.org) and the Orca
 # fleet: OpenRouter models only, starting on the default. OpenCode reads the
 # key from OPENROUTER_API_KEY, which each consumer's secretspec profile holds.
 #

@@ -638,7 +638,7 @@ below. Step 2 is code, pushed; two things wait on the owner:
   tunnel reads healthy and the owner gets agents, code and chat links.
 - **Tiers (`modules/agents/tiers.nix`, `checks.agents-budget`):** rule /
   small / flash / pro, every task kind pinned to one; Lean proves rank 0–1
-  never reach a paid tier and the keys' monthly caps ($70) fit the card
+  never reach a paid tier and the keys' monthly caps ($125) fit the card
   ($50/week = $200/month). `openrouter usage` prints the ledger (all keys
   at $0 used on 2026-11-04). Every swarm lead's prompt ends with the
   policy (`agents.policyText`).
@@ -673,12 +673,13 @@ below. Step 2 is code, pushed; two things wait on the owner:
   harness pushes as the App once the App exists. **The typed teams (step 4, last piece, 8b0d51c):**
   `governance.agents` gains model, key, budgetUsdPerMonth, changeClasses,
   tools and harness (`modules/governance/options.nix`);
-  `modules/agents/teams.nix` declares design, twin, builders, research and
-  upkeep on the orca-fleet key ($4+4+3+5+4 = its $20), and Lean proves
+  `modules/agents/teams.nix` declares review, design and upkeep on the
+  chat-and-code key ($3+4+4 = 11 ≤ 20), research-jingzo on the research key
+  ($20), twin and builders on swarms-mirazo ($4+3 = 7 ≤ 20), and Lean proves
   every key's shares fit it (`teamsWithin`, checks.agents-budget). The
   harness reads them from KAGAMIZO_TEAMS (teams.json); every swarm lead's
   prompt states its model, key, share and classes. `proton apply` would
-  mint the five teams' swarm tokens (only the Orca path needs them; not
+  mint the 15 agents' swarm tokens (only the Orca path needs them; not
   run). CI: `checks` and `change-class` pass on 0b93b0b; `infra` (the
   pull-request plan) passes once the agent token is re-synced.
 - **Step 3, the self-update loop, built (commits 34d56f4, cb33a83,
@@ -1617,13 +1618,12 @@ The owner's decisions (2026-11-02):
   covers another address or a later date.
 
 #### B. OpenRouter for the research loops
-- `modules/openrouter/card.nix`: `limitUsd = 20` (the owner's budget).
-- `modules/openrouter/openrouter.nix`: one key, `research`, at $20/month,
-  in a new secretspec profile `research`.
-  - The existing keys (chat-and-code, orca-fleet and swarms-*) stay
-    declared but are disabled until their own budget is approved.
-  - New typed check: the sum of the enabled caps is at most the paying
-    card's limit, otherwise evaluation fails.
+- `modules/openrouter/card.nix`: `limitUsd = 50`, `interval = "weekly"` (minted
+  2026-11-02 as "Research-OpenRouter" ••5055; $50/week = $200/month).
+- `modules/openrouter/openrouter.nix`: six keys summing to $125: chat-and-code
+  ($20), orca-fleet ($25), research ($20), and swarms-* ($20 each × 3). All
+  live; Lean proves `keys_within` (caps ≤ card's monthly) and `teams_within`
+  (teams' shares ≤ their keys' caps) in `checks.agents-budget`.
 - After the owner's steps: `openrouter apply` mints `research`, and
   `openrouter credits` confirms the balance.
 - `modules/tokens`: the research key joins the credential graph. Its root

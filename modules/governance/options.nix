@@ -98,7 +98,7 @@ let
       };
       budgetUsdPerMonth = mkOption {
         type = types.ints.positive;
-        # Three swarms share each entity's $10 key.
+        # Three swarms share each entity's $20 swarm key.
         default = 3;
         description = "Its share of the key's monthly cap; Lean checks the shares fit (modules/agents).";
       };
