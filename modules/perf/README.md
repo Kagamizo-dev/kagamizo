@@ -13,6 +13,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | mercury | `cards-declared` | build | none yet | none yet | 10% | Lean deciding the committed card discovery against the declarations |
 | catalog | `catalog-coverage` | build | none yet | none yet | 10% | Python walking every source file against 7 catalogs; moves with the number of sources and the regexes |
 | ci | `ci-pipeline` | build | none yet | none yet | 10% | Lean deciding every workflow sound |
+| cloudflare | `cloudflare-access` | build | none yet | none yet | 10% | Lean deciding every agent's Access token policy attached only to apps its tools justify, the owner first, none on status (decide +kernel over the rendered lists); moves with agents × tools |
 | compliance | `compliance-rules` | build | none yet | none yet | 10% | Lean deciding every strategy against the day-trade rule and its options level on its observed account |
 | discord | `discord-relay` | build | none yet | none yet | 10% | Lean deciding the relay rule on the declared ids, plus the crate's tests |
 | gamedev | `gamedev-profile` | build | none yet | none yet | 10% | Lean deciding the profile open source but its declared platform, plus the versions listing |
@@ -37,6 +38,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | trading | `trading-risk` | build | none yet | none yet | 10% | Lean proving what admissible guarantees (omega over Nat) and deciding the declared limits sane |
 | trading | `trading-stages` | build | none yet | none yet | 10% | Lean deciding every strategy's stage carries its evidence |
 | trading | `trading-weather` | build | none yet | none yet | 10% | The weather signal engine's unit tests over forecast fixtures (parsers, probabilities, edge) |
+| twin | `twin-world` | build | none yet | none yet | 10% | Lean deciding the world's shape: every module has a building, every agent a character, every recipe's action declared |
 
 ## Baseline
 
