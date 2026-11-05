@@ -27,9 +27,9 @@ let
   row = cells: "<tr>${lib.concatMapStrings td cells}</tr>\n";
   table =
     head: rows:
-    "<table><thead><tr>${
+    "<div class=\"scroll\"><table><thead><tr>${
       lib.concatMapStrings (h: "<th>${esc h}</th>") head
-    }</tr></thead><tbody>\n${lib.concatStrings rows}</tbody></table>";
+    }</tr></thead><tbody>\n${lib.concatStrings rows}</tbody></table></div>";
   paymentOf =
     a:
     let
@@ -62,16 +62,17 @@ in
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Kagamizo home</title>
         <style>
-          :root { --bg:#fbfaf8; --card:#ffffff; --fg:#1d1c1a; --muted:#6b6862; --line:#e4e1db; --accent:#2b5fa8; --gap:#b4441f; --ok:#2f6f4f; --ci-queued:#b0a99a; --ci-inprogress:#2b5fa8; --ci-success:#2f6f4f; --ci-failure:#b4441f; --ci-cancelled:#8a7f72; --ci-skip:#e4e1db; }
-          @media (prefers-color-scheme: dark) { :root { --bg:#151514; --card:#1e1e1c; --fg:#ecebe8; --muted:#a3a09a; --line:#34322f; --accent:#8db4ee; --gap:#ef8a64; --ok:#7fc4a0; --ci-queued:#8a867a; --ci-inprogress:#8db4ee; --ci-success:#7fc4a0; --ci-failure:#ef8a64; --ci-cancelled:#6b6862; --ci-skip:#34322f; } }
+          :root { --bg:#fbfaf8; --card:#ffffff; --fg:#1d1c1a; --muted:#6b6862; --line:#e4e1db; --accent:#2b5fa8; --gap:#b4441f; --ok:#2f6f4f; --ci-queued:#807060; --ci-inprogress:#3d6eb5; --ci-success:#3d733d; --ci-failure:#8c2d28; --ci-cancelled:#694b37; --ci-skip:#f0ebe3; }
+          @media (prefers-color-scheme: dark) { :root { --bg:#151514; --card:#1e1e1c; --fg:#ecebe8; --muted:#a3a09a; --line:#34322f; --accent:#8db4ee; --gap:#ef8a64; --ok:#7fc4a0; --ci-queued:#4d4036; --ci-inprogress:#3264a0; --ci-success:#2d6630; --ci-failure:#6b1f1c; --ci-cancelled:#4d3425; --ci-skip:#20201e; } }
           * { box-sizing:border-box }
+          html, body { overflow-x:hidden }
           body { background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; margin:0; }
           a { color:var(--accent); text-decoration:none } a:hover { text-decoration:underline }
           .wrap { display:grid; grid-template-columns:200px minmax(0,1fr); gap:32px; max-width:1240px; margin:0 auto; padding:24px 16px; }
           nav { position:sticky; top:24px; align-self:start; font-size:14px }
-          nav b { display:block; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.06em; margin:16px 0 4px }
-          nav a { display:block; padding:3px 0; color:var(--fg) }
-          @media (max-width:800px) { .wrap { grid-template-columns:1fr } nav { position:static; display:flex; flex-wrap:wrap; gap:4px 14px } nav b { width:100%; margin:8px 0 0 } }
+          nav b { display:block; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.06em; margin:16px 0 4px; overflow-wrap:anywhere; word-break:break-word }
+          nav a { display:inline-flex; align-items:center; min-width:44px; min-height:44px; justify-content:center; padding:0 12px; color:var(--fg) }
+          @media (max-width:800px) { .wrap { grid-template-columns:1fr } nav { position:static; display:flex; flex-wrap:wrap; gap:4px 14px; min-width:0 } nav b { width:100%; margin:8px 0 0; min-width:0 } nav a { justify-content:center } }
           h1 { font-size:24px; margin:0 0 4px } h2 { font-size:17px; margin:36px 0 10px; scroll-margin-top:16px }
           p.lede { color:var(--muted); margin:0 0 20px }
           .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px }
@@ -81,9 +82,11 @@ in
           .card h3 { font-size:15px; margin:0 0 2px } .card .sub { color:var(--muted); font-size:13px }
           .card dl { display:grid; grid-template-columns:auto 1fr; gap:2px 10px; margin:8px 0 0; font-size:13px }
           .card dt { color:var(--muted) } .card dd { margin:0; overflow-wrap:anywhere }
-          table { border-collapse:collapse; width:100%; font-size:13.5px; display:block; overflow-x:auto }
+          .scroll { overflow-x:auto; max-width:100% }
+          table { border-collapse:collapse; width:100%; font-size:13.5px }
           th, td { text-align:left; padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top }
           th { color:var(--muted); font-weight:600 }
+          td, b, code { overflow-wrap:anywhere }
           td:has(+ td), th { white-space:nowrap }
           .gap { color:var(--gap) } .ok { color:var(--ok) }
           .chip { display:inline-block; font-size:11.5px; font-weight:600; padding:1px 7px; border-radius:4px; line-height:1.6; white-space:nowrap; min-width:44px; text-align:center }
@@ -92,7 +95,7 @@ in
           .chip-success { background:var(--ci-success); color:#fff }
           .chip-failure { background:var(--ci-failure); color:#fff }
           .chip-cancelled { background:var(--ci-cancelled); color:#fff }
-          .chip-skip { background:var(--ci-skip); color:var(--muted) }
+          .chip-skip { background:var(--ci-skip); color:var(--fg) }
           .pipeline-table-wrap { overflow-x:auto }
           .pipeline-table-wrap td { vertical-align:middle }
           .pipeline-run { display:flex; align-items:center; gap:6px; flex-wrap:wrap }
@@ -100,6 +103,7 @@ in
           .tl-dot { display:inline-block; width:12px; height:12px; border-radius:50%; border:1px solid transparent; flex-shrink:0 }
           .tl-dot:hover { border-color:var(--accent); transform:scale(1.3) }
           @media (max-width:560px) { .pipeline-timeline { gap:4px } .tl-dot { width:20px; height:20px } }
+          a.sha-link, a.inline-link { display:inline-flex; min-width:44px; min-height:44px; align-items:center; justify-content:center; box-sizing:border-box; padding:12px 6px; line-height:1.6 }
         </style></head><body><div class="wrap">
         <nav>
           <b>Start</b><a href="#apps">Apps</a><a href="#infra">Infrastructure</a><a href="#research">Research</a><a href="#world">World</a>
@@ -165,7 +169,7 @@ in
             s: p:
             "<tr>${td p.title}${td s}${
               td top.trading.strategies.${s}.stage
-            }<td><a href=\"papers/${s}.html\">paper</a> · <a href=\"papers/${s}.pdf\">PDF</a></td></tr>\n"
+            }<td><a class=\"inline-link\" href=\"papers/${s}.html\">paper</a> · <a class=\"inline-link\" href=\"papers/${s}.pdf\">PDF</a></td></tr>\n"
           ) (lib.filterAttrs (_: p: p.public) top.research.papers)
         )}
 
@@ -174,7 +178,7 @@ in
         <div style="width:100%;max-width:780px;height:70vh;min-height:320px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)">
           <iframe src="twin.html" style="width:100%;height:100%;border:none" title="Digital twin world" loading="lazy"></iframe>
         </div>
-        <p style="font-size:13px;color:var(--muted);margin-top:6px">A static world — <a href="twin.html" target="_blank">open full screen</a> to see live agents when <code>window.__twinState</code> is set and for the full phone-optimised view.</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px">A static world — <a class="inline-link" href="twin.html" target="_blank">open full screen</a> to see live agents when <code>window.__twinState</code> is set and for the full phone-optimised view.</p>
 
         <h2 id="areas">Who owns what</h2>
         <p class="lede">Every area is a mailbox role: one owning team, reviewers that are never the owner, the controller who signs off, and the change classes it may propose. Lean proves the shape (modules/organization).</p>
@@ -620,7 +624,7 @@ in
                 var ch = chip(run.status, run.conclusion);
                 var dur = duration(run.started, run.updated);
                 var rel = relTime(run.updated);
-                var shaLink = "<a href=\"" + run.url + "\">" + run.sha + "</a>";
+                var shaLink = "<a class=\"sha-link\" href=\"" + run.url + "\">" + run.sha + "</a>";
                 return "<td><div class=\"pipeline-run\">" + ch + " <span style=\"color:var(--muted);font-size:13px\">" + shaLink + " " + rel + " · " + dur + "</span></div></td>";
               }
 
@@ -690,21 +694,11 @@ in
         site.statusHtml = htmlText;
         packages.site-status = site;
         packages.site-research = research;
-        checks.site-status =
-          pkgs.runCommand "site-status-screenshot"
-            {
-              nativeBuildInputs = [ pkgs.chromium ];
-            }
-            ''
-              export HOME=$TMPDIR FONTCONFIG_FILE=${
-                pkgs.makeFontsConf { fontDirectories = [ pkgs.dejavu_fonts ]; }
-              }
-              mkdir $out
-              chromium --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
-                --window-size=1200,2600 --screenshot=$out/status.png file://${site}/index.html 2>/dev/null
-              test -s $out/status.png
-              cp ${site}/index.html $out/
-            '';
+        checks.site-status = import ./_check.nix {
+          inherit pkgs;
+          htmlPath = "${site}/index.html";
+          name = "site-status-screenshot";
+        };
       };
     };
 }

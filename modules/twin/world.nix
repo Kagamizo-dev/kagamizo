@@ -108,7 +108,7 @@ let
       #search:focus { outline:none; border-color:var(--accent); }
       /* ── legend chip row ───────────────────────────────────── */
       #chip-row { display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; padding:4px 10px; border-bottom:1px solid var(--line); flex-shrink:0; min-height:32px; }
-      #chip-row .chip-toggle { background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; font-weight:600; padding:2px 6px; border-radius:4px; display:flex; align-items:center; gap:4px; }
+      #chip-row .chip-toggle { background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; font-weight:600; padding:2px 6px; border-radius:4px; display:flex; align-items:center; gap:4px; min-height:44px; min-width:44px; }
       #chip-row .chip-toggle:hover { background:var(--line); }
       #chip-row .chip-toggle .arrow { transition:transform .2s; display:inline-block; }
       #chip-row .chip-toggle.collapsed .arrow { transform:rotate(-90deg); }
@@ -121,7 +121,7 @@ let
       #world-wrap { flex:1; position:relative; overflow:hidden; touch-action:none; }
       #world-canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; position:absolute; top:0; left:0; }
       /* ── fit button ────────────────────────────────────────── */
-      #fit-btn { position:absolute; bottom:8px; right:8px; z-index:5; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer; color:var(--fg); box-shadow:0 1px 4px rgba(0,0,0,.1); }
+      #fit-btn { position:absolute; bottom:8px; right:8px; z-index:5; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer; color:var(--fg); box-shadow:0 1px 4px rgba(0,0,0,.1); min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; }
       #fit-btn:hover { border-color:var(--accent); }
       /* ── panel ─────────────────────────────────────────────── */
       #panel { position:fixed; bottom:0; left:0; right:0; max-height:70dvh; background:var(--card); border-top:2px solid var(--line); border-radius:12px 12px 0 0; padding:14px 16px 16px; overflow-y:auto; transform:translateY(100%); transition:transform .25s ease; z-index:10; box-shadow:0 -4px 20px rgba(0,0,0,.15); }
@@ -129,7 +129,7 @@ let
       #panel .panel-hdr { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
       #panel .panel-hdr .sprite4x { width:64px; height:64px; image-rendering:pixelated; image-rendering:crisp-edges; border:1px solid var(--line); border-radius:4px; flex-shrink:0; }
       #panel .panel-hdr h2 { font-size:17px; margin:0; }
-      #panel .close { margin-left:auto; background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; padding:0 4px; line-height:1; }
+      #panel .close { margin-left:auto; background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; padding:0 4px; line-height:1; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; }
       #panel .sub { color:var(--muted); font-size:13px; margin-bottom:8px; }
       #panel .status { display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; }
       .status-declared { background:var(--line); color:var(--muted); }
@@ -144,7 +144,7 @@ let
       .recipe-tile img { width:100%; height:100%; object-fit:contain; }
       .recipe-tile .badge { position:absolute; bottom:0; right:0; font-size:8px; background:var(--card); padding:0 2px; border:1px solid var(--line); border-radius:2px; line-height:1.2; }
       .hint { color:var(--muted); font-size:13px; font-style:italic; }
-      @media (min-width:800px) {
+      @media (min-width:50rem) {
         #panel { left:auto; right:16px; bottom:16px; width:380px; max-height:80vh; border-radius:12px; border:1px solid var(--line); }
       }
     </style></head><body>
@@ -813,30 +813,34 @@ in
           '';
 
       checks.twin-view =
-        pkgs.runCommand "twin-view"
-          {
-            nativeBuildInputs = [ pkgs.chromium ];
-          }
-          ''
-            export HOME=$TMPDIR
-            mkdir $out
-
-            # 1. Screenshot the world page on a phone-sized viewport.
-            chromium --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
-              --window-size=390,844 --screenshot=$out/twin-phone.png \
-              file://${htmlFile} 2>/dev/null
-            test -s $out/twin-phone.png
-
-            # 2. Deep-link test: ?open=<first building> must open the panel.
-            #    chromium --dump-dom prints the rendered DOM; grep for the open class.
-            chromium --headless=new --no-sandbox --disable-gpu \
-              --dump-dom "file://${htmlFile}?open=${firstBuilding}" 2>/dev/null \
-              | grep -q 'id="panel" class="open"'
-
-            # 3. Copy the HTML into the output for inspection.
-            cp ${htmlFile} $out/twin.html
-
-            touch $out/panel-ok
-          '';
+        let
+          pageCheck = import ../site/_check.nix {
+            inherit pkgs;
+            htmlPath = htmlFile;
+            name = "twin-view";
+            # Twin world: single viewport (phone) suffices; deep-link test
+            # as an additional URL check.
+            viewports = [
+              {
+                width = 390;
+                height = 844;
+                label = "phone";
+              }
+            ];
+            additionalUrls = [
+              {
+                url = "file://${htmlFile}?open=${firstBuilding}";
+                label = "deep-link";
+                assertions = [
+                  {
+                    pattern = "id=\"panel\".*open";
+                    msg = "deep-link opens panel for '${firstBuilding}'";
+                  }
+                ];
+              }
+            ];
+          };
+        in
+        pageCheck;
     };
 }
