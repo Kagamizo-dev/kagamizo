@@ -2,8 +2,10 @@
 # agent (../governance/options.nix: one entity, personas, grants) with
 # what it runs on and may propose. They run in DeepSeek Harness on
 # jingzo-host (../hetzner/_harness.nix reads `agents.teamsJson`) and spend
-# the Orca fleet's key; their shares add up to its cap, which Lean checks
-# (./tiers.nix, checks.agents-budget).
+# the chat-and-code key; their shares (review 3 + design 4 + upkeep 4 = 11)
+# fit its $20 cap. research-jingzo runs on the research key ($20), and twin
+# and builders run on the mirazo swarm key (swarms-mirazo, $20). Lean checks
+# every key's shares fit (./tiers.nix, checks.agents-budget).
 #
 #   design     proposes each page's layout against the mobile rubric
 #   twin       turns inventory and CAD into the twin's items
@@ -12,7 +14,7 @@
 #   upkeep     bumps pinned projects and reads changelogs
 { lib, config, ... }:
 let
-  team = personas: tools: changeClasses: budget: purpose: {
+  team = personas: tools: changeClasses: budget: purpose: key: model: {
     serves = "kagamizo";
     inherit
       personas
@@ -20,7 +22,7 @@ let
       changeClasses
       purpose
       ;
-    key = "orca-fleet";
+    inherit key model;
     budgetUsdPerMonth = budget;
     harness = "dsh";
   };
@@ -48,7 +50,9 @@ in
           "testing/testing-reality-checker"
         ] [ "repo" "matrix" ] [ ]
         3
-        "the review team: reads every pull request of code or tools against the checks and the plan";
+        "the review team: reads every pull request of code or tools against the checks and the plan"
+        "chat-and-code"
+        "deepseek/deepseek-v4-flash";
     # Jingzo's research: the research-to-trade loop (research@jingzo.org).
     research-jingzo = {
       serves = "jingzo";
@@ -75,7 +79,9 @@ in
           "design/design-ui-finish-gate-reviewer"
         ] [ "shell" "repo" "matrix" ] [ "page-design" "content" ]
         4
-        "the design team: three layouts, a critique, a pick; every page checked on a phone and a desktop";
+        "the design team: three layouts, a critique, a pick; every page checked on a phone and a desktop"
+        "chat-and-code"
+        "deepseek/deepseek-v4-pro";
     twin =
       personal
         [
@@ -97,7 +103,9 @@ in
           "testing/testing-tool-evaluator"
         ] [ "shell" "web" "repo" "matrix" ] [ "tool" "code" ]
         4
-        "the upkeep team: bumps pinned projects, reads changelogs, maps new tools";
+        "the upkeep team: bumps pinned projects, reads changelogs, maps new tools"
+        "chat-and-code"
+        "deepseek/deepseek-v4-flash";
   };
 
   # A key an agent names must be declared; its entity's swarm key is the

@@ -229,6 +229,8 @@ in
           owner = "twin";
           reviewers = [
             "builders"
+            "accounting-mirazo"
+            "legal-mirazo"
             "governance-mirazo"
           ];
           changeClasses = [
