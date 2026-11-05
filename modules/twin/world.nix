@@ -81,24 +81,35 @@ let
   :root {
     --bg:#fbfaf8; --card:#ffffff; --fg:#1d1c1a; --muted:#6b6862;
     --line:#e4e1db; --accent:#2b5fa8; --gap:#b4441f; --ok:#2f6f4f;
-    --tile:44;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg:#151514; --card:#1e1e1c; --fg:#ecebe8; --muted:#a3a09a; --line:#34322f; --accent:#8db4ee; --gap:#ef8a64; --ok:#7fc4a0; }
   }
   * { box-sizing:border-box; }
-  body { background:var(--bg); color:var(--fg); font:14px/1.4 system-ui,sans-serif; margin:0; padding:0; overscroll-behavior:none; overflow:hidden; height:100dvh; width:100vw; }
+  body { background:var(--bg); color:var(--fg); font:14px/1.4 system-ui,sans-serif; margin:0; padding:0; overscroll-behavior:none; height:100dvh; width:100vw; }
   #app { display:flex; flex-direction:column; height:100dvh; }
   header { display:flex; align-items:center; gap:8px; padding:6px 10px; border-bottom:1px solid var(--line); flex-shrink:0; }
   header h1 { font-size:16px; margin:0; white-space:nowrap; }
   #search { flex:1; border:1px solid var(--line); border-radius:6px; padding:6px 10px; background:var(--card); color:var(--fg); font-size:14px; min-width:0; }
   #search:focus { outline:none; border-color:var(--accent); }
+  /* ── legend chip row ───────────────────────────────────── */
+  #chip-row { display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; padding:4px 10px; border-bottom:1px solid var(--line); flex-shrink:0; min-height:32px; }
+  #chip-row .chip-toggle { background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; font-weight:600; padding:2px 6px; border-radius:4px; display:flex; align-items:center; gap:4px; }
+  #chip-row .chip-toggle:hover { background:var(--line); }
+  #chip-row .chip-toggle .arrow { transition:transform .2s; display:inline-block; }
+  #chip-row .chip-toggle.collapsed .arrow { transform:rotate(-90deg); }
+  #chip-row .chip-body { display:flex; flex-wrap:wrap; gap:4px 6px; }
+  #chip-row .chip-body.collapsed { display:none; }
+  #chip-row .chip { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:2px 10px 2px 6px; border-radius:12px; cursor:pointer; border:1px solid transparent; transition:border-color .15s; }
+  #chip-row .chip:hover { border-color:var(--accent); }
+  .chip-swatch { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+  /* ── world wrap ────────────────────────────────────────── */
   #world-wrap { flex:1; position:relative; overflow:hidden; touch-action:none; }
   #world-canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; position:absolute; top:0; left:0; }
-  #legend { position:absolute; top:8px; left:8px; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:11px; z-index:5; max-width:160px; box-shadow:0 2px 8px rgba(0,0,0,.12); }
-  #legend b { display:block; margin-bottom:3px; font-size:12px; }
-  #legend span { display:inline-block; margin:1px 4px 1px 0; }
-  .legend-s { width:10px;height:10px;display:inline-block;border-radius:2px;vertical-align:middle;margin-right:3px; }
+  /* ── fit button ────────────────────────────────────────── */
+  #fit-btn { position:absolute; bottom:8px; right:8px; z-index:5; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer; color:var(--fg); box-shadow:0 1px 4px rgba(0,0,0,.1); }
+  #fit-btn:hover { border-color:var(--accent); }
+  /* ── panel ─────────────────────────────────────────────── */
   #panel { position:fixed; bottom:0; left:0; right:0; max-height:70dvh; background:var(--card); border-top:2px solid var(--line); border-radius:12px 12px 0 0; padding:14px 16px 16px; overflow-y:auto; transform:translateY(100%); transition:transform .25s ease; z-index:10; box-shadow:0 -4px 20px rgba(0,0,0,.15); }
   #panel.open { transform:translateY(0); }
   #panel .panel-hdr { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
@@ -128,9 +139,10 @@ let
   <h1>🌍 Twin</h1>
   <input id="search" type="search" placeholder="Search modules, agents, items…" autocomplete="off">
 </header>
+<div id="chip-row"></div>
 <div id="world-wrap">
   <canvas id="world-canvas"></canvas>
-  <div id="legend"></div>
+  <button id="fit-btn">⌂ Fit</button>
 </div>
 </div>
 <div id="panel"></div>
@@ -150,9 +162,14 @@ let
   var wrap = document.getElementById("world-wrap");
   var panel = document.getElementById("panel");
   var search = document.getElementById("search");
-  var legend = document.getElementById("legend");
+  var chipRow = document.getElementById("chip-row");
+  var fitBtn = document.getElementById("fit-btn");
 
   var SPR = 16;
+
+  // -- pan / scroll state ------------------------------------
+  var panX = 0;
+  var panY = 0;
 
   // -- build map data ---------------------------------------
   function buildMap() {
@@ -227,6 +244,13 @@ let
     return osc.toDataURL();
   }
 
+  // -- compute grid columns from viewport width -------------
+  function gridCols(vw) {
+    if (vw < 480) return 1;
+    if (vw < 900) return 2;
+    return 3;
+  }
+
   // -- render -----------------------------------------------
   function render() {
     var rect = wrap.getBoundingClientRect();
@@ -235,37 +259,62 @@ let
     var spriteScale = vw >= 600 ? 3 : 2;
     var tilePx = SPR * spriteScale;
     var GAP = Math.round(SPR * spriteScale * 0.35);
-    var HALIGN = SPR * spriteScale;
+
+    var nCols = gridCols(vw);
+    var colW = Math.floor((vw - (nCols - 1) * GAP) / nCols);
 
     var distLayout = [];
-    var cursorX = 0;
-    var maxH = 0;
-    mapData.forEach(function(md) {
-      var w = md.cols * tilePx;
-      var h = md.rows * tilePx;
+    var curCol = 0;
+    var curY = 0;
+    var colH = new Array(nCols).fill(0);
+
+    var cellPad = Math.round(SPR * spriteScale * 0.2);
+
+    mapData.forEach(function(md, idx) {
+      var nRep = md.reps.length;
+      var repCols = md.cols;
+      var repRows = md.rows;
+      var w = repCols * tilePx + cellPad * 2;
+      var h = repRows * tilePx;
       var labH = Math.round(SPR * spriteScale * 0.75);
-      var totalH = h + labH + Math.round(SPR * spriteScale * 0.25);
-      var x = cursorX;
+      var totalH = labH + h + Math.round(SPR * spriteScale * 0.25) + cellPad * 2;
+      var cellW = Math.min(colW, w + GAP);
+
+      // find the shortest column
+      var minCol = 0;
+      var minH = colH[0];
+      for (var c = 1; c < nCols; c++) {
+        if (colH[c] < minH) { minH = colH[c]; minCol = c; }
+      }
+      curCol = minCol;
+      curY = colH[curCol];
+
+      var x = curCol * (colW + GAP) + Math.floor((colW - cellW) / 2);
+      if (x < 0) x = 0;
+
       distLayout.push({
-        md: md, x: x, y: 0, w: w, h: h, labH: labH, totalH: totalH,
-        groundW: w + tilePx,
-        groundH: totalH + Math.round(SPR * spriteScale * 0.15)
+        md: md, x: x, y: curY, w: w, h: h, labH: labH, totalH: totalH,
+        groundW: cellW,
+        groundH: totalH,
+        col: curCol
       });
-      cursorX += Math.max(w + GAP, HALIGN);
-      if (totalH > maxH) maxH = totalH;
+
+      colH[curCol] = curY + totalH + GAP;
     });
-    var mapW = cursorX;
-    var canvasW = Math.ceil(mapW);
-    var canvasH = Math.ceil(maxH);
 
-    canvas.width = canvasW;
-    canvas.height = canvasH;
-    canvas.style.width = canvasW + "px";
-    canvas.style.height = canvasH + "px";
+    var mapH = Math.max.apply(null, colH);
+    var mapW = nCols * (colW + GAP) - GAP;
+    if (mapW < vw) mapW = vw;
 
-    var offX = Math.max(0, Math.floor((vw - canvasW) / 2));
+    canvas.width = Math.ceil(mapW);
+    canvas.height = Math.ceil(mapH);
+    canvas.style.width = Math.ceil(mapW) + "px";
+    canvas.style.height = Math.ceil(mapH) + "px";
+
+    var offX = panX;
+    var offY = panY;
     canvas.style.left = offX + "px";
-    canvas.style.top = "0px";
+    canvas.style.top = offY + "px";
 
     var ctx = canvas.getContext("2d");
     ctx.imageSmoothingEnabled = false;
@@ -280,27 +329,97 @@ let
       ctx.fillStyle = isDark ? "#ecebe8" : "#1d1c1a";
       ctx.font = "900 " + Math.round(SPR * spriteScale * 0.5) + "px system-ui,sans-serif";
       ctx.textBaseline = "top";
-      ctx.fillText(d.label, gx + Math.round(SPR * spriteScale * 0.2), gy + Math.round(SPR * spriteScale * 0.15));
+      ctx.fillText(d.label, gx + cellPad, gy + cellPad);
       dl.md.reps.forEach(function(r) {
-        var sx = gx + r._gx * spriteScale;
-        var sy = gy + (dl.labH + r._gy * spriteScale);
+        var sx = gx + cellPad + r._gx * spriteScale;
+        var sy = gy + (dl.labH + cellPad + r._gy * spriteScale);
         drawSprite(ctx, r.sprite, sx, sy, spriteScale, r._filtered);
       });
     });
 
-    legend.innerHTML = "<b>Districts</b>" +
+    // -- legend chip row -------------------------------------
+    chipRow.innerHTML =
+      '<button class="chip-toggle" id="chip-toggle">' +
+      '<span class="arrow">▼</span> Districts</button>' +
+      '<div class="chip-body" id="chip-body">' +
       districts.map(function(d) {
-        return '<span><span class="legend-s" style="background:' +
-          (isDark ? d.color.dark : d.color.light) +
-          '"></span>' + d.label + '</span>';
-      }).join("");
+        var col = isDark ? d.color.dark : d.color.light;
+        return '<span class="chip" data-dist="' + d.name + '"><span class="chip-swatch" style="background:' + col + '"></span>' + d.label + '</span>';
+      }).join("") +
+      '</div>';
+
+    var toggleBtn = document.getElementById("chip-toggle");
+    var chipBody = document.getElementById("chip-body");
+    toggleBtn.addEventListener("click", function() {
+      chipBody.classList.toggle("collapsed");
+      toggleBtn.classList.toggle("collapsed");
+    });
+    chipBody.querySelectorAll(".chip").forEach(function(el) {
+      el.addEventListener("click", function() {
+        var distName = el.getAttribute("data-dist");
+        var dl = distLayout.find(function(d) { return d.md.d.name === distName; });
+        if (dl) {
+          panTo(dl.x, dl.y);
+        }
+      });
+    });
 
     if (search.value.trim()) applyFilter(search.value.trim());
 
     window.__distLayout = distLayout;
     window.__spriteScale = spriteScale;
     window.__canvasOffX = offX;
+    window.__canvasOffY = offY;
   }
+
+  // -- pan to a district ------------------------------------
+  var panAnim = null;
+  function panTo(tx, ty) {
+    if (panAnim) { cancelAnimationFrame(panAnim); panAnim = null; }
+    var rect = wrap.getBoundingClientRect();
+    var vw = rect.width;
+    var vh = rect.height;
+    var startX = panX;
+    var startY = panY;
+    // centre the target
+    var targetX = -tx + Math.floor(vw / 2);
+    var targetY = -ty + Math.floor(vh / 2);
+    // clamp so canvas doesn't leave viewport
+    var cw = parseInt(canvas.style.width);
+    var ch = parseInt(canvas.style.height);
+    if (targetX > 0) targetX = 0;
+    if (targetY > 0) targetY = 0;
+    if (targetX < -(cw - vw)) targetX = -(cw - vw);
+    if (targetY < -(ch - vh)) targetY = -(ch - vh);
+    if (cw <= vw) targetX = 0;
+    if (ch <= vh) targetY = 0;
+
+    var dur = 250;
+    var t0 = performance.now();
+    function step(now) {
+      var t = Math.min(1, (now - t0) / dur);
+      var ease = t < 0.5 ? 2*t*t : -1 + (4-2*t)*t; // easeInOutQuad
+      panX = startX + (targetX - startX) * ease;
+      panY = startY + (targetY - startY) * ease;
+      canvas.style.left = Math.round(panX) + "px";
+      canvas.style.top = Math.round(panY) + "px";
+      if (t < 1) { panAnim = requestAnimationFrame(step); }
+      else { panAnim = null; }
+    }
+    panAnim = requestAnimationFrame(step);
+  }
+
+  // -- fit --------------------------------------------------
+  function fitView() {
+    panX = 0;
+    panY = 0;
+    canvas.style.left = "0px";
+    canvas.style.top = "0px";
+    initDrag();
+    render();
+  }
+
+  fitBtn.addEventListener("click", fitView);
 
   // -- search / filter --------------------------------------
   function applyFilter(q) {
@@ -319,6 +438,7 @@ let
     var spriteScale = window.__spriteScale || 2;
     var isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     var distLayout = window.__distLayout;
+    var cellPad = Math.round(SPR * spriteScale * 0.2);
     if (!distLayout) return;
 
     var ctx = canvas.getContext("2d");
@@ -333,10 +453,10 @@ let
       ctx.fillStyle = isDark ? "#ecebe8" : "#1d1c1a";
       ctx.font = "900 " + Math.round(SPR * spriteScale * 0.5) + "px system-ui,sans-serif";
       ctx.textBaseline = "top";
-      ctx.fillText(d.label, gx + Math.round(SPR * spriteScale * 0.2), gy + Math.round(SPR * spriteScale * 0.15));
+      ctx.fillText(d.label, gx + cellPad, gy + cellPad);
       dl.md.reps.forEach(function(r) {
-        var sx = gx + r._gx * spriteScale;
-        var sy = gy + (dl.labH + r._gy * spriteScale);
+        var sx = gx + cellPad + r._gx * spriteScale;
+        var sy = gy + (dl.labH + cellPad + r._gy * spriteScale);
         drawSprite(ctx, r.sprite, sx, sy, spriteScale, r._filtered);
       });
     });
@@ -345,8 +465,8 @@ let
       var first = matches[0];
       var dl = distLayout.find(function(dl) { return dl.md.d.name === first.place; });
       if (dl) {
-        var sx = dl.x + first._gx * spriteScale;
-        var sy = dl.y + (dl.labH + first._gy * spriteScale);
+        var sx = dl.x + cellPad + first._gx * spriteScale;
+        var sy = dl.y + (dl.labH + cellPad + first._gy * spriteScale);
         ctx.strokeStyle = isDark ? "#f0c040" : "#d4a017";
         ctx.lineWidth = 3;
         ctx.strokeRect(sx - 2, sy - 2, SPR * spriteScale + 4, SPR * spriteScale + 4);
@@ -433,16 +553,18 @@ let
     var dl = window.__distLayout;
     var sc = window.__spriteScale || 2;
     var ox = window.__canvasOffX || 0;
+    var oy = window.__canvasOffY || 0;
+    var cellPad = Math.round(SPR * sc * 0.2);
     var cx2 = mapX - ox;
-    var cy2 = mapY;
+    var cy2 = mapY - oy;
     if (!dl) return null;
     for (var i = 0; i < dl.length; i++) {
       var d = dl[i];
       if (cx2 >= d.x && cx2 < d.x + d.groundW && cy2 >= d.y && cy2 < d.y + d.groundH) {
         for (var j = 0; j < d.md.reps.length; j++) {
           var r = d.md.reps[j];
-          var sx = d.x + r._gx * sc;
-          var sy = d.y + (d.labH + r._gy * sc);
+          var sx = d.x + cellPad + r._gx * sc;
+          var sy = d.y + (d.labH + cellPad + r._gy * sc);
           if (cx2 >= sx && cx2 < sx + SPR * sc && cy2 >= sy && cy2 < sy + SPR * sc) {
             return r;
           }
@@ -454,13 +576,24 @@ let
 
   // -- mouse events ------------------------------------------
   var dragState = null;
+  function initDrag() {
+    dragState = null;
+  }
+
   wrap.addEventListener("mousedown", function(e) {
-    dragState = { startX: e.clientX, startY: e.clientY, moved: false };
+    dragState = { startX: e.clientX, startY: e.clientY, startPanX: panX, startPanY: panY, moved: false };
   });
   window.addEventListener("mousemove", function(e) {
     if (!dragState) return;
-    if (Math.abs(e.clientX - dragState.startX) > 4 ||
-        Math.abs(e.clientY - dragState.startY) > 4) dragState.moved = true;
+    var dx = e.clientX - dragState.startX;
+    var dy = e.clientY - dragState.startY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+      dragState.moved = true;
+      panX = dragState.startPanX + dx;
+      panY = dragState.startPanY + dy;
+      canvas.style.left = panX + "px";
+      canvas.style.top = panY + "px";
+    }
   });
   window.addEventListener("mouseup", function(e) {
     if (!dragState) return;
@@ -476,13 +609,18 @@ let
   var touchState = null;
   wrap.addEventListener("touchstart", function(e) {
     if (e.touches.length === 1) {
-      touchState = { startX: e.touches[0].clientX, startY: e.touches[0].clientY, moved: false };
+      touchState = { startX: e.touches[0].clientX, startY: e.touches[0].clientY, startPanX: panX, startPanY: panY, moved: false };
     }
   }, { passive: true });
   wrap.addEventListener("touchmove", function(e) {
     if (e.touches.length === 1 && touchState) {
-      if (Math.abs(e.touches[0].clientX - touchState.startX) > 8 ||
-          Math.abs(e.touches[0].clientY - touchState.startY) > 8) touchState.moved = true;
+      var dx = e.touches[0].clientX - touchState.startX;
+      var dy = e.touches[0].clientY - touchState.startY;
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) touchState.moved = true;
+      panX = touchState.startPanX + dx;
+      panY = touchState.startPanY + dy;
+      canvas.style.left = panX + "px";
+      canvas.style.top = panY + "px";
     }
   }, { passive: true });
   wrap.addEventListener("touchend", function(e) {
