@@ -10,6 +10,11 @@
 #                           pinned version
 #   checks.site-status      renders it in the pinned Chromium and keeps the
 #                           screenshot (site-status/status.png in the build)
+#   packages.site-research  the homepage with the research papers beside it
+#                           (papers/<strategy>.{pdf,html}, ../research/papers.nix),
+#                           the bundle a worker serves; serving it is the
+#                           design team's and infra's next step (the status
+#                           worker, ../cloudflare/_status.nix, is unchanged)
 #
 # Served at status.mirazo.org by a Worker behind Cloudflare Access, only to
 # the owner (../cloudflare/_status.nix; the owner's go, 2026-11-01).
@@ -85,10 +90,10 @@ in
           .gap { color:var(--gap) } .ok { color:var(--ok) }
         </style></head><body><div class="wrap">
         <nav>
-          <b>Start</b><a href="#apps">Apps</a><a href="#infra">Infrastructure</a>
+          <b>Start</b><a href="#apps">Apps</a><a href="#infra">Infrastructure</a><a href="#research">Research</a>
           <b>Teams</b><a href="#areas">Who owns what</a>
-          <b>Money</b><a href="#cards">Cards</a><a href="#ai">AI keys</a><a href="#credit">Credit lines</a><a href="#tax">Tax</a>
-          <b>Records</b><a href="#entities">Entities</a><a href="#domains">Domains</a><a href="#accounts">Accounts</a><a href="#gaps">Gaps</a><a href="#steps">Your steps</a><a href="#migration">Migration</a><a href="#ci">CI</a><a href="#catalogs">Catalogs</a>
+          <b>Money</b><a href="#cards">Cards</a><a href="#ai">AI keys</a><a href="#credit">Credit lines</a><a href="#tax">Tax</a><a href="#rules">Rules</a>
+          <b>Records</b><a href="#entities">Entities</a><a href="#legal">Legal record</a><a href="#domains">Domains</a><a href="#accounts">Accounts</a><a href="#gaps">Gaps</a><a href="#steps">Your steps</a><a href="#migration">Migration</a><a href="#ci">CI</a><a href="#catalogs">Catalogs</a>
         </nav>
         <main>
         <h1>Kagamizo</h1>
@@ -140,6 +145,17 @@ in
             <dt>Cedar</dt><dd>authorizes every account action</dd>
             <dt>OpenTofu</dt><dd>applies Cloudflare and Hetzner</dd></dl></div>
         </div>
+
+        <h2 id="research">Research</h2>
+        <p class="lede">One paper per trading strategy, rendered from the declarations and the team's prose (modules/research/papers.nix), stripped to what Lean proves public: the mathematics, the algorithm, the theorems, the backtest method and results.</p>
+        ${table [ "Paper" "Strategy" "Stage" "Read" ] (
+          lib.mapAttrsToList (
+            s: p:
+            "<tr>${td p.title}${td s}${
+              td top.trading.strategies.${s}.stage
+            }<td><a href=\"papers/${s}.html\">paper</a> · <a href=\"papers/${s}.pdf\">PDF</a></td></tr>\n"
+          ) (lib.filterAttrs (_: p: p.public) top.research.papers)
+        )}
 
         <h2 id="areas">Who owns what</h2>
         <p class="lede">Every area is a mailbox role: one owning team, reviewers that are never the owner, the controller who signs off, and the change classes it may propose. Lean proves the shape (modules/organization).</p>
@@ -229,6 +245,60 @@ in
           )
         }
 
+        <h2 id="legal">Legal record</h2>
+        <p class="lede">What each entity is on paper (modules/legal): purpose, owners, where it is formed, its registered agent and the documents it holds. Private values (EIN, filing number, dates of formation) live in Proton Pass and are read only when a document is rendered; Lean proves each record complete for its standing.</p>
+        <div class="grid">
+        ${lib.concatStrings (
+          lib.mapAttrsToList (
+            e: r:
+            let
+              o = r.organization;
+              dash = v: if v == null then "—" else v;
+            in
+            ''
+              <div class="card wide"><h3>${esc r.legalName}</h3><div class="sub">${esc e}: ${esc r.kind}, ${esc r.status}</div><dl>
+                            <dt>Purpose</dt><dd>${esc (dash r.purpose)}</dd>
+                            <dt>Organization</dt><dd>${
+                              if o == null then
+                                "—"
+                              else
+                                esc "${o.management}: ${
+                                  lib.concatMapStringsSep ", " (m: "${m.name} ${toString m.percent}%") o.members
+                                }${
+                                  lib.optionalString (o.managers != [ ])
+                                    "; managers ${lib.concatMapStringsSep ", " (m: m.name) o.managers}"
+                                }"
+                            }</dd>
+                            <dt>State</dt><dd>${
+                              if r.formation.state != null then
+                                esc r.formation.state
+                              else if r.formation.item != null then
+                                "in Proton Pass (${esc r.formation.item})"
+                              else
+                                "—"
+                            }</dd>
+                            <dt>EIN</dt><dd>${
+                              if r.ein.item != null then "in Proton Pass (${esc r.ein.item})" else "—"
+                            }</dd>
+                            <dt>Registered agent</dt><dd>${
+                              if r.registeredAgent == null then
+                                "—"
+                              else
+                                esc "${r.registeredAgent.name} (${r.registeredAgent.account})"
+                            }</dd>
+                            <dt>Taxed as</dt><dd>${esc (dash r.taxClassification)}</dd>
+                            <dt>Documents</dt><dd>${
+                              if r.documents == [ ] then
+                                "—"
+                              else
+                                lib.concatMapStringsSep "<br>" (
+                                  d: esc "${d.title}${if d.issued == null then "" else ", ${d.issued}"}"
+                                ) r.documents
+                            }</dd></dl></div>''
+          ) top.legal.public
+        )}
+        </div>
+
         <h2 id="domains">Domains</h2>
         ${table [ "Domain" "Entity" "Registrar" "Mailboxes" ] (
           lib.mapAttrsToList (
@@ -304,6 +374,34 @@ in
               )
             )
         )}
+
+        <h2 id="rules">Rules we trade under</h2>
+        <p class="lede">Every rule with its source and the day it was read; a typed constraint is decided by Lean against the observed accounts and the declared strategies (modules/compliance).</p>
+        ${table
+          [
+            "Authority"
+            "Citation"
+            "Title"
+            "Applies to"
+            "Constraint"
+            "Source"
+            "Checked"
+          ]
+          (
+            map (
+              r:
+              row [
+                r.authority
+                r.citation
+                r.title
+                r.applies
+                r.constraint
+                r.source
+                (if r.checked == null then "not read" else r.checked)
+              ]
+            ) top.compliance.index.rows
+          )
+        }
 
         <h2 id="credit">Credit lines</h2>
         ${table
@@ -397,6 +495,14 @@ in
         mkdir $out
         cp ${html} $out/index.html
       '';
+      # The homepage with the public papers beside it, where its links point.
+      research = pkgs.runCommand "site-research" { } ''
+        mkdir -p $out/papers
+        cp ${site}/index.html $out/
+        for s in $(${lib.getExe pkgs.jq} -r '.[]' ${config.packages.research-papers}/papers/public.json); do
+          cp ${config.packages.research-papers}/papers/$s.html ${config.packages.research-papers}/papers/$s.pdf $out/papers/
+        done
+      '';
     in
     {
       options.site.statusHtml = lib.mkOption {
@@ -407,6 +513,7 @@ in
       config = {
         site.statusHtml = htmlText;
         packages.site-status = site;
+        packages.site-research = research;
         checks.site-status =
           pkgs.runCommand "site-status-screenshot"
             {
