@@ -6,9 +6,17 @@
 #       backtest, then paper, then live; live orders will be a spend action
 #       (modules/governance), so no agent ever places one.
 #   trading.strategies.<name> = { kind; backend; symbol; bar; params; option;
-#                                 event; decisions; }
+#                                 event; decisions; holdDays;
+#                                 maxDayTradesPer5Days; }
 #       one strategy on one instrument (or, for event-rule, one category of
-#       event contracts) of one backend.
+#       event contracts) of one backend. holdDays is the least number of
+#       days a position is held (0: it may be closed the day it opens);
+#       maxDayTradesPer5Days is the most round trips the strategy can open
+#       and close on one day over five business days, defaulting per kind
+#       (0 with holdDays ≥ 1; ema-cross on daily bars 0, since one bar is
+#       one day; agent-option and event-rule 5, one proposal a day that
+#       nothing stops closing the same day) and held under FINRA's
+#       pattern-day-trader rule by modules/compliance.
 #
 #   nix run .#trade -- backtest <strategy> <bars.csv>
 #   nix run .#trade -- bars <symbol> <step> [period]     Public's bars as CSV
@@ -61,122 +69,154 @@ let
     };
   };
 
-  strategy = types.submodule {
-    options = {
-      kind = mkOption {
-        type = types.enum [
-          "ema-cross"
-          # The day's research decision into one defined-risk option within
-          # the limits (./_propose.py, ./limits.nix).
-          "agent-option"
-          # Event contracts by rule: a forecast's probability against the
-          # contract's price (./_weather.py, ./_propose.py).
-          "event-rule"
-        ];
-        description = "A strategy _trade.py knows how to build.";
+  strategy = types.submodule (
+    { config, ... }:
+    {
+      options = {
+        holdDays = mkOption {
+          type = types.ints.unsigned;
+          default = 0;
+          description = ''
+            The least number of days a position is held once opened: 0 lets
+            the strategy close it the same day, 1 or more holds it overnight,
+            so no round trip is a day trade.
+          '';
+        };
+        maxDayTradesPer5Days = mkOption {
+          type = types.ints.unsigned;
+          default =
+            if config.holdDays >= 1 then
+              0
+            else
+              {
+                ema-cross = if lib.hasSuffix "-DAY" config.bar then 0 else 5;
+                agent-option = 5;
+                event-rule = 5;
+              }
+              .${config.kind};
+          defaultText = lib.literalMD "0 with `holdDays` ≥ 1; else per kind: ema-cross 0 on daily bars and 5 below, agent-option 5, event-rule 5";
+          description = ''
+            The most round trips (a buy and a sell of the same instrument on
+            one business day) the strategy can make in five consecutive
+            business days. modules/compliance holds it under FINRA's
+            pattern-day-trader rule for the account it runs on.
+          '';
+        };
+        kind = mkOption {
+          type = types.enum [
+            "ema-cross"
+            # The day's research decision into one defined-risk option within
+            # the limits (./_propose.py, ./limits.nix).
+            "agent-option"
+            # Event contracts by rule: a forecast's probability against the
+            # contract's price (./_weather.py, ./_propose.py).
+            "event-rule"
+          ];
+          description = "A strategy _trade.py knows how to build.";
+        };
+        event = mkOption {
+          type = types.nullOr (
+            types.submodule {
+              options = {
+                category = mkOption {
+                  type = types.str;
+                  description = "Public's event category, as `event-contracts categories` names it.";
+                };
+                subcategory = mkOption {
+                  type = types.nullOr types.str;
+                  default = null;
+                  description = "One of the category's subcategories, or null for the whole category.";
+                };
+                minEdge = mkOption {
+                  type = types.numbers.between 0.0 1.0;
+                  description = "The least model-probability-over-price a contract needs to be proposed.";
+                };
+                maxContracts = mkOption {
+                  type = types.ints.positive;
+                  description = "The most contracts one proposal buys.";
+                };
+                questions = mkOption {
+                  type = types.nonEmptyListOf (
+                    types.enum [
+                      "rain-month"
+                      "snow-month"
+                      "high-temp-day"
+                    ]
+                  );
+                  description = "The question shapes the rules may trade (_weather.py's QUESTIONS); everything else is skipped.";
+                };
+                source = mkOption {
+                  type = types.enum [
+                    "open-meteo"
+                    "nws"
+                  ];
+                  default = "open-meteo";
+                  description = "Where live forecasts come from (research.dataSources); --forecasts FILE replaces it.";
+                };
+              };
+            }
+          );
+          default = null;
+          description = "For event-rule: which contracts, which questions, and how much edge.";
+        };
+        option = mkOption {
+          type = types.nullOr (
+            types.submodule {
+              options = {
+                expiryDaysMin = mkOption {
+                  type = types.ints.positive;
+                  default = 7;
+                };
+                expiryDaysMax = mkOption {
+                  type = types.ints.positive;
+                  default = 21;
+                };
+                minAbsDelta = mkOption {
+                  type = types.numbers.between 0.0 1.0;
+                  default = 0.15;
+                };
+              };
+            }
+          );
+          default = null;
+          description = "For agent-option: how the contract is chosen.";
+        };
+        decisions = mkOption {
+          type = types.nullOr types.str;
+          default = null;
+          description = "For agent-option: the directory of research decisions, <dir>/<date>/<symbol>.json; for event-rule, the directory of the day's state and paper records.";
+        };
+        backend = mkOption { type = types.enum (lib.attrNames cfg.backends); };
+        symbol = mkOption {
+          type = types.strMatching "[A-Z][A-Z0-9.]*";
+          description = "The instrument; for event-rule, the exchange whose contracts Public lists (KALSHI, the prefix of every event symbol).";
+        };
+        bar = mkOption {
+          type = types.strMatching "[0-9]+-(SECOND|MINUTE|HOUR|DAY)";
+          default = "1-DAY";
+          description = "The bar step, as NautilusTrader writes it.";
+        };
+        startingUsd = mkOption {
+          type = types.ints.positive;
+          default = 10000;
+          description = "The simulated balance a backtest starts with.";
+        };
+        params = mkOption {
+          type = types.nullOr (
+            types.submodule {
+              options = {
+                tradeSize = mkOption { type = types.ints.positive; };
+                fastPeriod = mkOption { type = types.ints.positive; };
+                slowPeriod = mkOption { type = types.ints.positive; };
+              };
+            }
+          );
+          default = null;
+          description = "For ema-cross.";
+        };
       };
-      event = mkOption {
-        type = types.nullOr (
-          types.submodule {
-            options = {
-              category = mkOption {
-                type = types.str;
-                description = "Public's event category, as `event-contracts categories` names it.";
-              };
-              subcategory = mkOption {
-                type = types.nullOr types.str;
-                default = null;
-                description = "One of the category's subcategories, or null for the whole category.";
-              };
-              minEdge = mkOption {
-                type = types.numbers.between 0.0 1.0;
-                description = "The least model-probability-over-price a contract needs to be proposed.";
-              };
-              maxContracts = mkOption {
-                type = types.ints.positive;
-                description = "The most contracts one proposal buys.";
-              };
-              questions = mkOption {
-                type = types.nonEmptyListOf (
-                  types.enum [
-                    "rain-month"
-                    "snow-month"
-                    "high-temp-day"
-                  ]
-                );
-                description = "The question shapes the rules may trade (_weather.py's QUESTIONS); everything else is skipped.";
-              };
-              source = mkOption {
-                type = types.enum [
-                  "open-meteo"
-                  "nws"
-                ];
-                default = "open-meteo";
-                description = "Where live forecasts come from (research.dataSources); --forecasts FILE replaces it.";
-              };
-            };
-          }
-        );
-        default = null;
-        description = "For event-rule: which contracts, which questions, and how much edge.";
-      };
-      option = mkOption {
-        type = types.nullOr (
-          types.submodule {
-            options = {
-              expiryDaysMin = mkOption {
-                type = types.ints.positive;
-                default = 7;
-              };
-              expiryDaysMax = mkOption {
-                type = types.ints.positive;
-                default = 21;
-              };
-              minAbsDelta = mkOption {
-                type = types.numbers.between 0.0 1.0;
-                default = 0.15;
-              };
-            };
-          }
-        );
-        default = null;
-        description = "For agent-option: how the contract is chosen.";
-      };
-      decisions = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "For agent-option: the directory of research decisions, <dir>/<date>/<symbol>.json; for event-rule, the directory of the day's state and paper records.";
-      };
-      backend = mkOption { type = types.enum (lib.attrNames cfg.backends); };
-      symbol = mkOption {
-        type = types.strMatching "[A-Z][A-Z0-9.]*";
-        description = "The instrument; for event-rule, the exchange whose contracts Public lists (KALSHI, the prefix of every event symbol).";
-      };
-      bar = mkOption {
-        type = types.strMatching "[0-9]+-(SECOND|MINUTE|HOUR|DAY)";
-        default = "1-DAY";
-        description = "The bar step, as NautilusTrader writes it.";
-      };
-      startingUsd = mkOption {
-        type = types.ints.positive;
-        default = 10000;
-        description = "The simulated balance a backtest starts with.";
-      };
-      params = mkOption {
-        type = types.nullOr (
-          types.submodule {
-            options = {
-              tradeSize = mkOption { type = types.ints.positive; };
-              fastPeriod = mkOption { type = types.ints.positive; };
-              slowPeriod = mkOption { type = types.ints.positive; };
-            };
-          }
-        );
-        default = null;
-        description = "For ema-cross.";
-      };
-    };
-  };
+    }
+  );
 
   problems = lib.concatLists (
     lib.mapAttrsToList (
@@ -259,6 +299,11 @@ in
         symbol = "SPY";
         option = { };
         decisions = "research";
+        # The option is held at least overnight: the day's decision opens
+        # it, a later day's closes it, so no round trip is a day trade and
+        # the brokerage account (margin, far under $25,000) never meets
+        # FINRA's pattern-day-trader rule (modules/compliance, 2026-11-04).
+        holdDays = 1;
       };
       # The owner's framing of 2026-11-04: Kalshi's weather contracts on
       # Public, each settling on an observation (its worst case the price
@@ -281,6 +326,12 @@ in
           ];
         };
         decisions = "research";
+        # Contracts are held to settlement or at least overnight, never
+        # sold the day they are bought: at the default cadence (one
+        # proposal a day, closable the same day) the strategy would be five
+        # day trades in five days on a margin account under $25,000, which
+        # FINRA Rule 4210(f)(8)(B) restricts (modules/compliance, 2026-11-04).
+        holdDays = 1;
       };
     };
 
