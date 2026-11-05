@@ -11,6 +11,8 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | agents | `agents-budget` | build | none yet | none yet | 10% | Lean deciding every task's tier frugal and the keys' caps within the card (decide +kernel over the rendered lists); moves with tasks × keys |
 | catalog | `catalog-coverage` | build | none yet | none yet | 10% | Python walking every source file against 7 catalogs; moves with the number of sources and the regexes |
 | ci | `ci-pipeline` | build | none yet | none yet | 10% | Lean deciding every workflow sound |
+| cost | `cost-build` | build | none yet | none yet | 10% | cargo build --release of the cost report (std only); moves with the card count |
+| cost | `cost-lean` | build | none yet | none yet | 10% | Lean proving every card's draw fits its limit and the committed total stays under the ceiling (decide +kernel) |
 | governance | `governance-cedar` | build | none yet | none yet | 10% | Cedar's test runner over every generated test (6169); moves with accounts × actions × agents |
 | governance | `governance-changes` | build | none yet | none yet | 10% | Lean deciding the change-class table's shape, plus the Rust tool's tests; moves with the table |
 | inventory | `inventory-build` | build | none yet | none yet | 10% | cargo build --release of the inventory CLI (std only) and its statestore wrapper; moves with the schema |

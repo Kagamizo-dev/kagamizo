@@ -40,6 +40,7 @@
           inventory
           unit
           market
+          cost
         ];
       };
     in

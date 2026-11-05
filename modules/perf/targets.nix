@@ -17,6 +17,18 @@
       attr = "checks.x86_64-linux.tokens-graph";
       method = "Lean deciding the credential graph (every child's scope within its parent's, by List.contains); moves with nodes × scope sizes";
     };
+    cost-build = {
+      module = "cost";
+      kind = "build";
+      attr = "packages.x86_64-linux.cost";
+      method = "cargo build --release of the cost report (std only); moves with the card count";
+    };
+    cost-lean = {
+      module = "cost";
+      kind = "build";
+      attr = "checks.x86_64-linux.cost-lean";
+      method = "Lean proving every card's draw fits its limit and the committed total stays under the ceiling (decide +kernel)";
+    };
     market-build = {
       module = "market";
       kind = "build";
