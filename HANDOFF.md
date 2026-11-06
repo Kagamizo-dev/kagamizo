@@ -21,7 +21,7 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order: gate the weather backtest's replay pass and record its result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order: build the weather backtest's live source on the host and record its first real result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
@@ -34,15 +34,20 @@ The owner's focus is trading. What landed:
   edge and question parsing ported from `_weather.py` into
   `modules/trading/_weather-backtest`, 15 tests on `_json/forecasts.json`,
   built by `checks.weather-backtest`. Nothing here records a backtest yet.
-- **The replay pass** is dispatched to research-jingzo (brief in the
-  session's scratchpad, mirrored in the backlog item): sources behind a
-  `Source` trait (a fixture source first; HTTP clients once the host runner
-  reaches the weather and Kalshi hosts), settlement on the observed value,
-  the declared limits (maxContractPrice, the daily take-profit and loss
-  stop, maxOpenPositions, minEdge), P&L, drawdown, benchmark and alpha.
-  The gate then wires `trading.limits` into it and records the result
-  under research/backtests; `stages.weather-rules.backtest` counts only
-  under `backtestCounts` (alpha > 0, drawdown <= 20%).
+- **The replay** (research-jingzo, gated twice): mirrors `propose_event`
+  in `_propose.py`: both sides, one pick a day by edge then lowest ask,
+  sized by maxContracts, maxContractPriceUsd and maxPremiumUsd, the day's
+  stop and take-profit, sigma by lead time, settlement on the observed
+  high, P&L, drawdown, a buy-every-YES benchmark and alpha. Run as
+  `weather-backtest --days <file> --limits '<json>' --recorded <date>`,
+  with the limits under the names of `trading.limits.public` and
+  `weather-rules.event`. Only a fixture source exists (three hand-made
+  days, `_json/backtest-days.json`): they test the rules, so nothing is
+  recorded as the strategy's backtest. **Next:** the live `Source`
+  (forecasts as of before close, NWS climate reports, Kalshi prices),
+  which runs on the host; then record a real result under
+  research/backtests and set `stages.weather-rules.backtest`, which counts
+  only under `backtestCounts` (alpha > 0, drawdown <= 20%).
 - **The agent runner** (6e89d25, upkeep): a Rust binary that runs a
   headless dsh session from a typed request and pushes
   `agents/<team>/<topic>`; `agents.runner.scheduled` types the research
