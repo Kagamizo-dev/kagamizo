@@ -15,16 +15,67 @@ ticked) and the start message below, kept current.
 Start message for the next session:
 
 ```
-Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; HANDOFF.md's "The owner's standing decisions" holds what I've already decided, and its Roadmap is the order of work. Claude orchestrates only: every code, page and image change is a dsh job run through `nix run .#dispatch -- <team>/<topic> <task-file>`, gated by the checks in the session; Claude never writes code.
+Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; HANDOFF.md's "The owner's standing decisions" holds what I've already decided, and its Roadmap is the order of work. Work is done by the teams: each has a charter (modules/agents/charters.nix) and a typed backlog (modules/agents/backlog.nix); run an item with `nix run .#dispatch -- <team>/<topic> <its brief>`, gate it with the checks, and commit what passes under the team's name. Every file is held to Rust, Lean or Nix by `checks.languages` and the pre-commit hook; never raise the exceptions' baseline.
 
 Before anything else, check the network: `nix build .#session-tools` must reach cache.nixos.org. If the proxy refuses it (403), the session is not in the Kagamizo environment (see HANDOFF.md's "midday session"): stop and tell me, run nothing.
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "2026-11-04: the plan's step 2": apply chat.jingzo.org and reinstall the host if I have said go (else ask once), confirm the tunnel is healthy and send me the agents, code, chat and harness links, then the GitHub App manifest card (one click) and the github-bootstrap request for the rulesets; first "2026-11-05: the four hyperfix builders landed", then "2026-11-05, later: orchestration only; the harness codes", then "2026-11-04, latest: three modules dispatched and landed" and "2026-11-04, later: the trading path" (on the host: the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)": steps 2–4 and the typed areas (organization.areas) are built, so continue with step 5 (the design system and the page check) and the later steps in order; the iCloud exports into Proton Drive and the trading plan (/root/.claude/plans/let-s-take-a-moment-imperative-milner.md, copied into HANDOFF.md); once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order, from HANDOFF.md's "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
+
+## 2026-11-06: the base layers for the teams (read this first)
+
+The owner's go of 2026-11-05 covered the host reinstall and the Cloudflare
+apply it needs, and let Claude build the base layers itself while the
+harness has no credit (OpenRouter: $10 loaded, $0.54 left on 2026-11-05).
+
+- **The host, reinstalled.** Install window opened, `hetzner-infra
+  reinstall` (the first apply stopped on a stale reference after the
+  destroy; a second apply created server 174703396 on 2.31.96.54 with its
+  volume), host-install run 42132971061 at 00:08 UTC, window closed and
+  applied. The agents tunnel reads `healthy` with four connections. The
+  console screenshot (host-console run 42139315416) is an artifact on a
+  storage host outside the allowlist, so it was not read here.
+- **Cloudflare, applied.** Chat and harness hostnames and Access apps, six
+  team service tokens and their policies, the new status page, the tunnel's
+  routes. Two fixes on the way (d9cd945): ci-apply and agent-readonly gained
+  "Access: Service Tokens" (synced by `bootstrap apply` on the root token),
+  and each policy on an application now has its own precedence. The six
+  tokens are in the host's vault (`infra-service-tokens`); the host reads
+  them into /run/agents/<team>.env at its next boot or switch (it booted
+  before they were stored).
+- **The language rule (9935ff9).** `modules/repo/languages.nix`: Rust, Lean
+  or Nix only; `lang-scan` (Rust) in CI (`checks.languages`) and as the
+  pre-commit hook with nixfmt on staged files; 130 dated, owned exceptions
+  and 219 inline markers; `checks.languages-ratchet` (Lean) proves they
+  never exceed the baseline. Lean checks now build with no shell:
+  `config.kagamizo.leanCheck` (the `lean-check` Rust builder).
+- **The teams as contracted teams (8d644a0).** `agents.charters`: a goal,
+  measures, a project manager and every persona's role per agent;
+  `agents.lifecycle`: who proposes each kind of work, who must pass it, and
+  whether the owner signs off. Trades go to legal-mirazo and
+  accounting-mirazo; promotion, live trades and money flows need the owner.
+  `checks.agents-charters` proves no team passes its own work. The harness's
+  teams file carries each charter and what it proposes and reviews.
+- **Money, as decided (9479e5f).** Personal Public, Mercury personal;
+  `money.floors.mercury-mirazo` (500, a placeholder the owner sets);
+  `invest-excess` and `top-up-operating`; borrowing declared and off; the
+  nightly ledger on, read-only, idle until the host can read Public's token
+  (the owner shares the Public item into the host's vault once: a Gap).
+- **The twin's parts, read at their source (2e8fd97).** `twin.adoptions`:
+  Pumpkin (Rust, GPL-3, 26.3) as its own process; Azalea, fastanvil, Bevy,
+  bevy_ecs_tilemap, rs-tiled pinned; Valence, BlueMap, squaremap, Pl3xMap,
+  JourneyMap studied only. Minecraft is the single visual layer; the status
+  page becomes a map rendering of the server with its stats.
+- **The backlog (0fe0257).** `agents.backlog`: twin/pumpkin-server,
+  twin/map-tiles, builders/districts-and-rooms, twin/azalea-bots,
+  upkeep/languages-burndown, each with its brief in modules/agents/_backlog.
+- **Owner's steps now:** open the GitHub App page (sent as a file card;
+  one click) after chat.jingzo.org loads; set the Mercury floor; share the
+  Public item into the host's vault; top up OpenRouter when ready.
 
 ## 2026-11-05, later: orchestration only; the harness codes
 
