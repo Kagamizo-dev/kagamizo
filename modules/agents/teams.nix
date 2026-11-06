@@ -81,7 +81,7 @@ in
         4
         "the design team: three layouts, a critique, a pick; every page checked on a phone and a desktop"
         "chat-and-code"
-        "deepseek/deepseek-v4-pro";
+        "deepseek/deepseek-v4-flash";
     twin =
       personal
         [

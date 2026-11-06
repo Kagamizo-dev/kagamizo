@@ -227,9 +227,9 @@ in
         code = "flash";
         review = "flash";
         research = "flash";
-        plan = "pro";
+        plan = "flash";
         vision = "pro";
-        design = "pro";
+        design = "flash";
       };
       teamsJson = builtins.toJSON (
         lib.mapAttrs (n: a: {
