@@ -58,21 +58,22 @@ in
     agents.backlog = {
       "upkeep/trading-public-rust" = {
         kind = "code";
-        status = "active";
+        status = "done";
         brief = ./_backlog/upkeep-trading-public-rust.md;
       };
       "upkeep/trading-trade-rust" = {
         kind = "code";
+        status = "active";
         brief = ./_backlog/upkeep-trading-trade-rust.md;
       };
       "reverse-engineering/nautilus-rust" = {
         kind = "reverse-engineering";
-        status = "active";
+        status = "done";
         brief = ./_backlog/reverse-engineering-nautilus-rust.md;
       };
       "research-jingzo/trading-paper" = {
         kind = "strategy";
-        status = "active";
+        status = "done";
         brief = ./_backlog/research-jingzo-trading-paper.md;
       };
       "upkeep/module-papers" = {
