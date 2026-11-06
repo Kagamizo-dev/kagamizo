@@ -21,12 +21,33 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order: move backtest and paper onto NautilusTrader's Rust crates (backlog upkeep/trading-nautilus-rust) and delete the trading Python; build the weather backtest's live source on the host and record its first real result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order: check the host's first paper days (`systemctl status trading-paper-day-weather-rules` through the host console workflow) and the ledger; move backtest and paper onto NautilusTrader's Rust crates (backlog upkeep/trading-nautilus-rust) and delete the trading Python; build the weather backtest's live source on the host and record its first real result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
-## 2026-11-06, night: papers in Lean, the trading engine in Rust (read this first)
+## 2026-11-06, late: Public bounded, paper trading on the host (read this first)
+
+- **Public's API is bounded** (4ec75ae): all 30 endpoints of the pinned
+  CLI's client, each a typed governance action; the Rust client refuses any
+  request outside its bound (reader: no write, no spend; placer: + the
+  single-leg order, `place` only). `checks.public-api-bound` proves it in
+  Lean. Orders are read back until Public's own lifecycle says they ended.
+- **Paper trading runs daily on jingzo-host** (9444202, the owner's go):
+  `trading-paper-settle-weather-rules` at 13:43 UTC, then
+  `trading-paper-day-weather-rules` at 14:17 UTC, as the read-only agent
+  trading-mirazo, deterministic (no credit). Records and the ledger live in
+  `/var/lib/kagamizo/trading/research/paper/` on the host. The host takes it
+  at its 04:40 UTC switch once the cache has built the commit.
+- **The live gate needs paper that held:** five paper days, P&L ≥ 0 and
+  drawdown ≤ 20% from the ledger, then the owner's decision
+  (`paper_loss_blocks_live`).
+- **Gaps:** the ledger stays on the host; copying it into the repo as
+  `promotion.paper` evidence is by hand until the runner (off) commits it.
+  Agent-driven paper days (spy-agents) need OpenRouter credit (the fleet
+  key is at its limit). Options do not settle in paper-settle yet.
+
+## 2026-11-06, night: papers in Lean, the trading engine in Rust
 
 - **Every module's paper** (the owner's rule): `modules/<m>/_lean/Paper.lean`,
   typed by `modules/repo/_lean/PaperSchema.lean`, held to the repository by
