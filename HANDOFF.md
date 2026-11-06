@@ -26,7 +26,32 @@ Then, in order: check the host's first paper days (`systemctl status trading-pap
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
-## 2026-11-06, last: what the agents cost, and the cap (read this first)
+## 2026-11-06, night: every OpenRouter and repo setting typed (read this first)
+
+- **OpenRouter is code** (`openrouter plan|apply|probe`, Rust): every key
+  (the signup "Default key" declared and disabled), the routing guardrail
+  and its key assignments, the workspace's defaults. Routing classes
+  (modules/openrouter/routing.nix) bound price per kind of token,
+  precision, uptime, time to first token and throughput; the allowed
+  endpoints come from the price table and `openrouter probe` measurements,
+  and Lean proves each meets every bound. Applied; `plan` is clean.
+- **The repository is code** (`github-state plan|apply`, Rust,
+  modules/github/repo-state.nix): every setting; secret scanning and push
+  protection on (they were off); squash and rebase merges only; labels from
+  the charters, kinds and statuses; every backlog item an issue. Applied;
+  `plan` is clean. Next: the Projects board and the org's settings, which
+  need GraphQL, from the bootstrap runner.
+- **Incident:** a ureq error in github-state printed the stored
+  github-token into this session. Fixed (tokens trimmed, transport errors
+  by kind only). The session cannot reach GitHub's revocation API, so a
+  github-bootstrap run (requested 23:29 UTC) revokes it and mints a new
+  one; it waits for the owner's Proton Pass link and device code on the
+  approvals issue.
+- **Matrix:** the Element fix (62cd299) reaches the host at the 04:40 UTC
+  switch on 2026-11-07, with the paper-trading timers; the Matrix bots
+  (upkeep/matrix-bots) and GitHub-to-Matrix alerts are not built yet.
+
+## 2026-11-06, last: what the agents cost, and the cap
 
 - **The fleet key ($25 limit) is spent:** $25.03 this month, all of it the
   teams' dsh jobs; $4.97 of the $30 credit is left. Cause: agent loops
