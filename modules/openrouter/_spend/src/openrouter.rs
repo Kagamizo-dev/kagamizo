@@ -120,7 +120,8 @@ struct Api {
 
 impl Api {
     fn management() -> R<Api> {
-        Ok(Api { token: std::env::var("OPENROUTER_MANAGEMENT_KEY").map_err(|_| "OPENROUTER_MANAGEMENT_KEY is not set")? })
+        let token = std::env::var("OPENROUTER_MANAGEMENT_KEY").map_err(|_| "OPENROUTER_MANAGEMENT_KEY is not set")?;
+        Ok(Api { token: token.trim().to_string() })
     }
 
     fn call(&self, method: &str, path: &str, body: Option<Value>) -> R<Value> {
@@ -132,7 +133,8 @@ impl Api {
         match resp {
             Ok(r) => r.into_json::<Value>().map_err(|e| format!("{method} {path}: {e}")),
             Err(ureq::Error::Status(code, r)) => Err(format!("{method} {path}: HTTP {code} {}", r.into_string().unwrap_or_default())),
-            Err(e) => Err(format!("{method} {path}: {e}")),
+            // By kind only: ureq's message can quote the Authorization header.
+            Err(ureq::Error::Transport(t)) => Err(format!("{method} {path}: transport error ({:?})", t.kind())),
         }
     }
 
@@ -408,7 +410,8 @@ fn probe_one(token: &str, model: &str, tag: &str) -> Value {
         .send_json(body);
     let resp = match resp {
         Ok(r) => r,
-        Err(e) => return json!({"tag": tag, "ok": false, "error": e.to_string()}),
+        Err(ureq::Error::Status(code, _)) => return json!({"tag": tag, "ok": false, "error": format!("HTTP {code}")}),
+        Err(ureq::Error::Transport(t)) => return json!({"tag": tag, "ok": false, "error": format!("transport error ({:?})", t.kind())}),
     };
     let (mut first, mut tokens, mut cost) = (None, 0u64, 0.0);
     for line in BufReader::new(resp.into_reader()).lines() {
@@ -496,7 +499,7 @@ fn main() -> ExitCode {
             }
             Some("probe") if args.len() >= 3 => {
                 under_secret(&d, "OPENROUTER_API_KEY", "research", &args)?;
-                let token = std::env::var("OPENROUTER_API_KEY").map_err(|_| "OPENROUTER_API_KEY is not set")?;
+                let token = std::env::var("OPENROUTER_API_KEY").map_err(|_| "OPENROUTER_API_KEY is not set")?.trim().to_string();
                 let results: Vec<Value> = args[2..].iter().map(|tag| probe_one(&token, &args[1], tag)).collect();
                 let spent: f64 = results.iter().filter_map(|r| r["costUsd"].as_f64()).sum();
                 println!("{}", serde_json::to_string_pretty(&json!({"model": args[1], "endpoints": results, "costUsd": spent})).unwrap());
