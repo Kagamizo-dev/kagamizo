@@ -237,6 +237,17 @@ let
   # Steam's tools, only while gamedev.steam.enable is (../gamedev/_host.nix).
   gamedev = import ../gamedev/_host.nix { inherit (top.gamedev.steam) enable; };
 
+  # The agent runner's systemd units and timers (../agents/runner.nix).
+  agentRunnerHost = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ./_runner-host.nix {
+      agentRunner = config.packages.agent-runner;
+      inherit (config.packages) dsh;
+      inherit (top.agents.runner) enable requestFile scheduled;
+      inherit (top.agents) teamsJson;
+    }
+  );
+
   # The disk Hetzner Cloud gives an x86 server (virtio-scsi, /dev/sda),
   # GPT with a BIOS boot partition and an ESP, so GRUB boots either way.
   disk = {
@@ -286,6 +297,7 @@ let
         discord
         githubApp
         harness
+        agentRunnerHost
         media
         androidTwin
         gamedev
