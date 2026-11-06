@@ -1,12 +1,13 @@
-# The weather backtest (the research team's, 2026-11-06): a Rust port of
-# the weather rules (./_weather.py's probability and edge, with its test
-# fixtures) that replays a day's forecast, the observed outcome the
-# contract settles on, and the contract's prices, within the strategy's
-# declared limits. Sources sit behind a trait: the fixtures in tests, the
-# live forecasts, NWS climate reports and Kalshi prices on jingzo-host.
+# The trading module's Rust (./_rust, one Cargo workspace), replacing its
+# Python as the language rule requires:
+#   kagamizo-weather   the weather rules: probability and edge, ported from
+#                      ./_weather.py with its tests on ./_json/forecasts.json
+#   weather-backtest   the replay of those rules over settled days, within
+#                      the strategy's declared limits (sample days in
+#                      ./_json/backtest-days.json)
 #
-#   packages.weather-backtest   the binary; its tests run as it builds
-#   checks.weather-backtest     the same build: the ported rules' tests pass
+#   packages.weather-backtest   the binaries; the tests run as they build
+#   checks.weather-backtest     the same build: every crate's tests pass
 {
   perSystem =
     { pkgs, ... }:
@@ -14,11 +15,11 @@
       crate = pkgs.rustPlatform.buildRustPackage {
         pname = "weather-backtest";
         version = "0.1.0";
-        src = ./_weather-backtest;
-        cargoLock.lockFile = ./_weather-backtest/Cargo.lock;
+        src = ./_rust;
+        cargoLock.lockFile = ./_rust/Cargo.lock;
         doCheck = true;
-        # The tests read the replay's sample days and the strategy's own fixture, the same file the Python
-        # rules are tested on.
+        # The rule tests read the strategy's own fixture; the replay's tests
+        # read the sample days.
         FIXTURE_PATH = ./_json/forecasts.json;
         DAYS_PATH = ./_json/backtest-days.json;
         meta.mainProgram = "weather-backtest";

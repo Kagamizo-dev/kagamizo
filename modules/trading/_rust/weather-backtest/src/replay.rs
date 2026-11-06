@@ -16,9 +16,9 @@
 //! P&L = quantity * (1 - ask) if the side settles true,
 //!      -quantity * ask if it does not.
 
-use crate::data::{BacktestResult, BacktestLimits, Trade, DayResult, Question};
+use kagamizo_weather::data::{BacktestResult, BacktestLimits, Trade, DayResult, Question};
 use crate::source::{Source, Observed};
-use crate::weather::{parse_question, edge, band_probability, sigma_f, days_between};
+use kagamizo_weather::weather::{parse_question, edge, band_probability, sigma_f, days_between};
 
 /// A candidate side (YES or NO) for a market.
 pub struct Candidate {

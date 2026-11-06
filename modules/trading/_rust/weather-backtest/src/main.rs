@@ -1,9 +1,6 @@
-mod data;
-mod weather;
+use kagamizo_weather::data;
 mod source;
 mod replay;
-#[cfg(test)]
-mod rules_tests;
 
 use std::fs;
 use data::BacktestLimits;
@@ -82,8 +79,8 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::data::BacktestLimits;
-    use crate::weather::parse_question;
+    use kagamizo_weather::data::BacktestLimits;
+    use kagamizo_weather::weather::parse_question;
     use crate::source::{FixtureSource, Source};
     use crate::replay::{observed_in_band, run_replay};
 
