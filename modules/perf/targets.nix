@@ -215,5 +215,11 @@
       attr = "checks.x86_64-linux.agents-charters";
       method = "Lean deciding the lifecycles separated, trades reviewed by legal and accounting, and money and going live owner-gated (decide +kernel); moves with kinds x reviewers";
     };
+    twin-adoptions = {
+      module = "twin";
+      kind = "build";
+      attr = "checks.x86_64-linux.twin-adoptions";
+      method = "Lean deciding every adoption licensed for its use, Rust where it runs, and tested before it is trusted (decide +kernel); moves with the adoptions";
+    };
   };
 }

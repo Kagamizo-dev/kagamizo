@@ -41,6 +41,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | trading | `trading-risk` | build | none yet | none yet | 10% | Lean proving what admissible guarantees (omega over Nat) and deciding the declared limits sane |
 | trading | `trading-stages` | build | none yet | none yet | 10% | Lean deciding every strategy's stage carries its evidence |
 | trading | `trading-weather` | build | none yet | none yet | 10% | The weather signal engine's unit tests over forecast fixtures (parsers, probabilities, edge) |
+| twin | `twin-adoptions` | build | none yet | none yet | 10% | Lean deciding every adoption licensed for its use, Rust where it runs, and tested before it is trusted (decide +kernel); moves with the adoptions |
 | twin | `twin-world` | build | none yet | none yet | 10% | Lean deciding the world's shape: every module has a building, every agent a character, every recipe's action declared |
 
 ## Baseline
