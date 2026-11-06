@@ -6,9 +6,9 @@
 # nightly reads are allowed.
 #
 # The unit signs pass-cli in with the host's agent token (../migration/
-# _host.nix does the same); the `public` secretspec profile it then needs
-# reads the owner's root vault, which that token does not open, so even
-# enabled the unit idles until a read-only path to the secret exists: a Gap.
+# _host.nix does the same) and reads Public through the `public-host`
+# profile: the host's copy of the personal secret in Kagamizo-Host
+# (../public/secrets.nix).
 {
   ledger,
   passCli,
@@ -42,7 +42,7 @@ in
           export PROTON_PASS_KEY_PROVIDER=fs HOME=/root
           export PROTON_PASS_AGENT_REASON="jingzo-host: the nightly ledger"
           pass-cli info >/dev/null 2>&1 || pass-cli login --pat "$(cat ${tokenFile})" >/dev/null
-          export KAGAMIZO_PRINCIPAL=agent:${agent} MONEY_LEDGER_DIR=${dir}
+          export KAGAMIZO_PRINCIPAL=agent:${agent} MONEY_LEDGER_DIR=${dir} PUBLIC_PROFILE=public-host
           ledger public
         '';
       };

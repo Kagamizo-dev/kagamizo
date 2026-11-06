@@ -229,13 +229,13 @@ around.
   `modules/hetzner/_chat.nix`) until a sending path exists: Proton's
   business SMTP tokens, or a mail-only subdomain whose MX Cloudflare
   holds, each a declaration and a capability first.
-- **The nightly ledger cannot read Public from the host yet.** `money.ledger`
-  (off by default) runs as the accounting-mirazo swarm on jingzo-host, but
-  Public's secret lives in the owner's root vault, which no host or agent
-  token opens. Closing it: a delegated, read-scoped Public credential
-  (Public offers none; its personal secret trades as well as reads), or
-  the ledger run from the owner's own session. Until then `ledger public`
-  is the owner's command.
+- **The host holds a Public secret that can trade, not only read.** Public
+  offers no read-scoped credential, so for the owner's nightly read-only
+  ledger (decided 2026-11-05) jingzo-host holds a copy of the full personal
+  secret (Kagamizo-Host/public-host, piped from Mirazo-Root/Public on
+  2026-11-06). Its reads are read-only by policy (governance-authorize,
+  the brokerage wrapper's refused calls, no agent grant to trade), not by
+  the credential. Closing it: a read-scoped credential, if Public adds one.
 - **The GitHub organization itself**: github.com has no API to create one;
   `signup` prepares it from Proton Pass. Everything after (repos, secrets,
   environments, domain verification) is `modules/github`, applied by the

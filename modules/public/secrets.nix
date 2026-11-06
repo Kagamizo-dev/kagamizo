@@ -4,6 +4,22 @@ let
   secret = import ../_lib/secret.nix;
 in
 {
+  # jingzo-host's copy of the personal secret (the owner's decision of
+  # 2026-11-05: nightly, read-only ledger reads on the host), piped from
+  # Mirazo-Root/Public into Kagamizo-Host, which the host's token opens.
+  # The host's wrappers run with PUBLIC_PROFILE=public-host.
+  secrets.profiles.public-host = {
+    defaults.providers = [ "host" ];
+    PUBLIC_PERSONAL_SECRET = secret {
+      kind = "api-token";
+      # Copied pipe to pipe from the owner's item, so automation writes it:
+      # a note, never a field.
+      issuer = "automation:brokerage";
+      description = "Public personal secret, the host's copy of Mirazo-Root/Public";
+      item = "public-host";
+    };
+  };
+
   secrets.profiles.public = {
     defaults.providers = [ "root" ];
     # The owner's API credential item (Mirazo-Root/Public), its Secret field:

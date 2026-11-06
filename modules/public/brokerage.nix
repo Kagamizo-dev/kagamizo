@@ -150,7 +150,7 @@ in
           fi
           governance-authorize "public:$action" public-mirazo
           export BROKERAGE_COMMAND=$command
-          exec secretspec run --file ${config.packages.secretspec-toml} --profile public \
+          exec secretspec run --file ${config.packages.secretspec-toml} --profile "''${PUBLIC_PROFILE:-public}" \
             --reason "brokerage $*" -- ${run}/bin/brokerage-run "$@"
         '';
       };

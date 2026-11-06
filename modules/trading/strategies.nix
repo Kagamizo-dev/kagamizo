@@ -401,7 +401,7 @@ in
                     governance-authorize public:order-preflight-single "$account"
                     governance-authorize public:order-place "$account" ;;
                 esac
-                exec secretspec run --file ${config.packages.secretspec-toml} --profile public \
+                exec secretspec run --file ${config.packages.secretspec-toml} --profile "''${PUBLIC_PROFILE:-public}" \
                   --reason "trade $*" -- trade-run "$@"
                 ;;
               *) exec trade-run "$@" ;;
