@@ -26,7 +26,23 @@ Then, in order: check the host's first paper days (`systemctl status trading-pap
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
-## 2026-11-06, late: Public bounded, paper trading on the host (read this first)
+## 2026-11-06, last: what the agents cost, and the cap (read this first)
+
+- **The fleet key ($25 limit) is spent:** $25.03 this month, all of it the
+  teams' dsh jobs; $4.97 of the $30 credit is left. Cause: agent loops
+  re-read their context every step (97% of prompt tokens are cache reads)
+  and OpenRouter routed them to providers charging $0.05-0.07/M for cache
+  reads. The same work on deepseek-v4.1-flash at Baidu is ~1/30 the price.
+- **Now:** the teams run deepseek-v4.1-flash, and `dispatch` runs every job
+  under `agent-spend run` with a $0.25 budget (openrouter.spend), printing
+  its cost. `agent-spend estimate --steps S --context C` prices a job first;
+  a 120-step job at 100k context is $0.03-0.08.
+- **Owner's go needed:** an OpenRouter guardrail pinning the agent keys to
+  the cheap providers (the harness cannot route per request), and whether
+  to declare or delete the undeclared "Default key". No job runs until the
+  fleet key's limit resets (monthly) or is raised.
+
+## 2026-11-06, late: Public bounded, paper trading on the host
 
 - **Public's API is bounded** (4ec75ae): all 30 endpoints of the pinned
   CLI's client, each a typed governance action; the Rust client refuses any
