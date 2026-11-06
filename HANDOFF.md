@@ -21,12 +21,32 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order: build the weather backtest's live source on the host and record its first real result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order: move backtest and paper onto NautilusTrader's Rust crates (backlog upkeep/trading-nautilus-rust) and delete the trading Python; build the weather backtest's live source on the host and record its first real result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
-## 2026-11-06, evening: trading first; the runner landed (read this first)
+## 2026-11-06, night: papers in Lean, the trading engine in Rust (read this first)
+
+- **Every module's paper** (the owner's rule): `modules/<m>/_lean/Paper.lean`,
+  typed by `modules/repo/_lean/PaperSchema.lean`, held to the repository by
+  `checks.paper-<m>`; `checks.papers` keeps the modules without one within
+  the baseline (60 of 62). repo and trading have theirs; backlog
+  `upkeep/module-papers` writes the rest, the trading path's modules first.
+- **Trading in Rust** (`modules/trading/_rust`, one workspace): the weather
+  rules (with an exact erf now, and live Open-Meteo/NWS forecasts), the
+  backtest replay, the Public client and stub, and `trade-run` for every
+  command but `backtest` and `paper`, identical to the Python on every
+  scenario. NautilusTrader's Rust engine (0.67, rustc 1.99.1 from
+  rust-overlay) runs to fills with no Python (`checks.nautilus-probe`).
+  **Next:** backlog `upkeep/trading-nautilus-rust` moves backtest and paper
+  onto it and deletes the six trading Python files.
+- **The fleet key is at its monthly limit:** OpenRouter refused the last
+  job with 402 ("adjust the key's monthly limit"). Raising it is an
+  `account-limit` change (accounting-jingzo, bounded by the card); topping up
+  credit is the owner's. Until then the session does the work itself.
+
+## 2026-11-06, evening: trading first; the runner landed
 
 The owner's focus is trading. What landed:
 
