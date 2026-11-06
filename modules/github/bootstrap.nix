@@ -7,6 +7,8 @@
 #   1. Proton Pass and gh sign in (both logged out again when it ends)
 #   2. gh's token is stored as Kagamizo-LLC/github-token (profile github);
 #      later runs sign in with it, and need a device code only once it fails
+#      (or the request's first line says `rotate github-token`: it is revoked
+#      first, so a new one is minted)
 #   3. each verified domain: added to the org; its TXT token is printed for
 #      github.verifiedDomains, and once the record resolves it is verified
 #   4. each repo: transferred in if declared elsewhere, or created and
@@ -121,6 +123,17 @@ in
 
           step "Proton Pass: approve the link"
           retry approve "Proton Pass login, approve" 'https://account\.proton\.me/[^[:space:]]+' ${cli.passCli "login" { }}
+
+          # A request whose first line asks to rotate it: the stored token is
+          # revoked first (GitHub's credential revocation API, for exposed
+          # tokens; never printed), so the device code below mints a new one.
+          if head -1 .github/github-bootstrap.request 2>/dev/null | grep -q 'rotate github-token'; then
+            step "GitHub: revoking the stored token, as the request asks"
+            secretspec get GITHUB_TOKEN --file "$spec" --profile github --reason "$reason: rotate" 2>/dev/null |
+              tr -d '\n\r ' | jq -Rc '{credentials: [.]}' |
+              curl -fsS -o /dev/null -X POST -H 'Content-Type: application/json' -H 'Accept: application/vnd.github+json' \
+                --data @- https://api.github.com/credentials/revoke && echo "  revoked"
+          fi
 
           # The token a previous run stored, if GitHub still accepts it; a
           # device code only when it is missing, expired or revoked.
