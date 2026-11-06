@@ -65,10 +65,21 @@ in
     };
   };
 
-  services.static-web-server = {
+  # Element is a directory of links into its unwrapped build plus its own
+  # config; static-web-server refuses any file that resolves outside its
+  # root, so it served only config.json and the page stayed blank
+  # (2026-11-06). nginx follows the links.
+  services.nginx = {
     enable = true;
-    listen = "127.0.0.1:${toString elementPort}";
-    root = "${element}";
+    virtualHosts.element = {
+      listen = [
+        {
+          addr = "127.0.0.1";
+          port = elementPort;
+        }
+      ];
+      root = "${element}";
+    };
   };
 
   systemd.services = {
