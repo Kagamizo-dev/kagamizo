@@ -221,5 +221,11 @@
       attr = "checks.x86_64-linux.twin-adoptions";
       method = "Lean deciding every adoption licensed for its use, Rust where it runs, and tested before it is trusted (decide +kernel); moves with the adoptions";
     };
+    open-webui = {
+      module = "hetzner";
+      kind = "build";
+      attr = "checks.x86_64-linux.open-webui";
+      method = "Lean deciding every Open WebUI switch decided, the forbidden ones off and every variable known to the pinned version (decide +kernel over the catalog); moves with the catalog";
+    };
   };
 }

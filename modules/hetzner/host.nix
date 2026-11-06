@@ -161,7 +161,8 @@ let
   agents = withSystem "x86_64-linux" (
     { config, ... }:
     import ./_agents.nix {
-      inherit (cfg.agents) services zone tier1Port;
+      openWebuiEnvironment = top.openWebui.environment;
+      inherit (cfg.agents) services;
       inherit (config.packages) secretspec;
       secretspecToml = config.packages.secretspec-toml;
       passCli = config.packages.pass-cli;

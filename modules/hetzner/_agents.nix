@@ -26,8 +26,7 @@
 #   cloudflared      the tunnel, dialling out with its token as a credential
 {
   services,
-  zone,
-  tier1Port,
+  openWebuiEnvironment, # openWebui.environment
   passCli,
   secretspec,
   secretspecToml,
@@ -180,21 +179,8 @@ in
     host = "127.0.0.1";
     port = port "agents";
     environmentFile = "/run/agents/openrouter.env";
-    environment = {
-      OPENAI_API_BASE_URLS = "https://openrouter.ai/api/v1;http://127.0.0.1:${toString tier1Port}/v1";
-      ENABLE_OLLAMA_API = "False";
-      WEBUI_URL = "https://agents.${zone}";
-      # Owner single sign-on: Cloudflare Access has verified the viewer, so
-      # Open WebUI trusts the header instead of running its own login.
-      # Reachable only on 127.0.0.1 through cloudflared (the tunnel sets this
-      # header from Access's JWT), so no external actor can forge it.
-      WEBUI_AUTH_TRUSTED_EMAIL_HEADER = "Cf-Access-Authenticated-User-Email";
-      # ENABLE_SIGNUP off except for the trusted-header path, which the docs
-      # say bypasses this gate for Access-verified identities.
-      ENABLE_SIGNUP = "False";
-      ANONYMIZED_TELEMETRY = "False";
-      DO_NOT_TRACK = "True";
-      SCARF_NO_ANALYTICS = "True";
-    };
+    # Every switch decided and the settings, typed and bounded
+    # (./open-webui.nix, checks.open-webui).
+    environment = openWebuiEnvironment;
   };
 }
