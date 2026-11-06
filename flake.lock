@@ -295,8 +295,31 @@
         "publicdotcom-cli": "publicdotcom-cli",
         "pyicloud-src": "pyicloud-src",
         "rea": "rea",
+        "rust-overlay": "rust-overlay",
         "secretspec-src": "secretspec-src",
         "tradingagents": "tradingagents"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793956102,
+        "narHash": "sha256-dASUovwB3DUoTm6daga0hsNZZAFCCGlUS4FPBjK0OwA=",
+        "ref": "master",
+        "rev": "74cebce67ef6671ea48fda353a5be2d229bd2920",
+        "revCount": 2359,
+        "type": "git",
+        "url": "https://github.com/oxalica/rust-overlay"
+      },
+      "original": {
+        "ref": "master",
+        "rev": "74cebce67ef6671ea48fda353a5be2d229bd2920",
+        "type": "git",
+        "url": "https://github.com/oxalica/rust-overlay"
       }
     },
     "secretspec-src": {

@@ -1,0 +1,336 @@
+{
+  "version": "0.67.0",
+  "python_wheel_version": "1.231.0",
+  "date": "2026-11-07",
+  "crates": [
+    {
+      "name": "nautilus-trader",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "description": "Container crate for core NautilusTrader APIs",
+      "re_exports": ["nautilus_common", "nautilus_core", "nautilus_model"]
+    },
+    {
+      "name": "nautilus-model",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-model/src/lib.rs",
+      "public_modules": [
+        "accounts", "currencies", "data", "enums", "events", "fees",
+        "identifiers", "instruments", "macros", "orderbook", "orders",
+        "position", "reports", "types", "venues"
+      ]
+    },
+    {
+      "name": "nautilus-backtest",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-backtest/src/lib.rs",
+      "public_modules": [
+        "accumulator", "config", "data_client", "data_iterator",
+        "engine", "exchange", "execution_client", "modules", "result",
+        "node (streaming)", "python (python)"
+      ]
+    },
+    {
+      "name": "nautilus-common",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-common/src/lib.rs"
+    },
+    {
+      "name": "nautilus-core",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-core/src/lib.rs"
+    },
+    {
+      "name": "nautilus-trading",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-trading/src/lib.rs",
+      "public_modules": [
+        "algorithm", "controller", "examples (examples)", "sessions", "strategy"
+      ]
+    },
+    {
+      "name": "nautilus-execution",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-execution/src/lib.rs"
+    },
+    {
+      "name": "nautilus-data",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-data/src/lib.rs"
+    },
+    {
+      "name": "nautilus-live",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-live/src/lib.rs"
+    },
+    {
+      "name": "nautilus-risk",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-risk/src/lib.rs"
+    },
+    {
+      "name": "nautilus-persistence",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-persistence/src/lib.rs"
+    },
+    {
+      "name": "nautilus-system",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-system/src/lib.rs"
+    },
+    {
+      "name": "nautilus-portfolio",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-portfolio/src/lib.rs"
+    },
+    {
+      "name": "nautilus-indicators",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-indicators/src/lib.rs"
+    },
+    {
+      "name": "nautilus-analysis",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-analysis/src/lib.rs"
+    },
+    {
+      "name": "nautilus-serialization",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-serialization/src/lib.rs"
+    },
+    {
+      "name": "nautilus-infrastructure",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-infrastructure/src/lib.rs"
+    },
+    {
+      "name": "nautilus-cryptography",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-cryptography/src/lib.rs"
+    },
+    {
+      "name": "nautilus-plugin",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-plugin/src/lib.rs"
+    },
+    {
+      "name": "nautilus-network",
+      "version": "0.67.0",
+      "license": "LGPL-3.0-only",
+      "path": "nautilus-network/src/lib.rs"
+    }
+  ],
+  "backtest_engine": {
+    "crate": "nautilus-backtest",
+    "struct": "BacktestEngine",
+    "source_path": "nautilus-backtest/src/engine.rs:98",
+    "constructor": "fn new(config: BacktestEngineConfig) -> Result<Self>",
+    "methods": [
+      "fn add_venue(&mut self, config: SimulatedVenueConfig) -> Result<()>",
+      "fn add_instrument(&mut self, instrument: &InstrumentAny) -> Result<()>",
+      "fn add_data(&mut self, data: Vec<Data>, client_id: Option<ClientId>, validate: bool, sort: bool) -> Result<()>",
+      "fn add_strategy<T: Strategy + StrategyNative + DataActorNative + Component>(&mut self, strategy: T) -> Result<()>",
+      "fn run(&mut self, start: Option<UnixNanos>, end: Option<UnixNanos>, run_config_id: Option<String>, streaming: bool) -> Result<()>",
+      "fn end(&mut self) -> Result<()>",
+      "fn dispose(&mut self)",
+      "fn get_result(&self) -> BacktestResult",
+      "fn reset(&mut self) -> Result<()>",
+      "fn iteration(&self) -> usize",
+      "fn trader_id(&self) -> TraderId",
+      "fn list_venues(&self) -> Vec<Venue>",
+      "fn change_fill_model(&mut self, venue: Venue, fill_model: FillModelHandle)"
+    ]
+  },
+  "backtest_engine_config": {
+    "crate": "nautilus-backtest",
+    "source_path": "nautilus-backtest/src/config.rs:74",
+    "fields": [
+      "environment: Environment (default Backtest)",
+      "trader_id: TraderId",
+      "load_state: bool",
+      "save_state: bool",
+      "shutdown_on_error: bool",
+      "logging: LoggerConfig",
+      "instance_id: Option<UUID4>",
+      "timeout_connection: Duration (default 1 min)",
+      "timeout_reconciliation: Duration (default 30 s)",
+      "timeout_portfolio: Duration (default 10 s)",
+      "timeout_disconnection: Duration (default 10 s)",
+      "delay_post_stop: Duration (default 10 s)",
+      "timeout_shutdown: Duration (default 5 s)",
+      "cache: Option<CacheConfig>",
+      "msgbus: Option<MessageBusConfig>",
+      "data_engine: Option<DataEngineConfig>",
+      "risk_engine: Option<RiskEngineConfig>",
+      "exec_engine: Option<ExecutionEngineConfig>",
+      "portfolio: Option<PortfolioConfig>",
+      "controller: Option<ImportableControllerConfig>",
+      "bypass_logging: bool",
+      "run_analysis: bool (default true)"
+    ],
+    "builder": "BacktestEngineConfig::builder().build() or BacktestEngineConfig::default()"
+  },
+  "simulated_venue_config": {
+    "crate": "nautilus-backtest",
+    "source_path": "nautilus-backtest/src/config.rs:266",
+    "fields": [
+      "venue: Venue",
+      "oms_type: OmsType",
+      "account_type: AccountType",
+      "book_type: BookType",
+      "starting_balances: Vec<Money>",
+      "base_currency: Option<Currency>",
+      "default_leverage: Option<Decimal>",
+      "leverages: AHashMap<InstrumentId, Decimal>",
+      "fill_model: FillModelHandle",
+      "fee_model: FeeModelHandle",
+      "margin_model: Option<MarginModelHandle>",
+      "latency_model: Option<LatencyModelHandle>",
+      "modules: Vec<SimulationModuleHandle>",
+      "routing: bool",
+      "reject_stop_orders: bool",
+      "support_gtd_orders: bool",
+      "support_contingent_orders: bool",
+      "use_position_ids: bool",
+      "use_random_ids: bool",
+      "use_reduce_only: bool",
+      "use_message_queue: bool",
+      "use_market_order_acks: bool",
+      "bar_execution: bool (default true)",
+      "trade_execution: bool (default true)",
+      "liquidity_consumption: bool",
+      "allow_cash_borrowing: bool",
+      "frozen_account: bool",
+      "queue_position: bool",
+      "oto_full_trigger: bool",
+      "defer_option_settlement: bool (default true)",
+      "price_protection_points: u32",
+      "liquidation_enabled: bool",
+      "liquidation_trigger_ratio: f64",
+      "liquidation_cancel_open_orders: bool"
+    ]
+  },
+  "instruments": {
+    "equity": {
+      "crate": "nautilus-model",
+      "source_path": "nautilus-model/src/instruments/equity.rs:49",
+      "fields": [
+        "id: InstrumentId",
+        "raw_symbol: Symbol",
+        "isin: Option<Ustr>",
+        "currency: Currency",
+        "price_precision: u8",
+        "price_increment: Price",
+        "margin_init: Decimal",
+        "margin_maint: Decimal",
+        "lot_size: Option<Quantity>",
+        "max_quantity: Option<Quantity>",
+        "min_quantity: Option<Quantity>",
+        "max_price: Option<Price>",
+        "min_price: Option<Price>",
+        "tick_scheme: Option<Ustr>",
+        "info: Option<Params>",
+        "ts_event: UnixNanos",
+        "ts_init: UnixNanos"
+      ],
+      "builder": "Equity::builder().instrument_id(...).raw_symbol(...).currency(...).price_precision(...).price_increment(...).ts_event(...).ts_init(...).build()"
+    },
+    "instrument_any": {
+      "crate": "nautilus-model",
+      "source_path": "nautilus-model/src/instruments/any.rs",
+      "enum_variants": ["Equity", "CurrencyPair", "OptionContract", "FutureContract",
+        "BinaryOption", "Betting", "Commodity", "CryptoFuture", "CryptoFuturesSpread",
+        "CryptoOption", "CryptoOptionSpread", "CryptoPerpetual", "CFD",
+        "FuturesSpread", "OptionSpread", "PerpetualContract", "Synthetic",
+        "TokenizedAsset", "IndexInstrument"],
+      "construction": "InstrumentAny::Equity(equity)"
+    }
+  },
+  "bars": {
+    "crate": "nautilus-model",
+    "source_path": "nautilus-model/src/data/bar.rs:1123",
+    "struct": "Bar",
+    "fields": [
+      "bar_type: BarType",
+      "open: Price",
+      "high: Price",
+      "low: Price",
+      "close: Price",
+      "volume: Quantity",
+      "ts_event: UnixNanos",
+      "ts_init: UnixNanos"
+    ],
+    "data_wrapper": "Data::Bar(bar)",
+    "bar_type": {
+      "source_path": "nautilus-model/src/data/bar.rs:900+",
+      "construction": "BarType::from(\"SYMBOL.VENUE-1-DAY-LAST-EXTERNAL\")"
+    }
+  },
+  "strategy_trait": {
+    "crate": "nautilus-trading",
+    "source_path": "nautilus-trading/src/strategy/mod.rs:108",
+    "trait_bounds": "Strategy: DataActor",
+    "key_methods": [
+      "fn submit_order(&mut self, order: OrderAny, position_id: Option<PositionId>, client_id: Option<ClientId>, params: Option<Params>) -> Result<()>",
+      "fn modify_order(&mut self, client_order_id: ClientOrderId, quantity: Option<Quantity>, price: Option<Price>, trigger_price: Option<Price>, client_id: Option<ClientId>, params: Option<Params>) -> Result<()>",
+      "fn cancel_order(&mut self, client_order_id: ClientOrderId, client_id: Option<ClientId>, params: Option<Params>) -> Result<()>",
+      "fn close_position(&mut self, position: &Position, ...) -> Result<()>",
+      "fn strategy_id(&self) -> Option<StrategyId>",
+      "fn order(&self) -> OrderApi",
+      "fn portfolio(&self) -> PortfolioApi"
+    ],
+    "nautilus_strategy_macro": "nautilus_strategy!(MyStrategy) macro generates Strategy + StrategyNative impls",
+    "example_strategy": {
+      "name": "EmaCross",
+      "crate": "nautilus-trading",
+      "feature": "examples",
+      "source_path": "nautilus-trading/src/examples/strategies/ema_cross/strategy.rs:42"
+    }
+  },
+  "example_backtest": {
+    "crate": "nautilus-backtest",
+    "path": "nautilus-backtest/examples/engine_ema_cross.rs",
+    "feature": "examples",
+    "command": "cargo run -p nautilus-backtest --features examples --example engine-ema-cross",
+    "purpose": "Proves the BacktestEngine works from pure Rust without Python"
+  },
+  "fills": {
+    "access_path": "BacktestResult fills field (serde_json Value array)",
+    "alternative": "engine.kernel.cache.borrow().orders(...) for OrderAny objects with Fill events",
+    "canonical_result": "engine.get_canonical_result() for deterministic fills projection"
+  },
+  "accounts": {
+    "crate": "nautilus-model",
+    "path": "nautilus-model/src/accounts/",
+    "account_types": ["Cash", "Margin"],
+    "money_type": "nautilus_model::types::Money"
+  },
+  "currencies": {
+    "usd": "nautilus_model::types::Currency::USD()",
+    "crate": "nautilus-model"
+  },
+  "identifiers": {
+    "instrument_id": "InstrumentId::from(\"SYMBOL.VENUE\")",
+    "venue": "Venue::from(\"SIM\")",
+    "trader_id": "TraderId::from(\"TRADER-001\")",
+    "symbol": "Symbol::from(\"SYMBOL\")"
+  }
+}

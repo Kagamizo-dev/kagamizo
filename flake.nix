@@ -73,6 +73,14 @@
       flake = false;
     };
 
+    # Exact Rust releases (oxalica, MIT), for crates that need a newer
+    # rustc than nixpkgs ships: NautilusTrader's Rust engine needs 1.99.1
+    # (modules/trading). Pinned to a commit; used only where named.
+    rust-overlay = {
+      url = "git+https://github.com/oxalica/rust-overlay?ref=master&rev=74cebce67ef6671ea48fda353a5be2d229bd2920";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Typed declarations: refinement and dependent types checked at eval time.
     nix-effects = {
       url = "git+https://github.com/kleisli-io/nix-effects?ref=refs/tags/v0.16.0";
