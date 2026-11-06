@@ -83,7 +83,9 @@ fn walk(root: &Path, dir: &Path, policy: &Policy, out: &mut Vec<PathBuf>) -> std
         let name = entry.file_name().to_string_lossy().into_owned();
         let path = entry.path();
         let kind = entry.file_type()?;
-        if kind.is_symlink() {
+        // Skipped names are skipped whatever they are: in a git worktree
+        // `.git` is a file, not a directory.
+        if kind.is_symlink() || policy.skip.iter().any(|s| s == &name) {
             continue;
         }
         if kind.is_dir() {
