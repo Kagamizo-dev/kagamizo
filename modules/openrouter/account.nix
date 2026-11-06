@@ -51,7 +51,7 @@
       };
     };
 
-    # Models for chat and code, default deepseek/deepseek-v4-flash.
+    # Models for chat and code, default deepseek/deepseek-v4.1-flash.
     held.openrouter = {
       provider = "openrouter";
       plan = "pay-as-you-go";

@@ -9,7 +9,7 @@
 { pkgs, ... }:
 let
   vault = "yoga";
-  model = "deepseek/deepseek-v4-flash";
+  model = "deepseek/deepseek-v4.1-flash";
 
   setup = pkgs.writeShellApplication {
     name = "setup";

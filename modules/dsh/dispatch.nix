@@ -12,7 +12,8 @@
 # web-api disabled), runs the task under `secretspec run --profile agent`
 # from the worktree directory, and writes the JSON event stream to
 # <state>/log/<team>-<topic>.jsonl, printing the `final` event's text at
-# the end.
+# the end. Every job runs under agent-spend with openrouter.spend's
+# budget, and ends by printing what it cost (../openrouter/spend.nix).
 #
 # The team must be a declared governance agent (governance.agents.<team>)
 # whose harness is "dsh".
@@ -150,14 +151,23 @@ in
           # all agree.
           cd "$worktree" || exit 2
 
-          # Run the task.  The JSON log stays under the state dir, so the
-          # worktree is not polluted.
+          # Run the task under its budget (openrouter.spend): agent-spend
+          # passes the event stream through and stops the job the moment
+          # its cost at the dearest allowed provider reaches the budget.
+          # The JSON log stays under the state dir, so the worktree is not
+          # polluted.
           DSH_HOME="$state" \
           secretspec run --file ${config.packages.secretspec-toml} --profile agent \
             --reason "dispatch: $team/$topic" -- \
+            ${lib.getExe config.packages.agent-spend} run --model "$model" \
+              --budget ${toString top.openrouter.spend.jobBudgetUsd} \
+              --providers ${lib.concatStringsSep "," top.openrouter.spend.allowedProviders} -- \
             ${lib.getExe config.packages.dsh} --profile headless \
               --patch <(printf '%s' "$patch") --json < "$task" \
           > "$logdir/$team-$topic.jsonl" 2>&1 || true
+          ${lib.getExe config.packages.agent-spend} measure --model "$model" \
+            --providers ${lib.concatStringsSep "," top.openrouter.spend.allowedProviders} \
+            "$logdir/$team-$topic.jsonl" | tail -1
 
           # Print the final event's text.
           jq -r 'select(.type == "final") | .text // .' "$logdir/$team-$topic.jsonl" 2>/dev/null || \

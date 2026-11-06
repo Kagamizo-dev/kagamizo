@@ -203,7 +203,7 @@ in
         flash = {
           rank = 2;
           runs = "openrouter";
-          model = "deepseek/deepseek-v4-flash";
+          model = "deepseek/deepseek-v4.1-flash";
           why = "the cheap strong model: drafting, code, review, summaries";
         };
         pro = {

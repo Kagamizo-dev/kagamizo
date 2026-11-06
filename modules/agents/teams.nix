@@ -52,7 +52,7 @@ in
         3
         "the review team: reads every pull request of code or tools against the checks and the plan"
         "chat-and-code"
-        "deepseek/deepseek-v4-flash";
+        "deepseek/deepseek-v4.1-flash";
     # Jingzo's research: the research-to-trade loop (research@jingzo.org).
     research-jingzo = {
       serves = "jingzo";
@@ -81,7 +81,7 @@ in
         4
         "the design team: three layouts, a critique, a pick; every page checked on a phone and a desktop"
         "chat-and-code"
-        "deepseek/deepseek-v4-flash";
+        "deepseek/deepseek-v4.1-flash";
     twin =
       personal
         [
@@ -108,7 +108,7 @@ in
         3
         "the security team: reviews every change for vulnerabilities and secrets, tests what runs, watches advisories"
         "chat-and-code"
-        "deepseek/deepseek-v4-flash";
+        "deepseek/deepseek-v4.1-flash";
     # Reverse engineering: maps an existing tool, protocol or device with REA
     # into a typed catalog and ports its tests, so we adopt the minimal
     # surface instead of building or running the whole thing.
@@ -122,7 +122,7 @@ in
         3
         "the reverse-engineering team: maps tools, protocols and devices with REA into typed catalogs and ported tests"
         "chat-and-code"
-        "deepseek/deepseek-v4-flash";
+        "deepseek/deepseek-v4.1-flash";
     # Browser automation, in Rust: sign-ups, aliases and web flows no API
     # covers, each a typed flow the owner's 2FA approves.
     browser =
@@ -134,7 +134,7 @@ in
         3
         "the browser team: Rust browser flows for what no API covers, each typed and approved"
         "chat-and-code"
-        "deepseek/deepseek-v4-flash";
+        "deepseek/deepseek-v4.1-flash";
     upkeep =
       team
         [
@@ -145,7 +145,7 @@ in
         4
         "the upkeep team: bumps pinned projects, reads changelogs, maps new tools"
         "chat-and-code"
-        "deepseek/deepseek-v4-flash";
+        "deepseek/deepseek-v4.1-flash";
   };
 
   # A key an agent names must be declared; its entity's swarm key is the

@@ -70,10 +70,12 @@ in
   config = {
     openrouter = {
       account = "openrouter";
-      defaultModel = "deepseek/deepseek-v4-flash";
-      # Open-weight models only.
+      defaultModel = "deepseek/deepseek-v4.1-flash";
+      # Open-weight models only. Flash is v4.1: for agent loops, which re-read
+      # their context every step, its cache reads cost a tenth of v4's or
+      # less (openrouter.spend, ./_spend/prices.json).
       models = [
-        "deepseek/deepseek-v4-flash"
+        "deepseek/deepseek-v4.1-flash"
         "deepseek/deepseek-v4-pro"
         "qwen/qwen3.8-27b"
         "z-ai/glm-5.3"

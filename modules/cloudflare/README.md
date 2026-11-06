@@ -215,6 +215,20 @@ around.
   developer-preview harness has `--trusted-host` for session binding only,
   not for delegating auth to a reverse proxy. Closing this means adding a
   plugin or waiting for an upstream feature.
+- **OpenRouter routes agent jobs to dear providers.** The harness (dsh)
+  withholds OpenRouter's per-request routing, so a job goes wherever
+  OpenRouter sends it: on 2026-11-05 most of the fleet key's cache reads
+  went to Parasail at $0.07/M, 70x the cheapest provider. A guardrail
+  limiting the agent keys to `openrouter.spend.allowedProviders` closes it
+  (OpenRouter's guardrails API: allowed_providers, allowed_models, assigned
+  to keys); declaring and applying it is the next step, and applying it
+  needs the owner's go. Until then `agent-spend run` holds each job's budget
+  at the allowed providers' prices, so a job routed elsewhere can cost more
+  than its meter says; the key's own limit still caps the month.
+- **An undeclared OpenRouter key.** "Default key" (limit $100, unused)
+  exists at OpenRouter and in no declaration; it is to be declared or
+  deleted. The declared keys' limits add up to $225 against $30 of credit,
+  so only the credit bounds them today.
 - **OpenRouter credit cannot be bought by API.** The owner allows
   accounting-jingzo to top up within the Mercury card's limit (the
   credit-topup lifecycle, 2026-11-06), but OpenRouter's API has no purchase
