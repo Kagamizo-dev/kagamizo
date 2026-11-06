@@ -8,6 +8,7 @@
 //!   trade-run bars SYMBOL STEP [PERIOD]     Public's bars as CSV
 //!   trade-run propose STRATEGY [DATE] [--forecasts FILE]
 //!   trade-run paper-day STRATEGY [DATE] [--forecasts FILE]
+//!   trade-run paper-settle STRATEGY         settle the recorded paper days
 //!   trade-run place PROPOSAL.json           the one spend
 //!
 //! The agent-option strategy turns the day's research decision into one
@@ -22,6 +23,7 @@
 
 use chrono::NaiveDate;
 use kagamizo_public::client::{event_contract_order_body, option_order_body, Public};
+use kagamizo_public::endpoints::{OrderStatus, SettledOutcome};
 use kagamizo_public::types::OrderBody;
 use kagamizo_weather::data::{Question, WeatherData};
 use kagamizo_weather::live::{live_data, Source};
@@ -135,7 +137,7 @@ fn usage<T>() -> R<T> {
     Err(Die(USAGE.into(), 2))
 }
 
-const USAGE: &str = "usage: trade <backtest STRATEGY BARS.csv | strategies | bars SYMBOL STEP [PERIOD] | paper STRATEGY [BARS.csv] [--all] | propose STRATEGY [DATE] [--forecasts FILE] | paper-day STRATEGY [DATE] [--forecasts FILE] | place PROPOSAL.json>";
+const USAGE: &str = "usage: trade <backtest STRATEGY BARS.csv | strategies | bars SYMBOL STEP [PERIOD] | paper STRATEGY [BARS.csv] [--all] | propose STRATEGY [DATE] [--forecasts FILE] | paper-day STRATEGY [DATE] [--forecasts FILE] | paper-settle STRATEGY | place PROPOSAL.json>";
 
 // ── Reading the environment and the files ─────────────────────────────────
 
@@ -698,17 +700,21 @@ fn place(proposal_path: &str) -> R<()> {
     let order: OrderBody =
         serde_json::from_value(p["order"].clone()).map_err(|e| Die(format!("the proposal's order: {e}"), 1))?;
     let body = serde_json::to_string(&order).expect("an order body serialises");
-    let mut api = Public::new(None, None);
+    // The one client allowed an order (kagamizo_public::endpoints::Bound).
+    let mut api = Public::new(None, None).placer();
     let preflight = api.preflight(&body).map_err(|e| Die(format!("Public refused the preflight: {e}"), 1))?;
     // The one call that moves money.
     let placed = api.place(&body).map_err(|e| Die(format!("Public refused the order: {e}"), 1))?;
     let order_id = if placed.order_id.is_empty() { order.order_id.clone().unwrap_or_default() } else { placed.order_id.clone() };
+    // Read back until the order has ended (OrderStatus::terminal): a partial
+    // fill is still working. At most a minute; an order still working then
+    // is reported as it stands.
     let mut status = None;
     for _ in 0..20 {
         let s = api.order(&order_id).map_err(api_die)?;
-        let pending = matches!(s.status.as_deref(), None | Some("NEW") | Some("PENDING"));
+        let ended = s.status.as_deref().and_then(OrderStatus::parse).is_some_and(OrderStatus::terminal);
         status = Some(s);
-        if !pending {
+        if ended {
             break;
         }
         std::thread::sleep(std::time::Duration::from_secs(3));
@@ -724,6 +730,147 @@ fn place(proposal_path: &str) -> R<()> {
         "strategy": name, "order_id": order_id, "preflight": preflight,
         "placed": placed, "status": status, "day": day_raw,
     }));
+    Ok(())
+}
+
+
+// ── Paper trading: settling the recorded days ─────────────────────────────
+
+/// How one recorded paper day stands.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+enum PaperStatus {
+    /// Nothing proposed, or the proposal was not admissible.
+    NoTrade,
+    /// Proposed and admissible; the contract has not settled.
+    Open,
+    Won,
+    Lost,
+    /// Settled neither YES nor NO (SETTLED_OUTCOME_OTHER): no P&L.
+    Void,
+}
+
+impl PaperStatus {
+    fn name(self) -> &'static str {
+        match self {
+            PaperStatus::NoTrade => "no-trade",
+            PaperStatus::Open => "open",
+            PaperStatus::Won => "won",
+            PaperStatus::Lost => "lost",
+            PaperStatus::Void => "void",
+        }
+    }
+}
+
+/// An event contract bought at `ask` pays 1 - ask a contract if its side
+/// settles true and loses the ask if not.
+fn settle_event(side: &str, ask: f64, quantity: f64, settled: SettledOutcome) -> (PaperStatus, f64) {
+    let yes = match settled {
+        SettledOutcome::SettledOutcomeUnspecified => return (PaperStatus::Open, 0.0),
+        SettledOutcome::SettledOutcomeOther => return (PaperStatus::Void, 0.0),
+        SettledOutcome::SettledOutcomeYes => true,
+        SettledOutcome::SettledOutcomeNo => false,
+    };
+    if (side == "YES") == yes {
+        (PaperStatus::Won, round2(quantity * (1.0 - ask)))
+    } else {
+        (PaperStatus::Lost, round2(-quantity * ask))
+    }
+}
+
+/// Peak-to-trough of the equity curve from the seed, as a percent of the
+/// peak.
+fn max_drawdown_pct(seed: f64, pnls: &[f64]) -> f64 {
+    let (mut equity, mut peak, mut worst) = (seed, seed, 0.0f64);
+    for p in pnls {
+        equity += p;
+        peak = peak.max(equity);
+        if peak > 0.0 {
+            worst = worst.max((peak - equity) / peak * 100.0);
+        }
+    }
+    round2(worst)
+}
+
+/// Every recorded paper day of the strategy, settled where Public has
+/// settled its contract; the ledger written beside the records.
+fn paper_settle(name: &str) -> R<()> {
+    let decl = declared(name)?;
+    if decl.kind != Kind::EventRule {
+        return die(format!(
+            "{name} is {:?}: paper-settle settles event contracts; an option settles at expiry, which it does not price yet",
+            decl.kind
+        ));
+    }
+    let (_, limits_raw) = limits_for(&decl)?;
+    let seed = limits_raw.get("seedUsd").and_then(Value::as_f64).unwrap_or(0.0);
+    let folder = decisions_dir(&decl)?.join("paper");
+    let suffix = format!("-{name}.json");
+    let mut records: Vec<PathBuf> = std::fs::read_dir(&folder)
+        .map(|d| d.filter_map(|e| e.ok().map(|e| e.path())).collect())
+        .unwrap_or_default();
+    records.retain(|p| p.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.ends_with(&suffix) && n.len() == 10 + suffix.len()));
+    records.sort();
+    let mut api = Public::new(None, None);
+    let mut details: HashMap<String, kagamizo_public::types::EventDetailsResponse> = HashMap::new();
+    let (mut days, mut pnls) = (Vec::new(), Vec::new());
+    let (mut trades, mut won, mut lost, mut open) = (0u32, 0u32, 0u32, 0u32);
+    for path in &records {
+        let rec = read_json(path)?;
+        let date = rec["as_of"].as_str().unwrap_or_default().to_string();
+        let p = &rec["proposal"];
+        if p.is_null() || p["admissible"] != Value::Bool(true) {
+            days.push(json!({"date": date, "status": PaperStatus::NoTrade.name(), "why": rec.get("why").cloned().unwrap_or(json!(p["refused_because"]))}));
+            continue;
+        }
+        trades += 1;
+        let c = &p["contract"];
+        let (event, outcome, side) = (c["event"].as_str().unwrap_or(""), c["outcome"].as_str().unwrap_or(""), c["side"].as_str().unwrap_or(""));
+        let (ask, quantity) = (c["ask"].as_f64().unwrap_or(0.0), p["quantity"].as_f64().unwrap_or(0.0));
+        if !details.contains_key(event) {
+            details.insert(event.to_string(), api.event_contract_details(event, true).map_err(api_die)?);
+        }
+        let settled = details[event]
+            .outcomes
+            .iter()
+            .find(|o| o.outcome_id == outcome)
+            .and_then(|o| SettledOutcome::parse(&o.settled_outcome))
+            .unwrap_or(SettledOutcome::SettledOutcomeUnspecified);
+        let (status, pnl) = settle_event(side, ask, quantity, settled);
+        match status {
+            PaperStatus::Won => won += 1,
+            PaperStatus::Lost => lost += 1,
+            PaperStatus::Open => open += 1,
+            _ => {}
+        }
+        if matches!(status, PaperStatus::Won | PaperStatus::Lost) {
+            pnls.push(pnl);
+        }
+        days.push(json!({"date": date, "status": status.name(), "contract": c["contract"], "side": side,
+            "ask": ask, "quantity": quantity, "pnl_usd": pnl}));
+    }
+    let pnl: f64 = round2(pnls.iter().sum());
+    let settled = won + lost;
+    let ledger = json!({
+        "strategy": name,
+        "seed_usd": seed,
+        "days": records.len(),
+        "trades": trades,
+        "settled": settled,
+        "open": open,
+        "won": won,
+        "lost": lost,
+        "pnl_usd": pnl,
+        "hit_rate": if settled > 0 { round4(won as f64 / settled as f64) } else { 0.0 },
+        "max_drawdown_pct": max_drawdown_pct(seed, &pnls),
+        "from": days.first().map(|d| d["date"].clone()).unwrap_or(Value::Null),
+        "to": days.last().map(|d| d["date"].clone()).unwrap_or(Value::Null),
+        "record": days,
+    });
+    let out = folder.join(format!("ledger-{name}.json"));
+    std::fs::create_dir_all(&folder).map_err(|e| Die(format!("{}: {e}", folder.display()), 1))?;
+    std::fs::write(&out, serde_json::to_string_pretty(&ledger).expect("JSON serialises"))
+        .map_err(|e| Die(format!("{}: {e}", out.display()), 1))?;
+    emit(&ledger);
     Ok(())
 }
 
@@ -776,6 +923,7 @@ fn run(args: &[String]) -> R<()> {
             propose(&name, date.as_deref(), *cmd == "paper-day", forecasts.as_deref())
         }
         ["place", path] => place(path),
+        ["paper-settle", name] => paper_settle(name),
         ["backtest", ..] | ["paper", ..] => {
             die("backtest and paper run on the Python engine until they move onto NautilusTrader's Rust crates")
         }
@@ -849,6 +997,21 @@ mod tests {
         assert_eq!(ask_of("0.20"), Some(0.2));
         assert_eq!(ask_of("1.00"), None);
         assert_eq!(ask_of(""), None);
+    }
+
+    #[test]
+    fn event_contracts_settle_on_their_side() {
+        assert_eq!(settle_event("YES", 0.2, 10.0, SettledOutcome::SettledOutcomeYes), (PaperStatus::Won, 8.0));
+        assert_eq!(settle_event("NO", 0.3, 10.0, SettledOutcome::SettledOutcomeYes), (PaperStatus::Lost, -3.0));
+        assert_eq!(settle_event("YES", 0.2, 10.0, SettledOutcome::SettledOutcomeUnspecified).0, PaperStatus::Open);
+        assert_eq!(settle_event("YES", 0.2, 10.0, SettledOutcome::SettledOutcomeOther), (PaperStatus::Void, 0.0));
+    }
+
+    #[test]
+    fn drawdown_is_from_the_peak() {
+        // 100 -> 110 -> 99 -> 104: the trough is 11 below the 110 peak.
+        assert_eq!(max_drawdown_pct(100.0, &[10.0, -11.0, 5.0]), 10.0);
+        assert_eq!(max_drawdown_pct(100.0, &[]), 0.0);
     }
 
     #[test]

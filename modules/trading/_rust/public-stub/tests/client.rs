@@ -80,6 +80,18 @@ fn spawn_stub() -> Result<(Public, StubGuard), String> {
 // ── Tests ────────────────────────────────────────────────────────────────
 
 #[test]
+fn a_reader_cannot_place() -> Result<(), String> {
+    let (mut client, _guard) = spawn_stub()?;
+    let _ = client.account()?;
+    let body = r#"{"instrument":{"symbol":"SPY","type":"EQUITY"},"orderSide":"BUY","orderType":"MARKET","expiration":{"timeInForce":"DAY"},"quantity":"1"}"#;
+    let err = client.place(body).expect_err("a reader's order is refused before it is sent");
+    if !err.contains("the reader client may not call place_order") {
+        return Err(err);
+    }
+    Ok(())
+}
+
+#[test]
 fn test_token() -> Result<(), String> {
     let (mut client, guard) = spawn_stub()?;
     let tok = client.token()?;
@@ -270,7 +282,9 @@ fn test_quotes() -> Result<(), String> {
 
 #[test]
 fn test_place_and_order() -> Result<(), String> {
-    let (mut client, guard) = spawn_stub()?;
+    let (client, guard) = spawn_stub()?;
+    // Only a placer may place (kagamizo_public::endpoints::Bound).
+    let mut client = client.placer();
     let _ = client.account()?;
 
     // Place an order

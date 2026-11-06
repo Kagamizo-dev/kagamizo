@@ -6,6 +6,7 @@ use serde::Deserialize;
 
 use ureq::{self, AgentBuilder, Error};
 
+use crate::endpoints::{Bound, Endpoint};
 use crate::types::{
     AGGREGATIONS, EVENT_SORTING_MODES, EVENT_CONTRACT_PERIODS,
     EVENT_CONTRACT_MAX_SYMBOLS, INSTRUMENT_TYPES,
@@ -162,6 +163,8 @@ pub struct Public {
     pub token_value: Option<String>,
     pub account_id: Option<String>,
     pub base_url: String,
+    /// The endpoints this client may call (crate::endpoints).
+    pub bound: Bound,
 }
 
 impl Public {
@@ -186,15 +189,26 @@ impl Public {
             token_value: None,
             account_id: if account_id.is_empty() { None } else { Some(account_id.to_string()) },
             base_url: base_url.to_string(),
+            bound: Bound::Reader,
         }
+    }
+
+    /// The same client, allowed the one single-leg order: `trade place`'s.
+    pub fn placer(mut self) -> Self {
+        self.bound = Bound::Placer;
+        self
     }
 
     /// Low-level: send a request, ensure auth token first.
     fn do_req<T: for<'b> Deserialize<'b> + std::fmt::Debug>(
-        &mut self, method: &str, path: &str, body_json: Option<&str>,
+        &mut self, endpoint: Endpoint, path: &str, body_json: Option<&str>,
     ) -> Result<T, String> {
+        let method = endpoint.spec().method.as_str();
+        self.bound.check(endpoint, method, path)?;
         // Ensure token if we have a secret
-        if self.token_value.is_none() && !self.secret.is_empty() {
+        if self.token_value.is_none() && !self.secret.is_empty()
+            && self.bound.check(Endpoint::CreatePersonalAccessToken, "POST", "/userapiauthservice/personal/access-tokens").is_ok()
+        {
             let req_body = AccessTokenRequest {
                 secret: self.secret.clone(),
                 validity_in_minutes: 15,
@@ -232,6 +246,7 @@ impl Public {
         if self.token_value.is_some() {
             return Result::Ok(self.token_value.as_ref().unwrap().clone());
         }
+        self.bound.check(Endpoint::CreatePersonalAccessToken, "POST", "/userapiauthservice/personal/access-tokens")?;
         let req_body = AccessTokenRequest {
             secret: self.secret.clone(),
             validity_in_minutes: 15,
@@ -262,7 +277,7 @@ impl Public {
         if self.account_id.is_some() {
             return Result::Ok(self.account_id.as_ref().unwrap().clone());
         }
-        let resp = self.do_req::<AccountResponse>("GET", "/userapigateway/trading/account", None);
+        let resp = self.do_req::<AccountResponse>(Endpoint::GetAccounts, "/userapigateway/trading/account", None);
         if resp.is_err() { return Result::Err(resp.unwrap_err()); }
         let accounts = resp.unwrap().accounts;
         let mut brokerage: Vec<String> = Vec::new();
@@ -284,7 +299,7 @@ impl Public {
 
     pub fn instrument(&mut self, symbol: &str, kind: &str) -> Result<serde_json::Value, String> {
         let path = format!("/userapigateway/trading/instruments/{}/{}", symbol.to_uppercase(), kind);
-        self.do_req::<serde_json::Value>("GET", &path, None)
+        self.do_req::<serde_json::Value>(Endpoint::GetInstrument, &path, None)
     }
 
     pub fn bars(
@@ -309,7 +324,7 @@ impl Public {
         }
         let p = period.unwrap_or(longest.unwrap());
         let path = format!("/userapigateway/historicdata/{}/{}/{}/{}", kind, symbol.to_uppercase(), p, aggregation.unwrap());
-        let resp = self.do_req::<BarsResponse>("GET", &path, None);
+        let resp = self.do_req::<BarsResponse>(Endpoint::GetBarsV2WithAggregation, &path, None);
         if resp.is_err() { return Result::Err(resp.unwrap_err()); }
         let br = resp.unwrap();
         let session_opt = br.regular_market;
@@ -336,7 +351,7 @@ impl Public {
         let a = self.account();
         if a.is_err() { return Result::Err(a.unwrap_err()); }
         let path = format!("/userapigateway/trading/{}/preflight/single-leg", a.unwrap());
-        self.do_req::<PreflightResponse>("POST", &path, Some(order_json))
+        self.do_req::<PreflightResponse>(Endpoint::PreflightSingleLeg, &path, Some(order_json))
     }
 
     pub fn option_expirations(&mut self, symbol: &str, kind: &str) -> Result<Vec<String>, String> {
@@ -347,7 +362,7 @@ impl Public {
             instrument: OptionInstrument { symbol: symbol.to_uppercase(), kind: kind.to_string() },
         };
         let json = serde_json::to_string(&body).expect("ser");
-        let resp = self.do_req::<OptionExpirationsResponse>("POST", &path, Some(&json));
+        let resp = self.do_req::<OptionExpirationsResponse>(Endpoint::GetOptionExpirations, &path, Some(&json));
         if resp.is_err() { return Result::Err(resp.unwrap_err()); }
         let r = resp.unwrap();
         let mut result: Vec<String> = Vec::new();
@@ -368,7 +383,7 @@ impl Public {
             expiration_date: expiration.to_string(),
         };
         let json = serde_json::to_string(&body).expect("ser");
-        self.do_req::<OptionChainResponse>("POST", &path, Some(&json))
+        self.do_req::<OptionChainResponse>(Endpoint::GetOptionChain, &path, Some(&json))
     }
 
     pub fn greeks(
@@ -382,7 +397,7 @@ impl Public {
         }
         let query = qparts.join("&");
         let path = format!("/userapigateway/option-details/{}/greeks?{}", a.unwrap(), query);
-        let resp = self.do_req::<GreeksResponse>("GET", &path, None);
+        let resp = self.do_req::<GreeksResponse>(Endpoint::GetOptionGreeks, &path, None);
         if resp.is_err() { return Result::Err(resp.unwrap_err()); }
         let gr = resp.unwrap();
         let mut found: std::collections::HashMap<String, std::collections::HashMap<String, Option<f64>>> = std::collections::HashMap::new();
@@ -428,7 +443,7 @@ impl Public {
             body_instruments.push(QuoteInstrument { symbol: symbol.to_uppercase(), kind: kind.to_string() });
         }
         let json = serde_json::to_string(&QuotesRequest { instruments: body_instruments }).expect("ser");
-        let resp = self.do_req::<QuotesResponse>("POST", &path, Some(&json));
+        let resp = self.do_req::<QuotesResponse>(Endpoint::GetQuotes, &path, Some(&json));
         if resp.is_err() { return Result::Err(resp.unwrap_err()); }
         Result::Ok(resp.unwrap().quotes.unwrap_or(Vec::new()))
     }
@@ -475,7 +490,7 @@ impl Public {
             filters: filters,
         };
         let json = serde_json::to_string(&req).expect("ser");
-        self.do_req::<EventSummaryResponse>("POST", "/userapigateway/eventcontract/summary", Some(&json))
+        self.do_req::<EventSummaryResponse>(Endpoint::GetEventSummary, "/userapigateway/eventcontract/summary", Some(&json))
     }
 
     pub fn event_contracts(
@@ -515,7 +530,7 @@ impl Public {
     ) -> Result<EventDetailsResponse, String> {
         let sym = event_symbol.trim().to_uppercase();
         let path = format!("/userapigateway/eventcontract/details/{}?includeAllOutcomes={}", sym, if all_outcomes { "true" } else { "false" });
-        self.do_req::<EventDetailsResponse>("GET", &path, None)
+        self.do_req::<EventDetailsResponse>(Endpoint::GetEventDetails, &path, None)
     }
 
     pub fn event_contract_bars(
@@ -533,7 +548,7 @@ impl Public {
         }
         let path = format!("/userapigateway/historicdata/event-contracts/{}/bars/{}?symbols={}",
             event_id.to_uppercase(), period, url_encode(&cleaned.join(",")));
-        self.do_req::<EventContractBarsResponse>("GET", &path, None)
+        self.do_req::<EventContractBarsResponse>(Endpoint::GetEventContractBars, &path, None)
     }
 
     /// Places one single-leg order; the one call here that moves money.
@@ -541,14 +556,14 @@ impl Public {
         let a = self.account();
         if a.is_err() { return Result::Err(a.unwrap_err()); }
         let path = format!("/userapigateway/trading/{}/order", a.unwrap());
-        self.do_req::<PlaceOrderResponse>("POST", &path, Some(order_json))
+        self.do_req::<PlaceOrderResponse>(Endpoint::PlaceOrder, &path, Some(order_json))
     }
 
     pub fn order(&mut self, order_id: &str) -> Result<OrderResponse, String> {
         let a = self.account();
         if a.is_err() { return Result::Err(a.unwrap_err()); }
         let path = format!("/userapigateway/trading/{}/order/{}", a.unwrap(), order_id);
-        self.do_req::<OrderResponse>("GET", &path, None)
+        self.do_req::<OrderResponse>(Endpoint::GetOrder, &path, None)
     }
 }
 

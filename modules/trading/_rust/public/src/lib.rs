@@ -1,8 +1,7 @@
 //! Public's API for `trade`: the adapter NautilusTrader does not have.
 //!
 //! The same endpoints the pinned publicdotcom-cli calls (its generated client
-//! names them), through blocking TCP sockets, so it runs inside the
-//! NautilusTrader Python:
+//! names them; ./endpoints.rs bounds every call to them), over ureq and TLS:
 //!
 //!   token       a short-lived access token minted from PUBLIC_PERSONAL_SECRET
 //!   account     PUBLIC_ACCOUNT_ID, else the one BROKERAGE account
@@ -25,9 +24,11 @@
 //!               action: the controller's, after the risk check and a fresh
 //!               preflight); order() reads it back by its id
 //!
-//! Only `place` places; nothing replaces or cancels.
+//! Only `place` places, and only a client built with `placer()` may call
+//! it; nothing replaces or cancels.
 
 pub mod types;
+pub mod endpoints;
 pub mod client;
 
 pub use client::Public;
