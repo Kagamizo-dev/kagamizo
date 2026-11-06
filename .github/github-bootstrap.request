@@ -1,1 +1,2 @@
+2026-11-06T23:29:55Z rotate github-token: an error in github-state printed it into a session (fixed in 18cddb1); revoke it and mint a new one
 2026-11-03T02:40:34Z set PROTON_PASS_HOST_INSTALL_TOKEN (modules/hetzner/install.nix)
