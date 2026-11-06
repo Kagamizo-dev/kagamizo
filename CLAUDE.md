@@ -35,6 +35,13 @@ capabilities with the page that states them, and every module declares what it
 needs (`accounts.demands`). Never rely on what
 an account can do without a capability and a demand for it.
 
+The code we author is Rust, Lean or Nix: no bash, no Python, no JavaScript,
+and no inline code of any language inside a Nix string; upstream software we
+pin is wrapped by the least Nix that runs it (the owner's rule, 2026-11-05).
+`checks.languages` and the pre-commit hook (`lang-scan`) hold every file to
+it, and `checks.languages-ratchet` has Lean prove the dated, owned exceptions
+in `modules/repo/_json/language-exceptions.json` only ever shrink.
+
 ## Legal identities
 
 People and companies are the same kind of thing: an entity with a typed

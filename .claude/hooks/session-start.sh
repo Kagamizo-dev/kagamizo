@@ -27,4 +27,7 @@ fi
 
 # Reject commits that break the message convention (modules/repo/commits.nix).
 "$link/bin/commit-lint" --install-hook >/dev/null
+# Reject commits that add bash, Python, JavaScript or inline code, or that
+# leave Nix unformatted (modules/repo/languages.nix).
+"$link/bin/lang-scan" install-hook >/dev/null
 

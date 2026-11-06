@@ -34,6 +34,7 @@
           cards
           brokerage
           commit-lint
+          lang-scan
         ];
       };
     in

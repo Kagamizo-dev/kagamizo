@@ -197,5 +197,17 @@
       attr = "checks.x86_64-linux.twin-world";
       method = "Lean deciding the world's shape: every module has a building, every agent a character, every recipe's action declared";
     };
+    languages = {
+      module = "repo";
+      kind = "build";
+      attr = "checks.x86_64-linux.languages";
+      method = "lang-scan walking the tree against the typed policy and its exceptions; moves with the number of files";
+    };
+    languages-ratchet = {
+      module = "repo";
+      kind = "build";
+      attr = "checks.x86_64-linux.languages-ratchet";
+      method = "Lean deciding every language exception owned, dated and within the baseline (decide +kernel); moves with the exceptions";
+    };
   };
 }

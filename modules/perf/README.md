@@ -19,6 +19,8 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | gamedev | `gamedev-profile` | build | none yet | none yet | 10% | Lean deciding the profile open source but its declared platform, plus the versions listing |
 | governance | `governance-cedar` | build | none yet | none yet | 10% | Cedar's test runner over every generated test (6169); moves with accounts × actions × agents |
 | governance | `governance-changes` | build | none yet | none yet | 10% | Lean deciding the change-class table's shape, plus the Rust tool's tests; moves with the table |
+| repo | `languages` | build | none yet | none yet | 10% | lang-scan walking the tree against the typed policy and its exceptions; moves with the number of files |
+| repo | `languages-ratchet` | build | none yet | none yet | 10% | Lean deciding every language exception owned, dated and within the baseline (decide +kernel); moves with the exceptions |
 | lean | `lean-api-pyicloud` | build | none yet | none yet | 10% | Lean deciding pyicloud's model (184 classes); moves with the catalog |
 | lean | `lean-api-rclone` | build | none yet | none yet | 10% | Lean deciding rclone's model closed (101 commands, 1100 global flags on one operation); moves with the catalog's size and the proof's shape |
 | lean | `lean-governance` | build | none yet | none yet | 10% | Lean deciding every governed action typed and every grant allowed (decide +kernel) |

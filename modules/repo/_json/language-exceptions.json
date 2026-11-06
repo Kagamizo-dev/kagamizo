@@ -1,0 +1,871 @@
+{
+  ".claude/hooks/session-start.sh": {
+    "language": "sh",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/_lib/frozen.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/accounts/signup.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/agents/tiers.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/android/default.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "twin",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/apple/_icloud.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/apple/icloud.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/browser/_test/page.html": {
+    "language": "html",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/browser/_test/passkey.html": {
+    "language": "html",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/browser/_test/secretspec": {
+    "language": "other",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/browser/default.nix": {
+    "language": "nix-inline",
+    "markers": 6,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/cache/default.nix": {
+    "language": "nix-inline",
+    "markers": 4,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/bridge.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/cdp.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/cf.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/coverage.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/gh.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/hcloud.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/hetzner_api.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/icloudpd.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/mercury.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/mercury_api.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/pass_cli.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/pass_items.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/public.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/pyicloud.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/rclone.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/_extract/tofu.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/catalogs.nix": {
+    "language": "nix-inline",
+    "markers": 25,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/catalog/sources.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/ci/_hosts/github.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/ci/default.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/cloudflare/bootstrap.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/cloudflare/infra.nix": {
+    "language": "nix-inline",
+    "markers": 4,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/cloudflare/login.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/cloudflare/registrar.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/compliance/rules.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "governance-jingzo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/desktop/_assets/make-wallpaper.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/desktop/_assets/waybar/style.css": {
+    "language": "css",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/desktop/desktop.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/discord/default.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/dsh/default.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/dsh/dispatch.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/gamedev/default.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "builders",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/github/agents-app.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/github/bootstrap.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/governance/cedar.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/governance/changes.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/governance/orca.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/hetzner/_console.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/hetzner/_github-app.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/hetzner/agents.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/hetzner/console.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/hetzner/credentials.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/hetzner/host.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/hetzner/infra.nix": {
+    "language": "nix-inline",
+    "markers": 4,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/hetzner/install.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/identity/audit.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/identity/lifecycle.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/lean/_render/catalog.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/lean/default.nix": {
+    "language": "nix-inline",
+    "markers": 5,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/legal/_templates/common.typ": {
+    "language": "typ",
+    "owner": "legal-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/legal/_templates/fact-sheet.typ": {
+    "language": "typ",
+    "owner": "legal-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/legal/_templates/kyc-letter.typ": {
+    "language": "typ",
+    "owner": "legal-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/legal/_templates/operating-agreement.typ": {
+    "language": "typ",
+    "owner": "legal-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/legal/_templates/w9-prefill.typ": {
+    "language": "typ",
+    "owner": "legal-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/legal/documents.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "legal-jingzo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/legal/prepare.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "legal-jingzo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/legal/sync.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "legal-jingzo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/mailbox/_test/secretspec": {
+    "language": "other",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/mailbox/default.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/media/default.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "twin",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/mercury/cards.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "accounting-mirazo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/mercury/commands.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "accounting-mirazo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/mercury/discovery.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "accounting-mirazo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/mercury/session.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "accounting-mirazo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/migration/_export.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/migration/default.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/migration/export.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/migration/tools.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/money/_flows.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "accounting-mirazo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/money/_ledger.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "accounting-mirazo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/money/default.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "accounting-mirazo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/northwest/_client.py": {
+    "language": "py",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/northwest/session.nix": {
+    "language": "nix-inline",
+    "markers": 4,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/openrouter/opencode.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/openrouter/wrapper.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/operations/default.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/organization/areas.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/perf/default.nix": {
+    "language": "nix-inline",
+    "markers": 6,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/proton-mail/_src/go.mod": {
+    "language": "other",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/proton-mail/_src/go.sum": {
+    "language": "other",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/proton-mail/_src/main.go": {
+    "language": "go",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/proton-mail/mail.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/proton/secretspec.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/proton/vaults.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/public/authorization.nix": {
+    "language": "nix-inline",
+    "markers": 4,
+    "owner": "accounting-mirazo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/public/brokerage.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "accounting-mirazo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/public/package.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "accounting-mirazo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/rea/default.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/repo/commits.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/repo/languages.nix": {
+    "language": "nix-inline",
+    "markers": 2,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/repo/lint.nix": {
+    "language": "nix-inline",
+    "markers": 3,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/research/_paper.py": {
+    "language": "py",
+    "owner": "research-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/research/_research.py": {
+    "language": "py",
+    "owner": "research-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/research/default.nix": {
+    "language": "nix-inline",
+    "markers": 7,
+    "owner": "research-jingzo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/research/papers.nix": {
+    "language": "nix-inline",
+    "markers": 4,
+    "owner": "research-jingzo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/rpi5/rpi5.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/setup/_nixos.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/site/_check.js": {
+    "language": "js",
+    "owner": "design",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/site/_check.nix": {
+    "language": "nix-inline",
+    "markers": 6,
+    "owner": "design",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/site/_check.py": {
+    "language": "py",
+    "owner": "design",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/site/default.nix": {
+    "language": "nix-inline",
+    "markers": 4,
+    "owner": "design",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/statestore/default.nix": {
+    "language": "nix-inline",
+    "markers": 4,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/tmux/_nixos.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/tokens/default.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/trading/_propose.py": {
+    "language": "py",
+    "owner": "research-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/trading/_public.py": {
+    "language": "py",
+    "owner": "research-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/trading/_stub_public.py": {
+    "language": "py",
+    "owner": "research-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/trading/_trade.py": {
+    "language": "py",
+    "owner": "research-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/trading/_weather.py": {
+    "language": "py",
+    "owner": "research-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/trading/_weather_test.py": {
+    "language": "py",
+    "owner": "research-jingzo",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/trading/limits.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "research-jingzo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/trading/package.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "research-jingzo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/trading/stages.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "research-jingzo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/trading/strategies.nix": {
+    "language": "nix-inline",
+    "markers": 16,
+    "owner": "research-jingzo",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/twin/world.nix": {
+    "language": "nix-inline",
+    "markers": 4,
+    "owner": "twin",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/welcome/_nixos.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/yoga-c940/_nixos.nix": {
+    "language": "nix-inline",
+    "markers": 1,
+    "owner": "upkeep",
+    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
+    "until": "2027-01-31"
+  },
+  "modules/yoga-c940/_scripts/boot-iso.sh": {
+    "language": "sh",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  },
+  "modules/yoga-c940/_scripts/publish-release.sh": {
+    "language": "sh",
+    "owner": "upkeep",
+    "replacedBy": "a Rust crate",
+    "until": "2027-01-31"
+  }
+}

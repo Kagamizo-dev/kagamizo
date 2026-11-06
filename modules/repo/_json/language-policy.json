@@ -1,0 +1,42 @@
+{
+  "data": [
+    "json",
+    "toml",
+    "md",
+    "lock",
+    "yml",
+    "yaml",
+    "png",
+    "pdf",
+    "request",
+    "jsonl",
+    "jsonc",
+    "txt",
+    "patch",
+    "kdl"
+  ],
+  "names": [
+    ".gitignore",
+    "LICENSE",
+    "flake.lock",
+    "Cargo.lock",
+    ".gitattributes"
+  ],
+  "skip": [
+    ".git",
+    "_pin",
+    "node_modules",
+    "target",
+    "result"
+  ],
+  "markers": [
+    "writeShellApplication",
+    "writeShellScript",
+    "writeScript",
+    "writers.write",
+    "runCommand",
+    "<script",
+    "<style",
+    "python3"
+  ]
+}
