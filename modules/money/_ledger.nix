@@ -13,8 +13,8 @@
 # actions public:portfolio-show, public:history-list, public:order-search and
 # public:taxlots-list. On the host (./_host.nix) it runs nightly as the
 # accounting-mirazo swarm, which modules/governance/swarms.nix grants read
-# on public-mirazo; `money.ledger.enable` is false until the owner says
-# nightly reads are allowed.
+# on public-mirazo. The owner allowed nightly read-only reads on 2026-11-05;
+# until the host can read Public's token (a Gap) the unit runs and idles.
 { lib, config, ... }:
 let
   inherit (lib) mkOption types;
@@ -25,7 +25,7 @@ in
     enable = mkOption {
       type = types.bool;
       default = false;
-      description = "Whether jingzo-host reads the ledger nightly (the owner's answer is pending).";
+      description = "Whether jingzo-host reads the ledger nightly.";
     };
     account = mkOption {
       type = types.enum (

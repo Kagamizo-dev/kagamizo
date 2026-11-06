@@ -6,6 +6,16 @@
 # the declaration is what the books expect to see.
 #
 #   money.flows.<name> = { from; to; usd | rule; as; when; approvedBy; }
+#   money.floors.<account> = { usd; setBy; why; }    the cash an account keeps
+#   money.borrowing.<account> = { enabled; kind; maxUsd; approvedBy; }
+#
+# The owner's decisions of 2026-11-05: trading is on the owner's own Public
+# account, funded from and returned to Mercury personal; capital stays
+# invested, so Mercury keeps only an operating floor, the excess above it
+# goes to Public, and Public refills Mercury only when it falls below the
+# floor. Public's API moves no money, so the nightly ledger proposes each
+# flow's amount and the owner makes it by hand. Borrowing against holdings
+# is declared and switched off.
 #
 # ./_lean/Flows.lean proves the rules, rendered from these declarations
 # (checks.money-flows): a flow between two owners' accounts is booked as a
@@ -38,12 +48,19 @@ let
           types.submodule {
             options = {
               aboveUsd = mkOption {
-                type = types.ints.positive;
-                description = "The flow runs once the source holds more than this.";
+                type = types.nullOr types.ints.positive;
+                default = null;
+                description = "Excess: the flow runs once the source holds more than this.";
               };
               keepUsd = mkOption {
-                type = types.ints.unsigned;
-                description = "What stays behind; the excess over it moves.";
+                type = types.nullOr types.ints.unsigned;
+                default = null;
+                description = "Excess: what stays behind; the excess over it moves.";
+              };
+              refillToUsd = mkOption {
+                type = types.nullOr types.ints.positive;
+                default = null;
+                description = "Refill: when the destination holds less than this, enough moves to bring it back.";
               };
             };
           }
@@ -97,6 +114,20 @@ let
     /-- Every declared flow is booked right between its owners. -/
     theorem flows_booked : flows.all Flow.booked = true := by decide
 
+    def borrowing : List Borrowing := [
+    ${lib.concatStringsSep ",\n" (
+      lib.mapAttrsToList (
+        n: b:
+        "  { account := ${q n}, enabled := ${lib.boolToString b.enabled}, approved := ${
+            lib.boolToString (b.approvedBy != null)
+          }, maxUsd := ${toString b.maxUsd} }"
+      ) config.money.borrowing
+    )}
+    ]
+
+    /-- Borrowing is on only with the owner's dated approval and a cap. -/
+    theorem borrowing_gated : borrowing.all Borrowing.gated = true := by decide
+
     /-- No declared flow is executable yet: none is approved. -/
     theorem nothing_executable_yet : flows.all (fun f => !f.executable) = true := by decide
 
@@ -109,7 +140,13 @@ let
       lib.optional ((f.usd == null) == (f.rule == null)) "money.flows.${n}: exactly one of usd and rule"
       ++ lib.optional (f.from == f.to) "money.flows.${n}: from and to are the same account"
       ++ lib.optional (
-        f.rule != null && f.rule.keepUsd > f.rule.aboveUsd
+        f.rule != null && (f.rule.aboveUsd == null) != (f.rule.keepUsd == null)
+      ) "money.flows.${n}: an excess rule names both aboveUsd and keepUsd"
+      ++ lib.optional (
+        f.rule != null && (f.rule.aboveUsd != null) == (f.rule.refillToUsd != null)
+      ) "money.flows.${n}: a rule is either an excess (aboveUsd, keepUsd) or a refill (refillToUsd)"
+      ++ lib.optional (
+        f.rule != null && f.rule.aboveUsd != null && f.rule.keepUsd > f.rule.aboveUsd
       ) "money.flows.${n}: keeps more than its threshold, so nothing would ever move"
       ++
         lib.optional
@@ -136,38 +173,123 @@ in
       type = types.raw;
       readOnly = true;
     };
+    floors = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            usd = mkOption {
+              type = types.ints.positive;
+              description = "The cash the account keeps; flows move what is above it or refill to it.";
+            };
+            setBy = mkOption {
+              type = types.enum [
+                "owner"
+                "placeholder"
+              ];
+              description = "Whether the owner set it, or it holds a place until they do.";
+            };
+            why = mkOption { type = types.str; };
+          };
+        }
+      );
+      default = { };
+    };
+    borrowing = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            enabled = mkOption {
+              type = types.bool;
+              default = false;
+              description = "Whether the account may borrow against its holdings.";
+            };
+            kind = mkOption {
+              type = types.enum [
+                "margin"
+                "pledged-line"
+              ];
+            };
+            maxUsd = mkOption {
+              type = types.ints.unsigned;
+              default = 0;
+              description = "The most it may owe.";
+            };
+            approvedBy = mkOption {
+              type = types.nullOr date;
+              default = null;
+              description = "The owner's dated approval; enabled needs one.";
+            };
+          };
+        }
+      );
+      default = { };
+    };
   };
 
   config = {
-    money.flowsChecked =
-      assert lib.assertMsg (problems == [ ]) (
-        "modules/money/_flows.nix:\n" + lib.concatMapStrings (p: "  - ${p}\n") problems
-      );
-      cfg;
+    money = {
+      flowsChecked =
+        assert lib.assertMsg (problems == [ ]) (
+          "modules/money/_flows.nix:\n" + lib.concatMapStrings (p: "  - ${p}\n") problems
+        );
+        cfg;
 
-    # The trading plan (HANDOFF.md, 2026-11-02): a $100 seed into the
-    # brokerage after five paper days, and the excess over $100 swept back.
-    # Both wait on the owner's dated approval.
-    money.flows = {
-      public-seed = {
-        from = "mercury-mirazo";
-        to = "public-mirazo";
-        usd = 100;
-        as = "personal";
-        when = "after five paper days (trading.strategies.<s>.stage = paper, five dated days)";
-        approvedBy = null;
+      # The owner's answer, 2026-11-05: the host reads the ledger nightly,
+      # read-only (./_ledger.nix).
+      ledger.enable = true;
+
+      # Mercury personal keeps an operating floor; the owner sets its amount
+      # (500 holds the place).
+      floors.mercury-mirazo = {
+        usd = 500;
+        setBy = "placeholder";
+        why = "the cash the owner keeps liquid; everything above it stays invested";
       };
-      public-sweep = {
-        from = "public-mirazo";
-        to = "mercury-mirazo";
-        rule = {
-          aboveUsd = 100;
-          keepUsd = 100;
+
+      # Borrowing against the brokerage is declared and off: on a small account
+      # a margin loan adds interest and forced-sale risk for no gain.
+      borrowing.public-mirazo = {
+        enabled = false;
+        kind = "margin";
+      };
+
+      # The trading plan (HANDOFF.md, 2026-11-02, and the owner's decisions of
+      # 2026-11-05): a $100 seed after five paper days, then the floor rules.
+      # All wait on the owner's dated approval.
+      flows =
+        let
+          floor = config.money.floors.mercury-mirazo.usd;
+        in
+        {
+          public-seed = {
+            from = "mercury-mirazo";
+            to = "public-mirazo";
+            usd = 100;
+            as = "personal";
+            when = "after five paper days (trading.strategies.<s>.stage = paper, five dated days)";
+            approvedBy = null;
+          };
+          invest-excess = {
+            from = "mercury-mirazo";
+            to = "public-mirazo";
+            rule = {
+              aboveUsd = floor;
+              keepUsd = floor;
+            };
+            as = "personal";
+            when = "once a strategy is promoted: the nightly ledger proposes Mercury's cash above its floor";
+            approvedBy = null;
+          };
+          top-up-operating = {
+            from = "public-mirazo";
+            to = "mercury-mirazo";
+            rule.refillToUsd = floor;
+            as = "personal";
+            when = "whenever Mercury personal falls below its floor: the ledger proposes the shortfall";
+            approvedBy = null;
+          };
         };
-        as = "sweep";
-        when = "whenever the brokerage account's cash is above the threshold";
-        approvedBy = null;
-      };
+
     };
 
     perSystem =

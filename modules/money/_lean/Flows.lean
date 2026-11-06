@@ -57,4 +57,20 @@ theorem unapproved_never_executable (f : Flow) (h : f.approved = false) :
     f.executable = false := by
   simp [Flow.executable, h]
 
+/-- Borrowing against an account's holdings. -/
+structure Borrowing where
+  account : String
+  enabled : Bool
+  approved : Bool
+  maxUsd : Nat
+  deriving Repr
+
+/-- On only with the owner's dated approval and a cap above zero. -/
+def Borrowing.gated (b : Borrowing) : Bool :=
+  !b.enabled || (b.approved && b.maxUsd > 0)
+
+/-- Switched off, borrowing is always within the rule. -/
+theorem off_is_gated (b : Borrowing) (h : b.enabled = false) : b.gated = true := by
+  simp [Borrowing.gated, h]
+
 end Kagamizo.Money
