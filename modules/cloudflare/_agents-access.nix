@@ -17,7 +17,7 @@
 #   - one cloudflare_zero_trust_access_service_token "agents-<name>"
 #   - one cloudflare_zero_trust_access_policy "agents-<name>" (decision
 #     non_identity) that includes that token
-#   - that policy is attached (after the owner's policy at precedence 2) only
+#   - that policy is attached (after the owner's policy, at a precedence of its own) only
 #     to the applications the agent's tools map to
 #
 # The token's client id and secret are OpenTofu outputs; the apply writes them

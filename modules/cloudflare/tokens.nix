@@ -48,6 +48,8 @@
     "Access: Apps and Policies Write" = "access.write";
     "Access: Organizations, Identity Providers, and Groups Read" = "access.read";
     "Access: Organizations, Identity Providers, and Groups Write" = "access.write";
+    "Access: Service Tokens Read" = "access.read";
+    "Access: Service Tokens Write" = "access.write";
   };
 
   cloudflare.tokens = {
@@ -74,6 +76,9 @@
         # The Zero Trust organization and its sign-in method, so a
         # pull-request plan can refresh them (2026-11-04).
         "Access: Organizations, Identity Providers, and Groups Read"
+        # The dsh teams' service tokens (../cloudflare/_agents-access.nix),
+        # so a pull-request plan can refresh them (2026-11-06).
+        "Access: Service Tokens Read"
       ];
     };
 
@@ -110,6 +115,8 @@
         # The Zero Trust organization itself (status.mirazo.org, and the
         # agents behind Access).
         "Access: Organizations, Identity Providers, and Groups Write"
+        # The dsh teams' service tokens, minted at apply (2026-11-06).
+        "Access: Service Tokens Write"
       ];
     };
   };

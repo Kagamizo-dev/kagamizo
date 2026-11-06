@@ -75,7 +75,9 @@ in
             }
           ];
           extraPolicies = agentPolicyRefs.${appKey} or [ ];
-          allPolicies = basePolicies ++ extraPolicies;
+          # Cloudflare requires each policy's precedence on an application to
+          # be unique: the owner's first, then each team's in order.
+          allPolicies = lib.imap1 (i: p: p // { precedence = i; }) (basePolicies ++ extraPolicies);
         in
         {
           name = appKey;
