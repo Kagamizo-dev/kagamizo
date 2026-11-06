@@ -37,8 +37,9 @@ pub struct WeatherData {
 #[derive(Serialize, Clone, PartialEq, Debug)]
 pub struct BacktestResult {
     pub recorded: String,
-    pub days: u64,
-    pub trades: u64,
+    pub days: Vec<DayResult>,
+    pub trades: Vec<Trade>,
+    pub total_trades: u64,
     pub pnl: f64,
     pub alpha: f64,
     pub max_drawdown_pct: f64,
@@ -46,13 +47,48 @@ pub struct BacktestResult {
     pub benchmark_pnl: f64,
 }
 
-#[derive(Clone, PartialEq, Debug)]
+/// Backtest limits matching the declaration keys exactly.
+/// JSON uses camelCase: seedUsd, maxPremiumUsd, maxContractPriceUsd,
+/// maxOpenPositions, dailyLossStopUsd, dailyTakeProfitUsd, minEdge, maxContracts.
+#[derive(Deserialize, Clone, PartialEq, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct BacktestLimits {
-    pub max_contract_price_usd: f64,
-    pub daily_take_profit_usd: f64,
-    pub daily_loss_stop_usd: f64,
     pub seed_usd: f64,
+    pub max_premium_usd: f64,
+    pub max_contract_price_usd: f64,
     pub max_open_positions: u32,
+    pub daily_loss_stop_usd: f64,
+    pub daily_take_profit_usd: f64,
+    pub min_edge: f64,
+    pub max_contracts: u32,
+}
+
+/// A single executed trade in the backtest replay.
+#[derive(Serialize, Clone, PartialEq, Debug)]
+pub struct Trade {
+    pub day: String,
+    pub ticker: String,
+    pub city: String,
+    pub question: String,
+    pub outcome: String,
+    /// The ask price for the traded side (YES or NO).
+    pub price: f64,
+    pub probability: f64,
+    pub edge: f64,
+    /// The side traded: "YES" or "NO".
+    pub side: String,
+    /// How the trade settled: "YES" or "NO".
+    pub settled: String,
+    /// Contract P&L in dollars (positive = win, negative = loss).
+    pub pnl: f64,
+}
+
+/// A per-day breakdown in the backtest result.
+#[derive(Serialize, Clone, PartialEq, Debug)]
+pub struct DayResult {
+    pub date: String,
+    pub trades: u64,
+    pub pnl: f64,
 }
 
 #[derive(Clone, PartialEq, Debug)]

@@ -1,267 +1,266 @@
 mod data;
 mod weather;
+mod source;
+mod replay;
+#[cfg(test)]
+mod rules_tests;
 
 use std::fs;
-use data::WeatherData;
+use data::BacktestLimits;
+use source::FixtureSource;
+use source::Source;
+use replay::run_replay;
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args.is_empty() || args[0] == "--help" || args[0] == "-h" {
-        eprintln!("usage: weather-backtest --fixture <forecasts.json>");
+        eprintln!("usage: weather-backtest --days <file> --limits <json> --recorded <YYYY-MM-DD>");
         std::process::exit(2);
     }
-    let mut path: Option<String> = None;
+    let mut days_path: Option<String> = None;
+    let mut limits_json: Option<String> = None;
+    let mut recorded: Option<String> = None;
     let mut i = 0;
     while i < args.len() {
-        if args[i] == "--fixture" && i + 1 < args.len() {
-            path = Some(args[i + 1].clone());
-            break;
+        if args[i] == "--days" && i + 1 < args.len() {
+            days_path = Some(args[i + 1].clone());
+            i += 2;
+        } else if args[i] == "--limits" && i + 1 < args.len() {
+            limits_json = Some(args[i + 1].clone());
+            i += 2;
+        } else if args[i] == "--recorded" && i + 1 < args.len() {
+            recorded = Some(args[i + 1].clone());
+            i += 2;
+        } else {
+            eprintln!("weather-backtest: unexpected argument: {}", args[i]);
+            std::process::exit(2);
         }
-        i += 1;
     }
-    if path.is_none() {
-        eprintln!("weather-backtest: --fixture is required");
+    if days_path.is_none() {
+        eprintln!("weather-backtest: --days <file> is required");
         std::process::exit(2);
     }
-    let p = path.unwrap();
-    let text = fs::read_to_string(&p).unwrap_or_else(|e| {
-        eprintln!("weather-backtest: reading {}: {}", p, e);
+    if limits_json.is_none() {
+        eprintln!("weather-backtest: --limits <json> is required");
+        std::process::exit(2);
+    }
+    if recorded.is_none() {
+        eprintln!("weather-backtest: --recorded <YYYY-MM-DD> is required");
+        std::process::exit(2);
+    }
+
+    let dp = days_path.unwrap();
+    let text = fs::read_to_string(&dp).unwrap_or_else(|e| {
+        eprintln!("weather-backtest: reading {}: {}", dp, e);
         std::process::exit(1);
     });
-    let weather: WeatherData = serde_json::from_str(&text).unwrap_or_else(|e| {
-        eprintln!("weather-backtest: parsing fixture: {}", e);
+    let source = FixtureSource::from_json(&text).unwrap_or_else(|| {
+        eprintln!("weather-backtest: parsing days file");
         std::process::exit(1);
     });
-    println!("{} cities, as_of={}", weather.cities.len(), weather.as_of);
+
+    let limits_j = limits_json.unwrap();
+    let limits: BacktestLimits = serde_json::from_str(&limits_j).unwrap_or_else(|e| {
+        eprintln!("weather-backtest: parsing limits JSON: {}", e);
+        std::process::exit(1);
+    });
+
+    let rec = recorded.unwrap();
+
+    // Collect day keys from the fixture, sorted.
+    let mut day_keys = source.day_keys();
+    day_keys.sort();
+
+    let result = run_replay(&source as &dyn Source, &limits, day_keys, &rec);
+    let output = serde_json::to_string_pretty(&result).unwrap_or_else(|e| {
+        eprintln!("weather-backtest: serialising result: {}", e);
+        std::process::exit(1);
+    });
+    println!("{}", output);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use data::{month_days, month_number, Question};
-    use weather::{parse_question, probability, edge, canonical_city, normal_cdf, sigma_f};
-    use std::collections::HashMap;
+    use crate::data::BacktestLimits;
+    use crate::weather::parse_question;
+    use crate::source::{FixtureSource, Source};
+    use crate::replay::{observed_in_band, run_replay};
 
-    /// Load the bundled fixture.
-    fn load_fixture() -> WeatherData {
-        // Try env var first, then look relative to crate root, then current dir
-        let path = std::env::var("FIXTURE_PATH").unwrap_or_else(|_| {
-            // Try relative to the crate src directory
-            let candidates: Vec<String> = vec![
-                // relative to cargo run / the crate directory
-                "../../_json/forecasts.json".into(),
-                "../_json/forecasts.json".into(),
-                "_json/forecasts.json".into(),
-                "modules/trading/_json/forecasts.json".into(),
-            ];
-            for c in candidates {
-                if std::path::Path::new(&c).exists() {
-                    return c;
+    /// Load the backtest-days fixture.
+    fn load_days() -> FixtureSource {
+        let mut candidates: Vec<String> = std::env::var("DAYS_PATH").into_iter().collect();
+        candidates.extend([
+            "../../_json/backtest-days.json".into(),
+            "../_json/backtest-days.json".into(),
+            "_json/backtest-days.json".into(),
+            "modules/trading/_json/backtest-days.json".into(),
+        ]);
+        for c in candidates {
+            if std::path::Path::new(&c).exists() {
+                let s = FixtureSource::from_path(&c);
+                if s.is_some() {
+                    return s.unwrap();
                 }
             }
-            // Last resort: the path expected when run from crate root
-            "../../_json/forecasts.json".into()
-        });
-        let text = std::fs::read_to_string(&path).unwrap_or_else(|e| {
-            panic!("cannot read fixture at {}: {}", path, e)
-        });
-        serde_json::from_str::<WeatherData>(&text).unwrap_or_else(|e| {
-            panic!("cannot parse fixture: {}", e)
-        })
-    }
-
-    // -----------------------------------------------------------------------
-    // data module tests
-    // -----------------------------------------------------------------------
-
-    #[test]
-    fn test_month_days() {
-        assert_eq!(month_days(2024, 2), 29);
-        assert_eq!(month_days(2025, 2), 28);
-        assert_eq!(month_days(2026, 4), 30);
-        assert_eq!(month_days(2026, 1), 31);
-    }
-
-    #[test]
-    fn test_month_number() {
-        assert_eq!(month_number("jan"), Some(1));
-        assert_eq!(month_number("January"), Some(1));
-        assert_eq!(month_number("dec"), Some(12));
-        assert_eq!(month_number("sept"), Some(9));
-        assert_eq!(month_number("x"), None);
-    }
-
-    #[test]
-    fn test_struct_creation() {
-        let q = Question {
-            shape: "high-temp-day".into(),
-            city: "New York".into(), variable: "high-temp".into(),
-            low: Some(72.0), high: None,
-            year: 2026, month: 11, start_day: 6, end_day: 6,
-        };
-        assert_eq!(q.shape, "high-temp-day");
-        assert_eq!(q.city, "New York");
-    }
-
-    // -----------------------------------------------------------------------
-    // canonical_city tests
-    // -----------------------------------------------------------------------
-
-    #[test]
-    fn test_canonical_city() {
-        assert_eq!(canonical_city("New York"), Some("New York".into()));
-        assert_eq!(canonical_city("NYC"), Some("New York".into()));
-        assert_eq!(canonical_city("LA"), Some("Los Angeles".into()));
-        assert_eq!(canonical_city("Washington DC"), Some("Washington".into()));
-        assert_eq!(canonical_city("Narnia"), None);
-    }
-
-    // -----------------------------------------------------------------------
-    // parse_question tests (mapped from _weather_test.py's Parse class)
-    // -----------------------------------------------------------------------
-
-    #[test]
-    fn test_parse_high_temp_day() {
-        let q1 = parse_question("Highest temperature in New York on Nov 6?", "72° or above", "2026-11-04", None);
-        assert!(q1.is_some());
-        let q1v = q1.as_ref().unwrap();
-        assert_eq!(q1v.shape, "high-temp-day");
-        assert_eq!(q1v.city, "New York");
-        assert_eq!(q1v.low, Some(72.0));
-        assert_eq!(q1v.high, None);
-        assert_eq!(q1v.start_day, 6);
-
-        let q2 = parse_question("High temp in NYC on November 6?", "66° to 71°", "2026-11-04", None);
-        assert!(q2.is_some());
-        assert_eq!(q2.as_ref().unwrap().city, "New York");
-        assert_eq!(q2.as_ref().unwrap().low, Some(66.0));
-        assert_eq!(q2.as_ref().unwrap().high, Some(71.0));
-
-        let q3 = parse_question("Highest temperature in Chicago on Nov 6?", "65° or below", "2026-11-04", Some("2026-11-07T04:59:00Z"));
-        assert!(q3.is_some());
-        assert_eq!(q3.as_ref().unwrap().low, None);
-        assert_eq!(q3.as_ref().unwrap().high, Some(65.0));
-        assert_eq!(q3.as_ref().unwrap().year, 2026);
-    }
-
-    #[test]
-    fn test_parse_month_totals() {
-        let q1 = parse_question("Rain in Chicago in November?", "Above 3 inches", "2026-11-04", None);
-        assert!(q1.is_some());
-        let q1v = q1.as_ref().unwrap();
-        assert_eq!(q1v.shape, "rain-month");
-        assert_eq!(q1v.variable, "rain");
-        assert_eq!(q1v.low, Some(3.0));
-        assert_eq!(q1v.high, None);
-        assert_eq!(q1v.start_day, 1);
-        assert_eq!(q1v.end_day, 30);
-
-        let q2 = parse_question("Snow in Chicago in December?", "1 to 2 inches", "2026-11-04", None);
-        assert!(q2.is_some());
-        assert_eq!(q2.as_ref().unwrap().shape, "snow-month");
-        assert_eq!(q2.as_ref().unwrap().low, Some(1.0));
-        assert_eq!(q2.as_ref().unwrap().high, Some(2.0));
-        assert_eq!(q2.as_ref().unwrap().year, 2026);
-
-        let q3 = parse_question("Rain in Miami in January?", "Below 1 inch", "2026-11-04", None);
-        assert!(q3.is_some());
-        assert_eq!(q3.as_ref().unwrap().high, Some(1.0));
-        assert_eq!(q3.as_ref().unwrap().year, 2027);
-    }
-
-    #[test]
-    fn test_unknown_shapes_are_none() {
-        assert!(parse_question("Where will it rain this weekend?", "New York", "2026-11-04", None).is_none());
-        assert!(parse_question("Rain in Narnia in November?", "Above 1 inch", "2026-11-04", None).is_none());
-        assert!(parse_question("Rain in Chicago in November?", "A lot", "2026-11-04", None).is_none());
-        assert!(parse_question("Highest temperature in New York on Nov 31?", "72° or above", "2026-11-04", None).is_none());
-        assert!(parse_question("Hurricane landfall in Florida in 2026?", "Yes", "2026-11-04", None).is_none());
-    }
-
-    // -----------------------------------------------------------------------
-    // probability tests (mapped from _weather_test.py's Probability class)
-    // -----------------------------------------------------------------------
-
-    #[test]
-    fn test_high_temp_bands_sum_to_one() {
-        let data = load_fixture();
-        let q_above = parse_question("Highest temperature in New York on Nov 6?", "72° or above", "2026-11-04", None).unwrap();
-        let q_mid = parse_question("Highest temperature in New York on Nov 6?", "66° to 71°", "2026-11-04", None).unwrap();
-        let q_below = parse_question("Highest temperature in New York on Nov 6?", "65° or below", "2026-11-04", None).unwrap();
-        let above = probability(&q_above, &data, "2026-11-04");
-        let mid = probability(&q_mid, &data, "2026-11-04");
-        let below = probability(&q_below, &data, "2026-11-04");
-        assert!(above.is_some() && mid.is_some() && below.is_some());
-        let sum = above.unwrap() + mid.unwrap() + below.unwrap();
-        assert!((sum - 1.0).abs() < 0.001);
-        assert!(above.unwrap() > 0.9);
-    }
-
-    #[test]
-    fn test_observed_day_is_certain() {
-        let data = load_fixture();
-        let q60 = parse_question("Highest temperature in New York on Nov 2?", "60° or above", "2026-11-04", None).unwrap();
-        let q62 = parse_question("Highest temperature in New York on Nov 2?", "62° or above", "2026-11-04", None).unwrap();
-        let p60 = probability(&q60, &data, "2026-11-04");
-        let p62 = probability(&q62, &data, "2026-11-04");
-        assert_eq!(p60, Some(1.0));
-        assert_eq!(p62, Some(0.0));
-    }
-
-    #[test]
-    fn test_month_total_near_its_price() {
-        let data = load_fixture();
-        let q = parse_question("Rain in Chicago in November?", "Above 3 inches", "2026-11-04", None).unwrap();
-        let p = probability(&q, &data, "2026-11-04");
-        assert!(p.is_some());
-        let pv = p.unwrap();
-        assert!(pv > 0.5 && pv < 0.65);
-    }
-
-    #[test]
-    fn test_none_without_data() {
-        let data = load_fixture();
-        let q = parse_question("Highest temperature in Miami on Nov 6?", "80° or above", "2026-11-04", None).unwrap();
-        assert!(probability(&q, &data, "2026-11-04").is_none());
-        let q2 = parse_question("Highest temperature in New York on Nov 20?", "50° or above", "2026-11-04", None).unwrap();
-        assert!(probability(&q2, &data, "2026-11-04").is_none());
-    }
-
-    #[test]
-    fn test_none_without_climatology() {
-        let data = load_fixture();
-        // Remove climatology from Chicago
-        let mut new_cities: HashMap<String, data::CityData> = HashMap::new();
-        for item in data.cities.iter() {
-            let (name, cd) = item;
-            if name == "Chicago" {
-                let mut cd2 = cd.clone();
-                cd2.climatology = None;
-                new_cities.insert(name.clone(), cd2);
-            } else {
-                new_cities.insert(name.clone(), cd.clone());
+        }
+        // Last resort
+        let text = std::fs::read_to_string("../../_json/backtest-days.json").ok().or_else(||
+            std::fs::read_to_string("../_json/backtest-days.json").ok()
+        ).or_else(||
+            std::fs::read_to_string("modules/trading/_json/backtest-days.json").ok()
+        );
+        if text.is_some() {
+            let t = text.unwrap();
+            let s = FixtureSource::from_json(&t);
+            if s.is_some() {
+                return s.unwrap();
             }
         }
-        let mut data2 = data.clone();
-        data2.cities = new_cities;
-        let q = parse_question("Rain in Chicago in November?", "Above 3 inches", "2026-11-04", None).unwrap();
-        assert!(probability(&q, &data2, "2026-11-04").is_none());
+        panic!("cannot load fixture")
     }
 
-    #[test]
-    fn test_edge() {
-        assert!((edge(0.75, 0.20) - 0.55).abs() < 0.0001);
-        assert!((edge(0.2, 0.25) + 0.05).abs() < 0.0001);
+    fn default_limits() -> BacktestLimits {
+        BacktestLimits {
+            seed_usd: 1000.0,
+            max_premium_usd: 25.0,
+            max_contract_price_usd: 1.0,
+            max_open_positions: 1,
+            daily_loss_stop_usd: 1000.0,
+            daily_take_profit_usd: 1000.0,
+            min_edge: 0.0,  // allow all non-negative edges
+            max_contracts: 10,
+        }
     }
 
+    // -----------------------------------------------------------------------
+    // Settlement tests
+    // -----------------------------------------------------------------------
+
+    /// Settlement: NY on Nov 5, observed high=72, "72° or above" → YES (72 >= 71.5)
     #[test]
-    fn test_normal_cdf() {
-        assert!((normal_cdf(0.0, 0.0, 1.0) - 0.5).abs() < 0.01);
+    fn test_settlement_yes_on_band_edge() {
+        let src = load_days();
+        let obs = src.observed("New York", "2026-11-05").unwrap();
+        let q = parse_question("Highest temperature in New York on Nov 5?", "72° or above", "2026-11-04", None).unwrap();
+        assert!(observed_in_band(&q, &obs));
     }
 
+    /// Settlement: NY on Nov 5, "65° or below" → NO (observed 72 > 65.5)
     #[test]
-    fn test_sigma_f() {
-        assert_eq!(sigma_f(0), 2.5);
-        assert_eq!(sigma_f(6), 7.0);
+    fn test_settlement_no_outside_band() {
+        let src = load_days();
+        let obs = src.observed("New York", "2026-11-05").unwrap();
+        let q = parse_question("Highest temperature in New York on Nov 5?", "65° or below", "2026-11-04", None).unwrap();
+        assert!(!observed_in_band(&q, &obs));
+    }
+
+    /// Settlement: "66° to 71°" → NO (observed 72 > 71.5)
+    #[test]
+    fn test_settlement_mid_band_no() {
+        let src = load_days();
+        let obs = src.observed("New York", "2026-11-05").unwrap();
+        let q = parse_question("Highest temperature in New York on Nov 5?", "66° to 71°", "2026-11-04", None).unwrap();
+        assert!(!observed_in_band(&q, &obs));
+    }
+
+    // -----------------------------------------------------------------------
+    // Loss stop: day stops after P&L reaches -dailyLossStopUsd
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_loss_stop_halt_day() {
+        let limits = BacktestLimits {
+            seed_usd: 1000.0,
+            max_premium_usd: 10.0,
+            max_contract_price_usd: 1.0,
+            max_open_positions: 1,
+            daily_loss_stop_usd: 0.10,  // stop after -$0.10
+            daily_take_profit_usd: 1000.0,
+            min_edge: -1.0,  // allow all edges
+            max_contracts: 10,
+        };
+        // Day 2026-11-07: NYHIGHT1107A (yes_price=0.60, "70° or above").
+        // NY on Nov 7, forecast high=70, as_of=2026-11-06, lead=1.
+        // sigma = sigma_f(1) = 3.25
+        // P(high >= 69.5 | mu=70, sigma=3.25)
+        //   z = (69.5-70)/3.25 = -0.154, P = 1-CDF(-0.154) ≈ 0.561
+        // YES edge = 0.561-0.60 = -0.039
+        // NO edge = (1-0.561)-0.95 = -0.511
+        // YES is picked (higher edge: -0.039 > -0.511)
+        // qty = min(10, floor(1/0.60)=1, floor(10/0.60)=16) = 1
+        // observed high=68, 68 < 69.5 -> NO -> YES was wrong
+        // P&L = -1 * 0.60 = -0.60 < -0.10 -> stop triggered
+        let src = load_days();
+        let result = run_replay(&src as &dyn Source, &limits, vec!["2026-11-07".into()], "2026-11-08");
+        // Should have 1 trade
+        assert_eq!(result.total_trades, 1);
+        // The day P&L should be -0.60 (one losing trade)
+        assert!((result.days[0].pnl - (-0.60)).abs() < 0.01);
+    }
+
+    // -----------------------------------------------------------------------
+    // Quantity < 1: skipped when the ask makes quantity < 1 under maxContractPriceUsd
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_quantity_less_than_one_skips() {
+        let limits = BacktestLimits {
+            seed_usd: 1000.0,
+            max_premium_usd: 10.0,
+            max_contract_price_usd: 0.04,  // below every ask in the fixture
+            max_open_positions: 1,
+            daily_loss_stop_usd: 1000.0,
+            daily_take_profit_usd: 1000.0,
+            min_edge: -1.0,  // allow all edges
+            max_contracts: 10,
+        };
+        // On Nov 5 the cheapest ask is yes_price=0.05 (NYHIGHT1105C).
+        // floor(0.04/0.05) = 0 -> quantity < 1, skipped for every candidate.
+        let src = load_days();
+        let result = run_replay(&src as &dyn Source, &limits, vec!["2026-11-05".into()], "2026-11-08");
+        // No trade should happen because quantity < 1 for all candidates
+        assert_eq!(result.total_trades, 0);
+    }
+
+    // -----------------------------------------------------------------------
+    // Full fixture result
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_full_fixture_result() {
+        let limits = default_limits();
+        let src = load_days();
+        let result = run_replay(&src as &dyn Source, &limits, vec!["2026-11-05".into(), "2026-11-06".into(), "2026-11-07".into()], "2026-11-08");
+        // At least some trades happened
+        assert!(result.total_trades > 0);
+        // P&L should be non-zero (something traded)
+        assert!(result.pnl != 0.0);
+        // Hit rate should be between 0 and 1
+        assert!(result.hit_rate >= 0.0 && result.hit_rate <= 1.0);
+        // alpha = pnl - benchmark_pnl
+        assert!((result.alpha - (result.pnl - result.benchmark_pnl)).abs() < 0.001);
+        // Day results
+        assert_eq!(result.days.len(), 3);
+    }
+
+    // -----------------------------------------------------------------------
+    // Both sides trade: YES wins on Nov 5 with positive edge
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_nov5_trades_yes_wins() {
+        let limits = default_limits();
+        let src = load_days();
+        let result = run_replay(&src as &dyn Source, &limits, vec!["2026-11-05".into()], "2026-11-08");
+        // Should pick one trade (maxOpenPositions=1)
+        assert_eq!(result.total_trades, 1);
+        // The picked trade should have edge >= 0
+        assert!(result.trades[0].edge >= 0.0);
+        // Should be side YES (higher edge)
+        assert_eq!(result.trades[0].side, "YES");
+        // P&L: qty=5, yes_price=0.20, observed=72, YES settles true
+        // P&L = 5 * (1-0.20) = 4.0
+        assert!((result.days[0].pnl - 4.0).abs() < 0.01);
     }
 }

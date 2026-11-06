@@ -17,9 +17,10 @@
         src = ./_weather-backtest;
         cargoLock.lockFile = ./_weather-backtest/Cargo.lock;
         doCheck = true;
-        # The tests read the strategy's own fixture, the same file the Python
+        # The tests read the replay's sample days and the strategy's own fixture, the same file the Python
         # rules are tested on.
         FIXTURE_PATH = ./_json/forecasts.json;
+        DAYS_PATH = ./_json/backtest-days.json;
         meta.mainProgram = "weather-backtest";
       };
     in
