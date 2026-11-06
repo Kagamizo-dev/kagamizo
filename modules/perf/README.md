@@ -31,6 +31,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | migration | `migrate-build` | build | none yet | none yet | 10% | cargo build --release of the runner; crates vendored by Nix; moves with the dependency set and codegen settings (LTO, codegen-units) |
 | migration | `migration-lean` | build | none yet | none yet | 10% | Lean deciding closedRightly over the declared sources |
 | money | `money-flows` | build | none yet | none yet | 10% | Lean deciding every flow booked and none executable without approval |
+| trading | `nautilus-probe` | build | none yet | none yet | 10% | cargo build --release of NautilusTrader's Rust engine (0.67, about 180 crates) and the probe, with rustc 1.99.1; moves with Nautilus's version and its features (examples) |
 | hetzner | `open-webui` | build | none yet | none yet | 10% | Lean deciding every Open WebUI switch decided, the forbidden ones off and every variable known to the pinned version (decide +kernel over the catalog); moves with the catalog |
 | operations | `operations-boundary` | build | none yet | none yet | 10% | Lean deciding every declared secret well-formed |
 | organization | `organization-areas` | build | none yet | none yet | 10% | Lean deciding every area separated, scoped and every mergeable class covered; moves with areas × classes |

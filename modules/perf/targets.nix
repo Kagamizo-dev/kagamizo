@@ -209,6 +209,12 @@
       attr = "checks.x86_64-linux.languages-ratchet";
       method = "Lean deciding every language exception owned, dated and within the baseline (decide +kernel); moves with the exceptions";
     };
+    nautilus-probe = {
+      module = "trading";
+      kind = "build";
+      attr = "packages.x86_64-linux.nautilus-probe";
+      method = "cargo build --release of NautilusTrader's Rust engine (0.67, about 180 crates) and the probe, with rustc 1.99.1; moves with Nautilus's version and its features (examples)";
+    };
     papers = {
       module = "repo";
       kind = "build";
