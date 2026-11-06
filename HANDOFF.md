@@ -21,12 +21,43 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order, from HANDOFF.md's "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order: gate the weather backtest's replay pass and record its result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
-## 2026-11-06, later: chat fixed, OpenRouter by lifecycle (read this first)
+## 2026-11-06, evening: trading first; the runner landed (read this first)
+
+The owner's focus is trading. What landed:
+
+- **The weather rules in Rust** (68784a2, research-jingzo): probability,
+  edge and question parsing ported from `_weather.py` into
+  `modules/trading/_weather-backtest`, 15 tests on `_json/forecasts.json`,
+  built by `checks.weather-backtest`. Nothing here records a backtest yet.
+- **The replay pass** is dispatched to research-jingzo (brief in the
+  session's scratchpad, mirrored in the backlog item): sources behind a
+  `Source` trait (a fixture source first; HTTP clients once the host runner
+  reaches the weather and Kalshi hosts), settlement on the observed value,
+  the declared limits (maxContractPrice, the daily take-profit and loss
+  stop, maxOpenPositions, minEdge), P&L, drawdown, benchmark and alpha.
+  The gate then wires `trading.limits` into it and records the result
+  under research/backtests; `stages.weather-rules.backtest` counts only
+  under `backtestCounts` (alpha > 0, drawdown <= 20%).
+- **The agent runner** (6e89d25, upkeep): a Rust binary that runs a
+  headless dsh session from a typed request and pushes
+  `agents/<team>/<topic>`; `agents.runner.scheduled` types the research
+  team's four daily jobs. The host's units (`modules/hetzner/_runner-host.nix`)
+  are declared only once `agents.runner.enable` is set: **off**, because
+  each run spends OpenRouter credit. Turning it on is the owner's go.
+- **lang-scan** skips `.git` whatever its kind (a worktree's `.git` is a
+  file), so the hook works in the teams' worktrees (408e83f).
+
+Next: gate the replay pass; then live sources on the host (the runner on,
+by the owner's go); then paper days for weather-rules. Public funding by
+debit card is still unverified, and no money moves before paper trading is
+validated.
+
+## 2026-11-06, later: chat fixed, OpenRouter by lifecycle
 
 - **chat.jingzo.org was blank:** static-web-server 2.44 refuses any file
   that resolves outside its root, and Element's build is a directory of

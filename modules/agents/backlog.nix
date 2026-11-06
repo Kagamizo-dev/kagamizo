@@ -58,6 +58,7 @@ in
     agents.backlog = {
       "research-jingzo/weather-backtest" = {
         kind = "strategy";
+        status = "active";
         brief = ./_backlog/research-jingzo-weather-backtest.md;
       };
       "research-jingzo/grounded-sources" = {
@@ -66,6 +67,7 @@ in
       };
       "upkeep/host-runner" = {
         kind = "code";
+        status = "done";
         brief = ./_backlog/upkeep-host-runner.md;
       };
       "browser/engine-and-aliases" = {
