@@ -56,6 +56,30 @@ in
     governance.problems = problems;
 
     agents.backlog = {
+      "research-jingzo/weather-backtest" = {
+        kind = "strategy";
+        brief = ./_backlog/research-jingzo-weather-backtest.md;
+      };
+      "research-jingzo/grounded-sources" = {
+        kind = "strategy";
+        brief = ./_backlog/research-jingzo-grounded-sources.md;
+      };
+      "upkeep/host-runner" = {
+        kind = "code";
+        brief = ./_backlog/upkeep-host-runner.md;
+      };
+      "browser/engine-and-aliases" = {
+        kind = "browser-flow";
+        brief = ./_backlog/browser-engine-and-aliases.md;
+      };
+      "security/pipeline" = {
+        kind = "security-check";
+        brief = ./_backlog/security-pipeline.md;
+      };
+      "reverse-engineering/model-registry" = {
+        kind = "reverse-engineering";
+        brief = ./_backlog/reverse-engineering-model-registry.md;
+      };
       "twin/pumpkin-server" = {
         kind = "world";
         brief = ./_backlog/twin-pumpkin-server.md;

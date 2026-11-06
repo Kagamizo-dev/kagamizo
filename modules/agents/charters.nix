@@ -252,6 +252,45 @@ in
           "specialized/automation-governance-architect" = "keeps the lifecycles coherent";
         };
       };
+      security = {
+        goal = "Pass no change that adds a vulnerability, leaks a secret or widens a grant, and find weaknesses before anyone else";
+        measures = [
+          "every code, page, world and browser change reviewed for security"
+          "every pinned dependency's advisories read weekly"
+        ];
+        pm = "security/security-appsec-engineer";
+        roles = {
+          "security/security-appsec-engineer" = "runs the review queue and the static checks";
+          "security/security-penetration-tester" = "tests what runs on the host and behind Access";
+          "security/security-threat-intelligence-analyst" = "watches advisories for every pinned dependency";
+          "security/security-ai-generated-code-auditor" = "audits what the harness writes";
+        };
+      };
+      reverse-engineering = {
+        goal = "Map every tool, protocol and device we adopt into a typed catalog with its tests ported, so only the surface we need is ours";
+        measures = [
+          "every adoption with its tests ported before it is trusted"
+          "every catalog regenerated from the pinned thing itself"
+        ];
+        pm = "specialized/specialized-codebase-archaeologist";
+        roles = {
+          "specialized/specialized-codebase-archaeologist" = "runs the backlog and maps codebases with REA";
+          "engineering/engineering-embedded-firmware-engineer" = "maps devices and firmware";
+          "testing/testing-api-tester" = "ports each adoption's tests into our checks";
+        };
+      };
+      browser = {
+        goal = "Do in a browser, in Rust, only what no API offers, each flow typed and approved by the owner's 2FA";
+        measures = [
+          "every flow a typed declaration with its account and its approval"
+          "no credential ever printed or typed by hand"
+        ];
+        pm = "testing/testing-test-automation-engineer";
+        roles = {
+          "testing/testing-test-automation-engineer" = "runs the backlog and writes each flow";
+          "engineering/engineering-api-platform-engineer" = "checks first whether an API covers it";
+        };
+      };
       review = {
         goal = "Pass no code, tool, page or mod that fails the checks or the plan";
         measures = [
@@ -386,7 +425,10 @@ in
       };
       code = {
         proposer = "upkeep";
-        reviewers = [ "review" ];
+        reviewers = [
+          "review"
+          "security"
+        ];
         signOff = "owner";
         touches = [ "code" ];
       };
@@ -435,6 +477,51 @@ in
         ];
         signOff = "none";
         touches = [ "spend" ];
+      };
+      reverse-engineering = {
+        proposer = "reverse-engineering";
+        reviewers = [
+          "security"
+          "review"
+        ];
+        signOff = "owner";
+        touches = [ "code" ];
+      };
+      # A browser flow acts on an account in the owner's name: legal reads
+      # the site's terms, security the flow, and the owner signs it off.
+      browser-flow = {
+        proposer = "browser";
+        reviewers = [
+          "security"
+          "legal-jingzo"
+        ];
+        signOff = "owner";
+        touches = [ "code" ];
+      };
+      security-check = {
+        proposer = "security";
+        reviewers = [
+          "review"
+          "upkeep"
+        ];
+        signOff = "owner";
+        touches = [ "code" ];
+      };
+      # Trading code: research writes it; review and security pass the code,
+      # the owner's legal and accounting swarms pass what it trades.
+      strategy = {
+        proposer = "research-jingzo";
+        reviewers = [
+          "review"
+          "security"
+          "legal-mirazo"
+          "accounting-mirazo"
+        ];
+        signOff = "owner";
+        touches = [
+          "code"
+          "trade"
+        ];
       };
       world-content = {
         proposer = "builders";

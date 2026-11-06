@@ -95,6 +95,46 @@ in
       "game-development/game-designer"
       "game-development/level-designer"
     ] [ "twin" "matrix" ] [ "content" ] 3 "the builders: the bots that build, craft and keep the world";
+    # The owner's direction of 2026-11-06: industry-grade security in the
+    # pipelines, and a team for every change's security review.
+    security =
+      team
+        [
+          "security/security-appsec-engineer"
+          "security/security-penetration-tester"
+          "security/security-threat-intelligence-analyst"
+          "security/security-ai-generated-code-auditor"
+        ] [ "shell" "repo" "matrix" ] [ ]
+        3
+        "the security team: reviews every change for vulnerabilities and secrets, tests what runs, watches advisories"
+        "chat-and-code"
+        "deepseek/deepseek-v4-flash";
+    # Reverse engineering: maps an existing tool, protocol or device with REA
+    # into a typed catalog and ports its tests, so we adopt the minimal
+    # surface instead of building or running the whole thing.
+    reverse-engineering =
+      team
+        [
+          "specialized/specialized-codebase-archaeologist"
+          "engineering/engineering-embedded-firmware-engineer"
+          "testing/testing-api-tester"
+        ] [ "shell" "web" "repo" "matrix" ] [ "tool" "code" ]
+        3
+        "the reverse-engineering team: maps tools, protocols and devices with REA into typed catalogs and ported tests"
+        "chat-and-code"
+        "deepseek/deepseek-v4-flash";
+    # Browser automation, in Rust: sign-ups, aliases and web flows no API
+    # covers, each a typed flow the owner's 2FA approves.
+    browser =
+      team
+        [
+          "testing/testing-test-automation-engineer"
+          "engineering/engineering-api-platform-engineer"
+        ] [ "shell" "web" "repo" "matrix" ] [ "tool" "code" ]
+        3
+        "the browser team: Rust browser flows for what no API covers, each typed and approved"
+        "chat-and-code"
+        "deepseek/deepseek-v4-flash";
     upkeep =
       team
         [
