@@ -34,6 +34,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | hetzner | `open-webui` | build | none yet | none yet | 10% | Lean deciding every Open WebUI switch decided, the forbidden ones off and every variable known to the pinned version (decide +kernel over the catalog); moves with the catalog |
 | operations | `operations-boundary` | build | none yet | none yet | 10% | Lean deciding every declared secret well-formed |
 | organization | `organization-areas` | build | none yet | none yet | 10% | Lean deciding every area separated, scoped and every mergeable class covered; moves with areas × classes |
+| repo | `papers` | build | none yet | none yet | 10% | Lean deciding the modules without a paper within the baseline (decide); moves with the number of modules |
 | public | `public-endpoints` | build | none yet | none yet | 10% | The declared endpoints held against the pinned client's generated modules |
 | research | `research-papers` | build | none yet | none yet | 10% | Lean deciding every paper's facts allowed, then Pandoc and Typst renders scanned for the denylist; moves with the prose and the Lean files' size |
 | statestore | `statestore-build` | build | none yet | none yet | 10% | cargo build --release of the Proton Pass state backend (std-only HTTP, serde, sha2); moves with the dependency set |

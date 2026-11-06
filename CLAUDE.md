@@ -42,6 +42,18 @@ pin is wrapped by the least Nix that runs it (the owner's rule, 2026-11-05).
 it, and `checks.languages-ratchet` has Lean prove the dated, owned exceptions
 in `modules/repo/_json/language-exceptions.json` only ever shrink.
 
+Every module justifies its existence in a paper written as Lean,
+`modules/<m>/_lean/Paper.lean`, which replaces its README: purpose, full
+life cycle, pipeline, agents, tools, data and datasets, design,
+guarantees, performance, cited prior work and gaps (the owner's rule,
+2026-11-06; `modules/repo/_lean/PaperSchema.lean` types it, and
+`modules/repo/_lean/Paper.lean` is the worked example). `checks.paper-<m>`
+holds the paper to the repository: complete, every claim cited, every one
+of the module's theorems and perf targets explained, and only real checks,
+packages and teams named. `checks.papers` keeps the modules without one
+within the baseline, which only falls. Read a module's paper before
+changing it, and update the paper in the same commit as the change.
+
 ## Legal identities
 
 People and companies are the same kind of thing: an entity with a typed

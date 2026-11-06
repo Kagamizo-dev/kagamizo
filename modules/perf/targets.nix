@@ -209,6 +209,12 @@
       attr = "checks.x86_64-linux.languages-ratchet";
       method = "Lean deciding every language exception owned, dated and within the baseline (decide +kernel); moves with the exceptions";
     };
+    papers = {
+      module = "repo";
+      kind = "build";
+      attr = "checks.x86_64-linux.papers";
+      method = "Lean deciding the modules without a paper within the baseline (decide); moves with the number of modules";
+    };
     agents-charters = {
       module = "agents";
       kind = "build";
