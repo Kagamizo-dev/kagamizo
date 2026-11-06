@@ -7,3 +7,7 @@ publish = false
 [dependencies]
 serde.workspace = true
 serde_json.workspace = true
+ureq = { version = "2", features = ["json"] }
+chrono = { version = "0.4", default-features = false, features = ["std"] }
+chrono-tz = "0.10"
+libm = "0.2"

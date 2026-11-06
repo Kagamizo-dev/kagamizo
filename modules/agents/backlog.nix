@@ -63,7 +63,7 @@ in
       };
       "upkeep/trading-trade-rust" = {
         kind = "code";
-        status = "active";
+        status = "done";
         brief = ./_backlog/upkeep-trading-trade-rust.md;
       };
       "reverse-engineering/nautilus-rust" = {
@@ -75,6 +75,10 @@ in
         kind = "strategy";
         status = "done";
         brief = ./_backlog/research-jingzo-trading-paper.md;
+      };
+      "upkeep/trading-nautilus-rust" = {
+        kind = "code";
+        brief = ./_backlog/upkeep-trading-nautilus-rust.md;
       };
       "upkeep/module-papers" = {
         kind = "code";

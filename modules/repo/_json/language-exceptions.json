@@ -823,7 +823,7 @@
   },
   "modules/trading/strategies.nix": {
     "language": "nix-inline",
-    "markers": 16,
+    "markers": 12,
     "owner": "research-jingzo",
     "replacedBy": "its inline code moved into a Rust crate the Nix calls",
     "until": "2027-01-31"

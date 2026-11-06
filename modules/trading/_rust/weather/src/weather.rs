@@ -3,25 +3,16 @@ use crate::data::{WeatherData, CityData, Question, month_number, month_days, Dai
 use std::collections::HashMap;
 
 // ---------------------------------------------------------------------------
-// Normal CDF via error function approximation
+// Normal CDF
 // ---------------------------------------------------------------------------
 
+/// The normal distribution's CDF, through the error function exactly as
+/// _weather.py computes it (math.erf; libm's erf is the same function).
 pub fn normal_cdf(x: f64, mu: f64, sigma: f64) -> f64 {
     if sigma <= 0.0 {
-        if x >= mu { 1.0 } else { 0.0 }
-    } else {
-        // Abramowitz and Stegun approximation (26.2.17)
-        let z = (x - mu) / sigma;
-        let t = 1.0 / (1.0 + 0.231475 * z.abs());
-        let b0 = 0.3193815;
-        let b1 = -0.3565638;
-        let b2 = 1.7814779;
-        let b3 = -1.821256;
-        let b4 = 1.3302744;
-        let phi = 1.0 - 0.3989423 * (-z.abs() * z.abs() / 2.0).exp() *
-            (t * (b0 + t * (b1 + t * (b2 + t * (b3 + t * b4)))));
-        if z >= 0.0 { phi } else { 1.0 - phi }
+        return if x >= mu { 1.0 } else { 0.0 };
     }
+    0.5 * (1.0 + libm::erf((x - mu) / (sigma * std::f64::consts::SQRT_2)))
 }
 
 pub fn band_probability(mu: f64, sigma: f64, low: Option<f64>, high: Option<f64>) -> f64 {
@@ -373,6 +364,14 @@ pub fn probability(question: &Question, data: &WeatherData, as_of: &str) -> Opti
 // Edge
 // ---------------------------------------------------------------------------
 
+/// What the rules say the contract is worth over what it costs, as a
+/// probability, to four places as _weather.py's `round(p - price, 4)`.
 pub fn edge(prob: f64, price: f64) -> f64 {
-    prob - price
+    round_to(prob - price, 4)
+}
+
+/// Python's round(x, places): the float's exact decimal value, ties to even,
+/// which is how Rust formats a float to a precision.
+pub fn round_to(x: f64, places: usize) -> f64 {
+    format!("{x:.places$}").parse().unwrap_or(x)
 }

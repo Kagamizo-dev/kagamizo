@@ -52,14 +52,20 @@ static EXPIRATIONS: &[&str] = &["2026-11-06", "2026-11-13", "2026-11-20", "2026-
 // ── Option chain helpers ────────────────────────────────────────────────
 
 fn osi(symbol: &str, expiration: &str, kind: char, strike: f64) -> String {
+    // Match Python _stub_public.py: d.strftime('%y%m%d') gives 6-char date
     let d = &expiration[0..10];
-    let date_part = d.replace("-", "");
+    let y = d.chars().skip(2).take(2).collect::<String>();
+    let m = d.chars().skip(5).take(2).collect::<String>();
+    let day = d.chars().skip(8).take(2).collect::<String>();
+    let date_part = format!("{}{}{}", y, m, day); // %y%m%d: 6 chars
     let sym_part = if symbol.len() >= 6 { &symbol[0..6] } else { symbol };
-    format!("{:<6}{}{}{}", sym_part, date_part, kind, (strike * 1000.0) as u32)
+    let strike_int = (strike * 1000.0).round() as i64;
+    format!("{:<6}{}{}{:08}", sym_part, date_part, kind, strike_int)
 }
 
 fn greeks_of(sym: &str) -> String {
     let LAST = last_close();
+    // The OSI symbol: 6-char root, 6-char date, kind at 12, strike from 13.
     let kind: char = if sym.len() > 12 { sym.chars().nth(12).unwrap_or('C') } else { 'C' };
     let strike_str = if sym.len() > 13 { &sym[13..] } else { "0" };
     let strike: f64 = strike_str.parse::<f64>().unwrap_or(0.0) / 1000.0;

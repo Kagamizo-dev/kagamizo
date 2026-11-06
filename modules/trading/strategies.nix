@@ -365,7 +365,13 @@ in
           text = builtins.seq (lib.assertMsg (problems == [ ]) (lib.concatStringsSep "\n" problems)) ''
             export TRADE_STRATEGIES=${lib.escapeShellArg (builtins.toJSON declared)}
             export TRADE_LIMITS=${lib.escapeShellArg (builtins.toJSON cfg.limits)}
-            exec python3 -I ${scripts}/trade.py "$@"
+            # Rust (./_rust/trade) for every command but backtest and paper,
+            # which stay on the Python engine until they run on
+            # NautilusTrader's Rust crates (./_rust/nautilus-probe).
+            case "''${1:-}" in
+              backtest | paper) exec python3 -I ${scripts}/trade.py "$@" ;;
+              *) exec ${lib.getExe' config.packages.weather-backtest "trade-run"} "$@" ;;
+            esac
           '';
         };
         trade = pkgs.writeShellApplication {
@@ -452,91 +458,10 @@ in
                 and any(.preflight[]; .accepted and .preflight.estimatedCost == "1000.00")
                 and any(.preflight[]; (.accepted | not) and .refused_by == "public" and .status == 400)' paper.json
 
-              # The agent-option strategy against the stub's chain: a BUY
-              # decision becomes one call within the $25 cap at |delta| ≥
-              # 0.15, preflighted and accepted; HOLD proposes nothing; a
-              # stopped day refuses; `place` places and reads it back.
-              last=$(tail -1 bars.csv | cut -d, -f1 | cut -c1-10)
-              mkdir -p research/$last
-              echo '{"decision": "BUY", "rationale": "the check"}' > research/$last/SPY.json
-              trade-run propose spy-agents "$last" > proposal.json
-              jq -e --argjson cap ${toString cfg.limits.public.maxPremiumUsd} \
-                '.proposal.admissible and .proposal.accepted and .proposal.max_loss_usd <= $cap
-                 and (.proposal.contract.delta | fabs) >= 0.15 and .proposal.kind == "long-call"
-                 and .proposal.order.instrument.type == "OPTION" and .proposal.order.orderType == "LIMIT"' proposal.json
-              echo '{"decision": "HOLD"}' > research/$last/SPY.json
-              trade-run propose spy-agents "$last" | jq -e '.proposal == null'
-              echo '{"decision": "SELL", "rationale": "the check"}' > research/$last/SPY.json
-              echo '{"openPositions": 0, "lossUsd": ${toString cfg.limits.public.dailyLossStopUsd}}' > research/state.json
-              trade-run propose spy-agents "$last" | jq -e '.proposal.kind == "long-put" and (.proposal.admissible | not)'
-              rm research/state.json
-              # The gate: the strategy is at research (./stages.nix), so
-              # `place` refuses it whatever the proposal says.
-              if trade-run place proposal.json 2>refused; then exit 1; fi
-              grep -q "not live: nothing is placed" refused
-              # The adapter's own placing and reading back, against the stub.
-              ${pkgs.python313}/bin/python3 -I - > placed.json <<'EOF'
-              import json, sys
-              sys.path.insert(0, "${scripts}")
-              import _public
-              order = json.load(open("proposal.json"))["proposal"]["order"]
-              api = _public.Public()
-              placed = api.place(order)
-              print(json.dumps({"placed": placed, "status": api.order(placed["orderId"])}))
-              EOF
-              jq -e '.status.status == "FILLED" and .placed.orderId == .status.orderId' placed.json
-
-              # The event-rule strategy against the stub's weather contracts
-              # (two open events, one resolved) with the fixture forecasts:
-              # New York's high is far above the "72° or above" band's $0.20,
-              # so that YES is proposed, within the contract cap, preflighted
-              # and accepted; with the forecast at 68° every edge is small
-              # and nothing is proposed; a day at its take-profit refuses;
-              # paper-day records the day.
-              cp ${./_json/forecasts.json} forecasts.json
-              trade-run propose weather-rules 2026-11-04 --forecasts forecasts.json > weather.json
-              jq -e --argjson cap ${toString cfg.limits.public.maxContractPriceUsd} \
-                --argjson min ${toString cfg.strategies.weather-rules.event.minEdge} \
-                '.proposal.admissible and .proposal.accepted and .proposal.kind == "event-yes"
-                 and .proposal.max_loss_usd <= $cap and .proposal.contract.edge >= 0.5
-                 and .proposal.contract.contract == "KALSHI.KXHIGHNY-26NOV06-T72.Y"
-                 and .proposal.contract.edge >= $min
-                 and .proposal.order.instrument.type == "EVENTCONTRACT" and .proposal.order.orderType == "LIMIT"
-                 and .proposal.order.orderSide == "BUY" and .proposal.order.limitPrice == "0.20"
-                 and (.proposal.preflight.estimatedCost | tonumber) == .proposal.max_loss_usd
-                 and (.considered | length) == 8
-                 and all(.skipped[]; .why != "a question shape the rules do not handle")' weather.json
-              jq '.cities["New York"].daily |= map(if .date == "2026-11-06" then .high_f = 68 else . end)' forecasts.json > small.json
-              trade-run propose weather-rules 2026-11-04 --forecasts small.json \
-                | jq -e --argjson min ${toString cfg.strategies.weather-rules.event.minEdge} \
-                  '.proposal == null and ([.considered[].edge] | max) < $min'
-              echo '{"openPositions": 0, "lossUsd": 0, "gainUsd": ${toString cfg.limits.public.dailyTakeProfitUsd}}' > research/state.json
-              trade-run propose weather-rules 2026-11-04 --forecasts forecasts.json \
-                | jq -e '(.proposal.admissible | not) and (.proposal.refused_because | any(test("take-profit")))'
-              rm research/state.json
-              trade-run paper-day weather-rules 2026-11-04 --forecasts forecasts.json | jq -e '.recorded'
-              [ -s research/paper/2026-11-04-weather-rules.json ]
-              # The adapter's event endpoints against the stub: summaries
-              # with and without resolved events, quotes by EVENTCONTRACT,
-              # a contract's bars.
-              ${pkgs.python313}/bin/python3 -I - > events.json <<'EOF'
-              import json, sys
-              sys.path.insert(0, "${scripts}")
-              import _public
-              api = _public.Public()
-              every = api.event_contracts(category="Climate and Weather", include_resolved=True)
-              open_ = api.event_contracts(category="Climate and Weather")
-              sym = "KALSHI.KXHIGHNY-26NOV06-T72.Y"
-              print(json.dumps({
-                  "all": len(every), "open": len(open_),
-                  "quotes": api.quotes([(sym, "EVENTCONTRACT")]),
-                  "bars": api.event_contract_bars("KALSHI.KXHIGHNY-26NOV06-EVENT", "WEEK", [sym]),
-              }))
-              EOF
-              jq -e '.all == 3 and .open == 2 and .quotes[0].outcome == "SUCCESS" and .quotes[0].ask == "0.20"
-                     and (.bars.charts | length) == 1 and .bars.period == "WEEK"' events.json
-              jq -s '{backtest: .[0], paper: .[1], proposal: .[2], placed: .[3], weather: .[4], events: .[5]}' \
-                result.json paper.json proposal.json placed.json weather.json events.json > $out
+              # Proposals, the stage gate, placing and reading back, the
+              # paper day and the event endpoints are the Rust tests'
+              # (./_rust/trade/tests/checks.rs, run by checks.weather-backtest).
+              jq -s '{backtest: .[0], paper: .[1]}' result.json paper.json > $out
             '';
 
         # The weather rules over the fixture, offline: the parser's shapes

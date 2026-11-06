@@ -3,6 +3,7 @@
 //! month's climatology, and the edge against a contract's price. Shared by
 //! the backtest and the trade binary.
 pub mod data;
+pub mod live;
 pub mod weather;
 
 #[cfg(test)]

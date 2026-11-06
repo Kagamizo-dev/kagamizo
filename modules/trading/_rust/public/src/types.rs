@@ -128,11 +128,15 @@ pub struct BarRow {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PreflightResponse {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub instrument: Option<Instrument>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "orderValue")]
     pub order_value: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "estimatedCost")]
     pub estimated_cost: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "estimatedQuantity")]
     pub estimated_quantity: Option<String>,
 }
@@ -413,6 +417,7 @@ pub struct EventContractBarsResponse {
 pub struct OrderExpiration {
     #[serde(rename = "timeInForce")]
     pub time_in_force: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "expirationTime")]
     pub expiration_time: Option<String>,
 }
@@ -427,12 +432,16 @@ pub struct OrderBody {
     pub order_type: String,
     pub expiration: OrderExpiration,
     pub quantity: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "limitPrice")]
     pub limit_price: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "stopPrice")]
     pub stop_price: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "openCloseIndicator")]
     pub open_close_indicator: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "orderId")]
     pub order_id: Option<String>,
 }
