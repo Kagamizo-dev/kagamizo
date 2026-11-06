@@ -385,7 +385,7 @@ in
           text = builtins.seq top.accounts.checked ''
             account=${top.trading.backends.public.account}
             case "''${1:-}" in
-              account | bars | paper | propose | paper-day | place)
+              account | bars | paper | propose | paper-day | paper-settle | place)
                 export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
                 case "$1" in
                   account) governance-authorize public:accounts-list "$account" ;;
@@ -402,6 +402,8 @@ in
                       *) governance-authorize public:market-option-chain "$account" ;;
                     esac
                     governance-authorize public:order-preflight-single "$account" ;;
+                  # Settling paper days reads each recorded event's outcome.
+                  paper-settle) governance-authorize public:event-contracts-details "$account" ;;
                   # The one spend: the controller's, never an agent's (modules/governance).
                   place)
                     governance-authorize public:order-preflight-single "$account"

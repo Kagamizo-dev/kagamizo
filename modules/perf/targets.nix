@@ -209,6 +209,12 @@
       attr = "checks.x86_64-linux.languages-ratchet";
       method = "Lean deciding every language exception owned, dated and within the baseline (decide +kernel); moves with the exceptions";
     };
+    public-api-bound = {
+      module = "public";
+      kind = "build";
+      attr = "checks.x86_64-linux.public-api-bound";
+      method = "Lean deciding the Rust client's 30 endpoints against the declared ones, the governance actions and the two bounds (decide +kernel over string lists); moves with the endpoints and the CLI's commands";
+    };
     nautilus-probe = {
       module = "trading";
       kind = "build";

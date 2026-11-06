@@ -15,3 +15,7 @@ serde.workspace = true
 serde_json = { version = "1", features = ["preserve_order"] }
 chrono = { version = "0.4", default-features = false, features = ["std", "clock"] }
 uuid = { version = "1", features = ["v4"] }
+
+[[bin]]
+name = "trading-host"
+path = "src/host.rs"

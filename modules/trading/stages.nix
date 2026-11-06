@@ -1,14 +1,15 @@
 # Where each strategy stands, and what it took to get there (the plan of
 # 2026-11-02, part E): research, backtest, paper, live. A stage is declared
 # with its evidence; Lean (./_lean/Stages.lean) proves nothing is live
-# without a recorded backtest, enough recorded paper days and the owner's
-# dated decision. `trade place` reads the stage from the declaration and
+# without a recorded backtest, paper days that held (enough of them, P&L
+# not below zero, drawdown within 20%, from `trade paper-settle`'s ledger)
+# and the owner's dated decision. `trade place` reads the stage from the declaration and
 # refuses anything but live; `trade paper-day` records paper evidence.
 #
 #   trading.strategies.<s>.stage = "research" | "backtest" | "paper" | "live"
 #   trading.strategies.<s>.promotion = {
 #     backtest = { recorded; alpha; maxDrawdownPct; };   # to reach paper
-#     paper = { days; from; to; };                       # to reach live
+#     paper = { days; from; to; pnlUsd; maxDrawdownPct; ledger; }  # to reach live
 #     live = { decided; };                               # the owner's date
 #   }
 { lib, config, ... }:
@@ -55,6 +56,15 @@ let
                 days = mkOption { type = types.ints.positive; };
                 from = mkOption { type = date; };
                 to = mkOption { type = date; };
+                pnlUsd = mkOption {
+                  type = types.number;
+                  description = "The settled paper trades' P&L, as the ledger states it.";
+                };
+                maxDrawdownPct = mkOption { type = types.numbers.between 0.0 100.0; };
+                ledger = mkOption {
+                  type = types.str;
+                  description = "The ledger the numbers are from: research/paper/ledger-<strategy>.json at a commit.";
+                };
               };
             }
           );
@@ -69,11 +79,15 @@ let
   };
   # The thresholds a backtest must meet to count (the plan's gate).
   backtestCounts = b: b != null && b.alpha > 0.0 && b.maxDrawdownPct <= 20.0;
+  # Paper trading held: no loss over the days, and the drawdown within the
+  # backtest's own bound. The day count is Lean's (paperDaysNeeded).
+  paperHeld = p: p != null && p.pnlUsd >= 0 && p.maxDrawdownPct <= 20.0;
   facts = lib.mapAttrsToList (n: s: {
     name = n;
     inherit (s) stage;
     backtested = backtestCounts s.promotion.backtest;
     paperDays = if s.promotion.paper == null then 0 else s.promotion.paper.days;
+    paperHeld = paperHeld s.promotion.paper;
     decided = s.promotion.live != null;
   }) cfg.strategies;
   rendered = ''
@@ -83,7 +97,7 @@ let
     def declared : List Strategy := [
     ${lib.concatMapStringsSep ",\n" (
       f:
-      "  { name := ${q f.name}, stage := .${f.stage}, backtested := ${lib.boolToString f.backtested}, paperDays := ${toString f.paperDays}, decided := ${lib.boolToString f.decided} }"
+      "  { name := ${q f.name}, stage := .${f.stage}, backtested := ${lib.boolToString f.backtested}, paperDays := ${toString f.paperDays}, paperHeld := ${lib.boolToString f.paperHeld}, decided := ${lib.boolToString f.decided} }"
     ) facts}
     ]
 

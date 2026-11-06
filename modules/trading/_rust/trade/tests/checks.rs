@@ -269,3 +269,46 @@ fn the_declared_strategies_are_echoed() {
     assert_eq!(code, 0);
     assert_eq!(v, strategies(&c.dir, "research"));
 }
+
+/// A recorded paper day, as `paper-day` writes it, for a contract and side.
+fn paper_record(c: &Case, date: &str, event: &str, outcome: &str, contract: &str, side: &str, ask: f64, admissible: bool) {
+    std::fs::create_dir_all(c.dir.join("research/paper")).unwrap();
+    let rec = json!({"strategy": "weather-rules", "as_of": date, "proposal": {
+        "kind": if side == "YES" { "event-yes" } else { "event-no" },
+        "contract": {"event": event, "outcome": outcome, "contract": contract, "side": side, "ask": ask},
+        "quantity": 10, "max_loss_usd": ask * 10.0, "admissible": admissible}});
+    c.write(&format!("research/paper/{date}-weather-rules.json"), rec);
+}
+
+#[test]
+fn paper_days_settle_into_the_ledger() {
+    let c = Case::new("settle");
+    // Miami's October rain settled YES: the YES at 0.40 wins 6.00, the NO
+    // at 0.30 loses 3.00; New York's Nov 6 high is still open; a refused
+    // day is no trade.
+    paper_record(&c, "2026-10-28", "KALSHI.KXRAINMIA-26OCT", "KALSHI.KXRAINMIA-26OCT-5", "KALSHI.KXRAINMIA-26OCT-5.Y", "YES", 0.40, true);
+    paper_record(&c, "2026-10-29", "KALSHI.KXRAINMIA-26OCT", "KALSHI.KXRAINMIA-26OCT-5", "KALSHI.KXRAINMIA-26OCT-5.N", "NO", 0.30, true);
+    paper_record(&c, "2026-10-30", "KALSHI.KXRAINMIA-26OCT", "KALSHI.KXRAINMIA-26OCT-5", "KALSHI.KXRAINMIA-26OCT-5.Y", "YES", 0.40, false);
+    paper_record(&c, "2026-11-04", "KALSHI.KXHIGHNY-26NOV06", "KALSHI.KXHIGHNY-26NOV06-T72", "KALSHI.KXHIGHNY-26NOV06-T72.Y", "YES", 0.20, true);
+    let v = c.propose(&["paper-settle", "weather-rules"]);
+    assert_eq!(v["days"], 4);
+    assert_eq!(v["trades"], 3);
+    assert_eq!((v["won"].as_u64(), v["lost"].as_u64(), v["open"].as_u64()), (Some(1), Some(1), Some(1)));
+    assert_eq!(v["pnl_usd"], 3.0);
+    assert_eq!(v["hit_rate"], 0.5);
+    // 100 -> 106 -> 103: 3 below the 106 peak.
+    assert_eq!(v["max_drawdown_pct"], 2.83);
+    let statuses: Vec<&str> = v["record"].as_array().unwrap().iter().map(|d| d["status"].as_str().unwrap()).collect();
+    assert_eq!(statuses, vec!["won", "lost", "no-trade", "open"]);
+    assert!(c.dir.join("research/paper/ledger-weather-rules.json").exists());
+}
+
+#[test]
+fn the_ledger_is_not_read_as_a_paper_day() {
+    let c = Case::new("settle-again");
+    paper_record(&c, "2026-10-28", "KALSHI.KXRAINMIA-26OCT", "KALSHI.KXRAINMIA-26OCT-5", "KALSHI.KXRAINMIA-26OCT-5.Y", "YES", 0.40, true);
+    let first = c.propose(&["paper-settle", "weather-rules"]);
+    let again = c.propose(&["paper-settle", "weather-rules"]);
+    assert_eq!(first["days"], 1);
+    assert_eq!(again["days"], 1);
+}

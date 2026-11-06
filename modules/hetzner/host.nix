@@ -237,6 +237,24 @@ let
   # Steam's tools, only while gamedev.steam.enable is (../gamedev/_host.nix).
   gamedev = import ../gamedev/_host.nix { inherit (top.gamedev.steam) enable; };
 
+  # Paper trading: the daily paper days and their settlement (../trading/paper.nix).
+  tradingPaperHost = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ../trading/_paper-host.nix {
+      inherit (top.trading.paper)
+        enable
+        strategies
+        dayAt
+        settleAt
+        agent
+        dir
+        ;
+      inherit (config.packages) trade;
+      launcher = lib.getExe' config.packages.weather-backtest "trading-host";
+      passCli = config.packages.pass-cli;
+    }
+  );
+
   # The agent runner's systemd units and timers (../agents/runner.nix).
   agentRunnerHost = withSystem "x86_64-linux" (
     { config, ... }:
@@ -298,6 +316,7 @@ let
         githubApp
         harness
         agentRunnerHost
+        tradingPaperHost
         media
         androidTwin
         gamedev
