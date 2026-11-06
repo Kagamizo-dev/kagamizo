@@ -9,6 +9,8 @@
       managementKeys = "flag";
       passkeys = "flag";
       keyCreditLimits = "flag";
+      workspaceBudgets = "flag";
+      creditPurchaseApi = "flag";
     };
 
     # Prepaid credits, spent per token.
@@ -34,6 +36,17 @@
         keyCreditLimits = {
           value = true;
           source = "https://openrouter.ai/docs/guides/overview/auth/management-api-keys";
+        };
+        # PUT /workspaces/{workspace_ref}/budgets/{interval}, management key.
+        workspaceBudgets = {
+          value = true;
+          source = "https://openrouter.ai/openapi.json";
+        };
+        # Credit is bought only in the web flow; POST /credits/coinbase is
+        # deprecated (read 2026-11-06).
+        creditPurchaseApi = {
+          value = false;
+          source = "https://openrouter.ai/openapi.json";
         };
       };
     };

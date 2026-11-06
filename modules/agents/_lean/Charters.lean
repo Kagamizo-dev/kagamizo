@@ -31,6 +31,13 @@ def Kind.tradeReviewed (owner : String) (k : Kind) : Bool :=
 def Kind.ownerGated (k : Kind) : Bool :=
   !(k.touches.contains "live" || k.touches.contains "money") || k.ownerSignsOff
 
+/-- Spending involves the payer's accounting and legal teams, each as the
+proposer or a reviewer. -/
+def Kind.spendReviewed (payer : String) (k : Kind) : Bool :=
+  let takesPart := fun t => k.proposer == t || k.reviewers.contains t
+  !k.touches.contains "spend" ||
+    (takesPart ("accounting-" ++ payer) && takesPart ("legal-" ++ payer))
+
 def sound (owner : String) (ks : List Kind) : Bool :=
   ks.all fun k => k.separated && k.tradeReviewed owner && k.ownerGated
 

@@ -60,6 +60,17 @@ in
         }
       ];
       accounting-jingzo.grants = [
+        # The owner's decision, 2026-11-06: accounting manages the OpenRouter
+        # account's keys and budgets with the management key; each change
+        # is first code (the account-limit lifecycle, modules/agents).
+        {
+          account = "openrouter";
+          effects = [
+            "read"
+            "write"
+          ];
+          why = "every key's cap and the workspace budgets, set from openrouter.keys after review";
+        }
         {
           account = "northwest-jingzo";
           effects = [ "read" ];

@@ -75,9 +75,10 @@ let
             "money"
             "filing"
             "publication"
+            "spend"
           ]
         );
-        description = "What it affects; trade, live and money carry the strictest rules.";
+        description = "What it affects; trade, live, money and spend carry the strictest rules.";
       };
     };
   };
@@ -105,6 +106,8 @@ let
 
     def accountOwner : String := ${q cfg.tradingAccountOwner}
 
+    def payer : String := ${q cfg.spendPayer}
+
     def kinds : List Kind := [
     ${lib.concatStringsSep ",\n" (
       lib.mapAttrsToList (
@@ -119,6 +122,8 @@ let
     def chartered : List String := ${list (lib.attrNames cfg.charters)}
 
     theorem lifecycle_sound : sound accountOwner kinds = true := by decide +kernel
+
+    theorem spend_reviewed : kinds.all (Kind.spendReviewed payer) = true := by decide +kernel
 
     theorem every_proposer_reviewed : proposersReviewed kinds chartered = true := by decide +kernel
 
@@ -136,6 +141,12 @@ in
       type = types.attrsOf kind;
       default = { };
       description = "Each kind of work: who proposes, who reviews, who signs off.";
+    };
+    spendPayer = mkOption {
+      type = types.enum (lib.attrNames config.identity.checked.entities);
+      default = config.accounts.held.openrouter.owner;
+      defaultText = "accounts.held.openrouter.owner";
+      description = "Whose card pays for what the spend lifecycles buy (OpenRouter's account owner).";
     };
     tradingAccountOwner = mkOption {
       type = types.enum (lib.attrNames config.identity.checked.entities);
@@ -396,6 +407,34 @@ in
         ];
         signOff = "owner";
         touches = [ "world" ];
+      };
+      # The owner's decision, 2026-11-06: a change to an account's limits or
+      # subscription is code first (openrouter.keys and the like), written
+      # by upkeep and reviewed by the payer's accounting and legal; applying
+      # it needs no owner, because the Mercury card's limit bounds it.
+      account-limit = {
+        proposer = "upkeep";
+        reviewers = [
+          "accounting-jingzo"
+          "legal-jingzo"
+          "review"
+        ];
+        signOff = "none";
+        touches = [
+          "code"
+          "spend"
+        ];
+      };
+      # Accounting tops up OpenRouter's credit within the card's limit,
+      # reviewed by legal and governance (no purchase API yet: a Gap).
+      credit-topup = {
+        proposer = "accounting-jingzo";
+        reviewers = [
+          "legal-jingzo"
+          "governance-jingzo"
+        ];
+        signOff = "none";
+        touches = [ "spend" ];
       };
       world-content = {
         proposer = "builders";
