@@ -72,6 +72,10 @@ in
         kind = "world";
         brief = ./_backlog/twin-azalea-bots.md;
       };
+      "upkeep/account-links" = {
+        kind = "code";
+        brief = ./_backlog/upkeep-account-links.md;
+      };
       "upkeep/matrix-bots" = {
         kind = "code";
         brief = ./_backlog/upkeep-matrix-bots.md;
