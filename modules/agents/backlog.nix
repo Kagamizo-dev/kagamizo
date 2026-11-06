@@ -72,6 +72,10 @@ in
         kind = "world";
         brief = ./_backlog/twin-azalea-bots.md;
       };
+      "upkeep/deterministic-legal-record" = {
+        kind = "code";
+        brief = ./_backlog/upkeep-deterministic-legal-record.md;
+      };
       "upkeep/languages-burndown" = {
         kind = "code";
         brief = ./_backlog/upkeep-languages-burndown.md;
