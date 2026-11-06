@@ -56,6 +56,29 @@ in
     governance.problems = problems;
 
     agents.backlog = {
+      "upkeep/trading-public-rust" = {
+        kind = "code";
+        status = "active";
+        brief = ./_backlog/upkeep-trading-public-rust.md;
+      };
+      "upkeep/trading-trade-rust" = {
+        kind = "code";
+        brief = ./_backlog/upkeep-trading-trade-rust.md;
+      };
+      "reverse-engineering/nautilus-rust" = {
+        kind = "reverse-engineering";
+        status = "active";
+        brief = ./_backlog/reverse-engineering-nautilus-rust.md;
+      };
+      "research-jingzo/trading-paper" = {
+        kind = "strategy";
+        status = "active";
+        brief = ./_backlog/research-jingzo-trading-paper.md;
+      };
+      "upkeep/module-papers" = {
+        kind = "code";
+        brief = ./_backlog/upkeep-module-papers.md;
+      };
       "research-jingzo/weather-backtest" = {
         kind = "strategy";
         status = "active";
