@@ -209,5 +209,11 @@
       attr = "checks.x86_64-linux.languages-ratchet";
       method = "Lean deciding every language exception owned, dated and within the baseline (decide +kernel); moves with the exceptions";
     };
+    agents-charters = {
+      module = "agents";
+      kind = "build";
+      attr = "checks.x86_64-linux.agents-charters";
+      method = "Lean deciding the lifecycles separated, trades reviewed by legal and accounting, and money and going live owner-gated (decide +kernel); moves with kinds x reviewers";
+    };
   };
 }

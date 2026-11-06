@@ -153,7 +153,7 @@ in
     repo.languages.exceptions = lib.importJSON ./_json/language-exceptions.json;
 
     perSystem =
-      { pkgs, ... }:
+      { pkgs, config, ... }:
       let
         policyFile = pkgs.writeText "language-policy.json" (builtins.toJSON policy);
         lang-scan = pkgs.rustPlatform.buildRustPackage {
@@ -170,26 +170,26 @@ in
       {
         packages.lang-scan = lang-scan;
 
-        checks.languages = pkgs.runCommand "languages" { } ''
-          ${lib.getExe lang-scan} check ${self} && touch $out
-        '';
+        checks.languages = derivation {
+          name = "languages";
+          inherit (pkgs.stdenv.hostPlatform) system;
+          builder = lib.getExe lang-scan;
+          args = [
+            "check"
+            self
+          ];
+        };
 
         checks.languages-ratchet =
           assert lib.assertMsg (lib.length (lib.attrNames cfg.exceptions) <= baseline.exceptions)
             "repo.languages: ${toString (lib.length (lib.attrNames cfg.exceptions))} exceptions, the baseline allows ${toString baseline.exceptions}";
           assert lib.assertMsg (markerTotal <= baseline.markers)
             "repo.languages: ${toString markerTotal} inline markers, the baseline allows ${toString baseline.markers}";
-          pkgs.runCommand "languages-ratchet"
-            {
-              nativeBuildInputs = [ pkgs.lean4 ];
-              inherit facts;
-              passAsFile = [ "facts" ];
-            }
-            ''
-              cat ${./_lean/Languages.lean} "$factsPath" > Check.lean
-              lean Check.lean
-              touch $out
-            '';
+          config.kagamizo.leanCheck {
+            name = "languages-ratchet";
+            source = ./_lean/Languages.lean;
+            inherit facts;
+          };
       };
   };
 }

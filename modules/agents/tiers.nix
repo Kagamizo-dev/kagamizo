@@ -232,7 +232,7 @@ in
         design = "pro";
       };
       teamsJson = builtins.toJSON (
-        lib.mapAttrs (_: a: {
+        lib.mapAttrs (n: a: {
           inherit (a)
             purpose
             personas
@@ -243,6 +243,10 @@ in
             ;
           key = keyOf a;
           inherit (a) budgetUsdPerMonth;
+          # Its contract and its place in the lifecycles (./charters.nix).
+          charter = config.agents.charters.${n} or null;
+          proposes = lib.attrNames (lib.filterAttrs (_: k: k.proposer == n) config.agents.lifecycle);
+          reviews = lib.attrNames (lib.filterAttrs (_: k: lib.elem n k.reviewers) config.agents.lifecycle);
         }) config.governance.agents
       );
       policyText = ''

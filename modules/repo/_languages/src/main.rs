@@ -267,7 +267,13 @@ fn main() -> ExitCode {
         hook()
     } else {
         match (args.get(1).map(String::as_str), args.get(2)) {
-            (Some("check"), Some(root)) => check(Path::new(root)),
+            // As a derivation's builder: $out exists only when the tree holds.
+            (Some("check"), Some(root)) => check(Path::new(root)).and_then(|ok| {
+                match (ok, std::env::var("out")) {
+                    (true, Ok(out)) => fs::write(&out, "").map(|_| true).map_err(|e| format!("{out}: {e}")),
+                    _ => Ok(ok),
+                }
+            }),
             (Some("baseline"), Some(root)) => baseline(Path::new(root)).map(|_| true),
             (Some("install-hook"), None) => install_hook().map(|_| true),
             _ => Err("usage: lang-scan check <root> | baseline <root> | install-hook".into()),

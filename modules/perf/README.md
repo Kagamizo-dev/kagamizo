@@ -9,6 +9,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | Module | Target | Kind | Record (ms) | Latest (ms) | Tolerance | Method |
 |---|---|---|---|---|---|---|
 | agents | `agents-budget` | build | none yet | none yet | 10% | Lean deciding every task's tier frugal and the keys' caps within the card (decide +kernel over the rendered lists); moves with tasks × keys |
+| agents | `agents-charters` | build | none yet | none yet | 10% | Lean deciding the lifecycles separated, trades reviewed by legal and accounting, and money and going live owner-gated (decide +kernel); moves with kinds x reviewers |
 | android | `android-twin` | build | none yet | none yet | 10% | Lean deciding every base, app and setting pinned and typed, plus the rendered AVD config read back |
 | mercury | `cards-declared` | build | none yet | none yet | 10% | Lean deciding the committed card discovery against the declarations |
 | catalog | `catalog-coverage` | build | none yet | none yet | 10% | Python walking every source file against 7 catalogs; moves with the number of sources and the regexes |
