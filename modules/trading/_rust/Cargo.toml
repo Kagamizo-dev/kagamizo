@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["weather", "weather-backtest", "nautilus-probe"]
+members = ["weather", "weather-backtest", "public", "public-stub", "nautilus-probe"]
 
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
