@@ -1,144 +1,155 @@
-# `nix run .#openrouter -- <plan|apply|models|credits|usage>`: see ./openrouter.nix.
-# `usage` prints the keys' ledger (cap, left, used, reset) as JSON: what an
-# agent reads before it spends (modules/agents/tiers.nix).
-# OpenRouter has no CLI of its own, so this speaks its management API
-# (https://openrouter.ai/docs/api/api-reference/api-keys/create-keys) with
-# curl, under the secretspec profile `openrouter`.
+# `nix run .#openrouter -- <plan|apply|models|credits|usage|probe>`: the
+# OpenRouter account as code, in Rust (./_spend/src/openrouter.rs). Every
+# setting of the account is declared here or in ./openrouter.nix and
+# rendered into one file the tool is built with:
+#
+#   openrouter.keys.<n>          ours: minted as kagamizo/<n> (./openrouter.nix)
+#   openrouter.adoptedKeys.<n>   keys OpenRouter made, declared by their name
+#                                and held to a decision (disabled, cap)
+#   openrouter.guardrails        one per routing class (./routing.nix): the
+#                                models and providers its keys may reach
+#   openrouter.workspace         the workspace's defaults: its provider sort
+#                                and default model
+#
+# `plan` fails on any drift and on anything live that is not declared, so
+# no key, guardrail or workspace is ever left implicit.
 {
   lib,
   config,
   ...
 }:
 let
+  inherit (lib) mkOption types;
   top = config;
   cfg = config.openrouter;
-  # Keys are named after their declaration, so ours are told apart from any
-  # made by hand.
-  keys = lib.mapAttrs (name: k: k // { label = "kagamizo/${name}"; }) cfg.keys;
+  adopted = types.submodule {
+    options = {
+      label = mkOption {
+        type = types.str;
+        description = "Its name at OpenRouter.";
+      };
+      limitUsd = mkOption {
+        type = types.nullOr types.ints.positive;
+        description = "Its cap, as decided (null: none).";
+      };
+      reset = mkOption {
+        type = types.nullOr (
+          types.enum [
+            "daily"
+            "weekly"
+            "monthly"
+          ]
+        );
+        default = null;
+      };
+      disabled = mkOption {
+        type = types.bool;
+        description = "Whether it is turned off.";
+      };
+      why = mkOption { type = types.str; };
+    };
+  };
 in
 {
-  perSystem =
-    { pkgs, config, ... }:
-    let
-      spec = config.packages.secretspec-toml;
-
-      run = pkgs.writeShellApplication {
-        name = "openrouter-run";
-        runtimeInputs = [
-          pkgs.curl
-          pkgs.jq
-          config.packages.secretspec
-          config.packages.pass-cli
-        ];
-        text = ''
-          : "''${OPENROUTER_MANAGEMENT_KEY:?}"
-          keys=${lib.escapeShellArg (builtins.toJSON keys)}
-          models=${lib.escapeShellArg (builtins.toJSON cfg.models)}
-          spec=${spec}
-          reason="openrouter: keys from modules/openrouter"
-
-          api() { # method path [json body]
-            curl -fsS -X "$1" -H "Authorization: Bearer $OPENROUTER_MANAGEMENT_KEY" \
-              -H 'Content-Type: application/json' "https://openrouter.ai/api/v1$2" ''${3:+-d "$3"}
-          }
-          live() { api GET /keys | jq -c '[.data[] | select(.name | startswith("kagamizo/"))]'; }
-          stored() { # name -> whether its secret is in Proton Pass (never printed)
-            secretspec get "$(jq -r --arg n "$1" '.[$n].variable' <<<"$keys")" --file "$spec" \
-              --profile "$(jq -r --arg n "$1" '.[$n].profile' <<<"$keys")" --reason "$reason" >/dev/null 2>&1
-          }
-          # Creates a key and pipes its value, shown only once, into its profile.
-          mint() { # name
-            local k body
-            k=$(jq -c --arg n "$1" '.[$n]' <<<"$keys")
-            body=$(jq -c '{name: .label, limit: .limitUsd, limit_reset: .reset}' <<<"$k")
-            api POST /keys "$body" | jq -j .key |
-              secretspec set "$(jq -r .variable <<<"$k")" --file "$spec" --profile "$(jq -r .profile <<<"$k")" \
-                --from-file - --reason "$reason: mint $1" >/dev/null
-          }
-
-          case "''${1:-}" in
-            plan)
-              l=$(live)
-              for name in $(jq -r 'keys[]' <<<"$keys"); do
-                k=$(jq -c --arg n "$name" '.[$n]' <<<"$keys")
-                have=$(jq -c --arg l "$(jq -r .label <<<"$k")" 'map(select(.name == $l))[0] // empty' <<<"$l")
-                if stored "$name"; then s="stored"; else s="not stored"; fi
-                if [ -z "$have" ]; then
-                  echo "+ create  $name: \$$(jq -r .limitUsd <<<"$k")/$(jq -r .reset <<<"$k") -> $(jq -r '"\(.profile)/\(.variable)"' <<<"$k")"
-                elif [ "$s" = "not stored" ]; then
-                  echo "~ re-mint $name: its secret is not stored"
-                elif ! jq -e --argjson k "$k" '.limit == $k.limitUsd and .limit_reset == $k.reset' <<<"$have" >/dev/null; then
-                  echo "~ update  $name: cap \$$(jq -r .limit <<<"$have")/$(jq -r .limit_reset <<<"$have") -> \$$(jq -r .limitUsd <<<"$k")/$(jq -r .reset <<<"$k")"
-                else
-                  echo "  ok      $name: used \$$(jq -r '.usage // 0' <<<"$have") of \$$(jq -r .limit <<<"$have")/$(jq -r .limit_reset <<<"$have"), $s"
-                fi
-              done
-              jq -r --argjson k "$keys" '.[] | select(.name as $n | [$k[].label] | index($n) | not) | "- delete  \(.name) (no longer declared)"' <<<"$l"
-              ;;
-            apply)
-              l=$(live)
-              for name in $(jq -r 'keys[]' <<<"$keys"); do
-                k=$(jq -c --arg n "$name" '.[$n]' <<<"$keys")
-                hash=$(jq -r --arg l "$(jq -r .label <<<"$k")" 'map(select(.name == $l))[0].hash // empty' <<<"$l")
-                if [ -n "$hash" ] && ! stored "$name"; then
-                  api DELETE "/keys/$hash" >/dev/null
-                  hash=""
-                fi
-                if [ -z "$hash" ]; then
-                  mint "$name"
-                  echo "minted $name -> $(jq -r '"\(.profile)/\(.variable)"' <<<"$k")"
-                else
-                  api PATCH "/keys/$hash" "$(jq -c '{limit: .limitUsd, limit_reset: .reset}' <<<"$k")" >/dev/null
-                  echo "ok $name"
-                fi
-              done
-              jq -r --argjson k "$keys" '.[] | select(.name as $n | [$k[].label] | index($n) | not) | .hash' <<<"$l" |
-                while read -r hash; do
-                  api DELETE "/keys/$hash" >/dev/null
-                  echo "deleted undeclared key $hash"
-                done
-              ;;
-            models)
-              offered=$(curl -fsS https://openrouter.ai/api/v1/models | jq -c '[.data[].id]')
-              missing=$(jq -c --argjson o "$offered" 'map(select(. as $m | $o | index($m) | not))' <<<"$models")
-              if [ "$missing" != "[]" ]; then
-                echo "no longer offered: $missing" >&2
-                exit 1
-              fi
-              echo "all $(jq length <<<"$models") models offered"
-              ;;
-            credits)
-              api GET /credits | jq -r '.data | "credits \(.total_credits), used \(.total_usage), left \(.total_credits - .total_usage)"'
-              ;;
-            usage)
-              # The ledger every agent reads before it acts (modules/agents):
-              # each declared key's cap, what is left of it, and when it resets.
-              live | jq --argjson k "$keys" '[.[] | .name as $l | {
-                key: ($k | to_entries[] | select(.value.label == $l) | .key),
-                profile: ($k | to_entries[] | select(.value.label == $l) | .value.profile),
-                capUsd: .limit, leftUsd: .limit_remaining, usedUsd: (.usage // 0), reset: .limit_reset }]'
-              ;;
-            *)
-              echo "usage: openrouter <plan|apply|models|credits|usage>" >&2
-              exit 2
-              ;;
-          esac
-        '';
+  options.openrouter = {
+    adoptedKeys = mkOption {
+      type = types.attrsOf adopted;
+      default = { };
+      description = "Keys OpenRouter made (not minted by us), each declared with its decision.";
+    };
+    workspace = {
+      slug = mkOption {
+        type = types.str;
+        default = "default";
       };
-    in
-    {
-      packages.openrouter = pkgs.writeShellApplication {
-        name = "openrouter";
-        runtimeInputs = [
-          config.packages.secretspec
-          config.packages.pass-cli
-        ];
-        # Builds only while the declared plans cover what the repo needs.
-        text = builtins.seq top.accounts.checked ''
-          export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
-          exec secretspec run --file ${spec} --profile openrouter \
-            --reason "openrouter $*" -- ${run}/bin/openrouter-run "$@"
-        '';
+      defaultProviderSort = mkOption {
+        type = types.nullOr (
+          types.enum [
+            "price"
+            "throughput"
+            "latency"
+            "exacto"
+          ]
+        );
+        description = "How OpenRouter orders a request's allowed providers.";
+      };
+      defaultTextModel = mkOption { type = types.nullOr types.str; };
+    };
+  };
+
+  config = {
+    openrouter = {
+      # Made by OpenRouter at signup (2026-11-02): $100, no reset, expires
+      # 2027-05-02, never used. Nothing of ours holds it; off until a
+      # declaration needs it.
+      adoptedKeys.signup-default = {
+        label = "Default key";
+        limitUsd = 100;
+        disabled = true;
+        why = "OpenRouter's signup key, unused: disabled, so every live key is one we declared a use for";
+      };
+      # Cheapest first among the providers a key's guardrail allows.
+      workspace = {
+        defaultProviderSort = "price";
+        defaultTextModel = cfg.defaultModel;
       };
     };
+
+    perSystem =
+      { pkgs, config, ... }:
+      let
+        declared = pkgs.writeText "openrouter-declared.json" (
+          builtins.seq top.accounts.checked (
+            builtins.toJSON {
+              secretspec = lib.getExe config.packages.secretspec;
+              spec = "${config.packages.secretspec-toml}";
+              keys =
+                lib.mapAttrs (n: k: {
+                  label = "kagamizo/${n}";
+                  minted = true;
+                  inherit (k)
+                    profile
+                    variable
+                    reset
+                    limitUsd
+                    ;
+                  disabled = false;
+                }) cfg.keys
+                // lib.mapAttrs (_: k: {
+                  inherit (k)
+                    label
+                    reset
+                    disabled
+                    limitUsd
+                    ;
+                  minted = false;
+                  profile = null;
+                  variable = null;
+                }) cfg.adoptedKeys;
+              guardrails = lib.mapAttrs (n: c: {
+                label = "kagamizo/${n}";
+                description = "routing class ${n} (modules/openrouter/routing.nix): ${c.model} at ${lib.concatStringsSep ", " c.endpoints}";
+                allowedModels = [ c.model ];
+                allowedProviders = c.providers;
+                inherit (c) keys;
+              }) cfg.routing;
+              inherit (cfg) workspace models;
+            }
+          )
+        );
+        tools = pkgs.rustPlatform.buildRustPackage {
+          pname = "openrouter-tools";
+          version = "0.1.0";
+          src = ./_spend;
+          cargoLock.lockFile = ./_spend/Cargo.lock;
+          doCheck = true;
+          OPENROUTER_DECLARED = declared;
+          meta.mainProgram = "openrouter";
+        };
+      in
+      {
+        packages.openrouter-tools = tools;
+        packages.openrouter = tools;
+      };
+  };
 }

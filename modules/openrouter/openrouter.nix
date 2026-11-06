@@ -3,12 +3,17 @@
 # `openrouter apply` with the account's management key and piped straight
 # into the consumer's secretspec profile; a value never reaches a terminal.
 #
-#   openrouter plan     declared keys against the live ones (names, caps,
-#                       usage) and whether each one's secret is stored
-#   openrouter apply    create missing keys, correct caps, re-mint a key whose
-#                       secret is gone (its value cannot be read back)
+#   openrouter plan     every declared setting against the live one: keys
+#                       (ours and the adopted signup key), the routing
+#                       guardrails and their key assignments, the workspace's
+#                       defaults; fails on drift or anything undeclared
+#   openrouter apply    mint missing keys, set caps and disabled states,
+#                       create or update the guardrails, set the workspace
 #   openrouter models   check every declared model is still offered
 #   openrouter credits  the account's balance
+#   openrouter probe    measure endpoints for ./routing.nix
+#
+# (./wrapper.nix renders the declarations; the tool is Rust, ./_spend.)
 #
 # The management key itself is the one value made by hand (a Gap): created in
 # the dashboard after signup, saved as Kagamizo-LLC/openrouter-management-key.

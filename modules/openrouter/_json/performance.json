@@ -1,0 +1,40 @@
+{
+ "asOf": "2026-11-06",
+ "method": "openrouter probe: three rounds, one streamed request of at most 96 tokens pinned to each endpoint (provider.only, no fallbacks); the slowest first token and the lowest throughput of the three; uptime is OpenRouter's uptime_last_1d",
+ "models": {
+  "deepseek/deepseek-v4.1-flash": [
+   {
+    "tag": "baidu/fp8",
+    "ok": true,
+    "rounds": 3,
+    "ttftMs": 1433,
+    "tokensPerSecond": 188.9,
+    "uptimePct": 98.61
+   },
+   {
+    "tag": "coreweave/fp8",
+    "ok": true,
+    "rounds": 3,
+    "ttftMs": 819,
+    "tokensPerSecond": 67.6,
+    "uptimePct": 100
+   },
+   {
+    "tag": "streamlake/fp8",
+    "ok": true,
+    "rounds": 3,
+    "ttftMs": 1085,
+    "tokensPerSecond": 120.3,
+    "uptimePct": 100
+   },
+   {
+    "tag": "morph/fp8",
+    "ok": true,
+    "rounds": 3,
+    "ttftMs": 1626,
+    "tokensPerSecond": 114.9,
+    "uptimePct": 100
+   }
+  ]
+ }
+}

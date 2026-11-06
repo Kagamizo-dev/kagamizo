@@ -568,13 +568,6 @@
     "replacedBy": "its inline code moved into a Rust crate the Nix calls",
     "until": "2027-01-31"
   },
-  "modules/openrouter/wrapper.nix": {
-    "language": "nix-inline",
-    "markers": 2,
-    "owner": "upkeep",
-    "replacedBy": "its inline code moved into a Rust crate the Nix calls",
-    "until": "2027-01-31"
-  },
   "modules/operations/default.nix": {
     "language": "nix-inline",
     "markers": 1,

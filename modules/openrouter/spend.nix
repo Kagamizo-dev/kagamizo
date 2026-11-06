@@ -20,6 +20,7 @@
 { lib, config, ... }:
 let
   inherit (lib) mkOption types;
+  top = config;
   cfg = config.openrouter.spend;
   prices = lib.importJSON ./_spend/prices.json;
   fleet = config.openrouter.keys.orca-fleet.limitUsd;
@@ -33,37 +34,24 @@ in
     };
     allowedProviders = mkOption {
       type = types.listOf types.str;
-      default = [
-        "baidu/fp8"
-        "coreweave/fp8"
-        "streamlake/fp8"
-      ];
-      description = "The providers a team job may be routed to (exact endpoint tags, provider/quantization, as ./_spend/prices.json and the activity report name them): the cheapest cache reads for the teams' model. Until the guardrail is applied the job's budget is held at these prices; a job routed elsewhere costs more than its meter says (see the gaps in ../cloudflare/README.md).";
+      readOnly = true;
+      default = config.openrouter.routing.agents.endpoints;
+      description = "Derived: the endpoints the agents' routing class allows (./routing.nix), as exact tags.";
     };
   };
 
   config = {
     perSystem =
-      { pkgs, ... }:
-      let
-        agent-spend = pkgs.rustPlatform.buildRustPackage {
-          pname = "agent-spend";
-          version = "0.1.0";
-          src = ./_spend;
-          cargoLock.lockFile = ./_spend/Cargo.lock;
-          doCheck = true;
-          meta.mainProgram = "agent-spend";
-        };
-      in
+      { config, ... }:
       {
         packages.agent-spend =
           assert lib.assertMsg (cfg.jobBudgetUsd <= fleet)
             "openrouter.spend.jobBudgetUsd (${toString cfg.jobBudgetUsd}) is over the fleet key's limit (${toString fleet})";
           assert lib.assertMsg (
-            prices.models ? ${config.openrouter.defaultModel}
-          ) "openrouter.defaultModel ${config.openrouter.defaultModel} has no prices in ./_spend/prices.json";
-          agent-spend;
-        checks.agent-spend = agent-spend;
+            prices.models ? ${top.openrouter.defaultModel}
+          ) "openrouter.defaultModel ${top.openrouter.defaultModel} has no prices in ./_spend/prices.json";
+          config.packages.openrouter-tools;
+        checks.agent-spend = config.packages.openrouter-tools;
       };
   };
 }

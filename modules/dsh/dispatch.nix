@@ -159,13 +159,13 @@ in
           DSH_HOME="$state" \
           secretspec run --file ${config.packages.secretspec-toml} --profile agent \
             --reason "dispatch: $team/$topic" -- \
-            ${lib.getExe config.packages.agent-spend} run --model "$model" \
+            ${lib.getExe' config.packages.agent-spend "agent-spend"} run --model "$model" \
               --budget ${toString top.openrouter.spend.jobBudgetUsd} \
               --providers ${lib.concatStringsSep "," top.openrouter.spend.allowedProviders} -- \
             ${lib.getExe config.packages.dsh} --profile headless \
               --patch <(printf '%s' "$patch") --json < "$task" \
           > "$logdir/$team-$topic.jsonl" 2>&1 || true
-          ${lib.getExe config.packages.agent-spend} measure --model "$model" \
+          ${lib.getExe' config.packages.agent-spend "agent-spend"} measure --model "$model" \
             --providers ${lib.concatStringsSep "," top.openrouter.spend.allowedProviders} \
             "$logdir/$team-$topic.jsonl" | tail -1
 
