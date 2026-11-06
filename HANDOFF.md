@@ -26,6 +26,38 @@ Then, in order, from HANDOFF.md's "2026-11-06: the base layers for the teams": c
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
+## 2026-11-06, later: chat fixed, OpenRouter by lifecycle (read this first)
+
+- **chat.jingzo.org was blank:** static-web-server 2.44 refuses any file
+  that resolves outside its root, and Element's build is a directory of
+  links, so only config.json was served. Reproduced locally with the
+  host's build; nginx serves it to the sign-in screen (62cd299). The host
+  takes it at its 04:40 UTC switch, with the teams' tokens.
+- **The owner's decisions:**
+  - accounting-jingzo manages OpenRouter's key caps and workspace budgets
+    with the management key (a write grant and typed actions);
+  - a limit change is code first (`account-limit`: upkeep writes it, the
+    payer's accounting, legal and review pass it, no owner sign-off, since
+    the Mercury card bounds it);
+  - accounting may top up credit (`credit-topup`, reviewed by legal and
+    governance); Lean proves anything that spends involves the payer's
+    accounting and legal teams (ad616cf);
+  - the teams run on DeepSeek Flash, design and planning included, with
+    only vision on Pro (0247ca0);
+  - Floci (Java) is not adopted: no heavy non-Rust services;
+  - the status page works like Linear for now and is laid out like a
+    settings app; once the Minecraft twin is up, work moves into it,
+    trading and paper days included.
+- **Gap:** OpenRouter has no API to buy credit (openapi.json: the Coinbase
+  endpoint is deprecated in favour of the web flow; no auto top-up
+  setting). Backlog `upkeep/openrouter-topup-flow` closes it with a browser
+  flow, once Cedar holds a dated exception for that one action.
+- **Also needed for accounting to act:** the management key sits in the
+  jingzo-logins vault, which the accounting swarm's token does not open;
+  sharing that one item with it is the next step.
+- **Backlog added:** upkeep/matrix-bots, upkeep/openrouter-topup-flow,
+  design/account-dashboards, design/project-board, design/settings-layout.
+
 ## 2026-11-06: the base layers for the teams (read this first)
 
 The owner's go of 2026-11-05 covered the host reinstall and the Cloudflare
