@@ -215,6 +215,13 @@ around.
   developer-preview harness has `--trusted-host` for session binding only,
   not for delegating auth to a reverse proxy. Closing this means adding a
   plugin or waiting for an upstream feature.
+- **OpenRouter credit cannot be bought by API.** The owner allows
+  accounting-jingzo to top up within the Mercury card's limit (the
+  credit-topup lifecycle, 2026-11-06), but OpenRouter's API has no purchase
+  endpoint: `POST /credits/coinbase` is deprecated in favour of the web
+  flow (openapi.json, read 2026-11-06), and no setting turns on auto
+  top-up. Closing it: a browser flow in modules/browser, run by accounting
+  after review (backlog `upkeep/openrouter-topup-flow`).
 - **Agents cannot email the owner yet.** jingzo.org's mail is Proton's
   (its MX), so Cloudflare Email Routing and Email Workers are out for that
   domain, and Proton Unlimited offers no SMTP submission (that is Proton

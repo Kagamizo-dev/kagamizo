@@ -72,6 +72,26 @@ in
         kind = "world";
         brief = ./_backlog/twin-azalea-bots.md;
       };
+      "upkeep/matrix-bots" = {
+        kind = "code";
+        brief = ./_backlog/upkeep-matrix-bots.md;
+      };
+      "upkeep/openrouter-topup-flow" = {
+        kind = "account-limit";
+        brief = ./_backlog/upkeep-openrouter-topup-flow.md;
+      };
+      "design/account-dashboards" = {
+        kind = "page";
+        brief = ./_backlog/design-account-dashboards.md;
+      };
+      "design/project-board" = {
+        kind = "page";
+        brief = ./_backlog/design-project-board.md;
+      };
+      "design/settings-layout" = {
+        kind = "page";
+        brief = ./_backlog/design-settings-layout.md;
+      };
       "upkeep/deterministic-legal-record" = {
         kind = "code";
         brief = ./_backlog/upkeep-deterministic-legal-record.md;
