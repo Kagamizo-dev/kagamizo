@@ -28,14 +28,50 @@ let
   top = config;
   cfg = config.shell;
   q = builtins.toJSON;
+  # The library's shelves, in the order the home shows them.
   categories = [
     "system"
     "work"
     "chat"
     "browse"
-    "play"
     "build"
+    "research"
+    "money"
+    "media"
+    "play"
+    "twin"
+    "security"
+    "reverse"
   ];
+
+  # Every module of the repository, read as papers.nix reads them.
+  dir = ../.;
+  modules = lib.attrNames (
+    lib.filterAttrs (n: t: t == "directory" && !lib.hasPrefix "_" n) (builtins.readDir dir)
+  );
+
+  # The base's Settings sections, in order, and the generated ones beside them.
+  baseSections = [
+    "system"
+    "devices"
+    "accounts"
+    "identity"
+    "governance"
+    "infrastructure"
+    "repository"
+  ];
+  sectionOrder = [
+    "system"
+    "devices"
+    "apps"
+    "accounts"
+    "identity"
+    "teams"
+    "governance"
+    "infrastructure"
+    "repository"
+  ];
+  titleOf = s: lib.toUpper (lib.substring 0 1 s) + lib.substring 1 (-1) s;
 
   target = types.submodule {
     options = {
@@ -64,8 +100,17 @@ let
           "native"
           "web"
           "builtin"
+          "module"
         ];
-        description = "native: a program in the image; web: a page behind Access; builtin: a part of the shell.";
+        description = "native: a program in the image; web: a page behind Access; builtin: a part of the shell; module: the module's own page, generated.";
+      };
+      module = mkOption {
+        type = types.enum modules;
+        description = "The module that registers it, in its own library.nix.";
+      };
+      description = mkOption {
+        type = types.str;
+        default = "";
       };
       command = mkOption {
         type = types.nullOr types.str;
@@ -76,22 +121,71 @@ let
         type = types.nullOr types.str;
         default = null;
       };
-      targets = mkOption { type = types.listOf (types.enum (lib.attrNames cfg.targets)); };
+      targets = mkOption {
+        type = types.listOf (types.enum (lib.attrNames cfg.targets));
+        default = lib.attrNames cfg.targets;
+        description = "Where it shows; every target unless it says otherwise.";
+      };
     };
   };
 
-  web = n: "https://${n}.jingzo.org";
+  base = types.submodule {
+    options = {
+      section = mkOption { type = types.enum baseSections; };
+      why = mkOption { type = types.str; };
+    };
+  };
+
   nativeTargets = lib.unique (
     lib.concatMap (a: a.targets) (lib.filter (a: a.kind == "native") (lib.attrValues cfg.apps))
   );
-  allTargets = lib.attrNames cfg.targets;
+  appModules = lib.unique (lib.mapAttrsToList (_: a: a.module) cfg.apps);
+
+  # A module's page: its paper's title, abstract, checks, packages and
+  # teams, read from modules/<m>/_lean/Paper.lean when it has one.
+  paperOf =
+    m:
+    let
+      file = dir + "/${m}/_lean/Paper.lean";
+      text = if builtins.pathExists file then builtins.readFile file else "";
+      first =
+        re:
+        let
+          hit = lib.findFirst lib.isList null (builtins.split re text);
+        in
+        if hit == null then "" else lib.head hit;
+      field = name: first "\n  ${name} := \"([^\"]*)\"";
+      strings =
+        name:
+        let
+          inner = first "\n  ${name} := [[]([^\n]*)[]]";
+        in
+        map lib.head (lib.filter lib.isList (builtins.split "\"([^\"]*)\"" inner));
+    in
+    {
+      title = field "title";
+      abstract = field "abstract";
+      checks = strings "checks";
+      packages = strings "packages";
+      teams = strings "agents";
+    };
 
   # What the settings app shows, generated: never hand-written.
-  sections = {
+  generated = {
     system = lib.mapAttrsToList (n: t: {
       title = n;
       detail = "${t.kind} target (${t.host}): ${t.why}";
     }) cfg.targets;
+    # Owned first, then the proposals.
+    devices = lib.sort (a: b: a.owned && !b.owned) (
+      lib.mapAttrsToList (n: i: {
+        inherit (i) owned;
+        title = n;
+        detail = "${
+          if i.owned then "owned" else "proposal"
+        }, ${i.slot}: ${i.device}; provides ${lib.concatStringsSep ", " i.provides}";
+      }) config.kit.items
+    );
     accounts = lib.mapAttrsToList (n: a: {
       title = n;
       detail = "${a.provider or "account"}, plan ${a.plan or "undeclared"}";
@@ -102,9 +196,20 @@ let
     }) config.agents.charters;
     apps = lib.mapAttrsToList (_: a: {
       title = a.name;
-      detail = "${a.kind} ${a.category} app on ${lib.concatStringsSep ", " a.targets}";
+      detail = "${a.kind} ${a.category} app from modules/${a.module}, on ${lib.concatStringsSep ", " a.targets}";
     }) cfg.apps;
   };
+  baseRows =
+    s:
+    lib.mapAttrsToList (m: b: {
+      title = "modules/${m}";
+      detail = b.why;
+    }) (lib.filterAttrs (_: b: b.section == s) cfg.base);
+  sections = map (k: {
+    key = k;
+    title = titleOf k;
+    rows = (generated.${k} or [ ]) ++ baseRows k;
+  }) sectionOrder;
 in
 {
   options.shell = {
@@ -116,101 +221,81 @@ in
       type = types.attrsOf app;
       default = { };
     };
+    base = mkOption {
+      type = types.attrsOf base;
+      default = { };
+      description = "The modules that are the base: each a section of Settings, keyed by module.";
+    };
     rendered = mkOption {
       type = types.attrsOf types.anything;
       readOnly = true;
       description = "The declarations as the shell reads them.";
       default = {
-        inherit (cfg) apps targets;
+        inherit (cfg) apps;
         inherit sections categories;
+        pages = lib.genAttrs appModules paperOf;
       };
     };
   };
 
   config = {
-    shell.targets = {
-      yoga-c940 = {
-        kind = "nixos";
-        host = "yoga-c940";
-        why = "the first device: Intel graphics, a live USB that runs from RAM";
+    shell = {
+      targets = {
+        yoga-c940 = {
+          kind = "nixos";
+          host = "yoga-c940";
+          why = "the first device: Intel graphics, a live USB that runs from RAM";
+        };
+        web = {
+          kind = "web";
+          host = "os.jingzo.org";
+          why = "the same shell in any browser, the phone's included, behind Access";
+        };
+        # The carried kit (../kit): the Pi is the machine in the pocket, the
+        # phone its screen.
+        rpi5 = {
+          kind = "nixos";
+          host = "rpi5";
+          why = "the kit's machine: aarch64 in a pocket, serving the shell to the phone";
+        };
+        pixel-9a = {
+          kind = "android";
+          host = "pixel-9a";
+          why = "the kit's screen: GrapheneOS, the web target installed from the browser";
+        };
       };
-      web = {
-        kind = "web";
-        host = "os.jingzo.org";
-        why = "the same shell in any browser, the phone's included, behind Access";
-      };
-      # The carried kit (../kit): the Pi is the machine in the pocket, the
-      # phone its screen.
-      rpi5 = {
-        kind = "nixos";
-        host = "rpi5";
-        why = "the kit's machine: aarch64 in a pocket, serving the shell to the phone";
-      };
-      pixel-9a = {
-        kind = "android";
-        host = "pixel-9a";
-        why = "the kit's screen: GrapheneOS, the web target installed from the browser";
-      };
-    };
 
-    shell.apps = {
-      settings = {
-        name = "Settings";
-        category = "system";
-        kind = "builtin";
-        targets = allTargets;
+      # The shell is base (its own Settings row) and registers its own apps;
+      # every other module registers in its own library.nix.
+      base.shell = {
+        section = "system";
+        why = "the shell itself: the library, Settings, and every target's session";
       };
-      browser = {
-        name = "Firefox";
-        category = "browse";
-        kind = "native";
-        command = "firefox";
-        # The Pi joins once its image carries the shell's session.
-        targets = [ "yoga-c940" ];
-      };
-      terminal = {
-        name = "Terminal";
-        category = "build";
-        kind = "native";
-        command = "foot";
-        targets = [ "yoga-c940" ];
-      };
-      # The status page (modules/site, at status.mirazo.org behind Access):
-      # CI, the teams, the twin. Its own page; the shell is where it opens.
-      status = {
-        name = "Status";
-        category = "system";
-        kind = "web";
-        url = "https://status.mirazo.org";
-        targets = allTargets;
-      };
-      agents = {
-        name = "Agents";
-        category = "work";
-        kind = "web";
-        url = web "agents";
-        targets = allTargets;
-      };
-      code = {
-        name = "Code";
-        category = "build";
-        kind = "web";
-        url = web "code";
-        targets = allTargets;
-      };
-      harness = {
-        name = "Harness";
-        category = "work";
-        kind = "web";
-        url = web "harness";
-        targets = allTargets;
-      };
-      chat = {
-        name = "Chat";
-        category = "chat";
-        kind = "web";
-        url = web "chat";
-        targets = allTargets;
+      apps = {
+        settings = {
+          name = "Settings";
+          category = "system";
+          kind = "builtin";
+          module = "shell";
+          description = "The base: every target, device, account and team, from the repository";
+        };
+        browser = {
+          name = "Firefox";
+          category = "browse";
+          kind = "native";
+          module = "shell";
+          command = "firefox";
+          # The Pi joins once its image carries the shell's session.
+          targets = [ "yoga-c940" ];
+        };
+        terminal = {
+          name = "Terminal";
+          category = "build";
+          kind = "native";
+          module = "shell";
+          command = "foot";
+          targets = [ "yoga-c940" ];
+        };
       };
     };
 
@@ -316,7 +401,12 @@ in
             }]
 
             set_option maxRecDepth 100000
+            def modules : List String := ${q modules}
+            def base : List String := ${q (lib.attrNames cfg.base)}
+            def appModules : List String := ${q appModules}
+
             theorem shell_sound : sound targets apps images = true := by decide +kernel
+            theorem library_covered : covered modules base appModules = true := by decide +kernel
             end Kagamizo.Shell
           '';
         };

@@ -8,7 +8,7 @@ and every native app's command is on the PATH of every image it ships in.
 namespace Kagamizo.Shell
 
 inductive Kind where
-  | native | web | builtin
+  | native | web | builtin | module
   deriving DecidableEq, Repr
 
 structure Target where
@@ -53,6 +53,22 @@ theorem web_never_native (ts : List Target) (images : List (String × List Strin
   simp only [Bool.and_eq_true, List.all_eq_true] at h
   have := h.2 t ht
   simp [hw] at this
+  exact this
+
+/-- The library covers the repository: every module is part of the base
+or registers at least one app. -/
+def covered (modules base appModules : List String) : Bool :=
+  modules.all fun m => base.contains m || appModules.contains m
+
+/-- In a covered library, no module is invisible: each is a Settings row
+or a card. -/
+theorem covered_visible (modules base appModules : List String)
+    (h : covered modules base appModules = true) (m : String) (hm : m ∈ modules) :
+    m ∈ base ∨ m ∈ appModules := by
+  unfold covered at h
+  rw [List.all_eq_true] at h
+  have := h m hm
+  simp only [Bool.or_eq_true, List.contains_iff_mem] at this
   exact this
 
 end Kagamizo.Shell

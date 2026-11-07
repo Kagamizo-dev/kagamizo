@@ -1,5 +1,9 @@
 //! The shell's state, apart from drawing it: what is declared, where the
 //! focus is, and what a key does. Pure, so it is tested without a screen.
+//!
+//! The home is a library: every module of the repository is either part of
+//! the base (a section of Settings) or registers apps, which the home shows
+//! on shelves, one per category, in the declared order.
 use serde::Deserialize;
 use std::collections::BTreeMap;
 
@@ -9,6 +13,8 @@ pub enum Kind {
     Native,
     Web,
     Builtin,
+    /// A module without a screen of its own: its card opens its page.
+    Module,
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -19,6 +25,9 @@ pub struct App {
     pub command: Option<String>,
     pub url: Option<String>,
     pub targets: Vec<String>,
+    pub module: String,
+    #[serde(default)]
+    pub description: String,
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -28,23 +37,37 @@ pub struct Entry {
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub struct Declared {
-    pub apps: BTreeMap<String, App>,
-    pub sections: BTreeMap<String, Vec<Entry>>,
+pub struct Section {
+    pub key: String,
+    pub title: String,
+    pub rows: Vec<Entry>,
 }
 
-/// The settings sections, in the order the shell lists them.
-pub const SECTIONS: &[(&str, &str)] = &[
-    ("system", "System"),
-    ("apps", "Apps"),
-    ("accounts", "Accounts"),
-    ("teams", "Teams"),
-];
+/// A module's page, generated from its declarations and its paper.
+#[derive(Deserialize, Clone, Debug, Default)]
+pub struct Page {
+    pub title: String,
+    #[serde(rename = "abstract")]
+    pub summary: String,
+    pub checks: Vec<String>,
+    pub packages: Vec<String>,
+    pub teams: Vec<String>,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct Declared {
+    pub apps: BTreeMap<String, App>,
+    pub sections: Vec<Section>,
+    pub categories: Vec<String>,
+    pub pages: BTreeMap<String, Page>,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Screen {
     Home,
     Settings,
+    /// The focused app's module page.
+    Detail,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -67,7 +90,8 @@ pub enum Effect {
 
 pub struct Shell {
     pub declared: Declared,
-    /// The apps this target shows, in order: built-ins first, then by category and name.
+    /// The apps this target shows, in shelf order: by the declared
+    /// category order, built-ins first within a shelf, then by name.
     pub apps: Vec<(String, App)>,
     pub screen: Screen,
     pub focus: usize,
@@ -79,6 +103,13 @@ pub struct Shell {
 
 impl Shell {
     pub fn new(declared: Declared, target: &str) -> Shell {
+        let shelf = |c: &str| {
+            declared
+                .categories
+                .iter()
+                .position(|x| x == c)
+                .unwrap_or(usize::MAX)
+        };
         let mut apps: Vec<(String, App)> = declared
             .apps
             .iter()
@@ -86,16 +117,11 @@ impl Shell {
             .map(|(id, a)| (id.clone(), a.clone()))
             .collect();
         apps.sort_by(|(_, a), (_, b)| {
-            (
-                a.kind != Kind::Builtin,
-                a.category.as_str(),
-                a.name.as_str(),
-            )
-                .cmp(&(
-                    b.kind != Kind::Builtin,
-                    b.category.as_str(),
-                    b.name.as_str(),
-                ))
+            (shelf(&a.category), a.kind != Kind::Builtin, a.name.as_str()).cmp(&(
+                shelf(&b.category),
+                b.kind != Kind::Builtin,
+                b.name.as_str(),
+            ))
         });
         Shell {
             declared,
@@ -109,12 +135,24 @@ impl Shell {
     }
 
     pub fn rows(&self) -> &[Entry] {
-        let key = SECTIONS[self.section].0;
         self.declared
             .sections
-            .get(key)
-            .map(Vec::as_slice)
+            .get(self.section)
+            .map(|s| s.rows.as_slice())
             .unwrap_or(&[])
+    }
+
+    /// The page of the focused app's module, when the detail screen shows.
+    pub fn page(&self) -> Option<(&App, Page)> {
+        let (_, a) = self.apps.get(self.focus)?;
+        Some((
+            a,
+            self.declared
+                .pages
+                .get(&a.module)
+                .cloned()
+                .unwrap_or_default(),
+        ))
     }
 
     fn step(i: usize, len: usize, up: bool) -> usize {
@@ -138,7 +176,7 @@ impl Shell {
 
     /// A tap on the i-th settings section: show its rows.
     pub fn tap_section(&mut self, i: usize) {
-        if i < SECTIONS.len() {
+        if i < self.declared.sections.len() {
             self.section = i;
             self.row = 0;
             self.in_rows = false;
@@ -179,6 +217,10 @@ impl Shell {
                             self.in_rows = false;
                             Effect::None
                         }
+                        Kind::Module => {
+                            self.screen = Screen::Detail;
+                            Effect::None
+                        }
                         Kind::Native => a.command.clone().map(Effect::Run).unwrap_or(Effect::None),
                         Kind::Web if web => a.url.clone().map(Effect::Open).unwrap_or(Effect::None),
                         // On a device a web app opens in the browser, in its own window.
@@ -191,6 +233,12 @@ impl Shell {
                 }
                 _ => Effect::None,
             },
+            Screen::Detail => {
+                if matches!(k, Key::Back | Key::Left) {
+                    self.screen = Screen::Home;
+                }
+                Effect::None
+            }
             Screen::Settings => {
                 match k {
                     Key::Back if self.in_rows => self.in_rows = false,
@@ -204,7 +252,8 @@ impl Shell {
                         self.row = Self::step(self.row, self.rows().len(), k == Key::Up)
                     }
                     Key::Up | Key::Down => {
-                        self.section = Self::step(self.section, SECTIONS.len(), k == Key::Up);
+                        self.section =
+                            Self::step(self.section, self.declared.sections.len(), k == Key::Up);
                         self.row = 0;
                     }
                     _ => {}
@@ -222,25 +271,36 @@ mod tests {
     fn declared() -> Declared {
         serde_json::from_str(
             r#"{
+            "categories": ["system", "browse", "chat", "money"],
             "apps": {
-              "settings": {"name": "Settings", "category": "system", "kind": "builtin", "command": null, "url": null, "targets": ["yoga", "web"]},
-              "browser": {"name": "Firefox", "category": "browse", "kind": "native", "command": "firefox", "url": null, "targets": ["yoga"]},
-              "chat": {"name": "Chat", "category": "chat", "kind": "web", "command": null, "url": "https://chat.jingzo.org", "targets": ["yoga", "web"]}
+              "settings": {"name": "Settings", "category": "system", "kind": "builtin", "command": null, "url": null, "targets": ["yoga", "web"], "module": "shell"},
+              "browser": {"name": "Firefox", "category": "browse", "kind": "native", "command": "firefox", "url": null, "targets": ["yoga"], "module": "shell"},
+              "chat": {"name": "Chat", "category": "chat", "kind": "web", "command": null, "url": "https://chat.jingzo.org", "targets": ["yoga", "web"], "module": "hetzner"},
+              "trading": {"name": "Trading", "category": "money", "kind": "module", "command": null, "url": null, "targets": ["yoga", "web"], "module": "trading", "description": "paper first"}
             },
-            "sections": {"system": [{"title": "yoga", "detail": "nixos"}], "apps": [], "accounts": [{"title": "a", "detail": ""}, {"title": "b", "detail": ""}], "teams": []}
+            "sections": [
+              {"key": "system", "title": "System", "rows": [{"title": "yoga", "detail": "nixos"}]},
+              {"key": "apps", "title": "Apps", "rows": []},
+              {"key": "accounts", "title": "Accounts", "rows": [{"title": "a", "detail": ""}, {"title": "b", "detail": ""}]}
+            ],
+            "pages": {"trading": {"title": "Trading", "abstract": "the engine", "checks": ["trade"], "packages": ["trade"], "teams": ["research-jingzo"]}}
           }"#,
         )
         .unwrap()
     }
 
+    fn at(s: &Shell, id: &str) -> usize {
+        s.apps.iter().position(|(i, _)| i == id).unwrap()
+    }
+
     #[test]
-    fn a_target_shows_its_own_apps_settings_first() {
+    fn a_target_shows_its_own_apps_on_their_shelves() {
         let s = Shell::new(declared(), "web");
         let ids: Vec<&str> = s.apps.iter().map(|(id, _)| id.as_str()).collect();
-        assert_eq!(ids, vec!["settings", "chat"]);
+        assert_eq!(ids, vec!["settings", "chat", "trading"]);
         let s = Shell::new(declared(), "yoga");
-        assert_eq!(s.apps[0].0, "settings");
-        assert_eq!(s.apps.len(), 3);
+        let ids: Vec<&str> = s.apps.iter().map(|(id, _)| id.as_str()).collect();
+        assert_eq!(ids, vec!["settings", "browser", "chat", "trading"]);
     }
 
     #[test]
@@ -251,13 +311,12 @@ mod tests {
         for _ in 0..10 {
             s.key(Key::Down, false);
         }
-        assert_eq!(s.focus, 2);
+        assert_eq!(s.focus, 3);
     }
 
     #[test]
     fn apps_open_by_their_kind() {
         let mut s = Shell::new(declared(), "yoga");
-        let at = |s: &Shell, id: &str| s.apps.iter().position(|(i, _)| i == id).unwrap();
         s.focus = at(&s, "browser");
         assert_eq!(s.key(Key::Enter, false), Effect::Run("firefox".into()));
         s.focus = at(&s, "chat");
@@ -266,11 +325,26 @@ mod tests {
             Effect::Run("firefox --new-window https://chat.jingzo.org".into())
         );
         let mut w = Shell::new(declared(), "web");
-        w.focus = 1;
+        w.focus = at(&w, "chat");
         assert_eq!(
             w.key(Key::Enter, true),
             Effect::Open("https://chat.jingzo.org".into())
         );
+    }
+
+    #[test]
+    fn a_module_card_opens_its_page_and_back_returns_home() {
+        let mut s = Shell::new(declared(), "web");
+        s.focus = at(&s, "trading");
+        assert_eq!(s.key(Key::Enter, true), Effect::None);
+        assert_eq!(s.screen, Screen::Detail);
+        let (a, p) = s.page().unwrap();
+        assert_eq!(
+            (a.description.as_str(), p.summary.as_str()),
+            ("paper first", "the engine")
+        );
+        s.key(Key::Back, true);
+        assert_eq!(s.screen, Screen::Home);
     }
 
     #[test]
@@ -280,7 +354,7 @@ mod tests {
         assert_eq!(s.screen, Screen::Settings);
         s.key(Key::Down, false);
         s.key(Key::Down, false);
-        assert_eq!(SECTIONS[s.section].0, "accounts");
+        assert_eq!(s.declared.sections[s.section].key, "accounts");
         s.key(Key::Right, false);
         s.key(Key::Down, false);
         assert_eq!((s.in_rows, s.row), (true, 1));
@@ -293,7 +367,7 @@ mod tests {
     #[test]
     fn taps_do_what_keys_do() {
         let mut s = Shell::new(declared(), "yoga");
-        let chat = s.apps.iter().position(|(i, _)| i == "chat").unwrap();
+        let chat = at(&s, "chat");
         assert_eq!(
             s.tap_app(chat, false),
             Effect::Run("firefox --new-window https://chat.jingzo.org".into())

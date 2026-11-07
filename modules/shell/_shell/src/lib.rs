@@ -10,7 +10,7 @@ pub mod model;
 use eframe::egui::{
     self, Align, Color32, CornerRadius, Frame, Key as EKey, Layout, Margin, RichText, Sense, Stroke,
 };
-pub use model::{Effect, Key, Screen, Shell, SECTIONS};
+pub use model::{Effect, Key, Kind, Screen, Shell};
 
 pub const DECLARED: &str = include_str!(env!("SHELL_DECLARED"));
 
@@ -85,7 +85,20 @@ impl App {
         ui.add_space(24.0);
         let mut tapped = None;
         egui::ScrollArea::vertical().show(ui, |ui| {
+            let mut shelf = "";
             for (i, (_, a)) in self.shell.apps.iter().enumerate() {
+                // A shelf for each category, headed by its name.
+                if a.category != shelf {
+                    shelf = &a.category;
+                    ui.add_space(if i == 0 { 0.0 } else { 12.0 });
+                    ui.label(
+                        RichText::new(shelf.to_uppercase())
+                            .size(13.0)
+                            .color(MUTED)
+                            .strong(),
+                    );
+                    ui.add_space(8.0);
+                }
                 let focused = i == self.shell.focus;
                 let frame = Frame::new()
                     .fill(if focused { RAISED } else { CARD })
@@ -103,7 +116,12 @@ impl App {
                             .size(if focused { 26.0 } else { 22.0 })
                             .color(PAPER),
                     );
-                    ui.label(RichText::new(&a.category).size(14.0).color(if focused {
+                    let sub = if a.description.is_empty() {
+                        kind_label(&a.kind)
+                    } else {
+                        a.description.as_str()
+                    };
+                    ui.label(RichText::new(sub).size(14.0).color(if focused {
                         ACCENT
                     } else {
                         MUTED
@@ -125,9 +143,80 @@ impl App {
         }
     }
 
+    /// A module's page: what it is, its paper's abstract, and what it ships.
+    fn detail(&mut self, ui: &mut egui::Ui) {
+        let Some((a, page)) = self.shell.page().map(|(a, p)| (a.clone(), p)) else {
+            self.shell.go_home();
+            return;
+        };
+        ui.add_space(16.0);
+        if ui
+            .add(
+                egui::Label::new(RichText::new("‹ Home").size(15.0).color(MUTED))
+                    .sense(Sense::click()),
+            )
+            .clicked()
+        {
+            self.shell.go_home();
+            return;
+        }
+        ui.add_space(4.0);
+        ui.label(RichText::new(&a.name).size(30.0).color(PAPER).strong());
+        ui.label(
+            RichText::new(format!("{} · modules/{}", a.category, a.module))
+                .size(14.0)
+                .color(ACCENT),
+        );
+        ui.add_space(12.0);
+        egui::ScrollArea::vertical().show(ui, |ui| {
+            if !a.description.is_empty() {
+                ui.label(RichText::new(&a.description).size(17.0).color(PAPER));
+                ui.add_space(12.0);
+            }
+            let card = |ui: &mut egui::Ui, head: &str, body: &str| {
+                Frame::new()
+                    .fill(CARD)
+                    .corner_radius(CornerRadius::same(10))
+                    .inner_margin(Margin::same(14))
+                    .show(ui, |ui| {
+                        ui.set_width(ui.available_width());
+                        ui.label(RichText::new(head).size(13.0).color(MUTED).strong());
+                        ui.add_space(4.0);
+                        ui.label(RichText::new(body).size(15.0).color(PAPER));
+                    });
+                ui.add_space(8.0);
+            };
+            if page.title.is_empty() {
+                card(
+                    ui,
+                    "PAPER",
+                    "None yet: the module's paper is on the backlog.",
+                );
+            } else {
+                card(ui, "PAPER", &format!("{}\n\n{}", page.title, page.summary));
+            }
+            for (head, xs) in [
+                ("CHECKS", &page.checks),
+                ("PACKAGES", &page.packages),
+                ("TEAMS", &page.teams),
+            ] {
+                if !xs.is_empty() {
+                    card(ui, head, &xs.join(", "));
+                }
+            }
+        });
+    }
+
     fn sections(&mut self, ui: &mut egui::Ui, wide: bool) {
         let mut tapped = None;
-        for (i, (_, title)) in SECTIONS.iter().enumerate() {
+        let titles: Vec<String> = self
+            .shell
+            .declared
+            .sections
+            .iter()
+            .map(|s| s.title.clone())
+            .collect();
+        for (i, title) in titles.iter().enumerate() {
             let on = i == self.shell.section;
             let colour = if on && !self.shell.in_rows {
                 ACCENT
@@ -138,7 +227,7 @@ impl App {
             };
             let r = if wide {
                 let r = ui.add(
-                    egui::Label::new(RichText::new(*title).size(20.0).color(colour))
+                    egui::Label::new(RichText::new(title.as_str()).size(20.0).color(colour))
                         .sense(Sense::click()),
                 );
                 ui.add_space(10.0);
@@ -149,7 +238,7 @@ impl App {
                     .corner_radius(CornerRadius::same(18))
                     .inner_margin(Margin::symmetric(14, 8))
                     .show(ui, |ui| {
-                        ui.label(RichText::new(*title).size(16.0).color(colour))
+                        ui.label(RichText::new(title.as_str()).size(16.0).color(colour))
                     })
                     .response
                     .interact(Sense::click())
@@ -235,6 +324,16 @@ impl App {
     }
 }
 
+/// What a card does when it has no description of its own.
+fn kind_label(k: &Kind) -> &'static str {
+    match k {
+        Kind::Native => "a program on this device",
+        Kind::Web => "a page behind Access",
+        Kind::Builtin => "part of the shell",
+        Kind::Module => "a module of the repository",
+    }
+}
+
 /// In the browser, a web app opens in a tab of its own.
 #[cfg(target_arch = "wasm32")]
 fn open(url: &str) -> String {
@@ -296,7 +395,7 @@ impl eframe::App for App {
         // A phone's width stacks the settings; a wide screen keeps the
         // column to a readable measure, centred.
         let wide = ctx.screen_rect().width() >= 640.0;
-        let measure = if self.shell.screen == Screen::Home {
+        let measure = if self.shell.screen != Screen::Settings {
             760.0
         } else {
             1040.0
@@ -322,6 +421,7 @@ impl eframe::App for App {
                             match self.shell.screen {
                                 Screen::Home => self.home(ui),
                                 Screen::Settings => self.settings(ui, wide),
+                                Screen::Detail => self.detail(ui),
                             }
                             if !self.note.is_empty() {
                                 ui.add_space(8.0);
