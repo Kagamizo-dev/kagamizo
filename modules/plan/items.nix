@@ -288,6 +288,22 @@ in
     ]
     // track "identity" [
       {
+        id = "footprint";
+        title = "The owner's whole digital identity mapped onto the apps: documents, the professional and academic record, accounts, domains, public profiles; every value in Proton";
+      }
+      (
+        {
+          id = "personal-docs";
+          title = "The personal documents' Pass items made: passport, resume, degrees, W-2s";
+        }
+        // action
+      )
+      {
+        id = "mail-agents";
+        title = "Mail agents per domain: statements, W-2s, alerts and confirmations read from the mailboxes into the apps, each team only its alias";
+        dependsOn = [ "apps/team-addresses" ];
+      }
+      {
         id = "sign-in-types";
         title = "Each account's sign-in and second factors typed";
       }
@@ -741,6 +757,28 @@ in
         {
           id = "tax-forms";
           title = "The year's 1099s fetched by hand: no provider offers them by API";
+        }
+        // action
+      )
+      {
+        id = "statements-by-mail";
+        title = "Chase, the cards and PayPal wired by their mailed statements and alerts";
+        dependsOn = [ "identity/mail-agents" ];
+      }
+      {
+        id = "credit-file";
+        title = "The credit file read from Experian: every line, its limit and status, every inquiry";
+      }
+      {
+        id = "w2-intake";
+        title = "W-2s read from email into the return's inputs and into Proton";
+        dependsOn = [ "identity/mail-agents" ];
+      }
+      (
+        {
+          id = "wyoming-report";
+          title = "Wyoming's annual report kept up (owed even with no revenue): Jingzo's formation month recorded";
+          dependsOn = [ "bank/jingzo-record" ];
         }
         // action
       )

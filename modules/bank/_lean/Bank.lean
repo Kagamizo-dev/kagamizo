@@ -36,14 +36,30 @@ def unique : List String → Bool
   | [] => true
   | x :: xs => !xs.contains x && unique xs
 
+/-- How an account is wired: its way in, its Proton Pass gate, its provider. -/
+structure Link where
+  account : String
+  via : String
+  gate : String
+  provider : String
+  deriving DecidableEq, Repr
+
+/-- A link is gated by a Pass item, and never automates the web of a
+provider whose terms forbid it. -/
+def linkOk (noScrape : List String) (l : Link) : Bool :=
+  !l.gate.isEmpty && !(l.via == "web-only" && noScrape.contains l.provider)
+
 /-- A status names an obligation the bank knows, and shows its evidence. -/
 def statusOk (obligations : List String) (s : String × String) : Bool :=
   obligations.contains s.1 && !s.2.isEmpty
 
 def sound (moneyAccounts : List String) (owners : List (String × String)) (services : List Service)
     (revenue : List Source) (taxed owing teams : List String)
-    (obligations : List String) (statuses : List (String × String)) : Bool :=
+    (obligations : List String) (statuses : List (String × String))
+    (links : List Link) (noScrape : List String) : Bool :=
   statuses.all (statusOk obligations) &&
+  moneyAccounts.all (fun a => links.any (·.account == a)) &&
+  links.all (linkOk noScrape) &&
   unique (services.map (·.name)) && unique (revenue.map (·.name)) &&
   moneyAccounts.all (fun a => services.any (·.accounts.contains a)) &&
   revenue.all (sourceOk owners taxed owing) &&

@@ -46,6 +46,10 @@ let
     "ein-letter" # IRS CP 575
     "agent-acceptance" # the registered agent's consent
     "annual-report"
+    "passport" # a person's identity documents
+    "w2" # wages and withholding, per year
+    "resume" # the professional record (the source of the public profile)
+    "diploma" # degrees and transcripts
     "other"
   ];
 
@@ -305,7 +309,37 @@ in
       };
       # The person: the root of both companies; a natural person's record
       # holds nothing but the slot (their own papers are in their vault).
-      mirazo = { };
+      # The owner's own record: their identity documents, the professional
+      # and academic record, and every year's W-2s, each held in Proton
+      # Pass (or Drive, linked from the item) and never in this repository,
+      # which is public: the record says only that it exists and where.
+      mirazo.documents = {
+        passport = {
+          kind = "passport";
+          title = "US passport";
+          where.item = "doc-passport-mirazo";
+        };
+        resume = {
+          kind = "resume";
+          title = "Resume: professional and academic experience, the source of the public profile";
+          where.item = "doc-resume-mirazo";
+        };
+        education = {
+          kind = "diploma";
+          title = "Degrees and transcripts";
+          where.item = "doc-education-mirazo";
+        };
+        w2-2025 = {
+          kind = "w2";
+          title = "W-2s for 2025, every employer";
+          where.item = "doc-w2-2025-mirazo";
+        };
+        w2-2026 = {
+          kind = "w2";
+          title = "W-2s for 2026, expected by 2027-01-31 by email";
+          where.item = "doc-w2-2026-mirazo";
+        };
+      };
     };
 
     # The private values, one api-credential item each in the entity's vault

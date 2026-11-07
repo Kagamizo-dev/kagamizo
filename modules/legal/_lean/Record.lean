@@ -39,6 +39,10 @@ inductive DocumentKind where
   | einLetter
   | agentAcceptance
   | annualReport
+  | passport
+  | w2
+  | resume
+  | diploma
   | other
   deriving DecidableEq, Repr
 

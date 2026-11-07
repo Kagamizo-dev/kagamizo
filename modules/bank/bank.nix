@@ -112,6 +112,31 @@ let
 in
 {
   options.bank = {
+    links = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            via = mkOption {
+              type = types.enum [
+                "api"
+                "mcp"
+                "email-statements"
+                "credit-report"
+                "web-only"
+              ];
+              description = "How the bank reads the account: its API, its MCP server, the statements and alerts it mails, the credit report, or only the web.";
+            };
+            reads = mkOption { type = types.str; };
+            live = mkOption {
+              type = types.bool;
+              description = "Whether the link works today.";
+            };
+          };
+        }
+      );
+      default = { };
+      description = "How each money account is wired into the bank, keyed by account; gated by its Proton Pass login item.";
+    };
     asOf = mkOption {
       type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
       description = "The day the bank's statuses are current as of, moved forward each session: an open obligation due before it is past due.";
@@ -165,6 +190,84 @@ in
   config = {
     bank = {
       asOf = "2026-11-07";
+      status =
+        let
+          noRevenue = {
+            state = "not-owed";
+            date = "2026-11-07";
+            evidence = "the owner's statement, 2026-11-07: QSearch LLC had no revenue and no business activity in 2026";
+          };
+        in
+        {
+          "2026/jingzo/Schedule C (on mirazo's Form 1040)" = noRevenue;
+          "2026/jingzo/Schedule SE (on mirazo's Form 1040)" = noRevenue;
+          "2026/jingzo/Form 1099-NEC (issued)" = noRevenue;
+          "2026/mirazo/FinCEN 114 (FBAR)" = {
+            state = "not-owed";
+            date = "2026-11-07";
+            evidence = "the owner's statement, 2026-11-07: no foreign accounts, everything is in the US";
+          };
+        };
+      links =
+        let
+          mail = reads: {
+            via = "email-statements";
+            inherit reads;
+            live = false;
+          };
+        in
+        {
+          mercury = {
+            via = "api";
+            reads = "accounts, transactions, statements, cards (mercury-cli, read token)";
+            live = true;
+          };
+          mercury-jingzo = {
+            via = "api";
+            reads = "accounts, transactions, statements, cards (mercury-cli, read token)";
+            live = true;
+          };
+          mercury-mirazo = {
+            via = "api";
+            reads = "accounts, transactions, statements, cards (mercury-cli, read token)";
+            live = true;
+          };
+          public-mirazo = {
+            via = "api";
+            reads = "portfolio, history, orders, tax lots, quotes (brokerage)";
+            live = true;
+          };
+          public-jingzo = {
+            via = "api";
+            reads = "portfolio, history, orders (brokerage), once its own key is issued";
+            live = false;
+          };
+          ibkr-jingzo = {
+            via = "api";
+            reads = "the Client Portal API, once wrapped";
+            live = false;
+          };
+          chase-mirazo = mail "statements and alerts mailed to its login address, read by the mail agents";
+          capital-one-mirazo = mail "statements and alerts mailed to its login address";
+          credit-one-mirazo = mail "statements and alerts mailed to its login address";
+          discover-mirazo = mail "statements and alerts mailed to its login address";
+          paypal-mirazo = mail "receipts and statements mailed to its login address";
+          experian = {
+            via = "credit-report";
+            reads = "the credit file and its alerts: every line, its limit and status, inquiries";
+            live = false;
+          };
+          northwest-jingzo = {
+            via = "mcp";
+            reads = "the company, its documents and mail scans, annual reports (Northwest's MCP)";
+            live = false;
+          };
+          northwest-kagamizo = {
+            via = "mcp";
+            reads = "the company, once formed (Northwest's MCP)";
+            live = false;
+          };
+        };
       services =
         let
           accountants = [
@@ -327,6 +430,13 @@ in
           }) (lib.sort (a: b: dueOf a < dueOf b) obligations);
         }
         {
+          title = "Links";
+          rows = lib.mapAttrsToList (a: l: {
+            title = "${a}: ${l.via}${if l.live then "" else ", not yet live"}";
+            detail = "${l.reads}; gated by its Proton Pass item ${held.${a}.login.item or "(none)"}";
+          }) cfg.links;
+        }
+        {
           title = "Revenue";
           rows = lib.mapAttrsToList (n: r: {
             title = "${n}: into ${r.account} (${r.entity})";
@@ -406,11 +516,28 @@ in
             def owing : List String := ${q (lib.unique (map (o: o.entity or "") obligations))}
             def teams : List String := ${q teams}
             def obligations : List String := ${q (map oid obligations)}
+            def links : List Link := [${
+              lib.concatStringsSep ",\n  " (
+                lib.mapAttrsToList (
+                  a: l:
+                  "{ account := ${q a}, via := ${q l.via}, gate := ${q (held.${a}.login.item or "")}, provider := ${q (held.${a}.provider or "")} }"
+                ) cfg.links
+              )
+            }]
+            def noScrape : List String := ${
+              q (
+                lib.attrNames (
+                  lib.filterAttrs (
+                    _: cs: lib.any (c: c.effect == "forbids" && lib.hasInfix "scrap" c.says) cs
+                  ) cfg.terms
+                )
+              )
+            }
             def statuses : List (String × String) := [${
               lib.concatStringsSep ", " (lib.mapAttrsToList (k: s: "(${q k}, ${q s.evidence})") cfg.status)
             }]
 
-            theorem bank_sound : sound moneyAccounts owners services revenue taxed owing teams obligations statuses = true := by decide +kernel
+            theorem bank_sound : sound moneyAccounts owners services revenue taxed owing teams obligations statuses links noScrape = true := by decide +kernel
             end Kagamizo.Bank
           '';
         };

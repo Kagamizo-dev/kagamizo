@@ -131,6 +131,14 @@ let
           }
           {
             entity = i;
+            form = "W-2s received";
+            what = "wages and withholding for ${toString year} from every employer, read into the return; employers send them by January 31, often by email";
+            due = due next 1 31;
+            source = "https://www.irs.gov/forms-pubs/about-form-w-2";
+            when = "wages in the year";
+          }
+          {
+            entity = i;
             form = "1099-B, 1099-INT, 1099-DA received";
             what = "the brokerage's and the banks' information returns for ${toString year}, read into the return (payers send 1099-B by February 15, the others by January 31)";
             due = due next 2 15;
