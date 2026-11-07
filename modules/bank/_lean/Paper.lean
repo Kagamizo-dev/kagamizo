@@ -33,7 +33,7 @@ def paper : Paper := {
       body := "The bank composes instead of rebuilding: a service is a pointer to the module that runs it, with the accounts it holds and the teams that run it, so the books stay in money, the rules in compliance and the strategies in trading. The shell's library gains services (modules shown inside another app), so the bank's modules leave the home column and appear inside the Bank card. Lean's sourceOk ties a revenue source to its entity three ways: the account it lands in is the entity's own, the entity is taxed (money.tax), and the entity owes declared obligations (money.obligations); sound adds that every money account is held by a service, and every service's teams exist.",
       cites := ["lean4", "pacioli-summa"] },
     { kind := .guarantees,
-      body := "checks.bank decides bank_sound for the declared bank: services and sources are uniquely named; every money account is held by at least one service, so no money sits outside the bank; every revenue source lands in an account its own entity holds, for an entity that is taxed and has declared obligations; and every service is run by chartered teams. Every declared status (filed, paid, not owed or extended) names an obligation the bank knows and shows its evidence; an obligation with no status that falls due before the bank's as-of date is listed as past due, first among what waits on the owner. The theorem source_taxed proves that any source passing sourceOk belongs to a taxed entity, so no income can be declared for an entity the bank does not file for.",
+      body := "checks.bank decides bank_sound for the declared bank: services and sources are uniquely named; every money account is held by at least one service, so no money sits outside the bank; every revenue source lands in an account its own entity holds, for an entity that is taxed and has declared obligations; and every service is run by chartered teams. Every declared status (filed, paid, not owed or extended) names an obligation the bank knows and shows its evidence; an obligation with no status that falls due before the bank's as-of date is listed as past due, first among what waits on the owner. The theorem source_taxed proves that any source passing sourceOk belongs to a taxed entity, so no income can be declared for an entity the bank does not file for. checks.bank-authorities decides, over every authority's interfaces and every provider's terms (researched from their own pages on 2026-11-07), that no interface the bank relies on needs a phone number as its second factor, that every clause cites its page, and, because Public's Individual Trader API Agreement covers only accounts opened in the developer's own name (s1.a), that every revenue source at Public lands on a person's account; the theorem public_is_personal proves the last for any sound bank.",
       cites := ["lean4"] },
     { kind := .performance,
       body := "No perf target is declared. The check decides over thirty held accounts, ten services and two revenue sources in seconds. What will matter is the ledger: when the bank keeps one double-entry ledger of every flow, the time from a transaction at a provider to its entry in the books, and to its treatment on a return, becomes the measure, with a target that it lands the same night.",
@@ -53,9 +53,9 @@ def paper : Paper := {
     { key := "lean4", title := "The Lean 4 Theorem Prover and Programming Language", authors := ["Leonardo de Moura", "Sebastian Ullrich"], year := 2021,
       source := .doi "10.1007/978-3-030-79876-5_37" }
   ],
-  theorems := ["source_taxed"],
+  theorems := ["source_taxed", "public_is_personal"],
   perf := [],
-  checks := ["bank", "paper-bank", "money-flows"],
+  checks := ["bank", "bank-authorities", "paper-bank", "money-flows"],
   packages := ["bank-book"],
   agents := ["accounting-jingzo", "accounting-mirazo", "legal-jingzo", "legal-mirazo", "research-jingzo", "governance-jingzo", "governance-mirazo"]
 }

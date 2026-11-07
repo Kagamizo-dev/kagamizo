@@ -226,6 +226,13 @@
       build-box = {
         question = "A self-hosted build machine (a priced Hetzner builder), once CI's times are measured?";
       };
+      residence-state = {
+        question = "Which state are you resident in (a comment in the repository says Texas)? It decides whether QSearch owes a franchise report and sales tax on research sold there.";
+      };
+      mtm-election = {
+        question = "Elect section 475(f) mark-to-market for 2027 (trader tax status), or not? The statement is due by 2027-04-15 and cannot be made late.";
+        recommended = "Decide with the accountants once paper and live results show trading volume.";
+      };
       agent-mail = {
         question = "How agents send mail: Proton's business SMTP, or a Cloudflare-routed subdomain?";
       };

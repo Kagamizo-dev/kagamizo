@@ -130,6 +130,11 @@ in
         title = "The theme: retro pixel art with depth, academic type, a gaming and media feel; fonts, palette, sprites and icons for the shell and every app";
       }
       {
+        id = "templates";
+        title = "Views from existing open-source templates and kits (pixel art, game UI, dashboards), never drawn from scratch; game-like ease: save states, nothing lost, always a way back";
+        dependsOn = [ "shell/theme" ];
+      }
+      {
         id = "horizontal";
         title = "Horizontal tiling: apps as columns swiped left and right, a workspace per mode";
       }
@@ -651,6 +656,7 @@ in
       {
         id = "terms";
         title = "Each provider's terms typed and checked: automated trading, data use, an LLC's account (Public first)";
+        status = "done";
         dependsOn = [ "bank/app" ];
       }
       {
@@ -677,6 +683,75 @@ in
         id = "foreign";
         title = "Foreign accounts and currencies (Brazil's real first): typed, with their reporting (FBAR, FATCA)";
         dependsOn = [ "bank/ledger" ];
+      }
+      {
+        id = "status";
+        title = "Each obligation's status (filed, paid, not owed, extended) with its evidence; past due flagged";
+        status = "done";
+      }
+      {
+        id = "authorities";
+        title = "Every authority typed with its interfaces (IRS, Treasury, FinCEN, SEC, FINRA, CFTC, Wyoming, the rules' text)";
+        status = "done";
+      }
+      (
+        {
+          id = "estimated-tax";
+          title = "Say whether 2026's estimated tax payments 1 to 3 were owed and paid";
+        }
+        // action
+      )
+      (
+        {
+          id = "residence";
+          title = "The state of residence declared, deciding its franchise report and sales tax on research";
+        }
+        // owner "residence-state"
+      )
+      (
+        {
+          id = "mark-to-market";
+          title = "Elect section 475(f) for 2027 or not, by 2027-04-15 (it cannot be made late)";
+        }
+        // owner "mtm-election"
+      )
+      {
+        id = "mercury-events";
+        title = "Mercury's webhook events, signature checked, as the ledger's feed";
+        dependsOn = [ "bank/app" ];
+      }
+      {
+        id = "mercury-token";
+        title = "Mercury's token types typed, and a keep-alive inside its 45 days";
+      }
+      {
+        id = "mercury-gaps";
+        title = "Mercury's uncatalogued endpoints: credit statements, account cards, transfer approvals, auto-transfer rules, merchants, receipts, budgets";
+      }
+      {
+        id = "public-orders";
+        title = "Public's newer order fields: brackets, trailing stops, on-close, 24-hour sessions, tax-lot matching";
+      }
+      {
+        id = "northwest-catalog";
+        title = "Northwest's live tool list read from its server; the signature tools";
+        dependsOn = [ "identity/northwest-cli" ];
+      }
+      (
+        {
+          id = "tax-forms";
+          title = "The year's 1099s fetched by hand: no provider offers them by API";
+        }
+        // action
+      )
+      {
+        id = "holidays";
+        title = "Federal holidays in due dates (MLK Day falls on January 15 in 2029)";
+      }
+      {
+        id = "presentation";
+        title = "A small design group for the bank deciding how its data is shown on the desktop and in the browser, from the shell's templates";
+        dependsOn = [ "shell/templates" ];
       }
       {
         id = "page";

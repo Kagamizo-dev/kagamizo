@@ -341,6 +341,30 @@ in
           }) byEntity;
         }
         {
+          title = "Authorities";
+          rows = lib.mapAttrsToList (_: a: {
+            title = a.name;
+            detail = lib.concatMapStringsSep "; " (
+              i:
+              "${i.name}: ${i.access}${
+                lib.optionalString (i.secondFactor != "none") ", ${i.secondFactor}"
+              }, ${lib.concatStringsSep "/" i.can}${lib.optionalString (!i.api) ", web only"}"
+            ) a.interfaces;
+          }) cfg.authorities;
+        }
+        {
+          title = "Terms that bind us";
+          rows = lib.concatLists (
+            lib.mapAttrsToList (
+              p: cs:
+              map (c: {
+                title = "${p} ${c.section}: ${c.effect}";
+                detail = "${c.says}; so ${c.bears}";
+              }) cs
+            ) cfg.terms
+          );
+        }
+        {
           title = "Services";
           rows = lib.mapAttrsToList (n: s: {
             title = "${n} (${s.role})";

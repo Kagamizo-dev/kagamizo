@@ -41,6 +41,33 @@ let
       y' = if m < 3 then y - 1 else y;
     in
     lib.mod (y' + y' / 4 - y' / 100 + y' / 400 + lib.elemAt t (m - 1) + d) 7;
+  daysIn =
+    y: m:
+    if m == 2 then
+      (if (lib.mod y 4 == 0 && lib.mod y 100 != 0) || lib.mod y 400 == 0 then 29 else 28)
+    else if
+      lib.elem m [
+        4
+        6
+        9
+        11
+      ]
+    then
+      30
+    else
+      31;
+  # A date n days later, rolling into the next month and year.
+  later =
+    y: m: d: n:
+    let
+      d' = d + n;
+    in
+    if d' <= daysIn y m then
+      date y m d'
+    else if m == 12 then
+      date (y + 1) 1 (d' - 31)
+    else
+      date y (m + 1) (d' - daysIn y m);
   # The next business day on or after a date (weekends only).
   due =
     y: m: d:
@@ -48,9 +75,9 @@ let
       w = weekday y m d;
     in
     if w == 6 then
-      date y m (d + 2)
+      later y m d 2
     else if w == 0 then
-      date y m (d + 1)
+      later y m d 1
     else
       date y m d;
 
@@ -61,6 +88,11 @@ let
     es = "https://www.irs.gov/forms-pubs/about-form-1040-es";
     f8949 = "https://www.irs.gov/forms-pubs/about-form-8949";
     f6781 = "https://www.irs.gov/forms-pubs/about-form-6781";
+    f4868 = "https://www.irs.gov/pub/irs-pdf/f4868.pdf";
+    tc429 = "https://www.irs.gov/taxtopics/tc429";
+    p1099 = "https://www.irs.gov/pub/irs-pdf/p1099.pdf";
+    fbar = "https://www.fincen.gov/report-foreign-bank-and-financial-accounts";
+    penalty = "https://www.irs.gov/payments/failure-to-file-penalty";
   };
 
   obligations =
@@ -79,6 +111,38 @@ let
             what = "the ${toString year} individual return, carrying every disregarded business below";
             due = due next 4 15;
             source = irs.f1040;
+            penalty = "late filing: 5% of the unpaid tax a month, up to 25% (at least \$525 or the tax if over 60 days late); late payment: 0.5% a month, up to 25%, plus interest (${irs.penalty})";
+          }
+          {
+            entity = i;
+            form = "Form 4868";
+            what = "the extension: filing moves to October 15, payment does not";
+            due = due next 4 15;
+            source = irs.f4868;
+            when = "more time is needed to file";
+          }
+          {
+            entity = i;
+            form = "Section 475(f) election for ${toString next}";
+            what = "mark-to-market for a trader in securities, for tax year ${toString next}: a statement by the unextended due date of the ${toString year} return, then Form 3115 with the ${toString next} return and gains on Form 4797; it cannot be made late";
+            due = due next 4 15;
+            source = irs.tc429;
+            when = "the owner elects it (a dated decision, never a default)";
+          }
+          {
+            entity = i;
+            form = "1099-B, 1099-INT, 1099-DA received";
+            what = "the brokerage's and the banks' information returns for ${toString year}, read into the return (payers send 1099-B by February 15, the others by January 31)";
+            due = due next 2 15;
+            source = irs.p1099;
+          }
+          {
+            entity = i;
+            form = "FinCEN 114 (FBAR)";
+            what = "foreign financial accounts over \$10,000 in total at any time in ${toString year}";
+            due = due next 4 15;
+            source = irs.fbar;
+            when = "any foreign account";
           }
           {
             entity = i;
@@ -140,10 +204,18 @@ let
           {
             entity = b;
             form = "Schedule SE (on ${i}'s Form 1040)";
-            what = "self-employment tax on ${entities.${b}.legalName}'s net earnings";
+            what = "self-employment tax on ${entities.${b}.legalName}'s net business earnings; trading gains are never self-employment income, so they never land here or on Schedule C";
             due = due next 4 15;
             source = irs.schSE;
             when = "net self-employment earnings of \$400 or more";
+          }
+          {
+            entity = b;
+            form = "Form 1099-NEC (issued)";
+            what = "${entities.${b}.legalName}'s payments to contractors in ${toString year}, filed through IRIS and sent to each";
+            due = due next 1 31;
+            source = irs.p1099;
+            when = "\$2,000 or more paid to one contractor in the year";
           }
         ]) (businessesOf i)
         ++ lib.optional cfg.tax.${i}.residence.stateIncomeTax {
@@ -174,6 +246,7 @@ let
             what = "the greater of \$60 or 0.0002 of the assets it holds in Wyoming (W.S. 17-29-209)";
             due = if month == null || l.jurisdiction != "US-WY" then null else due year month 1;
             source = "https://sos.wyo.gov/Business/AnnualReport.aspx";
+            penalty = "delinquent from the second day of the next month; administratively dissolved if not filed within 60 days of the due date (https://sos.wyo.gov/faqs.aspx?root=BUS)";
             when =
               if l.jurisdiction == null then
                 "identity.entities.${e}.legal.jurisdiction and formed, read off Northwest's records, decide whether and when"
