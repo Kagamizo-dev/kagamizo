@@ -26,6 +26,8 @@
       (config.shell.runtimeModule "yoga-c940")
       # Its reverse-engineering workbench (modules/rea).
       (config.rea.workbenchModule "yoga-c940")
+      # Its scanners, for our own surfaces (modules/security).
+      (config.security.toolsModule "yoga-c940")
     ]
     ++ (with self.nixosModules; [
       tools

@@ -32,6 +32,8 @@ let
         (config.shell.runtimeModule "rpi5")
         # Its reverse-engineering tools, the command-line ones (../rea).
         (config.rea.workbenchModule "rpi5")
+        # Its scanners, carried (../security).
+        (config.security.toolsModule "rpi5")
         (import ../shell/_kit-serve.nix { web = self.packages.x86_64-linux.kagamizo-shell-web; })
       ]
       ++ extraModules;

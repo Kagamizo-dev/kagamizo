@@ -6,9 +6,11 @@
 #       always controls their own)
 #   governance.actions.<provider>.<tool> = { effect; description; }
 #       every operation a wrapper exposes, typed by what it does: read,
-#       write, spend, destroy, session (signing in), or move-login (moving an
+#       write, spend, destroy, session (signing in), move-login (moving an
 #       account's login onto its declared address: the one kind of action
-#       the login rule lets a controller run on a mismatched account)
+#       the login rule lets a controller run on a mismatched account), or
+#       probe (actively testing the account's own surface for weaknesses:
+#       granted only to a penetration tester, on its scope; ../security)
 #   governance.agents.<name> = { serves; purpose; personas; grants; }
 #       an agent identity: one Proton Pass agent token, one Cedar principal,
 #       serving exactly one entity, holding only the grants listed
@@ -32,6 +34,7 @@ let
     "destroy"
     "session"
     "move-login"
+    "probe"
   ];
   cfg = config.governance;
 
@@ -61,9 +64,10 @@ let
           types.enum [
             "read"
             "write"
+            "probe"
           ]
         );
-        description = "What the agent may do to it. Spending, destroying and signing in are never granted to an agent.";
+        description = "What the agent may do to it. Spending, destroying and signing in are never granted to an agent; probing only to a penetration tester (../security).";
       };
       why = mkOption { type = types.str; };
     };
@@ -97,7 +101,8 @@ let
         description = "The OpenRouter key it spends (openrouter.keys); null is its entity's swarm key.";
       };
       budgetUsdPerMonth = mkOption {
-        type = types.ints.positive;
+        # 0: it runs no model (tier 0 tools only), so it takes no share.
+        type = types.ints.unsigned;
         # Three swarms share each entity's $20 swarm key.
         default = 3;
         description = "Its share of the key's monthly cap; Lean checks the shares fit (modules/agents).";

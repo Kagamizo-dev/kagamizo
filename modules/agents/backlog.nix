@@ -89,9 +89,9 @@ in
         status = "active";
         brief = ./_backlog/upkeep-shell-web.md;
       };
-      "design/shell-input-and-targets" = {
+      "upkeep/shell-steam-and-perf" = {
         kind = "code";
-        brief = ./_backlog/design-shell-input-and-targets.md;
+        brief = ./_backlog/upkeep-shell-steam-and-perf.md;
       };
       "research-jingzo/weather-backtest" = {
         kind = "strategy";

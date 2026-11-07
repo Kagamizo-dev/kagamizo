@@ -19,6 +19,8 @@ inductive Effect where
   | destroy
   | session
   | moveLogin
+  /-- Actively testing an account's own surface (modules/security). -/
+  | probe
   deriving DecidableEq, Repr
 
 /-- What an action runs. -/
@@ -37,9 +39,10 @@ structure Action where
   runs : Runs
   deriving Repr
 
-/-- The effects an agent may ever be granted. -/
+/-- The effects an agent may ever be granted: probing only by a
+penetration tester, which governance.problems holds. -/
 def agentMay : Effect → Bool
-  | .read | .write => true
+  | .read | .write | .probe => true
   | _ => false
 
 structure Grant where
