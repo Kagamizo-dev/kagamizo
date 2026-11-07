@@ -69,6 +69,18 @@ let
     }
   );
 
+  # The shell's web target, at os.<zone> (../shell/_web-host.nix).
+  shellWeb = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ../shell/_web-host.nix {
+      web = config.packages.kagamizo-shell-web;
+      inherit
+        (lib.findFirst (s: s.name == "os") (throw "hetzner.host.agents: no os service") cfg.agents.services)
+        port
+        ;
+    }
+  );
+
   # DeepSeek Harness's web UI (../dsh, ./_harness.nix).
   harness = withSystem "x86_64-linux" (
     { config, ... }:
@@ -315,6 +327,7 @@ let
         discord
         githubApp
         harness
+        shellWeb
         agentRunnerHost
         tradingPaperHost
         media

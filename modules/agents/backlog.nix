@@ -86,6 +86,7 @@ in
       };
       "upkeep/shell-web" = {
         kind = "code";
+        status = "active";
         brief = ./_backlog/upkeep-shell-web.md;
       };
       "design/shell-input-and-targets" = {

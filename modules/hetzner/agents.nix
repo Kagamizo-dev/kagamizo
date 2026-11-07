@@ -58,8 +58,9 @@ in
                 "code"
                 "chat"
                 "harness"
+                "os"
               ];
-              description = "agents: Open WebUI; code: OpenCode's web interface; chat: Element Web and the Matrix homeserver; harness: DeepSeek Harness's web UI.";
+              description = "agents: Open WebUI; code: OpenCode's web interface; chat: Element Web and the Matrix homeserver; harness: DeepSeek Harness's web UI; os: the Kagamizo shell's web target (../shell).";
             };
             port = mkOption { type = types.ints.between 1024 65535; };
             paths = mkOption {
@@ -107,6 +108,10 @@ in
               port = 8083;
             }
           ];
+        }
+        {
+          name = "os";
+          port = 8084;
         }
       ];
     };

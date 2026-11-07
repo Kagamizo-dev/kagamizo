@@ -158,6 +158,15 @@ in
         command = "foot";
         targets = nixosTargets;
       };
+      # The status page (modules/site, at status.mirazo.org behind Access):
+      # CI, the teams, the twin. Its own page; the shell is where it opens.
+      status = {
+        name = "Status";
+        category = "system";
+        kind = "web";
+        url = "https://status.mirazo.org";
+        targets = allTargets;
+      };
       agents = {
         name = "Agents";
         category = "work";
