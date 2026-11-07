@@ -1,8 +1,5 @@
-# modules/compliance in the shell's library (../shell): part of the base, a row of
-# Settings under Governance.
+# modules/compliance in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.base."compliance" = {
-    section = "governance";
-    why = "the trading and business rules, typed and checked";
-  };
+  shell.services."compliance".app = "bank";
 }

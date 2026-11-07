@@ -298,6 +298,18 @@ in
           boot.binfmt.emulatedSystems = map (r: r.from) (lib.filter (r: r.kind == "binfmt") mine);
         };
     };
+    services = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options.app = mkOption {
+            type = types.enum (lib.attrNames cfg.apps);
+            description = "The app the module serves inside, which shows it.";
+          };
+        }
+      );
+      default = { };
+      description = "Modules that are services of another app (the bank's treasury, brokerage, tax), keyed by module.";
+    };
     base = mkOption {
       type = types.attrsOf base;
       default = { };
@@ -534,7 +546,7 @@ in
 
             set_option maxRecDepth 100000
             def modules : List String := ${q modules}
-            def base : List String := ${q (lib.attrNames cfg.base)}
+            def base : List String := ${q (lib.attrNames cfg.base ++ lib.attrNames cfg.services)}
             def appModules : List String := ${q appModules}
 
             theorem shell_sound : sound targets runtimes apps images = true := by decide +kernel

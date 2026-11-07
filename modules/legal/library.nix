@@ -1,11 +1,5 @@
-# modules/legal in the shell's library (../shell): a card on the work shelf,
-# opening the module's page.
+# modules/legal in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.apps."legal" = {
-    name = "Legal documents";
-    category = "work";
-    kind = "module";
-    module = "legal";
-    description = "The legal record's documents, rendered and kept in sync";
-  };
+  shell.services."legal".app = "bank";
 }

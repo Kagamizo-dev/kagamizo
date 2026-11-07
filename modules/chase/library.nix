@@ -1,8 +1,5 @@
-# modules/chase in the shell's library (../shell): part of the base, a row of
-# Settings under Accounts.
+# modules/chase in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.base."chase" = {
-    section = "accounts";
-    why = "Chase checking, closing, and cards";
-  };
+  shell.services."chase".app = "bank";
 }

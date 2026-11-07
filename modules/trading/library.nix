@@ -1,11 +1,5 @@
-# modules/trading in the shell's library (../shell): a card on the money shelf,
-# opening the module's page.
+# modules/trading in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.apps."trading" = {
-    name = "Trading";
-    category = "money";
-    kind = "module";
-    module = "trading";
-    description = "NautilusTrader, the strategies and their limits; paper before money";
-  };
+  shell.services."trading".app = "bank";
 }

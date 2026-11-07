@@ -1,8 +1,5 @@
-# modules/credit-one in the shell's library (../shell): part of the base, a row of
-# Settings under Accounts.
+# modules/credit-one in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.base."credit-one" = {
-    section = "accounts";
-    why = "Credit One card";
-  };
+  shell.services."credit-one".app = "bank";
 }

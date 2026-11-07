@@ -174,69 +174,71 @@ impl App {
                 .color(ACCENT),
         );
         ui.add_space(12.0);
-        egui::ScrollArea::vertical().show(ui, |ui| {
-            if !a.description.is_empty() {
-                ui.label(RichText::new(&a.description).size(17.0).color(PAPER));
-                ui.add_space(12.0);
-            }
-            let card = |ui: &mut egui::Ui, head: &str, body: &str| {
-                Frame::new()
-                    .fill(CARD)
-                    .corner_radius(CornerRadius::same(10))
-                    .inner_margin(Margin::same(14))
-                    .show(ui, |ui| {
-                        ui.set_width(ui.available_width());
-                        ui.label(RichText::new(head).size(13.0).color(MUTED).strong());
-                        ui.add_space(4.0);
-                        ui.label(RichText::new(body).size(15.0).color(PAPER));
-                    });
-                ui.add_space(8.0);
-            };
-            // The module's own view first (the plan's tracks), then its paper.
-            for v in &page.view {
-                ui.add_space(4.0);
-                ui.label(
-                    RichText::new(v.title.to_uppercase())
-                        .size(13.0)
-                        .color(ACCENT)
-                        .strong(),
-                );
-                ui.add_space(4.0);
-                Frame::new()
-                    .fill(CARD)
-                    .corner_radius(CornerRadius::same(10))
-                    .inner_margin(Margin::same(14))
-                    .show(ui, |ui| {
-                        ui.set_width(ui.available_width());
-                        for (n, r) in v.rows.iter().enumerate() {
-                            if n > 0 {
-                                ui.add_space(6.0);
-                            }
-                            ui.label(RichText::new(&r.title).size(15.0).color(PAPER));
-                            ui.label(RichText::new(&r.detail).size(13.0).color(MUTED));
-                        }
-                    });
-                ui.add_space(10.0);
-            }
-            if page.title.is_empty() {
-                card(
-                    ui,
-                    "PAPER",
-                    "None yet: the module's paper is on the backlog.",
-                );
-            } else {
-                card(ui, "PAPER", &format!("{}\n\n{}", page.title, page.summary));
-            }
-            for (head, xs) in [
-                ("CHECKS", &page.checks),
-                ("PACKAGES", &page.packages),
-                ("TEAMS", &page.teams),
-            ] {
-                if !xs.is_empty() {
-                    card(ui, head, &xs.join(", "));
+        egui::ScrollArea::vertical()
+            .id_salt(("detail", a.module.as_str()))
+            .show(ui, |ui| {
+                if !a.description.is_empty() {
+                    ui.label(RichText::new(&a.description).size(17.0).color(PAPER));
+                    ui.add_space(12.0);
                 }
-            }
-        });
+                let card = |ui: &mut egui::Ui, head: &str, body: &str| {
+                    Frame::new()
+                        .fill(CARD)
+                        .corner_radius(CornerRadius::same(10))
+                        .inner_margin(Margin::same(14))
+                        .show(ui, |ui| {
+                            ui.set_width(ui.available_width());
+                            ui.label(RichText::new(head).size(13.0).color(MUTED).strong());
+                            ui.add_space(4.0);
+                            ui.label(RichText::new(body).size(15.0).color(PAPER));
+                        });
+                    ui.add_space(8.0);
+                };
+                // The module's own view first (the plan's tracks), then its paper.
+                for v in &page.view {
+                    ui.add_space(4.0);
+                    ui.label(
+                        RichText::new(v.title.to_uppercase())
+                            .size(13.0)
+                            .color(ACCENT)
+                            .strong(),
+                    );
+                    ui.add_space(4.0);
+                    Frame::new()
+                        .fill(CARD)
+                        .corner_radius(CornerRadius::same(10))
+                        .inner_margin(Margin::same(14))
+                        .show(ui, |ui| {
+                            ui.set_width(ui.available_width());
+                            for (n, r) in v.rows.iter().enumerate() {
+                                if n > 0 {
+                                    ui.add_space(6.0);
+                                }
+                                ui.label(RichText::new(&r.title).size(15.0).color(PAPER));
+                                ui.label(RichText::new(&r.detail).size(13.0).color(MUTED));
+                            }
+                        });
+                    ui.add_space(10.0);
+                }
+                if page.title.is_empty() {
+                    card(
+                        ui,
+                        "PAPER",
+                        "None yet: the module's paper is on the backlog.",
+                    );
+                } else {
+                    card(ui, "PAPER", &format!("{}\n\n{}", page.title, page.summary));
+                }
+                for (head, xs) in [
+                    ("CHECKS", &page.checks),
+                    ("PACKAGES", &page.packages),
+                    ("TEAMS", &page.teams),
+                ] {
+                    if !xs.is_empty() {
+                        card(ui, head, &xs.join(", "));
+                    }
+                }
+            });
     }
 
     fn sections(&mut self, ui: &mut egui::Ui, wide: bool) {

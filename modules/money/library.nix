@@ -1,11 +1,5 @@
-# modules/money in the shell's library (../shell): a card on the money shelf,
-# opening the module's page.
+# modules/money in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.apps."money" = {
-    name = "Money";
-    category = "money";
-    kind = "module";
-    module = "money";
-    description = "Tax treatment, credit lines, the ledger and its report";
-  };
+  shell.services."money".app = "bank";
 }

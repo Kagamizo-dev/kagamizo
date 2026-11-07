@@ -1,8 +1,5 @@
-# modules/public in the shell's library (../shell): part of the base, a row of
-# Settings under Accounts.
+# modules/public in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.base."public" = {
-    section = "accounts";
-    why = "Public, the brokerage, and its typed API";
-  };
+  shell.services."public".app = "bank";
 }

@@ -1,8 +1,5 @@
-# modules/mercury in the shell's library (../shell): part of the base, a row of
-# Settings under Accounts.
+# modules/mercury in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.base."mercury" = {
-    section = "accounts";
-    why = "Mercury: the bank and its per-vendor cards";
-  };
+  shell.services."mercury".app = "bank";
 }

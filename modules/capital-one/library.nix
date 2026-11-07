@@ -1,8 +1,5 @@
-# modules/capital-one in the shell's library (../shell): part of the base, a row of
-# Settings under Accounts.
+# modules/capital-one in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.base."capital-one" = {
-    section = "accounts";
-    why = "Capital One cards";
-  };
+  shell.services."capital-one".app = "bank";
 }

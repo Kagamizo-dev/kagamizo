@@ -636,6 +636,7 @@ in
       {
         id = "app";
         title = "The bank app: one module wrapping Mercury, Public and IBKR, paper and live trading, legal and tax, its lawyers and accountants as its teams";
+        status = "done";
       }
       {
         id = "ledger";

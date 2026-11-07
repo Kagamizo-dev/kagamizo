@@ -1,8 +1,5 @@
-# modules/northwest in the shell's library (../shell): part of the base, a row of
-# Settings under Accounts.
+# modules/northwest in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.base."northwest" = {
-    section = "accounts";
-    why = "Northwest Registered Agent, through its MCP";
-  };
+  shell.services."northwest".app = "bank";
 }

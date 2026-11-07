@@ -1,8 +1,5 @@
-# modules/paypal in the shell's library (../shell): part of the base, a row of
-# Settings under Accounts.
+# modules/paypal in the shell's library (../shell): a service of the bank
+# (../bank), shown inside the Bank card rather than as a card of its own.
 {
-  shell.base."paypal" = {
-    section = "accounts";
-    why = "PayPal";
-  };
+  shell.services."paypal".app = "bank";
 }
