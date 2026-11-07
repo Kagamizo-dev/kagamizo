@@ -84,6 +84,14 @@ in
         kind = "code";
         brief = ./_backlog/upkeep-module-papers.md;
       };
+      "upkeep/shell-web" = {
+        kind = "code";
+        brief = ./_backlog/upkeep-shell-web.md;
+      };
+      "design/shell-input-and-targets" = {
+        kind = "code";
+        brief = ./_backlog/design-shell-input-and-targets.md;
+      };
       "research-jingzo/weather-backtest" = {
         kind = "strategy";
         status = "active";

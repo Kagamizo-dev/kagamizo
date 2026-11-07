@@ -21,12 +21,33 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order: check the host's first paper days (`systemctl status trading-paper-day-weather-rules` through the host console workflow) and the ledger; move backtest and paper onto NautilusTrader's Rust crates (backlog upkeep/trading-nautilus-rust) and delete the trading Python; build the weather backtest's live source on the host and record its first real result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order: run `github-state apply` for the two new shell issues; check the host's first paper days (`systemctl status trading-paper-day-weather-rules` through the host console workflow) and the ledger; move backtest and paper onto NautilusTrader's Rust crates (backlog upkeep/trading-nautilus-rust) and delete the trading Python; build the weather backtest's live source on the host and record its first real result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
-## 2026-11-06, night: every OpenRouter and repo setting typed (read this first)
+## 2026-11-07, early: the Kagamizo shell (read this first)
+
+- **The base OS is a declaration** (modules/shell, paper in
+  `_lean/Paper.lean`): `shell.targets` (yoga-c940, web) and `shell.apps`
+  (Settings, Firefox, Terminal, and Agents, Code, Harness, Chat behind
+  Access) are typed; one Rust/egui program draws a vertical column of app
+  cards and a settings app generated from targets, apps, `accounts.held`
+  and `agents.charters`. Keys and taps drive one tested model.
+- **Two outputs:** `packages.kagamizo-shell` (native; the Yoga's session
+  runs it first under niri, and each app opens full screen on the empty
+  workspace below) and `packages.kagamizo-shell-web` (wasm and its page).
+  `checks.shell` has Lean decide that no native app is on the web target
+  and that every native command is on its image's PATH.
+- **Seen:** the web build, screenshotted at 390 and 1280 px in headless
+  Chromium (home, focus, settings); the native build is verified by its
+  build and tests only (no GPU here).
+- **Next** (backlog, issues once `github-state apply` runs):
+  `upkeep/shell-web` serves it at os.jingzo.org behind Access (a Cloudflare
+  apply for the owner to approve); `design/shell-input-and-targets` adds
+  gamepad input, Steam, a perf target for the web build, and the Pi 5.
+
+## 2026-11-06, night: every OpenRouter and repo setting typed
 
 - **OpenRouter is code** (`openrouter plan|apply|probe`, Rust): every key
   (the signup "Default key" declared and disabled), the routing guardrail
