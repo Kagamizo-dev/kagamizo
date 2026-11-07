@@ -21,12 +21,46 @@ Before anything else, check the network: `nix build .#session-tools` must reach 
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order: run `github-state apply` for the two new shell issues; check the host's first paper days (`systemctl status trading-paper-day-weather-rules` through the host console workflow) and the ledger; move backtest and paper onto NautilusTrader's Rust crates (backlog upkeep/trading-nautilus-rust) and delete the trading Python; build the weather backtest's live source on the host and record its first real result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then, in order: re-plan Cloudflare (`infra agent plan`) and, once I approve, apply it so os.jingzo.org answers; run `github-state apply` for the new backlog issues; check the host's first paper days (`systemctl status trading-paper-day-weather-rules` through the host console workflow) and the ledger; move backtest and paper onto NautilusTrader's Rust crates (backlog upkeep/trading-nautilus-rust) and delete the trading Python; build the weather backtest's live source on the host and record its first real result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
-## 2026-11-07, early: the Kagamizo shell (read this first)
+## 2026-11-07, morning: the OS as a carried library (read this first)
+
+The owner's goal: a solo researcher's whole stack in the pockets and
+sleeves of their clothes; the OS organised like Steam's, the base being
+the image and Settings, every module an app. The approved plan is in
+this session's plan file; what landed, in order:
+
+- **kit** (modules/kit): clothing slots, devices (owned Pixel 9a and
+  Pi 5; proposals as specifications), requirements; Lean proves fit,
+  coverage, eight hours of power, and that every software device is a
+  shell target. Finding: the Pi runs only on a power bank, so the first
+  purchase is the bank (the owner's decision; no prices yet).
+- **library**: all 64 modules register in their own `library.nix`, as
+  base (a Settings section) or apps (cards on shelves by category);
+  `module` cards open pages generated from their papers. Lean proves no
+  module is invisible.
+- **carried targets**: installable web app (manifest and icons),
+  gamepads (gilrs, Gamepad API), the Pi serving the shell over nginx and
+  mDNS, the phone and its twin as android targets.
+- **runtimes**: platforms per target; qemu-user binfmt Yoga↔Pi, Wine on
+  the Yoga; Lean requires native apps to reach their target's platform.
+- **RE workbench** (modules/rea): typed subjects whose purposes exclude
+  DRM, anti-cheat and licence-check work; Ghidra, Cutter, ImHex, rizin,
+  radare2, binwalk, Frida on the Yoga (CLI ones on the Pi).
+- **security** (modules/security): typed scope of our own assets only;
+  new governance effect `probe`, held by `security-jingzo` and
+  `security-mirazo` on their entity's accounts; scanners on Yoga and Pi.
+- **Not done:** the scheduled scan runner (security/pipeline); Steam and
+  the web perf target (upkeep/shell-steam-and-perf); the Cloudflare apply
+  for os.jingzo.org (re-plan first: the new testers may add Access
+  service tokens); box64/FEX on the Pi (page size unverified); nothing
+  booted on a real device yet. `checks.jingzo-host` was not built in the
+  session (disk), so CI's run is its check.
+
+## 2026-11-07, early: the Kagamizo shell
 
 - **The base OS is a declaration** (modules/shell, paper in
   `_lean/Paper.lean`): `shell.targets` (yoga-c940, web) and `shell.apps`
