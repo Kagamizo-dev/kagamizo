@@ -3,7 +3,12 @@
 #
 #   nix build .#image             ephemeral: RAM-only root (the default)
 #   nix build .#image-persistent  a normal writable SD root, as a fallback
-{ inputs, self, ... }:
+{
+  inputs,
+  self,
+  config,
+  ...
+}:
 let
   mkPi =
     extraModules:
@@ -23,6 +28,10 @@ let
         self.nixosModules.tmux
         # The kit's machine serves the shell to the phone (../shell, ../kit).
         # The web build is architecture-free files, so the x86_64 build serves.
+        # Its runtimes: x86_64 programs on the Pi (../shell).
+        (config.shell.runtimeModule "rpi5")
+        # Its reverse-engineering tools, the command-line ones (../rea).
+        (config.rea.workbenchModule "rpi5")
         (import ../shell/_kit-serve.nix { web = self.packages.x86_64-linux.kagamizo-shell-web; })
       ]
       ++ extraModules;

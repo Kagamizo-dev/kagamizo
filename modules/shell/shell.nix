@@ -73,8 +73,45 @@ let
   ];
   titleOf = s: lib.toUpper (lib.substring 0 1 s) + lib.substring 1 (-1) s;
 
+  # What a program is built for, and what a target runs.
+  platforms = [
+    "x86_64-linux"
+    "aarch64-linux"
+    "x86_64-windows"
+    "x86_64-android"
+    "aarch64-android"
+    "web"
+  ];
+
+  # A translator: runs programs built for `from` on a `to` machine, installed
+  # on the targets it names (as a package, or as a binfmt handler).
+  runtime = types.submodule {
+    options = {
+      from = mkOption { type = types.enum platforms; };
+      to = mkOption { type = types.enum platforms; };
+      kind = mkOption {
+        type = types.enum [
+          "package"
+          "binfmt"
+        ];
+        description = "package: a program on the PATH; binfmt: the kernel runs `from` binaries through qemu-user transparently.";
+      };
+      package = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "For package: the nixpkgs attribute.";
+      };
+      targets = mkOption { type = types.listOf (types.enum (lib.attrNames cfg.targets)); };
+      why = mkOption { type = types.str; };
+    };
+  };
+
   target = types.submodule {
     options = {
+      platform = mkOption {
+        type = types.enum platforms;
+        description = "What the target runs natively.";
+      };
       kind = mkOption {
         type = types.enum [
           "nixos"
@@ -125,6 +162,11 @@ let
         type = types.listOf (types.enum (lib.attrNames cfg.targets));
         default = lib.attrNames cfg.targets;
         description = "Where it shows; every target unless it says otherwise.";
+      };
+      platform = mkOption {
+        type = types.nullOr (types.enum platforms);
+        default = null;
+        description = "For native: what the program is built for; null for the target's own. Another platform runs through the target's runtimes.";
       };
     };
   };
@@ -221,6 +263,25 @@ in
       type = types.attrsOf app;
       default = { };
     };
+    runtimes = mkOption {
+      type = types.attrsOf runtime;
+      default = { };
+    };
+    runtimeModule = mkOption {
+      type = types.functionTo types.raw;
+      readOnly = true;
+      description = "A target's runtimes as a NixOS module, for its image to import.";
+      default =
+        t:
+        { pkgs, lib, ... }:
+        let
+          mine = lib.filter (r: lib.elem t r.targets) (lib.attrValues cfg.runtimes);
+        in
+        {
+          environment.systemPackages = map (r: pkgs.${r.package}) (lib.filter (r: r.kind == "package") mine);
+          boot.binfmt.emulatedSystems = map (r: r.from) (lib.filter (r: r.kind == "binfmt") mine);
+        };
+    };
     base = mkOption {
       type = types.attrsOf base;
       default = { };
@@ -243,11 +304,13 @@ in
       targets = {
         yoga-c940 = {
           kind = "nixos";
+          platform = "x86_64-linux";
           host = "yoga-c940";
           why = "the first device: Intel graphics, a live USB that runs from RAM";
         };
         web = {
           kind = "web";
+          platform = "web";
           host = "os.jingzo.org";
           why = "the same shell in any browser, the phone's included, behind Access";
         };
@@ -255,16 +318,19 @@ in
         # phone its screen.
         rpi5 = {
           kind = "nixos";
+          platform = "aarch64-linux";
           host = "rpi5";
           why = "the kit's machine: aarch64 in a pocket, serving the shell to the phone";
         };
         pixel-9a = {
           kind = "android";
+          platform = "aarch64-android";
           host = "pixel-9a";
           why = "the kit's screen: GrapheneOS, the web target installed from the browser";
         };
         android-twin = {
           kind = "android";
+          platform = "x86_64-android";
           host = "pixel-9a";
           why = "the phone's twin on jingzo-host: the agents' sandboxed Pixel, which opens the web target like the phone";
         };
@@ -272,6 +338,32 @@ in
 
       # The shell is base (its own Settings row) and registers its own apps;
       # every other module registers in its own library.nix.
+      # Software built for one machine, run on another: each translator
+      # pinned from nixpkgs, installed on the targets it names.
+      runtimes = {
+        qemu-x86_64 = {
+          from = "x86_64-linux";
+          to = "aarch64-linux";
+          kind = "binfmt";
+          targets = [ "rpi5" ];
+          why = "x86_64 Linux programs on the Pi, through qemu-user, whatever the kernel's page size";
+        };
+        qemu-aarch64 = {
+          from = "aarch64-linux";
+          to = "x86_64-linux";
+          kind = "binfmt";
+          targets = [ "yoga-c940" ];
+          why = "the Pi's aarch64 programs on the Yoga, to test what the kit runs before it is carried";
+        };
+        wine = {
+          from = "x86_64-windows";
+          to = "x86_64-linux";
+          kind = "package";
+          package = "wine64";
+          targets = [ "yoga-c940" ];
+          why = "Windows programs the owner owns or licenses, on the Yoga";
+        };
+      };
       base.shell = {
         section = "system";
         why = "the shell itself: the library, Settings, and every target's session";
@@ -390,7 +482,8 @@ in
             def targets : List Target := [${
               lib.concatStringsSep ", " (
                 lib.mapAttrsToList (
-                  n: t: "{ name := ${q n}, web := ${lib.boolToString (t.kind != "nixos")} }"
+                  n: t:
+                  "{ name := ${q n}, web := ${lib.boolToString (t.kind != "nixos")}, platform := ${q t.platform} }"
                 ) cfg.targets
               )
             }]
@@ -400,8 +493,15 @@ in
                   n: a:
                   "{ id := ${q n}, kind := .${a.kind}, command := ${
                     q (if a.command == null then "" else a.command)
-                  }, targets := ${q a.targets} }"
+                  }, targets := ${q a.targets}, platform := ${q (if a.platform == null then "" else a.platform)} }"
                 ) cfg.apps
+              )
+            }]
+            def runtimes : List Runtime := [${
+              lib.concatStringsSep ", " (
+                lib.mapAttrsToList (
+                  n: r: "{ name := ${q n}, src := ${q r.from}, dst := ${q r.to}, targets := ${q r.targets} }"
+                ) cfg.runtimes
               )
             }]
             def images : List (String × List String) := [${
@@ -415,7 +515,7 @@ in
             def base : List String := ${q (lib.attrNames cfg.base)}
             def appModules : List String := ${q appModules}
 
-            theorem shell_sound : sound targets apps images = true := by decide +kernel
+            theorem shell_sound : sound targets runtimes apps images = true := by decide +kernel
             theorem library_covered : covered modules base appModules = true := by decide +kernel
             end Kagamizo.Shell
           '';
