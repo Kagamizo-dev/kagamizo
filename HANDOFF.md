@@ -1,5 +1,7 @@
 # Handoff
 
+**The plan lives in modules/plan** (`nix build .#plan`; the shell's Plan card): goals, tracks, every item and every decision waiting on the owner, proved coherent. This file is the log of sessions.
+
 The state of the work on branch `ccr-a3dc11d9-lh43d5`, for the next session.
 Read `CLAUDE.md`, `README.md` and the Gaps in `modules/cloudflare/README.md`
 first; this file says where things stand and what comes next. Delete it once
@@ -15,13 +17,13 @@ ticked) and the start message below, kept current.
 Start message for the next session:
 
 ```
-Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; HANDOFF.md's "The owner's standing decisions" holds what I've already decided, and its Roadmap is the order of work. Work is done by the teams: each has a charter (modules/agents/charters.nix) and a typed backlog (modules/agents/backlog.nix); run an item with `nix run .#dispatch -- <team>/<topic> <its brief>`, gate it with the checks, and commit what passes under the team's name. Every file is held to Rust, Lean or Nix by `checks.languages` and the pre-commit hook; never raise the exceptions' baseline.
+Continue the Kagamizo work on branch ccr-a3dc11d9-lh43d5. Read CLAUDE.md, README.md, the Gaps in modules/cloudflare/README.md, and HANDOFF.md first; The plan is modules/plan, the one source of truth for the work and its order (`nix build .#plan` prints it; the Plan card shows it); HANDOFF.md is the log of sessions, and its "The owner's standing decisions" holds what I've already decided. Work is done by the teams: each has a charter (modules/agents/charters.nix) and a typed backlog (modules/agents/backlog.nix); run an item with `nix run .#dispatch -- <team>/<topic> <its brief>`, gate it with the checks, and commit what passes under the team's name. Every file is held to Rust, Lean or Nix by `checks.languages` and the pre-commit hook; never raise the exceptions' baseline.
 
 Before anything else, check the network: `nix build .#session-tools` must reach cache.nixos.org. If the proxy refuses it (403), the session is not in the Kagamizo environment (see HANDOFF.md's "midday session"): stop and tell me, run nothing.
 
 Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me every link or code as a file card (SendUserFile, an HTML with the link) and a markdown link, never a bare URL; a Proton link lives nine minutes, a Cloudflare device code five, so send each the moment it exists and wait for my reply.
 
-Then, in order: re-plan Cloudflare (`infra agent plan`) and, once I approve, apply it so os.jingzo.org answers; run `github-state apply` for the new backlog issues; check the host's first paper days (`systemctl status trading-paper-day-weather-rules` through the host console workflow) and the ledger; move backtest and paper onto NautilusTrader's Rust crates (backlog upkeep/trading-nautilus-rust) and delete the trading Python; build the weather backtest's live source on the host and record its first real result (HANDOFF.md's "2026-11-06, evening"); then, from "2026-11-06: the base layers for the teams": check that I opened the GitHub App page and that its key reached the host, then the github-bootstrap request for the rulesets; once OpenRouter has credit, run the backlog in its order (twin/pumpkin-server first); then "2026-11-04, later: the trading path" on the host (the Proton Drive hop, `research run SPY`, `trade paper-day weather-rules` and `spy-agents` daily, a backtest; here: nothing moves money), then the rest of "The approved harness, twin and swarm plan (2026-11-04)"; the iCloud exports into Proton Drive; once Easy Switch has imported my mail, `mailbox senders` for the tally of every subscription, each to be declared with a card for me to mint.
+Then work the plan: in each track, the lowest unblocked item first; items waiting on me are listed as its open decisions, which you ask me about by name. Before the session ends, record in modules/plan what moved (status, answers to decisions, new items) and keep `checks.plan` green.
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
