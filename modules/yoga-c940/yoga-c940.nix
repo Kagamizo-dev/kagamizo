@@ -3,11 +3,24 @@
 # (_scripts/boot-iso.sh) and publishes it (_scripts/publish-release.sh).
 #
 #   nix build .#yoga-c940-iso  ->  result/iso/*.iso
-{ inputs, self, ... }:
+{
+  inputs,
+  self,
+  withSystem,
+  ...
+}:
 {
   flake.nixosConfigurations.yoga-c940 = inputs.nixpkgs.lib.nixosSystem {
     modules = [
       ./_nixos.nix
+      # The Kagamizo shell is the session (modules/shell).
+      (withSystem "x86_64-linux" (
+        { config, ... }:
+        import ../shell/_nixos.nix {
+          shell = config.packages.kagamizo-shell;
+          target = "yoga-c940";
+        }
+      ))
     ]
     ++ (with self.nixosModules; [
       tools
