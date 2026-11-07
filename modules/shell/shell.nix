@@ -7,7 +7,7 @@
 # full screen on its own workspace below it: niri stacks workspaces
 # vertically, so moving between apps is moving up and down.
 #
-#   shell.targets.<t> = { kind = "nixos" | "web"; host; }
+#   shell.targets.<t> = { kind = "nixos" | "android" | "web"; host; }
 #   shell.apps.<a>    = { name; category; kind = "native" | "web";
 #                         command | url; targets; }
 #
@@ -42,12 +42,14 @@ let
       kind = mkOption {
         type = types.enum [
           "nixos"
+          "android"
           "web"
         ];
+        description = "nixos: an image of ours, which runs native apps; android: a phone, which runs the web target; web: a browser.";
       };
       host = mkOption {
         type = types.str;
-        description = "The nixosConfigurations name, or the web target's hostname.";
+        description = "The nixosConfigurations name, the android device, or the web target's hostname.";
       };
       why = mkOption { type = types.str; };
     };
@@ -79,7 +81,9 @@ let
   };
 
   web = n: "https://${n}.jingzo.org";
-  nixosTargets = lib.attrNames (lib.filterAttrs (_: t: t.kind == "nixos") cfg.targets);
+  nativeTargets = lib.unique (
+    lib.concatMap (a: a.targets) (lib.filter (a: a.kind == "native") (lib.attrValues cfg.apps))
+  );
   allTargets = lib.attrNames cfg.targets;
 
   # What the settings app shows, generated: never hand-written.
@@ -135,6 +139,18 @@ in
         host = "os.jingzo.org";
         why = "the same shell in any browser, the phone's included, behind Access";
       };
+      # The carried kit (../kit): the Pi is the machine in the pocket, the
+      # phone its screen.
+      rpi5 = {
+        kind = "nixos";
+        host = "rpi5";
+        why = "the kit's machine: aarch64 in a pocket, serving the shell to the phone";
+      };
+      pixel-9a = {
+        kind = "android";
+        host = "pixel-9a";
+        why = "the kit's screen: GrapheneOS, the web target installed from the browser";
+      };
     };
 
     shell.apps = {
@@ -149,14 +165,15 @@ in
         category = "browse";
         kind = "native";
         command = "firefox";
-        targets = nixosTargets;
+        # The Pi joins once its image carries the shell's session.
+        targets = [ "yoga-c940" ];
       };
       terminal = {
         name = "Terminal";
         category = "build";
         kind = "native";
         command = "foot";
-        targets = nixosTargets;
+        targets = [ "yoga-c940" ];
       };
       # The status page (modules/site, at status.mirazo.org behind Access):
       # CI, the teams, the twin. Its own page; the shell is where it opens.
@@ -255,8 +272,9 @@ in
             ${shell}/bin/shell-page $out
           '';
         };
-        # Each NixOS target's PATH, to check every native app's command is there.
-        imagePaths = lib.genAttrs nixosTargets (
+        # The PATH of each image a native app ships in, to check its command
+        # is there (only those: reading a PATH builds the image's packages).
+        imagePaths = lib.genAttrs nativeTargets (
           t:
           lib.concatMap (p: lib.attrNames (builtins.readDir "${p}/bin")) (
             lib.filter (
@@ -277,7 +295,7 @@ in
             def targets : List Target := [${
               lib.concatStringsSep ", " (
                 lib.mapAttrsToList (
-                  n: t: "{ name := ${q n}, web := ${lib.boolToString (t.kind == "web")} }"
+                  n: t: "{ name := ${q n}, web := ${lib.boolToString (t.kind != "nixos")} }"
                 ) cfg.targets
               )
             }]

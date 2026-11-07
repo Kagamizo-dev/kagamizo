@@ -13,6 +13,7 @@ inductive Kind where
 
 structure Target where
   name : String
+  /-- A browser or a phone: it runs the web target, never a native program. -/
   web : Bool
   deriving DecidableEq, Repr
 
