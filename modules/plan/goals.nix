@@ -19,6 +19,10 @@
         title = "Data first, accounts only as providers";
         why = "APIs, CLIs, open data and OSINT before anything else; Proton Pass holds identity and TOTP; no provider whose 2FA needs a phone number; human-verification walls are deprioritised, never bypassed (2026-11-07).";
       };
+      bank = {
+        title = "Our own bank";
+        why = "Legal and tax identity bound to every source of revenue: one app wrapping Mercury, Public and IBKR, trading paper and live, the registered agent, the IRS and the states, every flow in and out (foreign accounts included) and every loan between entities and services, with its own lawyers and accountants as its teams (2026-11-07).";
+      };
       income = {
         title = "Income that runs by itself";
         why = "Algorithmic trading and published research, paper before money (2026-10-31, 2026-11-04).";
@@ -71,7 +75,7 @@
       };
       trading = {
         title = "Trading";
-        goal = "income";
+        goal = "bank";
         team = "research-jingzo";
       };
       research = {
@@ -79,9 +83,9 @@
         goal = "income";
         team = "research-jingzo";
       };
-      money = {
-        title = "Money, entities and tax";
-        goal = "income";
+      bank = {
+        title = "The bank: legal, tax, treasury and its flows";
+        goal = "bank";
         team = "accounting-jingzo";
       };
       data = {
@@ -194,7 +198,8 @@
         question = "What goes into the twin's inventory first, and do photos stay in Proton Drive?";
       };
       trading-entity = {
-        question = "Trade on the personal account or the LLC's; the trader's tax status?";
+        question = "Trade on the personal account or the LLC's?";
+        answer = "The personal account (public-mirazo) for now (2026-11-07); the trader's tax status is the bank's to settle.";
       };
       wiring = {
         question = "Money wiring: which Mercury account funds Public, sweeps with a tap or by hand?";
@@ -210,6 +215,7 @@
       };
       public-login = {
         question = "Move Public's sign-in to finance@mirazo.org, or change the declaration, before the exception ends on 2026-11-30?";
+        answer = "Settle it (2026-11-07): move the sign-in onto its declared address before 2026-11-30; the owner approves the sign-in.";
       };
       publishing = {
         question = "Where research is published: arXiv (whose account), or self-hosted papers?";

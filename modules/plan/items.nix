@@ -251,7 +251,7 @@ in
       )
       {
         id = "domains";
-        title = "Every app parameterised by its domain, <app>.jingzo.org by default";
+        title = "Every app its own page as well as its card, at its own domain (<app>.jingzo.org by default)";
         dependsOn = [ "apps/restructure" ];
       }
       {
@@ -302,11 +302,6 @@ in
         backlog = "upkeep/account-links";
         dependsOn = [ "agents/matrix-bots" ];
       }
-      {
-        id = "browser-aliases";
-        title = "The browser engine for the last flows, and identity aliases";
-        backlog = "browser/engine-and-aliases";
-      }
       (
         {
           id = "logins-on-domains";
@@ -317,9 +312,10 @@ in
       (
         {
           id = "public-login";
-          title = "Public's sign-in settled before its exception ends on 2026-11-30";
+          title = "Public's sign-in moved onto its declared address before its exception ends on 2026-11-30";
+          decision = "public-login";
         }
-        // owner "public-login"
+        // action
       )
       {
         id = "undeclared-logins";
@@ -434,6 +430,11 @@ in
     ]
     // track "agents" [
       {
+        id = "browser";
+        title = "Agents' own browsers: a headless engine per team (Lightpanda for speed, Chromium for full pages), Rust over CDP, every flow typed and governed by Cedar";
+        backlog = "browser/engine-and-aliases";
+      }
+      {
         id = "host-runner";
         title = "The agents' runner on the host";
         status = "done";
@@ -451,7 +452,7 @@ in
           id = "topup-flow";
           title = "The OpenRouter top-up as a flow within the card's limit";
           backlog = "upkeep/openrouter-topup-flow";
-          dependsOn = [ "identity/browser-aliases" ];
+          dependsOn = [ "agents/browser" ];
         }
         // credit
       )
@@ -521,15 +522,6 @@ in
         status = "active";
       }
       {
-        id = "self-contained";
-        title = "Trading as a self-contained app: Public, Mercury and IBKR as its providers; its terms, legal rules, accounting and team inside it";
-      }
-      {
-        id = "terms";
-        title = "Each provider's terms typed and checked: automated trading, data use, an LLC's account (Public first)";
-        dependsOn = [ "trading/self-contained" ];
-      }
-      {
         id = "paper-days";
         title = "Check the host's first paper days and the ledger";
         dependsOn = [ "trading/paper-visible" ];
@@ -588,10 +580,15 @@ in
         }
         // action
       )
+      {
+        id = "options-level-read";
+        title = "Read the options level from Public's API on the host (recorded: 1, on 2026-11-04; weather-rules needs none, spy-agents needs 2)";
+      }
       (
         {
           id = "options-level";
           title = "Raise Public's options level for the multi-leg strategies";
+          dependsOn = [ "trading/options-level-read" ];
         }
         // action
       )
@@ -602,13 +599,12 @@ in
         }
         // action
       )
-      (
-        {
-          id = "entity";
-          title = "Which account trades: personal or the LLC's";
-        }
-        // owner "trading-entity"
-      )
+      {
+        id = "entity";
+        title = "The personal account trades for now (public-mirazo)";
+        status = "done";
+        decision = "trading-entity";
+      }
       {
         id = "ibkr";
         title = "IBKR as a second backend";
@@ -636,7 +632,59 @@ in
         title = "Papers rendered with Verso; strategy papers off Typst";
       }
     ]
-    // track "money" [
+    // track "bank" [
+      {
+        id = "app";
+        title = "The bank app: one module wrapping Mercury, Public and IBKR, paper and live trading, legal and tax, its lawyers and accountants as its teams";
+      }
+      {
+        id = "ledger";
+        title = "One double-entry ledger of every flow in and out: accounts, cards, trades, entities, loans";
+        dependsOn = [ "bank/app" ];
+      }
+      {
+        id = "flows";
+        title = "Loans and contributions between entities and to services, each a typed flow the owner approves";
+        dependsOn = [ "bank/ledger" ];
+      }
+      {
+        id = "terms";
+        title = "Each provider's terms typed and checked: automated trading, data use, an LLC's account (Public first)";
+        dependsOn = [ "bank/app" ];
+      }
+      {
+        id = "irs";
+        title = "IRS obligations typed: EINs, returns, estimated tax dates, the 475(f) election, each with its deadline";
+        dependsOn = [ "bank/app" ];
+      }
+      {
+        id = "state";
+        title = "State obligations typed: the Wyoming annual report and its tax, the registered agent's renewals";
+        dependsOn = [ "bank/app" ];
+      }
+      {
+        id = "registered-agent";
+        title = "Northwest as the bank's registered agent: its documents and mail read into the app";
+        dependsOn = [ "identity/northwest-cli" ];
+      }
+      {
+        id = "documents";
+        title = "Every legal and tax record in the app: formation, EIN letters, statements, filings, kept in Proton Drive";
+        dependsOn = [ "bank/app" ];
+      }
+      {
+        id = "foreign";
+        title = "Foreign accounts and currencies (Brazil's real first): typed, with their reporting (FBAR, FATCA)";
+        dependsOn = [ "bank/ledger" ];
+      }
+      {
+        id = "page";
+        title = "The bank's page and view: balances, obligations due, what waits on the owner";
+        dependsOn = [
+          "bank/ledger"
+          "bank/irs"
+        ];
+      }
       (
         {
           id = "floor";
