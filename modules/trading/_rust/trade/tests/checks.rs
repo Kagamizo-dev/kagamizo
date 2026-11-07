@@ -112,6 +112,9 @@ impl Case {
             .env("PUBLIC_ACCOUNT_ID", "5LA00001")
             .env("TRADE_STRATEGIES", strategies(&self.dir, self.stage).to_string())
             .env("TRADE_LIMITS", limits().to_string())
+            // Two reads, no pause: a working order is cancelled in milliseconds.
+            .env("TRADE_READBACK_TRIES", "2")
+            .env("TRADE_READBACK_SECS", "0")
             .output()
             .expect("trade-run");
         let stdout = String::from_utf8_lossy(&out.stdout);
@@ -195,6 +198,54 @@ fn a_live_strategy_places_reads_back_and_records_the_position() {
     let (code, _, err) = c.run(&["place", "proposal.json"]);
     assert_ne!(code, 0);
     assert!(err.contains("position(s) open"), "{err}");
+}
+
+#[test]
+fn an_order_still_working_is_cancelled_and_opens_nothing() {
+    let c = Case::at_stage("resting", "live");
+    c.write("research/2026-11-04/SPY.json", json!({"decision": "BUY", "rationale": "the check"}));
+    let mut v = c.propose(&["propose", "spy-agents", "2026-11-04"]);
+    // A limit far from the market: the stub keeps it working (NEW).
+    v["proposal"]["order"]["limitPrice"] = json!("0.01");
+    c.write("proposal.json", v);
+    let (code, placed, err) = c.run(&["place", "proposal.json"]);
+    assert_eq!(code, 0, "{err}");
+    assert_eq!(placed["cancelled"], true, "{placed}");
+    assert_eq!(placed["filled"], false);
+    assert_eq!(placed["status"]["status"], "CANCELLED");
+    assert_eq!(placed["day"]["openPositions"], 0, "an unfilled order opens no position");
+    // And by hand: a cancel of a known order reads back CANCELLED.
+    let id = placed["order_id"].as_str().unwrap().to_string();
+    let (code, out, err) = c.run(&["cancel", &id]);
+    assert_eq!(code, 0, "{err}");
+    assert_eq!(out["status"]["status"], "CANCELLED");
+}
+
+#[test]
+fn a_paper_day_is_rehearsed_up_to_placing() {
+    let c = Case::at_stage("rehearsal", "paper");
+    let f = c.forecasts(None);
+    c.propose(&["paper-day", "weather-rules", "2026-11-04", "--forecasts", &f]);
+    let (code, r, err) = c.run(&["rehearse", "weather-rules", "2026-11-04"]);
+    assert_eq!(code, 0, "{err}");
+    assert_eq!(r["admissible"], true, "{r}");
+    assert!(r["preflight"]["estimatedCost"].is_string(), "{r}");
+    assert_eq!(r["account"], "5LA00001");
+    assert!(c.dir.join("research/rehearsal-2026-11-04.json").exists());
+    // A day with no paper record is not rehearsed.
+    let (code, _, err) = c.run(&["rehearse", "weather-rules", "2026-11-05"]);
+    assert_ne!(code, 0);
+    assert!(err.contains("no paper day recorded"), "{err}");
+}
+
+#[test]
+fn a_research_strategy_is_not_rehearsed() {
+    let c = Case::new("unrehearsed");
+    let f = c.forecasts(None);
+    c.propose(&["paper-day", "weather-rules", "2026-11-04", "--forecasts", &f]);
+    let (code, _, err) = c.run(&["rehearse", "weather-rules", "2026-11-04"]);
+    assert_ne!(code, 0);
+    assert!(err.contains("rehearsals start at paper"), "{err}");
 }
 
 #[test]

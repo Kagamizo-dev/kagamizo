@@ -228,10 +228,15 @@
       };
       residence-state = {
         question = "Which state are you resident in (a comment in the repository says Texas)? It decides whether QSearch owes a franchise report and sales tax on research sold there.";
+        answer = "Texas (2026-11-07). QSearch had no revenue, so nothing is owed there now; whether it must register or file Texas's franchise report once it earns is the lawyers' and accountants' question.";
       };
       mtm-election = {
         question = "Elect section 475(f) mark-to-market for 2027 (trader tax status), or not? The statement is due by 2027-04-15 and cannot be made late.";
         recommended = "Decide with the accountants once paper and live results show trading volume.";
+      };
+      canary = {
+        question = "Place one real canary order to prove the live path end to end: an event contract limit far from the market (it should not fill), read back, then cancelled within the minute? Without it, place, read-back and cancel are proved only against the stub.";
+        recommended = "Yes, once five paper days are in: a $0 expected cost, the owner approving it like any order.";
       };
       agent-mail = {
         question = "How agents send mail: Proton's business SMTP, or a Cloudflare-routed subdomain?";

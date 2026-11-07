@@ -14,6 +14,8 @@ static mut ORDER_COUNTER: u32 = 0;
 // In-memory order store: a simple Vec of (id, body_json) pairs.
 static mut ORDER_IDS: Vec<String> = Vec::new();
 static mut ORDER_BODIES: Vec<String> = Vec::new();
+// Orders cancelled by DELETE: read back as CANCELLED.
+static mut CANCELLED: Vec<String> = Vec::new();
 
 fn store_order(id: &str, body: &str) {
     unsafe {
@@ -498,6 +500,16 @@ fn main() {
             store_order(&final_id, &body_str);
             reply_fmt(&stream, 200, format!(r#"{{"orderId":"{}"}}"#, final_id));
 
+        // ── Cancel order (DELETE): an empty reply, as Public gives ────
+        } else if route_path.contains("/order/") && method == "DELETE" {
+            let order_id = route_path.rsplit('/').next().unwrap_or("").to_string();
+            if find_order(&order_id).is_some() {
+                unsafe { CANCELLED.push(order_id); }
+                reply(&stream, 200, "");
+            } else {
+                reply(&stream, 404, r#"{"message":"no such order"}"#);
+            }
+
         // ── Read order by id (GET) ────────────────────────────────────
         } else if route_path.contains("/order/") && method == "GET" {
             let route_str = route_path.as_str();
@@ -515,9 +527,14 @@ fn main() {
                 let qty = parsed.get("quantity").and_then(|v| v.as_str()).unwrap_or("");
                 let instr = parsed.get("instrument");
                 let instr_str = if instr.is_some() { instr.unwrap().to_string() } else { r#"{"symbol":"SPY","type":"EQUITY"}"#.to_string() };
+                // A cancelled order reads CANCELLED; a limit of 0.01 rests far
+                // from the market and stays NEW; anything else fills.
+                let cancelled = unsafe { CANCELLED.contains(&order_id) };
+                let resting = parsed.get("limitPrice").and_then(|v| v.as_str()) == Some("0.01");
+                let status = if cancelled { "CANCELLED" } else if resting { "NEW" } else { "FILLED" };
                 reply_fmt(&stream, 200, format!(
-                    r#"{{"orderId":"{}","instrument":{},"side":"{}","quantity":"{}","status":"FILLED"}}"#,
-                    order_id, instr_str, side, qty
+                    r#"{{"orderId":"{}","instrument":{},"side":"{}","quantity":"{}","status":"{}"}}"#,
+                    order_id, instr_str, side, qty, status
                 ));
             } else {
                 reply(&stream, 404, r#"{"message":"no such order"}"#);

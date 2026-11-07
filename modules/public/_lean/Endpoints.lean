@@ -5,7 +5,7 @@ The client's table, the declared endpoints with their evidence
 bounds are rendered after this file; Lean decides they agree: the table is
 the declared endpoints, every endpoint is an action with the same effect
 and a command that calls it, only orders spend, the reader neither writes
-nor spends, and the placer adds exactly the single-leg order. The order
+nor spends, and the placer adds exactly the single-leg order and its cancel. The order
 lifecycle is Public's own statuses.
 -/
 namespace Kagamizo.PublicApi

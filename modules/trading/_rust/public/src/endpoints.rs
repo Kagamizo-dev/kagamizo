@@ -196,11 +196,11 @@ mod tests {
     }
 
     #[test]
-    fn the_placer_adds_exactly_the_single_leg_order() {
+    fn the_placer_adds_exactly_the_single_leg_order_and_its_cancel() {
         let r = Bound::Reader.endpoints();
         let extra: Vec<Endpoint> = Bound::Placer.endpoints().into_iter().filter(|e| !r.contains(e)).collect();
-        assert_eq!(extra, vec![Endpoint::PlaceOrder]);
-        assert!(!Bound::Placer.allows(Endpoint::CancelOrder));
+        assert_eq!(extra, vec![Endpoint::CancelOrder, Endpoint::PlaceOrder]);
+        assert!(!Bound::Reader.allows(Endpoint::CancelOrder));
         assert!(!Bound::Placer.allows(Endpoint::ReplaceOrder));
         assert!(!Bound::Placer.allows(Endpoint::PlaceMultilegOrder));
     }

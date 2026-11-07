@@ -543,6 +543,33 @@ in
         status = "active";
       }
       {
+        id = "rehearsal";
+        title = "Every paper day rehearses the live path up to placing; an order still working is cancelled; only a fill opens a position";
+        status = "done";
+      }
+      {
+        id = "readiness";
+        title = "Every step of the live lifecycle typed with what exercises it; Lean keeps every strategy short of live until each has met the real backend";
+        status = "done";
+      }
+      {
+        id = "reconcile";
+        title = "Reconcile the day's positions against Public's portfolio";
+      }
+      {
+        id = "approval-link";
+        title = "Each live order approved by the owner through a Proton Pass link in #owner";
+        dependsOn = [ "identity/account-links" ];
+      }
+      (
+        {
+          id = "canary";
+          title = "One canary order: placed far from the market, read back, cancelled; place, read-back and cancel meet the real backend";
+          dependsOn = [ "trading/paper-days" ];
+        }
+        // owner "canary"
+      )
+      {
         id = "paper-days";
         title = "Check the host's first paper days and the ledger";
         dependsOn = [ "trading/paper-visible" ];
@@ -710,20 +737,17 @@ in
         title = "Every authority typed with its interfaces (IRS, Treasury, FinCEN, SEC, FINRA, CFTC, Wyoming, the rules' text)";
         status = "done";
       }
-      (
-        {
-          id = "estimated-tax";
-          title = "Say whether 2026's estimated tax payments 1 to 3 were owed and paid";
-        }
-        // action
-      )
-      (
-        {
-          id = "residence";
-          title = "The state of residence declared, deciding its franchise report and sales tax on research";
-        }
-        // owner "residence-state"
-      )
+      {
+        id = "estimated-tax";
+        title = "2026's estimated tax: not owed, the W-2 withholding covers it";
+        status = "done";
+      }
+      {
+        id = "residence";
+        title = "Texas declared as the state of residence";
+        status = "done";
+        decision = "residence-state";
+      }
       (
         {
           id = "mark-to-market";

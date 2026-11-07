@@ -1,5 +1,7 @@
 # The paper-trading units on jingzo-host (./paper.nix), imported by
-# ../hetzner/host.nix. Per strategy: a paper day and a settlement, each a
+# ../hetzner/host.nix. Per strategy: a paper day, its rehearsal of the live
+# path up to placing (started when the paper day succeeds) and a settlement,
+# each a
 # oneshot that trading-host starts (no shell): it signs pass-cli in with the
 # host's token, then runs `trade`, which asks governance-authorize as the
 # agent and reads Public through the `public-host` profile.
@@ -55,7 +57,14 @@ lib.mkIf enable {
   systemd = {
     tmpfiles.rules = [ "d ${dir} 0700 root root - -" ];
     services = each (s: [
-      (lib.nameValuePair "trading-paper-day-${s}" (unit "paper-day" s))
+      # After a paper day succeeds, its rehearsal: the live path up to placing.
+      (lib.nameValuePair "trading-paper-day-${s}" (
+        unit "paper-day" s
+        // {
+          onSuccess = [ "trading-rehearse-${s}.service" ];
+        }
+      ))
+      (lib.nameValuePair "trading-rehearse-${s}" (unit "rehearse" s))
       (lib.nameValuePair "trading-paper-settle-${s}" (unit "paper-settle" s))
     ]);
     timers = each (s: [

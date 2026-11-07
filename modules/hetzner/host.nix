@@ -389,6 +389,7 @@ let
             echo "-- paper trading"; systemctl list-timers 'trading-paper-*' --no-legend --plain || true
             ${lib.concatMapStrings (s: ''
               journalctl -u trading-paper-day-${s} --no-pager -n 6 -o cat || true
+              journalctl -u trading-rehearse-${s} --no-pager -n 6 -o cat || true
               journalctl -u trading-paper-settle-${s} --no-pager -n 20 -o cat || true
             '') top.trading.paper.strategies}
           '';

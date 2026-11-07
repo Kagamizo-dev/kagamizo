@@ -14,7 +14,7 @@
 #     - every endpoint is a governance action with the same effect, and a
 #       command whose handler calls it;
 #     - exactly the three order endpoints spend, and only cancel writes;
-#     - the reader neither writes nor spends; the placer adds place_order
+#     - the reader neither writes nor spends; the placer adds place_order and cancel_order
 #       alone; every endpoint either may call is observed or documented.
 { lib, config, ... }:
 let
@@ -86,9 +86,11 @@ in
           theorem bounds_are_safe :
               readOnly table reader = true ∧ runnable declared placer = true := by decide +kernel
 
-          /-- The placer is the reader and the single-leg order, nothing else. -/
-          theorem placer_adds_one_order :
-              beyond placer reader = ["order_placement.place_order"] ∧ beyond reader placer = [] := by
+          /-- The placer is the reader, the single-leg order and its cancel,
+          nothing else: it can end a working order it placed, never replace
+          one or place a multi-leg order. -/
+          theorem placer_adds_order_and_cancel :
+              beyond placer reader = ["order_placement.cancel_order", "order_placement.place_order"] ∧ beyond reader placer = [] := by
             decide +kernel
           end Kagamizo.PublicApi
         '';

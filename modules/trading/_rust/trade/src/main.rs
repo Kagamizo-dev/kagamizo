@@ -9,7 +9,12 @@
 //!   trade-run propose STRATEGY [DATE] [--forecasts FILE]
 //!   trade-run paper-day STRATEGY [DATE] [--forecasts FILE]
 //!   trade-run paper-settle STRATEGY         settle the recorded paper days
-//!   trade-run place PROPOSAL.json           the one spend
+//!   trade-run place PROPOSAL.json           the one spend (an order still
+//!                                           working after the read-back is
+//!                                           cancelled)
+//!   trade-run cancel ORDER_ID               end a working order
+//!   trade-run rehearse STRATEGY [DATE]      the live path up to placing, for
+//!                                           the day's recorded paper proposal
 //!
 //! The agent-option strategy turns the day's research decision into one
 //! option order; the event-rule strategy prices every open weather contract
@@ -707,20 +712,37 @@ fn place(proposal_path: &str) -> R<()> {
     let placed = api.place(&body).map_err(|e| Die(format!("Public refused the order: {e}"), 1))?;
     let order_id = if placed.order_id.is_empty() { order.order_id.clone().unwrap_or_default() } else { placed.order_id.clone() };
     // Read back until the order has ended (OrderStatus::terminal): a partial
-    // fill is still working. At most a minute; an order still working then
-    // is reported as it stands.
+    // fill is still working. An order still working when the window closes
+    // (a minute by default) is cancelled, never left unattended, and read
+    // once more.
+    let (tries, pause) = readback();
     let mut status = None;
-    for _ in 0..20 {
+    let mut cancelled = false;
+    for _ in 0..tries {
         let s = api.order(&order_id).map_err(api_die)?;
         let ended = s.status.as_deref().and_then(OrderStatus::parse).is_some_and(OrderStatus::terminal);
         status = Some(s);
         if ended {
             break;
         }
-        std::thread::sleep(std::time::Duration::from_secs(3));
+        std::thread::sleep(std::time::Duration::from_secs(pause));
     }
+    let ended = |s: &Option<kagamizo_public::types::OrderResponse>| {
+        s.as_ref().and_then(|s| s.status.as_deref()).and_then(OrderStatus::parse).is_some_and(OrderStatus::terminal)
+    };
+    if !ended(&status) {
+        api.cancel(&order_id).map_err(|e| Die(format!("the order is still working and its cancel failed: {e}"), 1))?;
+        cancelled = true;
+        status = Some(api.order(&order_id).map_err(api_die)?);
+    }
+    // Only a fill opens a position: an order cancelled, rejected or expired
+    // with nothing filled leaves the day as it was.
+    let filled = status.as_ref().and_then(|s| s.status.as_deref()).and_then(OrderStatus::parse)
+        .is_some_and(|s| matches!(s, OrderStatus::Filled | OrderStatus::PartiallyFilled));
     let mut day_raw = day.raw.clone();
-    day_raw.insert("openPositions".into(), json!(day.open_positions as i64 + 1));
+    if filled {
+        day_raw.insert("openPositions".into(), json!(day.open_positions as i64 + 1));
+    }
     let dir = decisions_dir(&decl)?;
     std::fs::create_dir_all(&dir).map_err(|e| Die(format!("{}: {e}", dir.display()), 1))?;
     let state = dir.join("state.json");
@@ -728,11 +750,82 @@ fn place(proposal_path: &str) -> R<()> {
         .map_err(|e| Die(format!("{}: {e}", state.display()), 1))?;
     emit(&json!({
         "strategy": name, "order_id": order_id, "preflight": preflight,
-        "placed": placed, "status": status, "day": day_raw,
+        "placed": placed, "status": status, "cancelled": cancelled, "filled": filled, "day": day_raw,
     }));
     Ok(())
 }
 
+
+/// The read-back window: TRADE_READBACK_TRIES reads, TRADE_READBACK_SECS
+/// apart (20 and 3: a minute).
+fn readback() -> (u32, u64) {
+    let n = |k: &str, d: u64| std::env::var(k).ok().and_then(|v| v.parse().ok()).unwrap_or(d);
+    (n("TRADE_READBACK_TRIES", 20) as u32, n("TRADE_READBACK_SECS", 3))
+}
+
+/// Ends a working order by hand, through the placer (its one write).
+fn cancel(order_id: &str) -> R<()> {
+    let mut api = Public::new(None, None).placer();
+    api.cancel(order_id).map_err(|e| Die(format!("Public refused the cancel: {e}"), 1))?;
+    let status = api.order(order_id).map_err(api_die)?;
+    emit(&json!({"order_id": order_id, "cancelled": true, "status": status}));
+    Ok(())
+}
+
+/// The live path, rehearsed: everything `place` does up to the one call that
+/// moves money, against Public itself. The strategy is at paper or live;
+/// the risk check, the placer client and its preflight run as they will;
+/// nothing is placed. The rehearsal is recorded beside the day's decisions,
+/// so the paper days carry evidence that the live wiring works.
+fn rehearse(name: &str, date: Option<&str>) -> R<()> {
+    let decl = declared(name)?;
+    let day = match date {
+        Some(d) => NaiveDate::parse_from_str(d, "%Y-%m-%d").map_err(|e| Die(format!("{d}: {e}"), 2))?,
+        None => today(),
+    };
+    // The day's recorded paper proposal (propose records it under paper/).
+    let folder = decisions_dir(&decl)?.join("paper");
+    let prefix = format!("{day}-");
+    let found = std::fs::read_dir(&folder)
+        .map_err(|e| Die(format!("{}: {e}", folder.display()), 1))?
+        .filter_map(Result::ok)
+        .map(|e| e.path())
+        .find(|p| p.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.starts_with(&prefix) && n.ends_with(".json")))
+        .ok_or_else(|| Die(format!("no paper day recorded for {name} on {day}"), 1))?;
+    let proposal = read_json(&found)?;
+    if !matches!(decl.stage, Stage::Paper | Stage::Live) {
+        return die(format!("{name} is at stage {}: rehearsals start at paper", decl.stage.name()));
+    }
+    let date = proposal["as_of"].as_str().unwrap_or_default().to_string();
+    let p = match proposal.get("proposal").filter(|p| !p.is_null()) {
+        Some(p) => p,
+        None => {
+            emit(&json!({"strategy": name, "date": date, "rehearsal": "no order proposed"}));
+            return Ok(());
+        }
+    };
+    let (limits, _) = limits_for(&decl)?;
+    let day = day_state(&decl)?;
+    let kind = p["kind"].as_str().unwrap_or_default();
+    let (admitted, why) = admissible(&limits, &day, kind, p["max_loss_usd"].as_f64().unwrap_or(f64::INFINITY));
+    let order: OrderBody =
+        serde_json::from_value(p["order"].clone()).map_err(|e| Die(format!("the proposal's order: {e}"), 1))?;
+    let body = serde_json::to_string(&order).expect("an order body serialises");
+    let mut api = Public::new(None, None).placer();
+    let account = api.account().map_err(api_die)?;
+    let preflight = api.preflight(&body).map_err(|e| Die(format!("Public refused the preflight: {e}"), 1))?;
+    let record = json!({
+        "strategy": name, "date": date, "rehearsal": "the live path up to placing",
+        "account": account, "admissible": admitted, "why": why, "preflight": preflight,
+    });
+    let dir = decisions_dir(&decl)?;
+    std::fs::create_dir_all(&dir).map_err(|e| Die(format!("{}: {e}", dir.display()), 1))?;
+    let out = dir.join(format!("rehearsal-{date}.json"));
+    std::fs::write(&out, serde_json::to_string_pretty(&record).expect("JSON serialises"))
+        .map_err(|e| Die(format!("{}: {e}", out.display()), 1))?;
+    emit(&record);
+    Ok(())
+}
 
 // ── Paper trading: settling the recorded days ─────────────────────────────
 
@@ -923,6 +1016,9 @@ fn run(args: &[String]) -> R<()> {
             propose(&name, date.as_deref(), *cmd == "paper-day", forecasts.as_deref())
         }
         ["place", path] => place(path),
+        ["cancel", order_id] => cancel(order_id),
+        ["rehearse", name] => rehearse(name, None),
+        ["rehearse", name, date] => rehearse(name, Some(date)),
         ["paper-settle", name] => paper_settle(name),
         ["backtest", ..] | ["paper", ..] => {
             die("backtest and paper run on the Python engine until they move onto NautilusTrader's Rust crates")

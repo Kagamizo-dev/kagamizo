@@ -23,6 +23,8 @@
 #   nix run .#trade -- paper <strategy> [bars.csv] [--all]
 #   nix run .#trade -- propose <strategy> [date] [--forecasts file]
 #   nix run .#trade -- paper-day <strategy> [date] [--forecasts file]
+#   nix run .#trade -- rehearse <strategy> [date]     the live path up to placing
+#   nix run .#trade -- cancel <order-id>              end a working order
 #
 # Backtests touch no account: a simulated venue named after the backend, with
 # a simulated balance. Bars come from anywhere with the columns in _trade.py.
@@ -385,7 +387,7 @@ in
           text = builtins.seq top.accounts.checked ''
             account=${top.trading.backends.public.account}
             case "''${1:-}" in
-              account | bars | paper | propose | paper-day | paper-settle | place)
+              account | bars | paper | propose | paper-day | paper-settle | rehearse | place | cancel)
                 export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
                 case "$1" in
                   account) governance-authorize public:accounts-list "$account" ;;
@@ -404,6 +406,12 @@ in
                     governance-authorize public:order-preflight-single "$account" ;;
                   # Settling paper days reads each recorded event's outcome.
                   paper-settle) governance-authorize public:event-contracts-details "$account" ;;
+                  # The live path up to placing: the account and a preflight.
+                  rehearse)
+                    governance-authorize public:accounts-list "$account"
+                    governance-authorize public:order-preflight-single "$account" ;;
+                  # Ending a working order: a write, never a spend.
+                  cancel) governance-authorize public:order-cancel "$account" ;;
                   # The one spend: the controller's, never an agent's (modules/governance).
                   place)
                     governance-authorize public:order-preflight-single "$account"

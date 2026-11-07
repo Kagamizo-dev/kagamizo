@@ -559,6 +559,19 @@ impl Public {
         self.do_req::<PlaceOrderResponse>(Endpoint::PlaceOrder, &path, Some(order_json))
     }
 
+    /// Cancels a working order (the placer's one write): what ends an order
+    /// still working after place's read-back. An empty reply is success.
+    pub fn cancel(&mut self, order_id: &str) -> Result<(), String> {
+        let a = self.account();
+        if a.is_err() { return Result::Err(a.unwrap_err()); }
+        let path = format!("/userapigateway/trading/{}/order/{}", a.unwrap(), order_id);
+        match self.do_req::<serde_json::Value>(Endpoint::CancelOrder, &path, None) {
+            Ok(_) => Ok(()),
+            Err(e) if e == "empty response body" => Ok(()),
+            Err(e) => Err(e),
+        }
+    }
+
     pub fn order(&mut self, order_id: &str) -> Result<OrderResponse, String> {
         let a = self.account();
         if a.is_err() { return Result::Err(a.unwrap_err()); }

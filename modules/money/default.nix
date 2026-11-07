@@ -452,8 +452,11 @@ in
     tax = {
       mirazo = {
         classification = "individual";
-        residence.stateIncomeTax = false;
-        confirmedBy = "the owner, 2026-11-01 (state not named)";
+        residence = {
+          state = "TX";
+          stateIncomeTax = false;
+        };
+        confirmedBy = "the owner, 2026-11-01; the state named Texas on 2026-11-07";
       };
       jingzo = {
         classification = "disregarded";

@@ -232,7 +232,7 @@
       ]
     },
     "placer": {
-      "why": "trade-run place alone: the reader's endpoints and the one single-leg order",
+      "why": "trade-run place alone: the reader's endpoints, the one single-leg order, and its cancel when it is still working after the read-back",
       "endpoints": [
         "create_personal_access_token",
         "get_accounts",
@@ -247,6 +247,7 @@
         "get_event_details",
         "get_event_contract_bars",
         "get_order",
+        "cancel_order",
         "place_order"
       ]
     }

@@ -192,6 +192,11 @@ in
       asOf = "2026-11-07";
       status =
         let
+          withheld = {
+            state = "not-owed";
+            date = "2026-11-07";
+            evidence = "the owner's statement, 2026-11-07: their W-2 withholding covers 2026's tax, so no estimated payment is owed";
+          };
           noRevenue = {
             state = "not-owed";
             date = "2026-11-07";
@@ -202,6 +207,10 @@ in
           "2026/jingzo/Schedule C (on mirazo's Form 1040)" = noRevenue;
           "2026/jingzo/Schedule SE (on mirazo's Form 1040)" = noRevenue;
           "2026/jingzo/Form 1099-NEC (issued)" = noRevenue;
+          "2026/mirazo/Form 1040-ES, payment 1" = withheld;
+          "2026/mirazo/Form 1040-ES, payment 2" = withheld;
+          "2026/mirazo/Form 1040-ES, payment 3" = withheld;
+          "2026/mirazo/Form 1040-ES, payment 4" = withheld;
           "2026/mirazo/FinCEN 114 (FBAR)" = {
             state = "not-owed";
             date = "2026-11-07";
@@ -473,6 +482,13 @@ in
               }) cs
             ) cfg.terms
           );
+        }
+        {
+          title = "Live readiness (trading)";
+          rows = lib.mapAttrsToList (n: s: {
+            title = "${n}: ${s.exercised}";
+            detail = "${s.what}; ${s.by}";
+          }) top.trading.readiness;
         }
         {
           title = "Services";
