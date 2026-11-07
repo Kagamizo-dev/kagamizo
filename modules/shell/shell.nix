@@ -263,6 +263,11 @@ in
           host = "pixel-9a";
           why = "the kit's screen: GrapheneOS, the web target installed from the browser";
         };
+        android-twin = {
+          kind = "android";
+          host = "pixel-9a";
+          why = "the phone's twin on jingzo-host: the agents' sandboxed Pixel, which opens the web target like the phone";
+        };
       };
 
       # The shell is base (its own Settings row) and registers its own apps;
@@ -310,8 +315,13 @@ in
           cargoLock.lockFile = ./_shell/Cargo.lock;
           doCheck = true;
           SHELL_DECLARED = declared;
-          nativeBuildInputs = [ pkgs.makeWrapper ];
+          nativeBuildInputs = [
+            pkgs.makeWrapper
+            pkgs.pkg-config
+          ];
           buildInputs = [
+            # gilrs reads gamepads through udev.
+            pkgs.udev
             pkgs.libxkbcommon
             pkgs.wayland
             pkgs.libGL

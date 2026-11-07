@@ -21,6 +21,9 @@ let
         )
         ./_nixos.nix
         self.nixosModules.tmux
+        # The kit's machine serves the shell to the phone (../shell, ../kit).
+        # The web build is architecture-free files, so the x86_64 build serves.
+        (import ../shell/_kit-serve.nix { web = self.packages.x86_64-linux.kagamizo-shell-web; })
       ]
       ++ extraModules;
     };

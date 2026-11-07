@@ -6,6 +6,7 @@
 //! goes back; in settings, left and right move between the section list
 //! and its rows.
 pub mod model;
+pub mod pad;
 
 use eframe::egui::{
     self, Align, Color32, CornerRadius, Frame, Key as EKey, Layout, Margin, RichText, Sense, Stroke,
@@ -30,6 +31,7 @@ pub struct App {
     /// Whether a key moved the focus this frame, so the view follows it
     /// (a tap leaves the scroll where the finger put it).
     pub moved: bool,
+    pub pads: pad::Pads,
 }
 
 impl App {
@@ -42,13 +44,14 @@ impl App {
             note: String::new(),
             web: target == "web",
             moved: false,
+            pads: pad::Pads::new(),
         }
     }
 }
 
 impl App {
     fn keys(&mut self, ctx: &egui::Context) {
-        let pressed: Vec<Key> = ctx.input(|i| {
+        let mut pressed: Vec<Key> = ctx.input(|i| {
             [
                 (EKey::ArrowUp, Key::Up),
                 (EKey::ArrowDown, Key::Down),
@@ -63,6 +66,9 @@ impl App {
             .map(|(_, k)| k)
             .collect()
         });
+        pressed.extend(self.pads.poll());
+        // A pad is polled, not heard: look again soon.
+        ctx.request_repaint_after(std::time::Duration::from_millis(100));
         self.moved = !pressed.is_empty();
         for k in pressed {
             let e = self.shell.key(k, self.web);
