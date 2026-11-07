@@ -126,6 +126,10 @@ in
     ]
     // track "shell" [
       {
+        id = "theme";
+        title = "The theme: retro pixel art with depth, academic type, a gaming and media feel; fonts, palette, sprites and icons for the shell and every app";
+      }
+      {
         id = "horizontal";
         title = "Horizontal tiling: apps as columns swiped left and right, a workspace per mode";
       }
@@ -512,8 +516,28 @@ in
         backlog = "research-jingzo/trading-paper";
       }
       {
+        id = "paper-visible";
+        title = "The paper days on the host's console every hour (live after the 04:40 switch)";
+        status = "active";
+      }
+      {
+        id = "self-contained";
+        title = "Trading as a self-contained app: Public, Mercury and IBKR as its providers; its terms, legal rules, accounting and team inside it";
+      }
+      {
+        id = "terms";
+        title = "Each provider's terms typed and checked: automated trading, data use, an LLC's account (Public first)";
+        dependsOn = [ "trading/self-contained" ];
+      }
+      {
         id = "paper-days";
         title = "Check the host's first paper days and the ledger";
+        dependsOn = [ "trading/paper-visible" ];
+      }
+      {
+        id = "paper-evidence";
+        title = "The paper ledger copied into the repository as the promotion's evidence";
+        dependsOn = [ "trading/paper-days" ];
       }
       {
         id = "nautilus-rust";

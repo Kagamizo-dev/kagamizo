@@ -153,6 +153,10 @@
         question = "Support iOS?";
         answer = "No (2026-11-07): it needs another account; Android, Linux and the browser only.";
       };
+      theme = {
+        question = "What is the look of the base image and every app?";
+        answer = "Retro and a little academic, with a gaming and media feel: 2D pixel art drawn with depth, like a pixelated game seen in three dimensions; professional type for reading (2026-11-07). The design team owns it.";
+      };
       first-device = {
         question = "Which device is the first deployment and test target?";
         answer = "A laptop or PC on NixOS stable, the Yoga first (2026-11-07).";

@@ -356,6 +356,11 @@ let
           matchConfig.Name = "en*";
           networkConfig.DHCP = "ipv4";
         };
+        # Again every hour, so the console shows the paper days as they run.
+        timers.host-report = {
+          wantedBy = [ "timers.target" ];
+          timerConfig.OnCalendar = "hourly";
+        };
         services.host-report = {
           description = "Print the host's state on its console";
           wantedBy = [ "multi-user.target" ];
@@ -381,6 +386,11 @@ let
             echo "-- failed units"; systemctl --failed --no-legend --plain || true
             [ -r /var/lib/kagamizo/host-token ] && echo "-- host token: present" || echo "-- host token: MISSING"
             echo "-- migration-staging"; journalctl -u migration-staging -b --no-pager -n 12 -o cat || true
+            echo "-- paper trading"; systemctl list-timers 'trading-paper-*' --no-legend --plain || true
+            ${lib.concatMapStrings (s: ''
+              journalctl -u trading-paper-day-${s} --no-pager -n 6 -o cat || true
+              journalctl -u trading-paper-settle-${s} --no-pager -n 20 -o cat || true
+            '') top.trading.paper.strategies}
           '';
         };
       };
