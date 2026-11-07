@@ -36,8 +36,14 @@ def unique : List String → Bool
   | [] => true
   | x :: xs => !xs.contains x && unique xs
 
+/-- A status names an obligation the bank knows, and shows its evidence. -/
+def statusOk (obligations : List String) (s : String × String) : Bool :=
+  obligations.contains s.1 && !s.2.isEmpty
+
 def sound (moneyAccounts : List String) (owners : List (String × String)) (services : List Service)
-    (revenue : List Source) (taxed owing teams : List String) : Bool :=
+    (revenue : List Source) (taxed owing teams : List String)
+    (obligations : List String) (statuses : List (String × String)) : Bool :=
+  statuses.all (statusOk obligations) &&
   unique (services.map (·.name)) && unique (revenue.map (·.name)) &&
   moneyAccounts.all (fun a => services.any (·.accounts.contains a)) &&
   revenue.all (sourceOk owners taxed owing) &&

@@ -97,10 +97,48 @@ let
   ownerOf = a: held.${a}.owner or "";
   # A due date, or "date open" (sorting last) where it waits on a fact.
   dueOf = o: if (o.due or null) == null then "date open" else o.due;
+  # An obligation's name in bank.status, and its state.
+  oid = o: "${toString year}/${o.entity or ""}/${o.form or ""}";
+  stateOf =
+    o:
+    if cfg.status ? ${oid o} then
+      "${cfg.status.${oid o}.state} ${cfg.status.${oid o}.date}"
+    else if (o.due or null) != null && o.due < cfg.asOf then
+      "past due, no status"
+    else
+      "open";
+  pastDue = lib.filter (o: stateOf o == "past due, no status") obligations;
   byEntity = lib.groupBy ownerOf moneyAccounts;
 in
 {
   options.bank = {
+    asOf = mkOption {
+      type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+      description = "The day the bank's statuses are current as of, moved forward each session: an open obligation due before it is past due.";
+    };
+    status = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            state = mkOption {
+              type = types.enum [
+                "filed"
+                "paid"
+                "not-owed"
+                "extended"
+              ];
+            };
+            date = mkOption { type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}"; };
+            evidence = mkOption {
+              type = types.str;
+              description = "What shows it: a confirmation number's Pass item, a statement, the owner's dated word.";
+            };
+          };
+        }
+      );
+      default = { };
+      description = "Each obligation's status, keyed year/entity/form as the bank names it; an obligation without one is open.";
+    };
     services = mkOption {
       type = types.attrsOf service;
       default = { };
@@ -116,6 +154,8 @@ in
       default = {
         inherit (cfg) services revenue;
         inherit year obligations;
+        inherit (cfg) asOf status;
+        pastDue = map oid pastDue;
         accounts = byEntity;
         flows = config.money.flows;
       };
@@ -124,6 +164,7 @@ in
 
   config = {
     bank = {
+      asOf = "2026-11-07";
       services =
         let
           accountants = [
@@ -256,27 +297,32 @@ in
         {
           title = "Waiting on you";
           rows =
-            map
-              (i: {
-                inherit (i) title;
-                detail = if i.decision != null then top.plan.decisions.${i.decision}.question else "your action";
-              })
-              (
-                lib.filter (
-                  i:
-                  (i.track == "bank" || i.track == "trading")
-                  && i.status != "done"
-                  && lib.elem i.blocked [
-                    "owner-decision"
-                    "owner-action"
-                  ]
-                ) (lib.attrValues top.plan.items)
-              );
+            map (o: {
+              title = "Past due without a status: ${o.form} (${o.entity})";
+              detail = "due ${o.due}: say whether it was filed, paid or not owed, with evidence";
+            }) pastDue
+            ++
+              map
+                (i: {
+                  inherit (i) title;
+                  detail = if i.decision != null then top.plan.decisions.${i.decision}.question else "your action";
+                })
+                (
+                  lib.filter (
+                    i:
+                    (i.track == "bank" || i.track == "trading")
+                    && i.status != "done"
+                    && lib.elem i.blocked [
+                      "owner-decision"
+                      "owner-action"
+                    ]
+                  ) (lib.attrValues top.plan.items)
+                );
         }
         {
           title = "Obligations, ${toString year}";
           rows = map (o: {
-            title = "${dueOf o} · ${o.form or "?"} (${o.entity or "?"})";
+            title = "${dueOf o} · ${o.form or "?"} (${o.entity or "?"}): ${stateOf o}";
             detail = o.what or "";
           }) (lib.sort (a: b: dueOf a < dueOf b) obligations);
         }
@@ -335,8 +381,12 @@ in
             def taxed : List String := ${q (lib.attrNames top.money.tax)}
             def owing : List String := ${q (lib.unique (map (o: o.entity or "") obligations))}
             def teams : List String := ${q teams}
+            def obligations : List String := ${q (map oid obligations)}
+            def statuses : List (String × String) := [${
+              lib.concatStringsSep ", " (lib.mapAttrsToList (k: s: "(${q k}, ${q s.evidence})") cfg.status)
+            }]
 
-            theorem bank_sound : sound moneyAccounts owners services revenue taxed owing teams = true := by decide +kernel
+            theorem bank_sound : sound moneyAccounts owners services revenue taxed owing teams obligations statuses = true := by decide +kernel
             end Kagamizo.Bank
           '';
         };
