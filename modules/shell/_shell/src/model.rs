@@ -52,6 +52,15 @@ pub struct Page {
     pub checks: Vec<String>,
     pub packages: Vec<String>,
     pub teams: Vec<String>,
+    /// Sections of rows the module generates for its page (the plan's tracks).
+    #[serde(default)]
+    pub view: Vec<View>,
+}
+
+#[derive(Deserialize, Clone, Debug, Default)]
+pub struct View {
+    pub title: String,
+    pub rows: Vec<Entry>,
 }
 
 #[derive(Deserialize, Clone, Debug)]

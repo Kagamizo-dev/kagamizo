@@ -57,7 +57,9 @@ fn write_icon(out: &str, size: u32) {
 }
 
 fn main() {
-    let out = std::env::args().nth(1).expect("usage: shell-page <out-dir>");
+    let out = std::env::args()
+        .nth(1)
+        .expect("usage: shell-page <out-dir>");
     let page = concat!(
         "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n",
         "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n",

@@ -192,6 +192,32 @@ impl App {
                     });
                 ui.add_space(8.0);
             };
+            // The module's own view first (the plan's tracks), then its paper.
+            for v in &page.view {
+                ui.add_space(4.0);
+                ui.label(
+                    RichText::new(v.title.to_uppercase())
+                        .size(13.0)
+                        .color(ACCENT)
+                        .strong(),
+                );
+                ui.add_space(4.0);
+                Frame::new()
+                    .fill(CARD)
+                    .corner_radius(CornerRadius::same(10))
+                    .inner_margin(Margin::same(14))
+                    .show(ui, |ui| {
+                        ui.set_width(ui.available_width());
+                        for (n, r) in v.rows.iter().enumerate() {
+                            if n > 0 {
+                                ui.add_space(6.0);
+                            }
+                            ui.label(RichText::new(&r.title).size(15.0).color(PAPER));
+                            ui.label(RichText::new(&r.detail).size(13.0).color(MUTED));
+                        }
+                    });
+                ui.add_space(10.0);
+            }
             if page.title.is_empty() {
                 card(
                     ui,
