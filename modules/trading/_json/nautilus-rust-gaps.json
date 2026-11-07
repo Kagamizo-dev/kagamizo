@@ -1,0 +1,49 @@
+{
+  "verdict": "The NautilusTrader Rust crates (v0.67.0) CAN run the backtest engine without Python. All infrastructure types exist: BacktestEngine, BacktestEngineConfig, SimulatedVenueConfig, Equity, Bar, Strategy trait, InstrumentAny, BacktestResult.",
+  "evidence_source": "modules/trading/_rust/nautilus-probe/src/main.rs, which builds, links and runs against the published crates",
+  "crate_version_mismatch": {
+    "rust_crate_version": "0.67.0",
+    "python_wheel_version": "1.231.0",
+    "impact": "None. The Rust crates are the underlying engine that the Python bindings wrap. Version 0.67.0 is the latest published Rust SDK (2026-11-07). The Python 1.231.0 wheel bundles these same crates under pyo3. The crate versions are independent of the Python release version.",
+    "crates.io_urls": [
+      "https://crates.io/crates/nautilus-trader/0.67.0",
+      "https://crates.io/crates/nautilus-backtest/0.67.0",
+      "https://crates.io/crates/nautilus-model/0.67.0",
+      "https://crates.io/crates/nautilus-trading/0.67.0"
+    ]
+  },
+  "what_works_in_pure_rust": [
+    "BacktestEngine initialization and configuration",
+    "SimulatedVenueConfig with Cash or Margin accounts",
+    "Equity instrument creation and registration",
+    "Any instrument type: CurrencyPair, BinaryOption, OptionContract, FuturesContract, etc.",
+    "Bar and QuoteTick data ingestion",
+    "Strategy trait and the nautilus_strategy! macro for custom strategies",
+    "The EmaCross example strategy (under `examples` feature flag)",
+    "BacktestEngine run lifecycle (start, data processing, iterations, dispose)",
+    "BacktestResult with fills, positions, PnL, returns series",
+    "Canonical result with deterministic fills projection",
+    "Feature-gated compilation (no pyo3, no python feature needed)"
+  ],
+  "what_needs_porting_from_python": [
+    {
+      "item": "weather-rules strategy logic (event contract pricing, question parsing)",
+      "current_location": "modules/trading/_weather.py",
+      "rust_crate_availability": "BinaryOption and OptionContract instrument types exist in nautilus-model v0.67.0",
+      "gap": "The rule engine itself (probability, edge, question parsing) is written in Python, not Rust"
+    },
+    {
+      "item": "agent-option strategy logic (propose_event, option chains)",
+      "current_location": "modules/trading/_propose.py",
+      "rust_crate_availability": "OptionGreeks data type, OptionContract instrument exist in nautilus-model",
+      "gap": "The proposal logic (admissible, sizing, chain walking) is written in Python"
+    },
+    {
+      "item": "Public brokerage adapter",
+      "current_location": "modules/trading/_public.py",
+      "rust_crate_availability": "No NautilusTrader adapter exists for Public; would need to use Public's API crate or custom HTTP client",
+      "gap": "Public's personal-secret-based API signing is Python-only (requests library)"
+    }
+  ],
+  "bottom_line": "Yes, the weather and equity strategies CAN run on the Rust crates alone, once their logic is ported from Python to Rust. The engine infrastructure is fully available. The existing weather-backtest Rust crate (modules/trading/_rust/weather-backtest/) already shows the weather rules being ported."
+}

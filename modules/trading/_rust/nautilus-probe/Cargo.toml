@@ -1,0 +1,18 @@
+[package]
+name = "nautilus-probe"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+nautilus-backtest = "=0.67.0"
+nautilus-model = "=0.67.0"
+nautilus-trading = { version = "=0.67.0", features = ["examples"] }
+nautilus-common = "=0.67.0"
+nautilus-core = "=0.67.0"
+nautilus-execution = "=0.67.0"
+nautilus-data = "=0.67.0"
+nautilus-indicators = "=0.67.0"
+anyhow = "1"
+serde = "1"
+serde_json = "1"

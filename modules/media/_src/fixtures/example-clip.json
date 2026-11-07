@@ -1,0 +1,18 @@
+{
+  "id": "2026-11-03-dji-20261103-081500-0007",
+  "source": "2026-11-03/DJI_20261103_081500_0007.MP4",
+  "date": "2026-11-03",
+  "durationMs": 94520,
+  "width": 3840,
+  "height": 2160,
+  "codec": "hevc",
+  "fps": 59.94,
+  "hasAudio": true,
+  "sceneThreshold": 0.4,
+  "scenes": [4120, 17800, 23460, 61000],
+  "whisperModel": "ggml-small.en.bin",
+  "transcript": [
+    { "startMs": 2000, "endMs": 5400, "text": "Okay, heading down the hill." },
+    { "startMs": 18200, "endMs": 20100, "text": "That was close." }
+  ]
+}

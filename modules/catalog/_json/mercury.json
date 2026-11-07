@@ -1,0 +1,2090 @@
+{
+ "commands": {
+  "accounts get": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "accounts list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "cards cancel": {
+   "args": [],
+   "options": {
+    "card-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "cards create": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "required": false,
+     "type": "string"
+    },
+    "kind": {
+     "oneOf": [
+      "debit",
+      "credit"
+     ],
+     "required": true,
+     "type": "string"
+    },
+    "nickname": {
+     "required": false,
+     "type": "string"
+    },
+    "spend-limit": {
+     "required": false,
+     "type": "json"
+    },
+    "spend-limit.amount-cents": {
+     "required": false,
+     "type": "number"
+    },
+    "spend-limit.interval": {
+     "required": false,
+     "type": "string"
+    },
+    "type": {
+     "required": true,
+     "type": "string"
+    },
+    "user-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "cards freeze": {
+   "args": [],
+   "options": {
+    "card-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "cards get": {
+   "args": [],
+   "options": {
+    "card-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "cards list": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "required": false,
+     "type": "list"
+    },
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "is-agent-card": {
+     "required": false,
+     "type": "boolean"
+    },
+    "kind": {
+     "required": false,
+     "type": "list"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    },
+    "status": {
+     "required": false,
+     "type": "list"
+    },
+    "type": {
+     "required": false,
+     "type": "list"
+    },
+    "user-id": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "cards reveal": {
+   "args": [],
+   "options": {
+    "card-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "cards unfreeze": {
+   "args": [],
+   "options": {
+    "card-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "cards update": {
+   "args": [],
+   "options": {
+    "card-id": {
+     "required": true,
+     "type": "string"
+    },
+    "nickname": {
+     "required": true,
+     "type": "string"
+    },
+    "spend-limit": {
+     "required": false,
+     "type": "json"
+    },
+    "spend-limit.amount-cents": {
+     "required": false,
+     "type": "number"
+    },
+    "spend-limit.atm-amount-cents": {
+     "required": false,
+     "type": "number"
+    },
+    "spend-limit.interval": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "categories create": {
+   "args": [],
+   "options": {
+    "name": {
+     "required": true,
+     "type": "string"
+    },
+    "visible-for-card-spend": {
+     "required": true,
+     "type": "boolean"
+    },
+    "visible-for-other": {
+     "required": true,
+     "type": "boolean"
+    },
+    "visible-for-reimbursements": {
+     "required": true,
+     "type": "boolean"
+    }
+   }
+  },
+  "categories delete": {
+   "args": [],
+   "options": {
+    "expense-category-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "categories list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "categories update": {
+   "args": [],
+   "options": {
+    "expense-category-id": {
+     "required": true,
+     "type": "string"
+    },
+    "name": {
+     "required": false,
+     "type": "string"
+    },
+    "visible-for-card-spend": {
+     "required": false,
+     "type": "boolean"
+    },
+    "visible-for-other": {
+     "required": false,
+     "type": "boolean"
+    },
+    "visible-for-reimbursements": {
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "credit list": {
+   "args": [],
+   "options": {}
+  },
+  "customers create": {
+   "args": [],
+   "options": {
+    "address": {
+     "required": false,
+     "type": "json"
+    },
+    "address.address1": {
+     "required": false,
+     "type": "string"
+    },
+    "address.address2": {
+     "required": false,
+     "type": "string"
+    },
+    "address.city": {
+     "required": false,
+     "type": "string"
+    },
+    "address.country": {
+     "required": false,
+     "type": "string"
+    },
+    "address.name": {
+     "required": false,
+     "type": "string"
+    },
+    "address.postal-code": {
+     "required": false,
+     "type": "string"
+    },
+    "address.region": {
+     "required": false,
+     "type": "string"
+    },
+    "email": {
+     "required": true,
+     "type": "string"
+    },
+    "name": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "customers delete": {
+   "args": [],
+   "options": {
+    "customer-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "customers get": {
+   "args": [],
+   "options": {
+    "customer-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "customers list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "customers update": {
+   "args": [],
+   "options": {
+    "address": {
+     "required": false,
+     "type": "json"
+    },
+    "address.address1": {
+     "required": false,
+     "type": "string"
+    },
+    "address.address2": {
+     "required": false,
+     "type": "string"
+    },
+    "address.city": {
+     "required": false,
+     "type": "string"
+    },
+    "address.country": {
+     "required": false,
+     "type": "string"
+    },
+    "address.name": {
+     "required": false,
+     "type": "string"
+    },
+    "address.postal-code": {
+     "required": false,
+     "type": "string"
+    },
+    "address.region": {
+     "required": false,
+     "type": "string"
+    },
+    "customer-id": {
+     "required": true,
+     "type": "string"
+    },
+    "email": {
+     "required": true,
+     "type": "string"
+    },
+    "name": {
+     "required": true,
+     "type": "string"
+    },
+    "resend-open-invoices": {
+     "required": true,
+     "type": "boolean"
+    }
+   }
+  },
+  "events get": {
+   "args": [],
+   "options": {
+    "event-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "events list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "resource-id": {
+     "required": false,
+     "type": "string"
+    },
+    "resource-type": {
+     "oneOf": [
+      "transaction",
+      "checkingAccount",
+      "savingsAccount",
+      "treasuryAccount",
+      "investmentAccount",
+      "creditAccount"
+     ],
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "invoices attachments get": {
+   "args": [],
+   "options": {
+    "attachment-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "invoices attachments list": {
+   "args": [],
+   "options": {
+    "invoice-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "invoices cancel": {
+   "args": [],
+   "options": {
+    "invoice-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "invoices create": {
+   "args": [],
+   "options": {
+    "ach-debit-enabled": {
+     "required": true,
+     "type": "boolean"
+    },
+    "cc-email": {
+     "required": true,
+     "type": "list"
+    },
+    "credit-card-enabled": {
+     "required": true,
+     "type": "boolean"
+    },
+    "currency-code": {
+     "required": false,
+     "type": "string"
+    },
+    "customer-id": {
+     "required": true,
+     "type": "string"
+    },
+    "destination-account-id": {
+     "required": true,
+     "type": "string"
+    },
+    "due-date": {
+     "required": true,
+     "type": "json"
+    },
+    "internal-note": {
+     "required": false,
+     "type": "string"
+    },
+    "invoice-date": {
+     "required": true,
+     "type": "json"
+    },
+    "invoice-number": {
+     "required": false,
+     "type": "string"
+    },
+    "line-item": {
+     "required": true,
+     "type": "json"
+    },
+    "line-item.name": {
+     "required": false,
+     "type": "string"
+    },
+    "line-item.quantity": {
+     "required": false,
+     "type": "number"
+    },
+    "line-item.sales-tax-rate": {
+     "required": false,
+     "type": "number"
+    },
+    "line-item.unit-price": {
+     "required": false,
+     "type": "number"
+    },
+    "payer-memo": {
+     "required": false,
+     "type": "string"
+    },
+    "po-number": {
+     "required": false,
+     "type": "string"
+    },
+    "send-email-option": {
+     "required": false,
+     "type": "string"
+    },
+    "service-period-end-date": {
+     "required": false,
+     "type": "json"
+    },
+    "service-period-start-date": {
+     "required": false,
+     "type": "json"
+    },
+    "use-real-account-number": {
+     "required": true,
+     "type": "boolean"
+    }
+   }
+  },
+  "invoices download": {
+   "args": [],
+   "options": {
+    "invoice-id": {
+     "required": true,
+     "type": "string"
+    },
+    "output": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "invoices get": {
+   "args": [],
+   "options": {
+    "invoice-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "invoices list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "invoices update": {
+   "args": [],
+   "options": {
+    "ach-debit-enabled": {
+     "required": true,
+     "type": "boolean"
+    },
+    "cc-email": {
+     "required": true,
+     "type": "list"
+    },
+    "credit-card-enabled": {
+     "required": true,
+     "type": "boolean"
+    },
+    "due-date": {
+     "required": true,
+     "type": "json"
+    },
+    "internal-note": {
+     "required": false,
+     "type": "string"
+    },
+    "invoice-date": {
+     "required": true,
+     "type": "json"
+    },
+    "invoice-id": {
+     "required": true,
+     "type": "string"
+    },
+    "invoice-number": {
+     "required": true,
+     "type": "string"
+    },
+    "line-item": {
+     "required": true,
+     "type": "json"
+    },
+    "line-item.name": {
+     "required": false,
+     "type": "string"
+    },
+    "line-item.quantity": {
+     "required": false,
+     "type": "number"
+    },
+    "line-item.sales-tax-rate": {
+     "required": false,
+     "type": "number"
+    },
+    "line-item.unit-price": {
+     "required": false,
+     "type": "number"
+    },
+    "payer-memo": {
+     "required": false,
+     "type": "string"
+    },
+    "po-number": {
+     "required": false,
+     "type": "string"
+    },
+    "service-period-end-date": {
+     "required": false,
+     "type": "json"
+    },
+    "service-period-start-date": {
+     "required": false,
+     "type": "json"
+    },
+    "use-real-account-number": {
+     "required": true,
+     "type": "boolean"
+    }
+   }
+  },
+  "login": {
+   "args": [],
+   "options": {}
+  },
+  "logout": {
+   "args": [],
+   "options": {}
+  },
+  "onboarding apply": {
+   "args": [],
+   "options": {
+    "about": {
+     "required": false,
+     "type": "json"
+    },
+    "about.countries-of-operations": {
+     "required": false,
+     "type": "json"
+    },
+    "about.country-of-operation": {
+     "required": false,
+     "type": "string"
+    },
+    "about.description": {
+     "required": false,
+     "type": "string"
+    },
+    "about.industry": {
+     "required": false,
+     "type": "string"
+    },
+    "about.legal-business-name": {
+     "required": false,
+     "type": "string"
+    },
+    "about.website": {
+     "required": false,
+     "type": "string"
+    },
+    "application-type": {
+     "oneOf": [
+      "PendingEINApplication",
+      "DefaultApplication"
+     ],
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner": {
+     "required": true,
+     "type": "json"
+    },
+    "beneficial-owner.address1": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.address2": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.citizenship-status": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.city": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.country": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.date-of-birth": {
+     "required": false,
+     "type": "json"
+    },
+    "beneficial-owner.email": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.first-name": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.identification-blob": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.identification-type": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.is-pep": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.job-title": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.last-name": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.other-job-title": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.percent-ownership": {
+     "required": false,
+     "type": "number"
+    },
+    "beneficial-owner.phone-number": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.postal-code": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.region": {
+     "required": false,
+     "type": "string"
+    },
+    "beneficial-owner.social-profile-links": {
+     "required": false,
+     "type": "json"
+    },
+    "beneficial-owner.state": {
+     "required": false,
+     "type": "string"
+    },
+    "business-contact-details": {
+     "required": false,
+     "type": "json"
+    },
+    "business-contact-details.address1": {
+     "required": false,
+     "type": "string"
+    },
+    "business-contact-details.address2": {
+     "required": false,
+     "type": "string"
+    },
+    "business-contact-details.city": {
+     "required": false,
+     "type": "string"
+    },
+    "business-contact-details.country": {
+     "required": false,
+     "type": "string"
+    },
+    "business-contact-details.phone-number": {
+     "required": false,
+     "type": "string"
+    },
+    "business-contact-details.postal-code": {
+     "required": false,
+     "type": "string"
+    },
+    "business-contact-details.state": {
+     "required": false,
+     "type": "string"
+    },
+    "business-legal-address": {
+     "required": false,
+     "type": "json"
+    },
+    "business-legal-address.address1": {
+     "required": false,
+     "type": "string"
+    },
+    "business-legal-address.address2": {
+     "required": false,
+     "type": "string"
+    },
+    "business-legal-address.city": {
+     "required": false,
+     "type": "string"
+    },
+    "business-legal-address.country": {
+     "required": false,
+     "type": "string"
+    },
+    "business-legal-address.postal-code": {
+     "required": false,
+     "type": "string"
+    },
+    "business-legal-address.region": {
+     "required": false,
+     "type": "string"
+    },
+    "business-physical-address": {
+     "required": false,
+     "type": "json"
+    },
+    "business-physical-address.address1": {
+     "required": false,
+     "type": "string"
+    },
+    "business-physical-address.address2": {
+     "required": false,
+     "type": "string"
+    },
+    "business-physical-address.city": {
+     "required": false,
+     "type": "string"
+    },
+    "business-physical-address.country": {
+     "required": false,
+     "type": "string"
+    },
+    "business-physical-address.postal-code": {
+     "required": false,
+     "type": "string"
+    },
+    "business-physical-address.region": {
+     "required": false,
+     "type": "string"
+    },
+    "formation-details": {
+     "required": false,
+     "type": "json"
+    },
+    "formation-details.company-origin-country": {
+     "required": false,
+     "type": "string"
+    },
+    "formation-details.company-structure": {
+     "oneOf": [
+      "CCorp",
+      "LLC",
+      "LLP",
+      "NonProfit",
+      "Partnership",
+      "ProfessionalAssociation",
+      "ProfessionalCorporation",
+      "SCorp",
+      "GeneralPartnership",
+      "LimitedPartnership",
+      "JointVenture",
+      "LLCTaxedAsSoleProprietorship",
+      "SoleProprietorship",
+      "ExemptedCompany",
+      "Limited"
+     ],
+     "required": false,
+     "type": "string"
+    },
+    "formation-details.e-in-document-file-blob": {
+     "required": false,
+     "type": "string"
+    },
+    "formation-details.ein-document-file-blob": {
+     "required": false,
+     "type": "string"
+    },
+    "formation-details.federal-ein": {
+     "required": false,
+     "type": "string"
+    },
+    "formation-details.foreign-business-number": {
+     "required": false,
+     "type": "string"
+    },
+    "formation-details.formation-document-file-blob": {
+     "required": false,
+     "type": "string"
+    },
+    "formation-details.formation-document-type": {
+     "oneOf": [
+      "ArticlesOfIncorporation",
+      "ArticlesOfOrganization",
+      "CertificateOfFormation",
+      "PartnershipAgreement",
+      "SecretaryOfStateRegistrationPage"
+     ],
+     "required": false,
+     "type": "string"
+    },
+    "invite-email": {
+     "required": false,
+     "type": "string"
+    },
+    "partner": {
+     "required": true,
+     "type": "string"
+    },
+    "webhook-url": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "org get": {
+   "args": [],
+   "options": {}
+  },
+  "payments create": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "required": true,
+     "type": "string"
+    },
+    "amount": {
+     "required": true,
+     "type": "number"
+    },
+    "external-memo": {
+     "required": false,
+     "type": "string"
+    },
+    "idempotency-key": {
+     "required": true,
+     "type": "string"
+    },
+    "note": {
+     "required": false,
+     "type": "string"
+    },
+    "payment-method": {
+     "required": true,
+     "type": "string"
+    },
+    "purpose": {
+     "required": false,
+     "type": "json"
+    },
+    "purpose.simple": {
+     "required": false,
+     "type": "json"
+    },
+    "recipient-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "payments get": {
+   "args": [],
+   "options": {
+    "request-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "payments list": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "required": false,
+     "type": "string"
+    },
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    },
+    "status": {
+     "oneOf": [
+      "pendingApproval",
+      "approved",
+      "rejected",
+      "cancelled"
+     ],
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "payments request": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "required": true,
+     "type": "string"
+    },
+    "amount": {
+     "required": true,
+     "type": "number"
+    },
+    "external-memo": {
+     "required": false,
+     "type": "string"
+    },
+    "idempotency-key": {
+     "required": true,
+     "type": "string"
+    },
+    "note": {
+     "required": false,
+     "type": "string"
+    },
+    "payment-method": {
+     "oneOf": [
+      "ach",
+      "check",
+      "domesticWire",
+      "internationalWire"
+     ],
+     "required": true,
+     "type": "string"
+    },
+    "purpose": {
+     "required": false,
+     "type": "json"
+    },
+    "purpose.simple": {
+     "required": false,
+     "type": "json"
+    },
+    "recipient-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "payments transfer": {
+   "args": [],
+   "options": {
+    "amount": {
+     "required": true,
+     "type": "number"
+    },
+    "destination-account-id": {
+     "required": true,
+     "type": "string"
+    },
+    "idempotency-key": {
+     "required": true,
+     "type": "string"
+    },
+    "note": {
+     "required": false,
+     "type": "string"
+    },
+    "source-account-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "recipients attachments attach": {
+   "args": [],
+   "options": {
+    "file": {
+     "required": true,
+     "type": "string"
+    },
+    "recipient-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "recipients attachments list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "recipients create": {
+   "args": [],
+   "options": {
+    "address": {
+     "required": false,
+     "type": "json"
+    },
+    "address.address1": {
+     "required": false,
+     "type": "string"
+    },
+    "address.address2": {
+     "required": false,
+     "type": "string"
+    },
+    "address.city": {
+     "required": false,
+     "type": "string"
+    },
+    "address.postal-code": {
+     "required": false,
+     "type": "string"
+    },
+    "address.state": {
+     "oneOf": [
+      "AL",
+      "AK",
+      "AZ",
+      "AR",
+      "CA",
+      "CO",
+      "CT",
+      "DE",
+      "DC",
+      "FL",
+      "GA",
+      "HI",
+      "ID",
+      "IL",
+      "IN",
+      "IA",
+      "KS",
+      "KY",
+      "LA",
+      "ME",
+      "MD",
+      "MA",
+      "MI",
+      "MN",
+      "MS",
+      "MO",
+      "MT",
+      "NE",
+      "NV",
+      "NH",
+      "NJ",
+      "NM",
+      "NY",
+      "NC",
+      "ND",
+      "OH",
+      "OK",
+      "OR",
+      "PA",
+      "RI",
+      "SC",
+      "SD",
+      "TN",
+      "TX",
+      "UT",
+      "VT",
+      "VA",
+      "WA",
+      "WV",
+      "WI",
+      "WY"
+     ],
+     "required": false,
+     "type": "string"
+    },
+    "check-info": {
+     "required": false,
+     "type": "json"
+    },
+    "check-info.address": {
+     "required": false,
+     "type": "json"
+    },
+    "contact-email": {
+     "required": false,
+     "type": "string"
+    },
+    "domestic-wire-routing-info": {
+     "required": false,
+     "type": "json"
+    },
+    "domestic-wire-routing-info.account-number": {
+     "required": false,
+     "type": "string"
+    },
+    "domestic-wire-routing-info.address": {
+     "required": false,
+     "type": "json"
+    },
+    "domestic-wire-routing-info.routing-number": {
+     "required": false,
+     "type": "string"
+    },
+    "electronic-routing-info": {
+     "required": false,
+     "type": "json"
+    },
+    "electronic-routing-info.account-number": {
+     "required": false,
+     "type": "string"
+    },
+    "electronic-routing-info.address": {
+     "required": false,
+     "type": "json"
+    },
+    "electronic-routing-info.electronic-account-type": {
+     "oneOf": [
+      "businessChecking",
+      "businessSavings",
+      "personalChecking",
+      "personalSavings"
+     ],
+     "required": false,
+     "type": "string"
+    },
+    "electronic-routing-info.routing-number": {
+     "required": false,
+     "type": "string"
+    },
+    "email": {
+     "required": true,
+     "type": "list"
+    },
+    "name": {
+     "required": true,
+     "type": "string"
+    },
+    "nickname": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "recipients delete": {
+   "args": [],
+   "options": {
+    "recipient-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "recipients get": {
+   "args": [],
+   "options": {
+    "recipient-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "recipients list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "recipients update": {
+   "args": [],
+   "options": {
+    "address": {
+     "required": false,
+     "type": "json"
+    },
+    "address.address1": {
+     "required": false,
+     "type": "string"
+    },
+    "address.address2": {
+     "required": false,
+     "type": "string"
+    },
+    "address.city": {
+     "required": false,
+     "type": "string"
+    },
+    "address.postal-code": {
+     "required": false,
+     "type": "string"
+    },
+    "address.state": {
+     "oneOf": [
+      "AL",
+      "AK",
+      "AZ",
+      "AR",
+      "CA",
+      "CO",
+      "CT",
+      "DE",
+      "DC",
+      "FL",
+      "GA",
+      "HI",
+      "ID",
+      "IL",
+      "IN",
+      "IA",
+      "KS",
+      "KY",
+      "LA",
+      "ME",
+      "MD",
+      "MA",
+      "MI",
+      "MN",
+      "MS",
+      "MO",
+      "MT",
+      "NE",
+      "NV",
+      "NH",
+      "NJ",
+      "NM",
+      "NY",
+      "NC",
+      "ND",
+      "OH",
+      "OK",
+      "OR",
+      "PA",
+      "RI",
+      "SC",
+      "SD",
+      "TN",
+      "TX",
+      "UT",
+      "VT",
+      "VA",
+      "WA",
+      "WV",
+      "WI",
+      "WY"
+     ],
+     "required": false,
+     "type": "string"
+    },
+    "check-info": {
+     "required": false,
+     "type": "json"
+    },
+    "check-info.address": {
+     "required": false,
+     "type": "json"
+    },
+    "contact-email": {
+     "required": false,
+     "type": "string"
+    },
+    "domestic-wire-routing-info": {
+     "required": false,
+     "type": "json"
+    },
+    "domestic-wire-routing-info.account-number": {
+     "required": false,
+     "type": "string"
+    },
+    "domestic-wire-routing-info.address": {
+     "required": false,
+     "type": "json"
+    },
+    "domestic-wire-routing-info.routing-number": {
+     "required": false,
+     "type": "string"
+    },
+    "electronic-routing-info": {
+     "required": false,
+     "type": "json"
+    },
+    "electronic-routing-info.account-number": {
+     "required": false,
+     "type": "string"
+    },
+    "electronic-routing-info.address": {
+     "required": false,
+     "type": "json"
+    },
+    "electronic-routing-info.electronic-account-type": {
+     "oneOf": [
+      "businessChecking",
+      "businessSavings",
+      "personalChecking",
+      "personalSavings"
+     ],
+     "required": false,
+     "type": "string"
+    },
+    "electronic-routing-info.routing-number": {
+     "required": false,
+     "type": "string"
+    },
+    "email": {
+     "required": false,
+     "type": "list"
+    },
+    "name": {
+     "required": false,
+     "type": "string"
+    },
+    "nickname": {
+     "required": false,
+     "type": "string"
+    },
+    "recipient-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "recipients:invites create": {
+   "args": [],
+   "options": {
+    "contact-email": {
+     "required": true,
+     "type": "string"
+    },
+    "name": {
+     "required": false,
+     "type": "string"
+    },
+    "notes": {
+     "required": false,
+     "type": "string"
+    },
+    "organization-name-on-request": {
+     "required": false,
+     "type": "string"
+    },
+    "payment-method": {
+     "required": true,
+     "type": "list"
+    },
+    "recipient-id": {
+     "required": false,
+     "type": "string"
+    },
+    "require-tax-document": {
+     "required": true,
+     "type": "boolean"
+    },
+    "send-email": {
+     "required": true,
+     "type": "boolean"
+    }
+   }
+  },
+  "recipients:invites delete": {
+   "args": [],
+   "options": {
+    "invite-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "recipients:invites list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    },
+    "status": {
+     "oneOf": [
+      "created",
+      "completed",
+      "expired"
+     ],
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "safes download": {
+   "args": [],
+   "options": {
+    "output": {
+     "required": false,
+     "type": "string"
+    },
+    "safe-request-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "safes get": {
+   "args": [],
+   "options": {
+    "safe-request-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "safes list": {
+   "args": [],
+   "options": {}
+  },
+  "statements accounts list": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "required": true,
+     "type": "string"
+    },
+    "end": {
+     "required": false,
+     "type": "string"
+    },
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "statements download": {
+   "args": [],
+   "options": {
+    "output": {
+     "required": false,
+     "type": "string"
+    },
+    "statement-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "statements treasury list": {
+   "args": [],
+   "options": {
+    "document-type": {
+     "required": false,
+     "type": "string"
+    },
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    },
+    "treasury-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "status": {
+   "args": [],
+   "options": {}
+  },
+  "transactions attachments attach": {
+   "args": [],
+   "options": {
+    "attachment-type": {
+     "required": false,
+     "type": "string"
+    },
+    "file": {
+     "required": true,
+     "type": "string"
+    },
+    "transaction-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "transactions get": {
+   "args": [],
+   "options": {
+    "transaction-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "transactions list": {
+   "args": [],
+   "options": {
+    "account-id": {
+     "required": false,
+     "type": "list"
+    },
+    "card-id": {
+     "required": false,
+     "type": "list"
+    },
+    "category-id": {
+     "required": false,
+     "type": "string"
+    },
+    "end": {
+     "required": false,
+     "type": "string"
+    },
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "mercury-category": {
+     "required": false,
+     "type": "string"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "posted-end": {
+     "required": false,
+     "type": "string"
+    },
+    "posted-start": {
+     "required": false,
+     "type": "string"
+    },
+    "search": {
+     "required": false,
+     "type": "string"
+    },
+    "start": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    },
+    "start-at": {
+     "required": false,
+     "type": "string"
+    },
+    "status": {
+     "required": false,
+     "type": "list"
+    }
+   }
+  },
+  "transactions update": {
+   "args": [],
+   "options": {
+    "category-id": {
+     "required": true,
+     "type": "string"
+    },
+    "note": {
+     "required": true,
+     "type": "string"
+    },
+    "transaction-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "treasury list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "treasury transactions": {
+   "args": [],
+   "options": {
+    "cursor": {
+     "required": false,
+     "type": "number"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "treasury-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "upgrade": {
+   "args": [],
+   "options": {
+    "force": {
+     "required": false,
+     "type": "boolean"
+    },
+    "version": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "users get": {
+   "args": [],
+   "options": {
+    "user-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "users list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    }
+   }
+  },
+  "webhooks create": {
+   "args": [],
+   "options": {
+    "event-type": {
+     "required": false,
+     "type": "json"
+    },
+    "filter-path": {
+     "required": false,
+     "type": "json"
+    },
+    "url": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "webhooks delete": {
+   "args": [],
+   "options": {
+    "webhook-endpoint-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "webhooks get": {
+   "args": [],
+   "options": {
+    "webhook-endpoint-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "webhooks list": {
+   "args": [],
+   "options": {
+    "end-before": {
+     "required": false,
+     "type": "string"
+    },
+    "limit": {
+     "required": false,
+     "type": "number"
+    },
+    "max-items": {
+     "required": false,
+     "type": "number"
+    },
+    "order": {
+     "required": false,
+     "type": "string"
+    },
+    "start-after": {
+     "required": false,
+     "type": "string"
+    },
+    "status": {
+     "required": false,
+     "type": "list"
+    }
+   }
+  },
+  "webhooks update": {
+   "args": [],
+   "options": {
+    "event-type": {
+     "required": false,
+     "type": "json"
+    },
+    "filter-path": {
+     "required": false,
+     "type": "json"
+    },
+    "status": {
+     "required": false,
+     "type": "string"
+    },
+    "url": {
+     "required": false,
+     "type": "string"
+    },
+    "webhook-endpoint-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  },
+  "webhooks verify": {
+   "args": [],
+   "options": {
+    "event-type": {
+     "required": false,
+     "type": "string"
+    },
+    "webhook-endpoint-id": {
+     "required": true,
+     "type": "string"
+    }
+   }
+  }
+ },
+ "global": {
+  "api-key": {
+   "required": false,
+   "type": "string"
+  },
+  "base-url": {
+   "required": false,
+   "type": "string"
+  },
+  "debug": {
+   "required": false,
+   "type": "boolean"
+  },
+  "environment": {
+   "required": false,
+   "type": "string"
+  },
+  "format": {
+   "required": false,
+   "type": "string"
+  },
+  "format-error": {
+   "required": false,
+   "type": "string"
+  },
+  "raw-output": {
+   "required": false,
+   "type": "boolean"
+  },
+  "transform": {
+   "required": false,
+   "type": "string"
+  },
+  "transform-error": {
+   "required": false,
+   "type": "string"
+  },
+  "yes": {
+   "required": false,
+   "type": "boolean"
+  }
+ }
+}

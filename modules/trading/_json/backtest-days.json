@@ -1,0 +1,107 @@
+{
+  "note": "Backtest replay fixture: three days across two cities with markets, forecasts, and observed values. Each market has yes_price and no_price for both sides.",
+  "days": [
+    {
+      "date": "2026-11-05",
+      "markets": [
+        {
+          "ticker": "NYHIGHT1105A",
+          "question": "Highest temperature in New York on Nov 5?",
+          "outcome": "72° or above",
+          "close_time": "2026-11-04T18:00:00Z",
+          "yes_price": 0.20,
+          "no_price": 0.40,
+          "settled": null
+        },
+        {
+          "ticker": "NYHIGHT1105B",
+          "question": "Highest temperature in New York on Nov 5?",
+          "outcome": "66° to 71°",
+          "close_time": "2026-11-04T18:00:00Z",
+          "yes_price": 0.30,
+          "no_price": 0.70,
+          "settled": null
+        },
+        {
+          "ticker": "NYHIGHT1105C",
+          "question": "Highest temperature in New York on Nov 5?",
+          "outcome": "65° or below",
+          "close_time": "2026-11-04T18:00:00Z",
+          "yes_price": 0.05,
+          "no_price": 0.95,
+          "settled": null
+        }
+      ],
+      "forecasts": {
+        "New York": { "high_f": 72, "kind": "forecast" },
+        "Chicago": { "high_f": 51, "kind": "forecast" }
+      },
+      "observed": {
+        "New York": { "high_f": 72, "low_f": 55, "precip_in": 0.0 },
+        "Chicago": { "high_f": 51, "low_f": 38, "precip_in": 0.3 }
+      }
+    },
+    {
+      "date": "2026-11-06",
+      "markets": [
+        {
+          "ticker": "CHIRAIN1106",
+          "question": "Rain in Chicago in November?",
+          "outcome": "Above 3 inches",
+          "close_time": "2026-11-05T18:00:00Z",
+          "yes_price": 0.55,
+          "no_price": 0.45,
+          "settled": null
+        },
+        {
+          "ticker": "NYHIGHT1106A",
+          "question": "Highest temperature in New York on Nov 6?",
+          "outcome": "72° or above",
+          "close_time": "2026-11-05T18:00:00Z",
+          "yes_price": 0.85,
+          "no_price": 0.15,
+          "settled": null
+        }
+      ],
+      "forecasts": {
+        "New York": { "high_f": 78, "kind": "forecast" },
+        "Chicago": { "high_f": 48, "kind": "forecast" }
+      },
+      "observed": {
+        "New York": { "high_f": 75, "low_f": 58, "precip_in": 0.1 },
+        "Chicago": { "high_f": 48, "low_f": 35, "precip_in": 0.1 }
+      }
+    },
+    {
+      "date": "2026-11-07",
+      "markets": [
+        {
+          "ticker": "NYHIGHT1107A",
+          "question": "Highest temperature in New York on Nov 7?",
+          "outcome": "70° or above",
+          "close_time": "2026-11-06T18:00:00Z",
+          "yes_price": 0.60,
+          "no_price": 0.95,
+          "settled": null
+        },
+        {
+          "ticker": "NYHIGHT1107EXP",
+          "question": "Highest temperature in New York on Nov 7?",
+          "outcome": "70° or above",
+          "close_time": "2026-11-06T18:00:00Z",
+          "yes_price": 1.10,
+          "no_price": 0.90,
+          "settled": null
+        }
+      ],
+      "forecasts": {
+        "New York": { "high_f": 70, "kind": "forecast" },
+        "Chicago": { "high_f": 45, "kind": "forecast" }
+      },
+      "observed": {
+        "New York": { "high_f": 68, "low_f": 50, "precip_in": 0.2 },
+        "Chicago": { "high_f": 45, "low_f": 32, "precip_in": 0.0 }
+      }
+    }
+  ]
+}

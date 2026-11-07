@@ -1,0 +1,3972 @@
+{
+ "data": {
+  "hcloud_certificate": {
+   "certificate": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "created": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "domain_names": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "fingerprint": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "not_valid_after": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "not_valid_before": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_certificates": {
+   "certificates": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "certificate": "string",
+       "created": "string",
+       "domain_names": [
+        "list",
+        "string"
+       ],
+       "fingerprint": "string",
+       "id": "number",
+       "labels": [
+        "map",
+        "string"
+       ],
+       "name": "string",
+       "not_valid_after": "string",
+       "not_valid_before": "string",
+       "type": "string"
+      }
+     ]
+    ]
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_datacenter": {
+   "available_server_type_ids": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "number"
+    ]
+   },
+   "description": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "location": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "supported_server_type_ids": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "number"
+    ]
+   }
+  },
+  "hcloud_datacenters": {
+   "datacenter_ids": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "datacenters": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "descriptions": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "names": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   }
+  },
+  "hcloud_firewall": {
+   "apply_to": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   },
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "most_recent": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "rule": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_firewalls": {
+   "firewalls": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "apply_to": [
+        "set",
+        [
+         "object",
+         {
+          "label_selector": "string",
+          "server": "number"
+         }
+        ]
+       ],
+       "id": "number",
+       "labels": [
+        "map",
+        "string"
+       ],
+       "name": "string",
+       "rule": [
+        "set",
+        [
+         "object",
+         {
+          "description": "string",
+          "destination_ips": [
+           "set",
+           "string"
+          ],
+          "direction": "string",
+          "port": "string",
+          "protocol": "string",
+          "source_ips": [
+           "set",
+           "string"
+          ]
+         }
+        ]
+       ]
+      }
+     ]
+    ]
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "most_recent": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_floating_ip": {
+   "delete_protection": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "description": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "home_location": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "ip_address": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ip_network": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "server_id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_floating_ips": {
+   "floating_ips": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "delete_protection": "bool",
+       "description": "string",
+       "home_location": "string",
+       "id": "number",
+       "ip_address": "string",
+       "ip_network": "string",
+       "labels": [
+        "map",
+        "string"
+       ],
+       "name": "string",
+       "server_id": "number",
+       "type": "string"
+      }
+     ]
+    ]
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_image": {
+   "architecture": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "created": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "deprecated": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "description": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "include_deprecated": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "most_recent": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "os_flavor": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "os_version": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "rapid_deploy": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "with_architecture": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_status": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   }
+  },
+  "hcloud_images": {
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "images": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "architecture": "string",
+       "created": "string",
+       "deprecated": "string",
+       "description": "string",
+       "id": "number",
+       "labels": [
+        "map",
+        "string"
+       ],
+       "name": "string",
+       "os_flavor": "string",
+       "os_version": "string",
+       "rapid_deploy": "bool",
+       "selector": "string",
+       "type": "string"
+      }
+     ]
+    ]
+   },
+   "include_deprecated": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "most_recent": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "with_architecture": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "set",
+     "string"
+    ]
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_status": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   }
+  },
+  "hcloud_load_balancer": {
+   "algorithm": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "type": "string"
+      }
+     ]
+    ]
+   },
+   "delete_protection": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "ipv4": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ipv6": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "load_balancer_type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "location": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "network_id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "network_ip": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "network_zone": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "service": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "destination_port": "number",
+       "health_check": [
+        "list",
+        [
+         "object",
+         {
+          "http": [
+           "list",
+           [
+            "object",
+            {
+             "domain": "string",
+             "path": "string",
+             "response": "string",
+             "status_codes": [
+              "list",
+              "number"
+             ],
+             "tls": "bool"
+            }
+           ]
+          ],
+          "interval": "number",
+          "port": "number",
+          "protocol": "string",
+          "retries": "number",
+          "timeout": "number"
+         }
+        ]
+       ],
+       "http": [
+        "list",
+        [
+         "object",
+         {
+          "certificates": [
+           "list",
+           "string"
+          ],
+          "cookie_lifetime": "number",
+          "cookie_name": "string",
+          "redirect_http": "bool",
+          "sticky_sessions": "bool"
+         }
+        ]
+       ],
+       "listen_port": "number",
+       "protocol": "string",
+       "proxyprotocol": "bool"
+      }
+     ]
+    ]
+   },
+   "target": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "label_selector": "string",
+       "server_id": "number",
+       "type": "string"
+      }
+     ]
+    ]
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_load_balancer_type": {
+   "description": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "max_assigned_certificates": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "max_connections": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "max_services": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "max_targets": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_load_balancer_types": {
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "load_balancer_types": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   }
+  },
+  "hcloud_load_balancers": {
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "load_balancers": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "algorithm": [
+        "list",
+        [
+         "object",
+         {
+          "type": "string"
+         }
+        ]
+       ],
+       "delete_protection": "bool",
+       "id": "number",
+       "ipv4": "string",
+       "ipv6": "string",
+       "labels": [
+        "map",
+        "string"
+       ],
+       "load_balancer_type": "string",
+       "location": "string",
+       "name": "string",
+       "network_id": "number",
+       "network_ip": "string",
+       "network_zone": "string",
+       "service": [
+        "list",
+        [
+         "object",
+         {
+          "destination_port": "number",
+          "health_check": [
+           "list",
+           [
+            "object",
+            {
+             "http": [
+              "list",
+              [
+               "object",
+               {
+                "domain": "string",
+                "path": "string",
+                "response": "string",
+                "status_codes": [
+                 "list",
+                 "number"
+                ],
+                "tls": "bool"
+               }
+              ]
+             ],
+             "interval": "number",
+             "port": "number",
+             "protocol": "string",
+             "retries": "number",
+             "timeout": "number"
+            }
+           ]
+          ],
+          "http": [
+           "list",
+           [
+            "object",
+            {
+             "certificates": [
+              "list",
+              "string"
+             ],
+             "cookie_lifetime": "number",
+             "cookie_name": "string",
+             "redirect_http": "bool",
+             "sticky_sessions": "bool"
+            }
+           ]
+          ],
+          "listen_port": "number",
+          "protocol": "string",
+          "proxyprotocol": "bool"
+         }
+        ]
+       ],
+       "target": [
+        "list",
+        [
+         "object",
+         {
+          "label_selector": "string",
+          "server_id": "number",
+          "type": "string"
+         }
+        ]
+       ]
+      }
+     ]
+    ]
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_location": {
+   "city": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "country": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "description": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "latitude": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "longitude": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "network_zone": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_locations": {
+   "descriptions": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "location_ids": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "locations": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "names": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   }
+  },
+  "hcloud_network": {
+   "delete_protection": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "expose_routes_to_vswitch": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "ip_range": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "most_recent": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_networks": {
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "networks": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "delete_protection": "bool",
+       "expose_routes_to_vswitch": "bool",
+       "id": "number",
+       "ip_range": "string",
+       "labels": [
+        "map",
+        "string"
+       ],
+       "name": "string"
+      }
+     ]
+    ]
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_placement_group": {
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "most_recent": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "servers": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "number"
+    ]
+   },
+   "type": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_placement_groups": {
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "most_recent": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "placement_groups": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "id": "number",
+       "labels": [
+        "map",
+        "string"
+       ],
+       "name": "string",
+       "servers": [
+        "list",
+        "number"
+       ],
+       "type": "string"
+      }
+     ]
+    ]
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_primary_ip": {
+   "assignee_id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "assignee_type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "auto_delete": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "datacenter": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "delete_protection": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "ip_address": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ip_network": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "location": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_primary_ips": {
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "primary_ips": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_server": {
+   "backup_window": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "backups": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "datacenter": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "delete_protection": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "firewall_ids": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "number"
+    ]
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "image": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ipv4_address": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ipv6_address": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ipv6_network": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "iso": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "location": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "network": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   },
+   "placement_group_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "primary_disk_size": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "rebuild_protection": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "rescue": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "server_type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "status": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_status": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   }
+  },
+  "hcloud_server_type": {
+   "architecture": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "category": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "cores": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "cpu_type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "deprecation_announced": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "description": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "disk": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "included_traffic": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "is_deprecated": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "locations": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "memory": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "storage_type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "unavailable_after": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_server_types": {
+   "descriptions": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "names": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "server_type_ids": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "server_types": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   }
+  },
+  "hcloud_servers": {
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "servers": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "backup_window": "string",
+       "backups": "bool",
+       "datacenter": "string",
+       "delete_protection": "bool",
+       "firewall_ids": [
+        "list",
+        "number"
+       ],
+       "id": "number",
+       "image": "string",
+       "ipv4_address": "string",
+       "ipv6_address": "string",
+       "ipv6_network": "string",
+       "iso": "string",
+       "labels": [
+        "map",
+        "string"
+       ],
+       "location": "string",
+       "name": "string",
+       "network": [
+        "set",
+        [
+         "object",
+         {
+          "alias_ips": [
+           "set",
+           "string"
+          ],
+          "ip": "string",
+          "mac_address": "string",
+          "network_id": "number"
+         }
+        ]
+       ],
+       "placement_group_id": "number",
+       "primary_disk_size": "number",
+       "rebuild_protection": "bool",
+       "rescue": "string",
+       "server_type": "string",
+       "status": "string"
+      }
+     ]
+    ]
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_status": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   }
+  },
+  "hcloud_ssh_key": {
+   "fingerprint": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "public_key": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_ssh_keys": {
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ssh_keys": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_storage_box": {
+   "access_settings": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "delete_protection": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "location": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "server": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "snapshot_plan": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "storage_box_type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "system": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "username": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_storage_box_snapshot": {
+   "description": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "is_automatic": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "stats": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "storage_box_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_storage_box_snapshots": {
+   "snapshots": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "storage_box_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_storage_box_subaccount": {
+   "access_settings": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "description": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "home_directory": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "server": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "storage_box_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "username": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_storage_box_subaccounts": {
+   "storage_box_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "subaccounts": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_storage_box_type": {
+   "automatic_snapshot_limit": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "deprecation_announced": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "description": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "is_deprecated": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "size": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "snapshot_limit": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "subaccounts_limit": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "unavailable_after": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_storage_box_types": {
+   "storage_box_types": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   }
+  },
+  "hcloud_storage_boxes": {
+   "storage_boxes": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_volume": {
+   "delete_protection": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "linux_device": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "location": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "server_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "size": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_status": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   }
+  },
+  "hcloud_volumes": {
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "volumes": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     [
+      "object",
+      {
+       "delete_protection": "bool",
+       "id": "number",
+       "labels": [
+        "map",
+        "string"
+       ],
+       "linux_device": "string",
+       "location": "string",
+       "name": "string",
+       "server_id": "number",
+       "size": "number"
+      }
+     ]
+    ]
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_status": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   }
+  },
+  "hcloud_zone": {
+   "authoritative_nameservers": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "delete_protection": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "mode": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "primary_nameservers": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "registrar": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ttl": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_zone_rrset": {
+   "change_protection": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "records": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "ttl": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "type": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "zone": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   }
+  },
+  "hcloud_zone_rrsets": {
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "rrsets": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "zone": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   }
+  },
+  "hcloud_zones": {
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "with_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "zones": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   }
+  }
+ },
+ "resources": {
+  "hcloud_certificate": {
+   "certificate": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "created": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "domain_names": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "fingerprint": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "not_valid_after": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "not_valid_before": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "private_key": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_firewall": {
+   "apply_to": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "rule": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   }
+  },
+  "hcloud_firewall_attachment": {
+   "firewall_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "label_selectors": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "set",
+     "string"
+    ]
+   },
+   "server_ids": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "set",
+     "number"
+    ]
+   }
+  },
+  "hcloud_floating_ip": {
+   "delete_protection": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "description": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "home_location": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ip_address": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ip_network": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "server_id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "type": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   }
+  },
+  "hcloud_floating_ip_assignment": {
+   "floating_ip_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "server_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   }
+  },
+  "hcloud_load_balancer": {
+   "algorithm": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   },
+   "delete_protection": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ipv4": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ipv6": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "load_balancer_type": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "location": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "network_id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "network_ip": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "network_zone": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "target": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   }
+  },
+  "hcloud_load_balancer_network": {
+   "enable_public_interface": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ip": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "load_balancer_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "network_id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "subnet_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_load_balancer_service": {
+   "destination_port": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "health_check": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   },
+   "http": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "listen_port": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "load_balancer_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "protocol": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "proxyprotocol": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   }
+  },
+  "hcloud_load_balancer_target": {
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ip": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "label_selector": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "load_balancer_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "server_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "type": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "use_private_ip": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   }
+  },
+  "hcloud_managed_certificate": {
+   "certificate": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "created": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "domain_names": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": [
+     "set",
+     "string"
+    ]
+   },
+   "fingerprint": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "not_valid_after": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "not_valid_before": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_network": {
+   "delete_protection": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "expose_routes_to_vswitch": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ip_range": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "labels": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   }
+  },
+  "hcloud_network_route": {
+   "destination": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "gateway": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "network_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   }
+  },
+  "hcloud_network_subnet": {
+   "gateway": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ip_range": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "network_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "network_zone": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "type": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "vswitch_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   }
+  },
+  "hcloud_placement_group": {
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "servers": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "set",
+     "number"
+    ]
+   },
+   "type": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   }
+  },
+  "hcloud_primary_ip": {
+   "assignee_id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "assignee_type": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "auto_delete": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "bool"
+   },
+   "datacenter": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "delete_protection": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "ip_address": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ip_network": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "location": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "type": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   }
+  },
+  "hcloud_rdns": {
+   "dns_ptr": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "floating_ip_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ip_address": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "load_balancer_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "primary_ip_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "server_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   }
+  },
+  "hcloud_server": {
+   "allow_deprecated_images": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "backup_window": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "backups": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "datacenter": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "delete_protection": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "firewall_ids": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "set",
+     "number"
+    ]
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ignore_remote_firewall_ids": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "image": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "ipv4_address": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ipv6_address": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ipv6_network": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "iso": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "keep_disk": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "labels": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "location": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "network": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   },
+   "placement_group_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "primary_disk_size": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "public_net": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   },
+   "rebuild_protection": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "rescue": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "server_type": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "shutdown_before_deletion": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "ssh_keys": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "status": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "timeouts": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   },
+   "user_data": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_server_network": {
+   "alias_ips": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "set",
+     "string"
+    ]
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ip": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "mac_address": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "network_id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "server_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "subnet_id": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_snapshot": {
+   "description": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "server_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "timeouts": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "block"
+   }
+  },
+  "hcloud_ssh_key": {
+   "fingerprint": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "public_key": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   }
+  },
+  "hcloud_storage_box": {
+   "access_settings": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "nested"
+   },
+   "delete_protection": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "location": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "password": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "server": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "snapshot_plan": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "nested"
+   },
+   "ssh_keys": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "set",
+     "string"
+    ]
+   },
+   "storage_box_type": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "system": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "username": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_storage_box_snapshot": {
+   "description": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "is_automatic": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "bool"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "storage_box_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   }
+  },
+  "hcloud_storage_box_subaccount": {
+   "access_settings": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "nested"
+   },
+   "description": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "home_directory": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "password": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "server": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "storage_box_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "username": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_uploaded_certificate": {
+   "certificate": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "created": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "domain_names": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": [
+     "list",
+     "string"
+    ]
+   },
+   "fingerprint": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "not_valid_after": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "not_valid_before": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "private_key": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "type": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   }
+  },
+  "hcloud_volume": {
+   "automount": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "delete_protection": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "format": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "linux_device": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "location": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "server_id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "size": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   }
+  },
+  "hcloud_volume_attachment": {
+   "automount": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "server_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   },
+   "volume_id": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "number"
+   }
+  },
+  "hcloud_zone": {
+   "authoritative_nameservers": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "nested"
+   },
+   "delete_protection": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "number"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "mode": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "primary_nameservers": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "nested"
+   },
+   "registrar": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "ttl": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   }
+  },
+  "hcloud_zone_record": {
+   "comment": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "string"
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "type": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "value": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "zone": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   }
+  },
+  "hcloud_zone_rrset": {
+   "change_protection": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": "bool"
+   },
+   "id": {
+    "computed": true,
+    "optional": false,
+    "required": false,
+    "type": "string"
+   },
+   "labels": {
+    "computed": true,
+    "optional": true,
+    "required": false,
+    "type": [
+     "map",
+     "string"
+    ]
+   },
+   "name": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "records": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "nested"
+   },
+   "ttl": {
+    "computed": false,
+    "optional": true,
+    "required": false,
+    "type": "number"
+   },
+   "type": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   },
+   "zone": {
+    "computed": false,
+    "optional": false,
+    "required": true,
+    "type": "string"
+   }
+  }
+ }
+}

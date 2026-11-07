@@ -1,0 +1,107 @@
+# The agent swarms: legal, accounting and governance, one of each per legal
+# identity (you included), so no agent ever works for two of them. Personas are agency-agents'
+# (flake input); grants are the only account access an agent gets, and the
+# base policies (./cedar.nix) cap them whatever they say.
+{ lib, ... }:
+let
+  swarm = serves: {
+    "legal-${serves}" = {
+      inherit serves;
+      purpose = "Compliance, filings and documents served on ${serves}";
+      personas = [
+        "support/support-legal-compliance-checker"
+        "specialized/legal-document-review"
+      ];
+    };
+    "accounting-${serves}" = {
+      inherit serves;
+      purpose = "Books, invoices and tax for ${serves}";
+      personas = [
+        "finance/finance-bookkeeper-controller"
+        "finance/finance-tax-strategist"
+        "finance/finance-fpa-analyst"
+      ];
+    };
+    "governance-${serves}" = {
+      inherit serves;
+      purpose = "Records, controls and agent oversight for ${serves}";
+      personas = [
+        "specialized/specialized-chief-of-staff"
+        "specialized/chief-financial-officer"
+        "specialized/agentic-identity-trust"
+        "security/security-compliance-auditor"
+        "specialized/automation-governance-architect"
+      ];
+    };
+  };
+in
+{
+  governance.controllers = {
+    kagamizo = [ "mirazo" ];
+    jingzo = [ "mirazo" ];
+  };
+
+  # Public's personal secret trades as well as reads, so no swarm holds it:
+  # the secret stays in the owner's root vault. The accounting swarm's grant
+  # below is Cedar's read permit for the nightly ledger (modules/money,
+  # money.ledger, off until the owner allows it); the secret still only
+  # reaches it when Public offers a read-only credential (a Gap).
+
+  governance.agents = lib.mkMerge [
+    (swarm "kagamizo")
+    (swarm "jingzo")
+    (swarm "mirazo")
+    {
+      legal-jingzo.grants = [
+        {
+          account = "northwest-jingzo";
+          effects = [ "read" ];
+          why = "filing status, annual report due dates, documents served";
+        }
+      ];
+      accounting-jingzo.grants = [
+        # The owner's decision, 2026-11-06: accounting manages the OpenRouter
+        # account's keys and budgets with the management key; each change
+        # is first code (the account-limit lifecycle, modules/agents).
+        {
+          account = "openrouter";
+          effects = [
+            "read"
+            "write"
+          ];
+          why = "every key's cap and the workspace budgets, set from openrouter.keys after review";
+        }
+        {
+          account = "northwest-jingzo";
+          effects = [ "read" ];
+          why = "Northwest invoices and refunds, for the books";
+        }
+        {
+          account = "mercury-jingzo";
+          effects = [ "read" ];
+          why = "balances and card spend, for the books";
+        }
+      ];
+      accounting-mirazo.grants = [
+        {
+          account = "public-mirazo";
+          effects = [ "read" ];
+          why = "the brokerage's portfolio, history, orders and tax lots, for the nightly ledger (money.ledger)";
+        }
+      ];
+      # Reads only: changing the company's record stays with its controller.
+      governance-jingzo.grants = [
+        {
+          account = "northwest-jingzo";
+          effects = [ "read" ];
+          why = "company records and registered agent services";
+        }
+        {
+          account = "mercury-jingzo";
+          effects = [ "read" ];
+          why = "what the bank holds and what the cards spend, against their limits";
+        }
+      ];
+    }
+  ];
+}

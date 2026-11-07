@@ -1,0 +1,12 @@
+{
+  "action": "test:passkey-signin",
+  "account": "test",
+  "hosts": ["localhost"],
+  "login": { "vault": "none", "item": "none", "email": "finance@jingzo.org" },
+  "passkey": { "rpId": "localhost", "profile": "passkey-test" },
+  "steps": [
+    { "do": "goto", "url": "http://localhost:PORT/passkey.html" },
+    { "do": "click", "target": { "by": "role", "role": "button", "name": "Sign in with passkey" } },
+    { "do": "wait-for", "target": { "by": "role", "role": "heading", "name": "Signed in" }, "seconds": 10 }
+  ]
+}

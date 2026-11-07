@@ -1,0 +1,200 @@
+{
+ "commands": {
+  "icloudpd": {
+   "args": [],
+   "options": {
+    "album": {
+     "value": true
+    },
+    "align-raw": {
+     "oneOf": [
+      "as-is",
+      "original",
+      "alternative"
+     ],
+     "value": true
+    },
+    "auth-only": {
+     "value": false
+    },
+    "auto-delete": {
+     "value": false
+    },
+    "cookie-directory": {
+     "value": true
+    },
+    "delete-after-download": {
+     "value": false
+    },
+    "directory": {
+     "value": true
+    },
+    "domain": {
+     "oneOf": [
+      "com",
+      "cn"
+     ],
+     "value": true
+    },
+    "dry-run": {
+     "value": false
+    },
+    "file-match-policy": {
+     "oneOf": [
+      "name-size-dedup-with-suffix",
+      "name-id7"
+     ],
+     "value": true
+    },
+    "folder-structure": {
+     "value": true
+    },
+    "force-size": {
+     "value": false
+    },
+    "help": {
+     "value": false
+    },
+    "keep-icloud-recent-days": {
+     "value": true
+    },
+    "keep-unicode-in-filenames": {
+     "value": false
+    },
+    "library": {
+     "value": true
+    },
+    "list-albums": {
+     "value": false
+    },
+    "list-libraries": {
+     "value": false
+    },
+    "live-photo-mov-filename-policy": {
+     "oneOf": [
+      "suffix",
+      "original"
+     ],
+     "value": true
+    },
+    "live-photo-size": {
+     "oneOf": [
+      "original",
+      "medium",
+      "thumb"
+     ],
+     "value": true
+    },
+    "log-level": {
+     "oneOf": [
+      "debug",
+      "info",
+      "error"
+     ],
+     "value": true
+    },
+    "mfa-provider": {
+     "oneOf": [
+      "console",
+      "webui"
+     ],
+     "value": true
+    },
+    "no-progress-bar": {
+     "value": false
+    },
+    "notification-email": {
+     "value": true
+    },
+    "notification-email-from": {
+     "value": true
+    },
+    "notification-script": {
+     "value": true
+    },
+    "only-print-filenames": {
+     "value": false
+    },
+    "password": {
+     "value": true
+    },
+    "password-provider": {
+     "oneOf": [
+      "console",
+      "keyring",
+      "parameter",
+      "webui"
+     ],
+     "value": true
+    },
+    "recent": {
+     "value": true
+    },
+    "set-exif-datetime": {
+     "value": false
+    },
+    "size": {
+     "oneOf": [
+      "original",
+      "medium",
+      "thumb",
+      "adjusted",
+      "alternative"
+     ],
+     "value": true
+    },
+    "skip-created-after": {
+     "value": true
+    },
+    "skip-created-before": {
+     "value": true
+    },
+    "skip-live-photos": {
+     "value": false
+    },
+    "skip-photos": {
+     "value": false
+    },
+    "skip-videos": {
+     "value": false
+    },
+    "smtp-host": {
+     "value": true
+    },
+    "smtp-no-tls": {
+     "value": false
+    },
+    "smtp-password": {
+     "value": true
+    },
+    "smtp-port": {
+     "value": true
+    },
+    "smtp-username": {
+     "value": true
+    },
+    "threads-num": {
+     "value": true
+    },
+    "until-found": {
+     "value": true
+    },
+    "use-os-locale": {
+     "value": false
+    },
+    "username": {
+     "value": true
+    },
+    "version": {
+     "value": false
+    },
+    "watch-with-interval": {
+     "value": true
+    },
+    "xmp-sidecar": {
+     "value": false
+    }
+   }
+  }
+ }
+}
