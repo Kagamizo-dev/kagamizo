@@ -470,6 +470,56 @@ pub struct OrderResponse {
     #[serde(rename = "limitPrice")]
     pub limit_price: Option<String>,
     pub status: Option<String>,
+    /// How much has filled, and at what average price (Public's order read).
+    #[serde(rename = "filledQuantity", default)]
+    pub filled_quantity: Option<String>,
+    #[serde(rename = "averagePrice", default)]
+    pub average_price: Option<String>,
+}
+
+/// The account's buying power, as the portfolio reports it.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BuyingPower {
+    pub cash_only_buying_power: String,
+    pub buying_power: String,
+    #[serde(default)]
+    pub options_buying_power: Option<String>,
+}
+
+/// One held position: the instrument and its quantity.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PortfolioPosition {
+    pub instrument: Instrument,
+    pub quantity: String,
+    /// What the position cost: Public reports it as an object (unitCost,
+    /// totalCost); kept as JSON until a real holding confirms its fields.
+    #[serde(default)]
+    pub cost_basis: Option<serde_json::Value>,
+}
+
+impl PortfolioPosition {
+    /// The average price paid a unit, from the cost basis.
+    pub fn unit_cost(&self) -> Option<f64> {
+        let cb = self.cost_basis.as_ref()?;
+        let num = |k: &str| cb.get(k).and_then(|v| v.as_str().map(str::to_string).or(v.as_f64().map(|f| f.to_string()))).and_then(|v| v.parse::<f64>().ok());
+        let q: f64 = self.quantity.parse().ok()?;
+        num("unitCost").or_else(|| num("totalCost").filter(|_| q != 0.0).map(|t| t / q))
+    }
+}
+
+/// The account's portfolio (get_account_portfolio_v2), as far as the
+/// adapter reads it: cash, buying power and positions.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Portfolio {
+    pub account_id: String,
+    pub buying_power: BuyingPower,
+    #[serde(default)]
+    pub positions: Vec<PortfolioPosition>,
+    #[serde(default)]
+    pub cash: Option<String>,
 }
 
 // ── Error ────────────────────────────────────────────────────────────────

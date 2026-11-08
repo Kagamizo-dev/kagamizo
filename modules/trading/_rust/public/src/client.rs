@@ -11,7 +11,7 @@ use crate::types::{
     AGGREGATIONS, EVENT_SORTING_MODES, EVENT_CONTRACT_PERIODS,
     EVENT_CONTRACT_MAX_SYMBOLS, INSTRUMENT_TYPES,
     AccessTokenRequest, AccessTokenResponse,
-    AccountResponse,
+    AccountResponse, Portfolio,
     Instrument,
     BarsResponse, BarRow,
     PreflightResponse,
@@ -572,6 +572,13 @@ impl Public {
         }
     }
 
+    /// The account's portfolio: cash, buying power and positions.
+    pub fn portfolio(&mut self) -> Result<Portfolio, String> {
+        let a = self.account()?;
+        let path = format!("/userapigateway/trading/{}/portfolio/v2", a);
+        self.do_req::<Portfolio>(Endpoint::GetAccountPortfolioV2, &path, None)
+    }
+
     pub fn order(&mut self, order_id: &str) -> Result<OrderResponse, String> {
         let a = self.account();
         if a.is_err() { return Result::Err(a.unwrap_err()); }
@@ -669,6 +676,19 @@ pub fn crypto_order_body(
         stop_price: None, open_close_indicator: None,
         order_id: order_id.map(|o| o.to_string()),
     })
+}
+
+/// A crypto order for a number of coins (a sale closing a position):
+/// Public takes an amount or a quantity, never both.
+pub fn crypto_quantity_order_body(
+    symbol: &str, side: &str, limit_price: &str, quantity: &str, order_id: Option<&str>,
+) -> Result<OrderBody, String> {
+    let mut body = crypto_order_body(symbol, side, limit_price, "1", order_id)?;
+    let q: f64 = quantity.parse::<f64>().unwrap_or(0.0);
+    if q <= 0.0 || !q.is_finite() { return Result::Err(format!("a crypto quantity is a positive number of coins, not {}", quantity)); }
+    body.amount = None;
+    body.quantity = quantity.to_string();
+    Result::Ok(body)
 }
 
 pub fn event_contract_order_body(

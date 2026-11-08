@@ -13,9 +13,17 @@
 #   packages.weather-backtest   the binaries; the tests run as they build
 #   checks.weather-backtest     the same build: every crate's tests pass
 #                               (Nautilus excluded: it builds on its own)
+#   nautilus-public    the NautilusTrader adapter for Public: Public's
+#                      quotes as a data client, its orders as an execution
+#                      client; paper attaches Nautilus's sandbox instead
+#
 #   packages.nautilus-probe     the probe
 #   checks.nautilus-probe       the probe as its own builder: $out exists
 #                               only when every order filled
+#   checks.nautilus-public      the adapter's tests: a crypto round trip on
+#                               a live Nautilus node against public-stub, in
+#                               paper (sandbox) and live (our client) modes,
+#                               and reconciliation after a restart
 { lib, inputs, ... }:
 {
   perSystem =
@@ -31,11 +39,15 @@
           "--workspace"
           "--exclude"
           "nautilus-probe"
+          "--exclude"
+          "nautilus-public"
         ];
         cargoTestFlags = [
           "--workspace"
           "--exclude"
           "nautilus-probe"
+          "--exclude"
+          "nautilus-public"
         ];
         # The rule tests read the strategy's own fixture; the replay's tests
         # read the sample days.
@@ -61,15 +73,43 @@
         doCheck = false;
         meta.mainProgram = "nautilus-probe";
       };
+      # The adapter, tested as it builds: the stub is built beside it.
+      adapter = rustPlatform.buildRustPackage {
+        pname = "nautilus-public";
+        version = "0.1.0";
+        src = ./_rust;
+        cargoLock.lockFile = ./_rust/Cargo.lock;
+        nativeBuildInputs = [
+          pkgs.cmake
+          pkgs.perl
+        ];
+        cargoBuildFlags = [
+          "-p"
+          "nautilus-public"
+          "-p"
+          "public-stub"
+        ];
+        cargoTestFlags = [
+          "-p"
+          "nautilus-public"
+        ];
+        doCheck = true;
+      };
     in
     {
-      packages.weather-backtest = crate;
-      checks.weather-backtest = crate;
-      packages.nautilus-probe = probe;
-      checks.nautilus-probe = derivation {
-        name = "nautilus-probe-run";
-        inherit (pkgs.stdenv.hostPlatform) system;
-        builder = lib.getExe probe;
+      packages = {
+        weather-backtest = crate;
+        nautilus-public = adapter;
+        nautilus-probe = probe;
+      };
+      checks = {
+        weather-backtest = crate;
+        nautilus-public = adapter;
+        nautilus-probe = derivation {
+          name = "nautilus-probe-run";
+          inherit (pkgs.stdenv.hostPlatform) system;
+          builder = lib.getExe probe;
+        };
       };
     };
 }

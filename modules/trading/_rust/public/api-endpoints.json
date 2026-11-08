@@ -228,7 +228,8 @@
         "get_event_summary",
         "get_event_details",
         "get_event_contract_bars",
-        "get_order"
+        "get_order",
+        "get_account_portfolio_v2"
       ]
     },
     "placer": {
@@ -248,7 +249,8 @@
         "get_event_contract_bars",
         "get_order",
         "cancel_order",
-        "place_order"
+        "place_order",
+        "get_account_portfolio_v2"
       ]
     }
   }

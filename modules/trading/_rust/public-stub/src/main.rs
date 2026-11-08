@@ -35,6 +35,62 @@ fn find_order(id: &str) -> Option<&str> {
     None
 }
 
+/// How a stored order stands: its status, the quantity filled and the
+/// average fill price. A cancelled order reads CANCELLED; a limit of 0.01
+/// rests far from the market and stays NEW; anything else fills at its
+/// limit, an order sized by amount for amount / limit coins.
+fn standing(id: &str, body: &serde_json::Value) -> (&'static str, f64, f64) {
+    let num = |k: &str| body.get(k).and_then(|v| v.as_str()).and_then(|v| v.parse::<f64>().ok());
+    let cancelled = unsafe { CANCELLED.iter().any(|c| c == id) };
+    let limit = body.get("limitPrice").and_then(|v| v.as_str());
+    if cancelled {
+        return ("CANCELLED", 0.0, 0.0);
+    }
+    if limit == Some("0.01") {
+        return ("NEW", 0.0, 0.0);
+    }
+    let px = num("limitPrice").unwrap_or(last_close());
+    let qty = match num("amount") {
+        Some(a) if px > 0.0 => a / px,
+        _ => num("quantity").unwrap_or(0.0),
+    };
+    ("FILLED", qty, px)
+}
+
+/// What the filled orders hold of an instrument, and the cash left of
+/// $1,000.
+fn holdings() -> (f64, Vec<(String, String, f64)>) {
+    let (cash, held) = holdings_with_cost();
+    (cash, held.into_iter().map(|h| (h.0, h.1, h.2)).collect())
+}
+
+/// The same, with each holding's total cost (buys add their cost, sells
+/// take out their share of it).
+fn holdings_with_cost() -> (f64, Vec<(String, String, f64, f64)>) {
+    let mut cash = 1000.0f64;
+    let mut held: Vec<(String, String, f64, f64)> = Vec::new();
+    let (ids, bodies) = unsafe { ((*std::ptr::addr_of!(ORDER_IDS)).clone(), (*std::ptr::addr_of!(ORDER_BODIES)).clone()) };
+    for (id, b) in ids.iter().zip(bodies.iter()) {
+        let v = serde_json::from_str::<serde_json::Value>(b).unwrap_or(serde_json::Value::Null);
+        let (status, qty, px) = standing(id, &v);
+        if status != "FILLED" { continue; }
+        let sym = v["instrument"]["symbol"].as_str().unwrap_or("").to_string();
+        let kind = v["instrument"]["type"].as_str().unwrap_or("").to_string();
+        let sign = if v["orderSide"] == "SELL" { -1.0 } else { 1.0 };
+        let mult = if kind == "OPTION" { 100.0 } else { 1.0 };
+        cash -= sign * qty * px * mult;
+        match held.iter_mut().find(|h| h.0 == sym && h.1 == kind) {
+            Some(h) => {
+                let cost = if sign > 0.0 { qty * px * mult } else if h.2 != 0.0 { -h.3 * qty / h.2 } else { 0.0 };
+                h.2 += sign * qty;
+                h.3 += cost;
+            }
+            None => held.push((sym, kind, sign * qty, sign * qty * px * mult)),
+        }
+    }
+    (cash, held)
+}
+
 // ── Bars fixture (7 bars for SPY, matching _stub_public.py's CSV) ───────
 
 static BARS: &[(&str, &str, &str, &str, &str, u64)] = &[
@@ -395,6 +451,18 @@ fn main() {
             }
             reply_fmt(&stream, 200, format!(r#"{{"content":[{}],"nextToken":null}}"#, content.join(",")));
 
+        // ── Portfolio: cash and the positions the filled orders left ──
+        } else if route_path.ends_with("/portfolio/v2") {
+            let (cash, held) = holdings_with_cost();
+            let positions: Vec<String> = held.iter().filter(|h| h.2.abs() > 1e-12).map(|h| format!(
+                r#"{{"instrument":{{"symbol":"{}","type":"{}"}},"quantity":"{}","costBasis":{{"totalCost":"{:.2}","unitCost":"{:.2}"}}}}"#,
+                h.0, h.1, h.2, h.3, h.3 / h.2
+            )).collect();
+            reply_fmt(&stream, 200, format!(
+                r#"{{"accountId":"{ACCOUNT}","accountType":"BROKERAGE","buyingPower":{{"cashOnlyBuyingPower":"{cash:.2}","buyingPower":"{cash:.2}","optionsBuyingPower":"{cash:.2}"}},"equity":[],"positions":[{}],"orders":[],"cash":"{cash:.2}"}}"#,
+                positions.join(",")
+            ));
+
         // ── Instrument ────────────────────────────────────────────────
         } else if route_path.starts_with("/userapigateway/trading/instruments/") {
             reply(&stream, 200, r#"{"symbol":"SPY","type":"EQUITY","status":"ACTIVE"}"#);
@@ -435,22 +503,24 @@ fn main() {
                     ));
                 }
             } else if instr_type == "CRYPTO" {
-                // A crypto order is sized by a dollar amount, never a quantity.
+                // A crypto order is sized by a dollar amount or a number of
+                // coins, never both; a sale is of coins held.
                 let sym = instrument.and_then(|i| i.get("symbol")).and_then(|s| s.as_str()).unwrap_or("");
-                let amount = body.get("amount").and_then(|v| v.as_str()).and_then(|a| a.parse::<f64>().ok());
-                let limit = body.get("limitPrice").and_then(|v| v.as_str()).and_then(|p| p.parse::<f64>().ok());
-                let has_qty = body.get("quantity").and_then(|v| v.as_str()).map(|q| !q.is_empty()).unwrap_or(false);
+                let num = |k: &str| body.get(k).and_then(|v| v.as_str()).filter(|v| !v.is_empty()).and_then(|a| a.parse::<f64>().ok());
+                let (amount, qty, limit) = (num("amount"), num("quantity"), num("limitPrice"));
+                let held = holdings().1.iter().find(|h| h.0 == sym && h.1 == "CRYPTO").map(|h| h.2).unwrap_or(0.0);
                 if coin_price(sym).is_none() {
                     reply(&stream, 400, r#"{"message":"unknown coin"}"#);
-                } else if has_qty || amount.is_none() || limit.is_none() {
-                    reply(&stream, 400, r#"{"message":"a crypto order takes an amount and a limit price, not a quantity"}"#);
-                } else if side == "SELL" {
+                } else if amount.is_some() == qty.is_some() || limit.is_none() {
+                    reply(&stream, 400, r#"{"message":"a crypto order takes an amount or a quantity, and a limit price"}"#);
+                } else if side == "SELL" && qty.unwrap_or(f64::INFINITY) > held + 1e-12 {
                     reply(&stream, 400, r#"{"message":"no coins held"}"#);
                 } else {
-                    let (a, p) = (amount.unwrap(), limit.unwrap());
+                    let p = limit.unwrap();
+                    let (a, q) = match (amount, qty) { (Some(a), _) => (a, a / p), (_, Some(q)) => (q * p, q), _ => (0.0, 0.0) };
                     reply_fmt(&stream, 200, format!(
                         r#"{{"instrument":{},"orderValue":"{:.2}","estimatedCost":"{:.2}","estimatedQuantity":"{:.8}"}}"#,
-                        instrument.unwrap(), a, a, a / p
+                        instrument.unwrap(), a, a, q
                     ));
                 }
             } else if side == "SELL" {
@@ -559,22 +629,14 @@ fn main() {
                     serde_json::from_str::<serde_json::Value>("{}").expect("{}")
                 );
                 let side = parsed.get("orderSide").and_then(|v| v.as_str()).unwrap_or("");
-                // A crypto order sized by amount fills for amount / limit coins.
-                let sized = parsed.get("amount").and_then(|v| v.as_str()).and_then(|a| a.parse::<f64>().ok())
-                    .zip(parsed.get("limitPrice").and_then(|v| v.as_str()).and_then(|p| p.parse::<f64>().ok()))
-                    .map(|(a, p)| format!("{:.8}", a / p));
-                let qty_owned = sized.unwrap_or_else(|| parsed.get("quantity").and_then(|v| v.as_str()).unwrap_or("").to_string());
+                let qty_owned = parsed.get("quantity").and_then(|v| v.as_str()).unwrap_or("").to_string();
                 let qty = qty_owned.as_str();
                 let instr = parsed.get("instrument");
                 let instr_str = if instr.is_some() { instr.unwrap().to_string() } else { r#"{"symbol":"SPY","type":"EQUITY"}"#.to_string() };
-                // A cancelled order reads CANCELLED; a limit of 0.01 rests far
-                // from the market and stays NEW; anything else fills.
-                let cancelled = unsafe { CANCELLED.contains(&order_id) };
-                let resting = parsed.get("limitPrice").and_then(|v| v.as_str()) == Some("0.01");
-                let status = if cancelled { "CANCELLED" } else if resting { "NEW" } else { "FILLED" };
+                let (status, filled, avg) = standing(&order_id, &parsed);
                 reply_fmt(&stream, 200, format!(
-                    r#"{{"orderId":"{}","instrument":{},"side":"{}","quantity":"{}","status":"{}"}}"#,
-                    order_id, instr_str, side, qty, status
+                    r#"{{"orderId":"{}","instrument":{},"side":"{}","quantity":"{}","status":"{}","filledQuantity":"{}","averagePrice":"{}"}}"#,
+                    order_id, instr_str, side, qty, status, filled, avg
                 ));
             } else {
                 reply(&stream, 404, r#"{"message":"no such order"}"#);

@@ -571,8 +571,31 @@ in
         status = "done";
       }
       {
+        id = "nautilus-adapter";
+        title = "Public as a NautilusTrader adapter (data and execution clients); paper on Nautilus's sandbox, live on ours, the same node: a crypto round trip proved both ways";
+        status = "done";
+      }
+      {
         id = "reconcile";
         title = "Reconcile the day's positions against Public's portfolio";
+        # 2026-11-08: positions reconcile through Nautilus on restart (with
+        # their cost basis); open orders and fills are not reported yet.
+        status = "active";
+      }
+      {
+        id = "nautilus-strategies";
+        title = "Every strategy a Nautilus strategy with its close: event-rule maker-only to settlement, agent-option sell to close, baselines beside them; the hand-rolled ledger and read-back deleted";
+        dependsOn = [ "trading/nautilus-adapter" ];
+      }
+      {
+        id = "measured-costs";
+        title = "Latency, spread and fees measured from Public into the sandbox's models; implementation shortfall on every order";
+        dependsOn = [ "trading/nautilus-strategies" ];
+      }
+      {
+        id = "validity-gates";
+        title = "Live gated on forward paper days after the model's cutoff, deflated Sharpe, PBO over logged variants and beating the baseline (Lean)";
+        dependsOn = [ "trading/measured-costs" ];
       }
       {
         id = "approval-link";
