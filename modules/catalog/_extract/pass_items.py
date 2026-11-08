@@ -27,6 +27,14 @@ env = dict(os.environ, PROTON_PASS_KEY_PROVIDER="fs")
 
 TYPES = ["login", "note", "credit-card", "identity", "wifi", "custom"]
 
+# Types pass-cli creates without a template (`item alias create`, `item
+# create ssh-key generate|import`): their fields are their create flags, as
+# its own help names them, read below.
+FLAGGED = {
+    "alias": ["item", "alias", "create"],
+    "ssh-key": ["item", "create", "ssh-key", "generate"],
+}
+
 # App templates for custom items, as a real item stores them: its
 # `extra_fields`, each a name and a typed value.
 observed = {
@@ -67,6 +75,23 @@ for kind in TYPES:
         entry["customFieldKinds"] = kinds
         field_kinds |= set(kinds)
     types[kind] = entry
+
+def flags(argv):
+    r = subprocess.run([binary, *argv, "--help"], capture_output=True, text=True, env=env)
+    if r.returncode != 0:
+        sys.exit(f"pass_items.py: {' '.join(argv)} --help failed: {r.stderr.strip()}")
+    found = []
+    for line in r.stdout.splitlines():
+        word = line.strip().split(" ")[0]
+        if word.startswith("--"):
+            name = word[2:].replace("-", "_")
+            if name not in ("help", "output", "share_id", "vault_name"):
+                found.append(name)
+    return sorted(found)
+
+
+for kind, argv in FLAGGED.items():
+    types[kind] = {"fields": sorted(set(flags(argv)) | {"title"}), "createdBy": " ".join(argv)}
 
 for name, tpl in observed.items():
     unknown = set(tpl["fields"].values()) - field_kinds
