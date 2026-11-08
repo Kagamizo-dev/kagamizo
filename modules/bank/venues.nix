@@ -322,6 +322,25 @@ in
         needs = "the 24-hour session in our order types (equityMarketSession)";
         source = "https://public.com/learn";
       };
+      public-crypto = {
+        name = "Crypto on Public, around the clock";
+        account = "public-mirazo";
+        classes = [ "crypto" ];
+        # Always open but a daily pause of about 22:30 to 23:05 UTC (Public's
+        # help centre, read from a search snippet; to confirm on the page).
+        sessions = daily "UTC" [
+          0
+          1
+          2
+          3
+          4
+          5
+          6
+        ] "23:05" "22:30";
+        active = false;
+        needs = "crypto orders in our Public client (the API takes them); fees from 0.60% a trade at low volume; the daily pause confirmed on Public's own page";
+        source = "https://public.com/api/docs/changelog";
+      };
       kraken = {
         name = "Kraken: spot crypto and US perpetual futures";
         classes = [

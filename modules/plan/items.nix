@@ -850,6 +850,10 @@ in
         dependsOn = [ "bank/public-orders" ];
       }
       {
+        id = "public-crypto";
+        title = "Crypto on Public in our client and its paper days: with Kalshi, all 168 hours of the week on the one account (the daily pause confirmed first)";
+      }
+      {
         id = "daylight";
         title = "Venue sessions in their exchanges' own time zones, turned into UTC by each daylight-saving rule, checked over seven reference weeks";
         status = "done";
