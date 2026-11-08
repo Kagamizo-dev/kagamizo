@@ -838,6 +838,30 @@ in
         dependsOn = [ "identity/mail-agents" ];
       }
       {
+        id = "subscription-tally";
+        title = "Every recurring charge read off the migrated mail (receipts, renewals, bills): `mailbox recurring`, the tally kept private";
+        status = "active";
+      }
+      {
+        id = "aggregator-coverage";
+        title = "Each bank-link provider's coverage of Chase, Capital One, Credit One, Discover and PayPal, card transactions included, verified from its own institution search before one is chosen";
+      }
+      {
+        id = "bank-links";
+        title = "Chase, Capital One and Credit One read daily through the chosen provider (one sign-in each, through Proton Pass)";
+        dependsOn = [ "bank/aggregator-coverage" ];
+      }
+      {
+        id = "bills-on-mercury";
+        title = "Every kept bill on its own Mercury card; nothing kept on Chase (Lean over the tally's decisions)";
+        dependsOn = [ "bank/subscription-tally" ];
+      }
+      {
+        id = "cancellation-notices";
+        title = "A written cancellation notice to every recurring charge not kept, sent through Bridge after one approval, kept as evidence";
+        dependsOn = [ "bank/subscription-tally" ];
+      }
+      {
         id = "credit-file";
         title = "The credit file read from Experian: every line, its limit and status, every inquiry";
       }

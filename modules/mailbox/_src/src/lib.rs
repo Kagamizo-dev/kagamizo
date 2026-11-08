@@ -2,6 +2,8 @@
 //! driver (`mailbox`, src/main.rs) share: where Bridge's keychain keeps its
 //! entries, and secretspec run as the caller.
 
+pub mod recurring;
+
 use std::path::Path;
 use std::process::{Command, Stdio};
 

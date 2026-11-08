@@ -7,6 +7,9 @@
 #   nix run .#mailbox -- login
 #       signs Bridge in to Proton with the `proton` account's login item;
 #       Proton's 2FA code (or a human verification) is the owner's step
+#   nix run .#mailbox -- recurring --out FILE [--since DAYS]
+#       the subscription tally: every recurring charge in the mail, to a
+#       private file; only counts are printed
 #   nix run .#mailbox -- link --account A [--since MIN] [--wait MIN]
 #       the newest declared link in A's mail, on stdout only, for a browser
 #       flow to open; nothing else of the mail is printed
@@ -123,15 +126,24 @@ in
     # Signing Bridge in is a session on the Proton account; reading one
     # account's confirmation mail is a read on that account.
     governance.actions = {
-      proton.bridge = {
-        effect = "session";
-        description = "Sign Proton Mail Bridge in and serve the mailboxes over IMAP on the loopback";
-        command = "mailbox login";
-      };
-      proton.inventory = {
-        effect = "read";
-        description = "Who has written to the account, by sender domain: headers only (modules/migration's inventory)";
-        command = "mailbox senders";
+      proton = {
+        bridge = {
+          effect = "session";
+          description = "Sign Proton Mail Bridge in and serve the mailboxes over IMAP on the loopback";
+          command = "mailbox login";
+        };
+        inventory = {
+          effect = "read";
+          description = "Who has written to the account, by sender domain: headers only (modules/migration's inventory)";
+          command = "mailbox senders";
+        };
+        # The recurring relationships (receipts, renewals, bills), to a
+        # private file: merchant, cadence, amount, card, cancel links.
+        recurring = {
+          effect = "read";
+          description = "Every recurring charge read off receipts, renewal notices and bills, to a private file (the subscription tally)";
+          command = "mailbox recurring";
+        };
       };
     }
     // lib.mapAttrs (_: _: {
@@ -193,7 +205,7 @@ in
               pkgs.coreutils
             ];
             text = builtins.seq top.accounts.checked ''
-              usage="usage: mailbox login | senders [--since DAYS] | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
+              usage="usage: mailbox login | senders [--since DAYS] | recurring --out FILE [--senders FILE] [--since DAYS] | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
               governance-authorize proton:bridge proton
               args=()
               case "''${1:-}" in
@@ -202,6 +214,11 @@ in
                   governance-authorize proton:inventory proton
                   shift
                   args=(senders "$@")
+                  ;;
+                recurring)
+                  governance-authorize proton:recurring proton
+                  shift
+                  args=(recurring "$@")
                   ;;
                 link)
                   [ "''${2:-}" = --account ] || { echo "$usage" >&2; exit 2; }

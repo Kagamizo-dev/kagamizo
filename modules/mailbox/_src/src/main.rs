@@ -19,6 +19,13 @@
 //!       subject or body is printed. The services an account holds are
 //!       read off this (modules/migration's inventory).
 //!
+//!   mailbox recurring --out FILE [--since DAYS] [--wait MIN]
+//!       every recurring relationship read off receipts, renewal notices
+//!       and bills in All Mail (src/recurring.rs): merchant, kind, cadence,
+//!       last amount, card, and cancel links without their tokens, written
+//!       as a JSON array to FILE (mode 600). Only the counts by kind are
+//!       printed; no subject, body or merchant reaches the terminal.
+//!
 //! Bridge's own output is never echoed: its `info` carries the IMAP
 //! password. Only its prompts for the owner and its errors are passed on.
 
@@ -44,7 +51,8 @@ fn main() -> Result<()> {
         Some("login") => login(),
         Some("link") => link(&Query::parse(&args[1..])?),
         Some("senders") => senders(&args[1..]),
-        _ => bail!("usage: mailbox login | link --to A --from D... --host H... [--path P] [--since M] [--wait M] | senders [--since DAYS]"),
+        Some("recurring") => recurring(&args[1..]),
+        _ => bail!("usage: mailbox login | link --to A --from D... --host H... [--path P] [--since M] [--wait M] | senders [--since DAYS] | recurring --out FILE [--since DAYS]"),
     }
 }
 
@@ -440,6 +448,95 @@ fn with_imap<T>(wait_min: u64, f: impl FnOnce(u16, &str, &str, &[u8]) -> Result<
     bridge.stop()?;
     home.save()?;
     result
+}
+
+/// The recurring relationships in All Mail, to a private file.
+fn recurring(args: &[String]) -> Result<()> {
+    let usage = "usage: mailbox recurring --out FILE [--senders FILE] [--since DAYS] [--wait MIN]";
+    let (mut since_days, mut wait_min, mut out) = (36500u64, 45u64, None::<PathBuf>);
+    let mut senders_out = None::<PathBuf>;
+    let mut it = args.iter();
+    while let Some(flag) = it.next() {
+        let v = it.next().context(usage)?;
+        match flag.as_str() {
+            "--since" => since_days = v.parse().context("--since DAYS")?,
+            "--wait" => wait_min = v.parse().context("--wait MIN")?,
+            "--out" => out = Some(PathBuf::from(v)),
+            "--senders" => senders_out = Some(PathBuf::from(v)),
+            _ => bail!(usage),
+        }
+    }
+    let out = out.context(usage)?;
+    let charges = with_imap(wait_min, |port, user, pass, pem| {
+        let tls = native_tls::TlsConnector::builder()
+            .add_root_certificate(native_tls::Certificate::from_pem(pem)?)
+            .disable_built_in_roots(true)
+            .danger_accept_invalid_hostnames(true)
+            .build()?;
+        let client = imap::connect_starttls(("127.0.0.1", port), "127.0.0.1", &tls)?;
+        let mut session = client.login(user, pass).map_err(|e| e.0).context("Bridge's IMAP login")?;
+        session.select("All Mail")?;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+        let uids = session.uid_search(format!("SINCE {}", imap_date(now.saturating_sub(since_days * 86400))))?;
+        let mut uids: Vec<u32> = uids.into_iter().collect();
+        uids.sort_unstable();
+        // Headers first (the sender inventory too); bodies only of mail
+        // whose subject reads as a charge.
+        let mut wanted = vec![];
+        let mut tally: std::collections::BTreeMap<String, Sender> = Default::default();
+        for chunk in uids.chunks(500) {
+            let set = chunk.iter().map(u32::to_string).collect::<Vec<_>>().join(",");
+            for fetch in session.uid_fetch(set, "(UID BODY.PEEK[HEADER.FIELDS (FROM DATE SUBJECT)])")?.iter() {
+                if let Some(h) = fetch.header() {
+                    tally_header(&mut tally, h);
+                }
+                let subject = fetch
+                    .header()
+                    .and_then(|h| mailparse::parse_headers(h).ok())
+                    .and_then(|(hs, _)| hs.iter().find(|h| h.get_key().eq_ignore_ascii_case("subject")).map(|h| h.get_value()))
+                    .unwrap_or_default();
+                if let (Some(uid), true) = (fetch.uid, mailbox::recurring::charge_subject(&subject)) {
+                    wanted.push(uid);
+                }
+            }
+        }
+        let mut charges = vec![];
+        for chunk in wanted.chunks(100) {
+            let set = chunk.iter().map(u32::to_string).collect::<Vec<_>>().join(",");
+            for fetch in session.uid_fetch(set, "BODY.PEEK[]")?.iter() {
+                if let Some(c) = fetch.body().and_then(mailbox::recurring::charge) {
+                    charges.push(c);
+                }
+            }
+        }
+        session.logout().ok();
+        let senders = tally.into_iter().map(|(d, s)| s.json(&d)).collect::<Vec<_>>();
+        Ok((uids.len(), wanted.len(), charges, senders))
+    })?;
+    let (scanned, fetched, charges, senders) = charges;
+    if let Some(path) = &senders_out {
+        use std::os::unix::fs::OpenOptionsExt;
+        let mut f = std::fs::OpenOptions::new().write(true).create(true).truncate(true).mode(0o600).open(path)?;
+        f.write_all((senders.join("\n") + "\n").as_bytes())?;
+    }
+    let rels = mailbox::recurring::relationships(&charges);
+    let json = format!("[\n{}\n]\n", rels.iter().map(|r| r.json()).collect::<Vec<_>>().join(",\n"));
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        let mut f = std::fs::OpenOptions::new().write(true).create(true).truncate(true).mode(0o600).open(&out)?;
+        f.write_all(json.as_bytes())?;
+    }
+    let count = |k: mailbox::recurring::Kind| rels.iter().filter(|r| r.recurring() && r.kind == k).count();
+    let monthly: f64 = rels.iter().filter(|r| r.recurring()).map(|r| r.per_month()).sum();
+    println!(
+        "{{\"scanned\":{scanned},\"fetched\":{fetched},\"charges\":{},\"relationships\":{},\"recurring\":{{\"bill\":{},\"subscription\":{},\"receipt\":{}}},\"per_month_usd\":{monthly:.2}}}",
+        charges.len(),
+        rels.len(),
+        count(mailbox::recurring::Kind::Bill),
+        count(mailbox::recurring::Kind::Subscription),
+        count(mailbox::recurring::Kind::Receipt),
+    );
+    Ok(())
 }
 
 /// Who has written to the account, by sender domain (headers only).
