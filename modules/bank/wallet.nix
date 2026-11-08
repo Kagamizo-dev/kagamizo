@@ -230,164 +230,183 @@ in
       };
     };
 
-    # The bank's own cards first: the accounts that hold money, as Pass
-    # holds them today (read 2026-11-08 by title and type only).
-    wallet.cards = {
-      mercury-jingzo = {
-        type = "login";
-        vault = "Jingzo-LLC";
-        title = "Mercury";
-        account = "mercury-jingzo";
-        mint = "human:sign-up";
-        secondFactor = {
-          method = "passkey";
-          offered = [
+    # Every Mercury card, as the credit-card item `cards vault` writes for
+    # it in its account's owner's vault (../mercury/cards.nix): minted by the
+    # owner, then vaulted by automation.
+    wallet.cards =
+      lib.mapAttrs' (
+        n: c:
+        lib.nameValuePair "mercury-card-${n}" {
+          type = "credit-card";
+          vault = entities.${config.accounts.held.${c.account}.owner}.vault;
+          title = "card-${n}";
+          fields = [
+            "cardholder_name"
+            "number"
+            "expiration_date"
+            "cvv"
+          ];
+          inherit (c) account why;
+          mint = "human:mint-card";
+          target = "keep";
+        }
+      ) config.mercury.cards
+      // {
+        mercury-jingzo = {
+          type = "login";
+          vault = "Jingzo-LLC";
+          title = "Mercury";
+          account = "mercury-jingzo";
+          mint = "human:sign-up";
+          secondFactor = {
+            method = "passkey";
+            offered = [
+              "passkey"
+              "security-key"
+            ];
+          };
+          devices = [
+            {
+              device = "pixel-9a";
+              as = "passkey";
+            }
+          ];
+          target = "keep";
+          why = "Jingzo's treasury; its passkey was registered from the phone";
+        };
+        mercury-mirazo = {
+          type = "login";
+          vault = "Mirazo-Root";
+          title = "Mercury";
+          account = "mercury-mirazo";
+          mint = "human:sign-up";
+          secondFactor.offered = [
             "passkey"
             "security-key"
           ];
+          target = "keep";
+          why = "the owner's personal Mercury";
         };
-        devices = [
-          {
-            device = "pixel-9a";
-            as = "passkey";
-          }
-        ];
-        target = "keep";
-        why = "Jingzo's treasury; its passkey was registered from the phone";
-      };
-      mercury-mirazo = {
-        type = "login";
-        vault = "Mirazo-Root";
-        title = "Mercury";
-        account = "mercury-mirazo";
-        mint = "human:sign-up";
-        secondFactor.offered = [
-          "passkey"
-          "security-key"
-        ];
-        target = "keep";
-        why = "the owner's personal Mercury";
-      };
-      public-mirazo = {
-        type = "login";
-        vault = "Mirazo-Root";
-        title = "Public";
-        account = "public-mirazo";
-        mint = "human:sign-up";
-        secondFactor.method = "sms";
-        earns = true;
-        target = "keep";
-        why = "the brokerage: every trade; Public offers no security key (its help pages show SMS only)";
-      };
-      public-api-mirazo = {
-        type = "custom";
-        template = "api-credential";
-        vault = "Mirazo-Root";
-        title = "Public";
-        fields = [
-          "Secret"
-          "Permissions"
-        ];
-        account = "public-mirazo";
-        mint = "human:console-credential";
-        holders.trading-mirazo = [ "read" ];
-        earns = true;
-        target = "keep";
-        why = "the API credential the trading node reads";
-      };
-      capital-one-mirazo = {
-        type = "login";
-        vault = "Mirazo-Root";
-        title = "CapitalOne";
-        account = "capital-one-mirazo";
-        mint = "human:sign-up";
-        target = "keep";
-        why = "the one outside card in the owner's target wallet";
-      };
-      capital-one-venture-x = {
-        type = "credit-card";
-        vault = "Mirazo-Root";
-        title = "Capital One - Venture X";
-        account = "capital-one-mirazo";
-        mint = "human:mint-card";
-        target = "keep";
-        why = "the Venture X ($10,000 line)";
-      };
-      chase-mirazo = {
-        type = "login";
-        vault = "Mirazo-Root";
-        title = "Chase";
-        account = "chase-mirazo";
-        mint = "human:sign-up";
-        target = "close";
-        why = "closes once no kept bill rests on Chase";
-      };
-      credit-one-mirazo = {
-        type = "login";
-        vault = "Mirazo-Root";
-        title = "creditonebank.com";
-        account = "credit-one-mirazo";
-        mint = "human:sign-up";
-        target = "close";
-        why = "closes once no kept bill rests on it";
-      };
-      discover-mirazo = {
-        type = "login";
-        vault = "Mirazo-Root";
-        title = "card.discover.com";
-        account = "discover-mirazo";
-        mint = "human:sign-up";
-        why = "its card moved onto Capital One's platform in 2026";
-      };
-      experian = {
-        type = "login";
-        vault = "Mirazo-Root";
-        title = "Experian";
-        account = "experian";
-        mint = "human:sign-up";
-        target = "keep";
-        why = "the credit file";
-      };
-      paypal-mirazo = {
-        type = "login";
-        vault = "Mirazo-Root";
-        title = "paypal.com";
-        account = "paypal-mirazo";
-        mint = "human:sign-up";
-        why = "PayPal";
-      };
-      proton = {
-        type = "login";
-        vault = "Mirazo-Root";
-        title = "Proton";
-        account = "proton";
-        mint = "human:sign-up";
-        secondFactor = {
-          method = "totp";
-          offered = [
-            "security-key"
-            "totp"
+        public-mirazo = {
+          type = "login";
+          vault = "Mirazo-Root";
+          title = "Public";
+          account = "public-mirazo";
+          mint = "human:sign-up";
+          secondFactor.method = "sms";
+          earns = true;
+          target = "keep";
+          why = "the brokerage: every trade; Public offers no security key (its help pages show SMS only)";
+        };
+        public-api-mirazo = {
+          type = "custom";
+          template = "api-credential";
+          vault = "Mirazo-Root";
+          title = "Public";
+          fields = [
+            "Secret"
+            "Permissions"
           ];
+          account = "public-mirazo";
+          mint = "human:console-credential";
+          holders.trading-mirazo = [ "read" ];
+          earns = true;
+          target = "keep";
+          why = "the API credential the trading node reads";
         };
-        target = "keep";
-        why = "the account every card lives in; Bridge signs in with its TOTP; a YubiKey would raise it";
+        capital-one-mirazo = {
+          type = "login";
+          vault = "Mirazo-Root";
+          title = "CapitalOne";
+          account = "capital-one-mirazo";
+          mint = "human:sign-up";
+          target = "keep";
+          why = "the one outside card in the owner's target wallet";
+        };
+        capital-one-venture-x = {
+          type = "credit-card";
+          vault = "Mirazo-Root";
+          title = "Capital One - Venture X";
+          account = "capital-one-mirazo";
+          mint = "human:mint-card";
+          target = "keep";
+          why = "the Venture X ($10,000 line)";
+        };
+        chase-mirazo = {
+          type = "login";
+          vault = "Mirazo-Root";
+          title = "Chase";
+          account = "chase-mirazo";
+          mint = "human:sign-up";
+          target = "close";
+          why = "closes once no kept bill rests on Chase";
+        };
+        credit-one-mirazo = {
+          type = "login";
+          vault = "Mirazo-Root";
+          title = "creditonebank.com";
+          account = "credit-one-mirazo";
+          mint = "human:sign-up";
+          target = "close";
+          why = "closes once no kept bill rests on it";
+        };
+        discover-mirazo = {
+          type = "login";
+          vault = "Mirazo-Root";
+          title = "card.discover.com";
+          account = "discover-mirazo";
+          mint = "human:sign-up";
+          why = "its card moved onto Capital One's platform in 2026";
+        };
+        experian = {
+          type = "login";
+          vault = "Mirazo-Root";
+          title = "Experian";
+          account = "experian";
+          mint = "human:sign-up";
+          target = "keep";
+          why = "the credit file";
+        };
+        paypal-mirazo = {
+          type = "login";
+          vault = "Mirazo-Root";
+          title = "paypal.com";
+          account = "paypal-mirazo";
+          mint = "human:sign-up";
+          why = "PayPal";
+        };
+        proton = {
+          type = "login";
+          vault = "Mirazo-Root";
+          title = "Proton";
+          account = "proton";
+          mint = "human:sign-up";
+          secondFactor = {
+            method = "totp";
+            offered = [
+              "security-key"
+              "totp"
+            ];
+          };
+          target = "keep";
+          why = "the account every card lives in; Bridge signs in with its TOTP; a YubiKey would raise it";
+        };
+        mirazo-identity = {
+          type = "identity";
+          vault = "Mirazo-Root";
+          title = "ID";
+          fields = [
+            "full_name"
+            "birthdate"
+            "passport_number"
+            "license_number"
+          ];
+          mint = "human:sign-up";
+          holders.legal-mirazo = [ "read" ];
+          target = "keep";
+          why = "the owner's one identity card: passport and driver's licence together";
+        };
       };
-      mirazo-identity = {
-        type = "identity";
-        vault = "Mirazo-Root";
-        title = "ID";
-        fields = [
-          "full_name"
-          "birthdate"
-          "passport_number"
-          "license_number"
-        ];
-        mint = "human:sign-up";
-        holders.legal-mirazo = [ "read" ];
-        target = "keep";
-        why = "the owner's one identity card: passport and driver's licence together";
-      };
-    };
 
     perSystem =
       { config, pkgs, ... }:
