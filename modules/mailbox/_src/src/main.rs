@@ -26,6 +26,13 @@
 //!       as a JSON array to FILE (mode 600). Only the counts by kind are
 //!       printed; no subject, body or merchant reaches the terminal.
 //!
+//!   mailbox send --batch FILE --log FILE
+//!       sends a batch of notices (a JSON array of {from, to, subject,
+//!       body}) through Bridge's own SMTP, but only a batch whose SHA-256
+//!       the owner approved (MAILBOX_APPROVED, from mailbox.approvedBatches);
+//!       each sent message's Message-ID is logged to FILE, nothing printed
+//!       but the count.
+//!
 //! Bridge's own output is never echoed: its `info` carries the IMAP
 //! password. Only its prompts for the owner and its errors are passed on.
 
@@ -52,6 +59,7 @@ fn main() -> Result<()> {
         Some("link") => link(&Query::parse(&args[1..])?),
         Some("senders") => senders(&args[1..]),
         Some("recurring") => recurring(&args[1..]),
+        Some("send") => send(&args[1..]),
         _ => bail!("usage: mailbox login | link --to A --from D... --host H... [--path P] [--since M] [--wait M] | senders [--since DAYS] | recurring --out FILE [--since DAYS]"),
     }
 }
@@ -414,6 +422,21 @@ fn imap_date(secs: u64) -> String {
 /// Bridge signed in and synced, then `f` with its IMAP port, user, password
 /// and certificate; Bridge is stopped and its vault saved after.
 fn with_imap<T>(wait_min: u64, f: impl FnOnce(u16, &str, &str, &[u8]) -> Result<T>) -> Result<T> {
+    with_bridge(Some(wait_min), |c| f(c.imap, &c.user, &c.pass, &c.pem))
+}
+
+/// What Bridge serves on the loopback once signed in and synced.
+struct Served {
+    imap: u16,
+    smtp: u16,
+    user: String,
+    pass: Zeroizing<String>,
+    pem: Vec<u8>,
+}
+
+/// `wait_min`: how long to wait for the mailbox's sync (None: not at all,
+/// for sending, which needs no synced mailbox).
+fn with_bridge<T>(wait_min: Option<u64>, f: impl FnOnce(&Served) -> Result<T>) -> Result<T> {
     let home = Home::new()?;
     if !home.restore()? {
         bail!("Bridge has no stored session: run `mailbox login` first");
@@ -421,12 +444,14 @@ fn with_imap<T>(wait_min: u64, f: impl FnOnce(u16, &str, &str, &[u8]) -> Result<
     let mut bridge = Bridge::start(&home)?;
     let result = (|| -> Result<T> {
         bridge.settle()?;
-        let seen = bridge.seen;
-        bridge.seen = 0;
-        bridge
-            .wait(&["A sync has finished"], wait_min * 60 + 600)
-            .context("Bridge's sync did not finish")?;
-        bridge.seen = bridge.seen.max(seen);
+        if let Some(wait_min) = wait_min {
+            let seen = bridge.seen;
+            bridge.seen = 0;
+            bridge
+                .wait(&["A sync has finished"], wait_min * 60 + 600)
+                .context("Bridge's sync did not finish")?;
+            bridge.seen = bridge.seen.max(seen);
+        }
         bridge.send("info")?;
         bridge.wait(&["IMAP port:"], 60)?;
         let port: u16 = bridge.line(30)?.trim().parse().context("IMAP port")?;
@@ -434,6 +459,8 @@ fn with_imap<T>(wait_min: u64, f: impl FnOnce(u16, &str, &str, &[u8]) -> Result<
         let user = bridge.line(30)?.trim().to_owned();
         bridge.wait(&["Password:"], 30)?;
         let pass = Zeroizing::new(bridge.line(30)?.trim().to_owned());
+        bridge.wait(&["SMTP port:"], 30)?;
+        let smtp: u16 = bridge.line(30)?.trim().parse().context("SMTP port")?;
         let certs = home.private.join("cert");
         std::fs::create_dir_all(&certs)?;
         bridge.send("cert export")?;
@@ -443,11 +470,76 @@ fn with_imap<T>(wait_min: u64, f: impl FnOnce(u16, &str, &str, &[u8]) -> Result<
         bridge.wait(&["exported to"], 30)?;
         let pem = std::fs::read(certs.join("cert.pem"));
         std::fs::remove_dir_all(&certs).ok();
-        f(port, &user, &pass, &pem?)
+        f(&Served { imap: port, smtp, user, pass, pem: pem? })
     })();
     bridge.stop()?;
     home.save()?;
     result
+}
+
+/// One notice of a batch.
+#[derive(serde::Deserialize)]
+struct Notice {
+    from: String,
+    to: String,
+    subject: String,
+    body: String,
+}
+
+/// A batch the owner approved, by its SHA-256, sent through Bridge's SMTP.
+fn send(args: &[String]) -> Result<()> {
+    use sha2::Digest;
+    let usage = "usage: mailbox send --batch FILE --log FILE";
+    let (mut batch, mut log) = (None::<PathBuf>, None::<PathBuf>);
+    let mut it = args.iter();
+    while let Some(flag) = it.next() {
+        let v = it.next().context(usage)?;
+        match flag.as_str() {
+            "--batch" => batch = Some(PathBuf::from(v)),
+            "--log" => log = Some(PathBuf::from(v)),
+            _ => bail!(usage),
+        }
+    }
+    let (batch, log) = (batch.context(usage)?, log.context(usage)?);
+    let raw = std::fs::read(&batch)?;
+    let digest: String = sha2::Sha256::digest(&raw).iter().map(|b| format!("{b:02x}")).collect();
+    let approved = std::env::var("MAILBOX_APPROVED").unwrap_or_default();
+    if !approved.split(',').any(|a| a.trim() == digest) {
+        bail!("batch {digest} is not approved (mailbox.approvedBatches); nothing sent");
+    }
+    let notices: Vec<Notice> = serde_json::from_slice(&raw).context("the batch: a JSON array of {from, to, subject, body}")?;
+    let sent = with_bridge(None, |c| {
+        use lettre::transport::smtp::authentication::Credentials;
+        use lettre::transport::smtp::client::{Certificate, Tls, TlsParameters};
+        let tls = TlsParameters::builder("127.0.0.1".into())
+            .add_root_certificate(Certificate::from_pem(&c.pem)?)
+            .dangerous_accept_invalid_hostnames(true)
+            .build()?;
+        let smtp = lettre::SmtpTransport::builder_dangerous("127.0.0.1")
+            .port(c.smtp)
+            .tls(Tls::Required(tls))
+            .credentials(Credentials::new(c.user.clone(), c.pass.to_string()))
+            .build();
+        let mut ids = vec![];
+        for n in &notices {
+            let email = lettre::Message::builder()
+                .from(n.from.parse()?)
+                .to(n.to.parse()?)
+                .subject(n.subject.clone())
+                .body(n.body.clone())?;
+            let id = email.headers().get_raw("Message-ID").unwrap_or_default().to_string();
+            lettre::Transport::send(&smtp, &email)?;
+            ids.push(format!("{{\"to\":\"{}\",\"message_id\":\"{}\"}}", n.to.replace('"', ""), id.replace('"', "")));
+        }
+        Ok(ids)
+    })?;
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        let mut f = std::fs::OpenOptions::new().append(true).create(true).mode(0o600).open(&log)?;
+        f.write_all((sent.join("\n") + "\n").as_bytes())?;
+    }
+    println!("{{\"batch\":\"{digest}\",\"sent\":{}}}", sent.len());
+    Ok(())
 }
 
 /// The recurring relationships in All Mail, to a private file.

@@ -17,6 +17,9 @@ pub struct Charge {
     pub card: Option<String>,
     pub kind: Kind,
     pub cancel: Vec<String>,
+    /// Addresses a person reads at the merchant: Reply-To, and support or
+    /// billing addresses on its own domain named in the mail.
+    pub contacts: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -187,6 +190,29 @@ pub fn cancel_links(body: &str) -> Vec<String> {
     out.into_iter().take(3).collect()
 }
 
+/// Addresses on the merchant's own domain that a person reads: support,
+/// help, billing, care, members, cancel; never no-reply.
+pub fn contacts(text: &str, domain: &str) -> Vec<String> {
+    let mut out = BTreeSet::new();
+    for word in text.split(|c: char| c.is_whitespace() || "<>()[]\"',;:".contains(c)) {
+        let w = word.trim_end_matches('.').to_lowercase();
+        let Some((local, host)) = w.split_once('@') else { continue };
+        if local.is_empty() || !host.contains('.') || base_domain(host) != domain {
+            continue;
+        }
+        let human = ["support", "help", "billing", "care", "member", "cancel", "service", "account", "customer"]
+            .iter()
+            .any(|k| local.contains(k));
+        let robot = ["noreply", "no-reply", "donotreply", "do-not-reply", "mailer", "bounce", "notification"]
+            .iter()
+            .any(|k| local.contains(k));
+        if human && !robot {
+            out.insert(w);
+        }
+    }
+    out.into_iter().take(3).collect()
+}
+
 /// What a raw message says about a charge, if it reads as one.
 pub fn charge(raw: &[u8]) -> Option<Charge> {
     let mail = mailparse::parse_mail(raw).ok()?;
@@ -214,6 +240,17 @@ pub fn charge(raw: &[u8]) -> Option<Charge> {
     } else {
         Kind::Receipt
     };
+    let contact_list = {
+        let reply = header("reply-to").unwrap_or_default();
+        let mut c = contacts(&format!("{reply} {}", plain(&raw_body)), &domain);
+        let reply = reply.rsplit('<').next().unwrap_or("").trim_end_matches(['>', ' ', '"']).to_lowercase();
+        let robot = ["noreply", "no-reply", "donotreply", "do-not-reply"].iter().any(|k| reply.contains(k));
+        if reply.contains('@') && !robot && !c.contains(&reply) {
+            c.insert(0, reply);
+        }
+        c.truncate(3);
+        c
+    };
     Some(Charge {
         merchant: if display.is_empty() { domain.clone() } else { display },
         domain,
@@ -223,6 +260,7 @@ pub fn charge(raw: &[u8]) -> Option<Charge> {
         card: card(&text),
         kind,
         cancel: cancel_links(&raw_body),
+        contacts: contact_list,
     })
 }
 
@@ -308,6 +346,7 @@ pub struct Relationship {
     pub cards: Vec<String>,
     pub to: Vec<String>,
     pub cancel: Vec<String>,
+    pub contacts: Vec<String>,
 }
 
 impl Relationship {
@@ -324,7 +363,7 @@ impl Relationship {
         let s = |v: &str| v.replace(['"', '\\'], "");
         let list = |v: &[String]| v.iter().map(|x| format!("\"{}\"", s(x))).collect::<Vec<_>>().join(",");
         format!(
-            "{{\"domain\":\"{}\",\"merchant\":\"{}\",\"kind\":\"{}\",\"cadence\":\"{}\",\"recurring\":{},\"charges\":{},\"first\":{},\"last\":{},\"last_amount\":{},\"per_month\":{:.2},\"cards\":[{}],\"to\":[{}],\"cancel\":[{}],\"decision\":null}}",
+            "{{\"domain\":\"{}\",\"merchant\":\"{}\",\"kind\":\"{}\",\"cadence\":\"{}\",\"recurring\":{},\"charges\":{},\"first\":{},\"last\":{},\"last_amount\":{},\"per_month\":{:.2},\"cards\":[{}],\"to\":[{}],\"cancel\":[{}],\"contacts\":[{}],\"decision\":null}}",
             s(&self.domain),
             s(&self.merchant),
             self.kind.name(),
@@ -338,6 +377,7 @@ impl Relationship {
             list(&self.cards),
             list(&self.to),
             list(&self.cancel),
+            list(&self.contacts),
         )
     }
 }
@@ -365,6 +405,7 @@ pub fn relationships(charges: &[Charge]) -> Vec<Relationship> {
             cards: cs.iter().filter_map(|c| c.card.clone()).collect::<BTreeSet<_>>().into_iter().collect(),
             to: cs.iter().map(|c| c.to.clone()).filter(|t| !t.is_empty()).collect::<BTreeSet<_>>().into_iter().collect(),
             cancel: cs.iter().flat_map(|c| c.cancel.clone()).collect::<BTreeSet<_>>().into_iter().take(3).collect(),
+            contacts: cs.iter().flat_map(|c| c.contacts.clone()).collect::<BTreeSet<_>>().into_iter().take(3).collect(),
         });
     }
     out.sort_by(|a, b| b.per_month().partial_cmp(&a.per_month()).unwrap_or(std::cmp::Ordering::Equal));
@@ -421,6 +462,12 @@ mod tests {
         assert_eq!(s.cancel, vec!["https://streamer.com/account/cancel".to_string()]);
         assert!((s.per_month() - 15.49).abs() < 1e-9);
         assert!(r.iter().all(|r| r.recurring()));
+    }
+
+    #[test]
+    fn contacts_are_the_merchants_own_human_addresses() {
+        let t = "questions? write support@streamer.com or billing@mail.streamer.com, not noreply@streamer.com or help@other.com";
+        assert_eq!(contacts(t, "streamer.com"), vec!["billing@mail.streamer.com".to_string(), "support@streamer.com".to_string()]);
     }
 
     #[test]

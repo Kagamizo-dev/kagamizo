@@ -10,6 +10,9 @@
 #   nix run .#mailbox -- recurring --out FILE [--since DAYS]
 #       the subscription tally: every recurring charge in the mail, to a
 #       private file; only counts are printed
+#   nix run .#mailbox -- send --batch FILE --log FILE
+#       a batch of notices the owner approved (mailbox.approvedBatches holds
+#       its SHA-256), sent from their address through Bridge's SMTP
 #   nix run .#mailbox -- link --account A [--since MIN] [--wait MIN]
 #       the newest declared link in A's mail, on stdout only, for a browser
 #       flow to open; nothing else of the mail is printed
@@ -82,6 +85,12 @@ let
   }) withMail;
 in
 {
+  options.mailbox.approvedBatches = mkOption {
+    type = types.listOf (types.strMatching "[0-9a-f]{64}");
+    default = [ ];
+    description = "SHA-256 digests of notice batches the owner approved, each recorded on the owner's word in the commit that adds it; `mailbox send` sends no other batch.";
+  };
+
   options.mailbox.senders = mkOption {
     type = types.attrsOf sender;
     default = { };
@@ -139,6 +148,13 @@ in
         };
         # The recurring relationships (receipts, renewals, bills), to a
         # private file: merchant, cadence, amount, card, cancel links.
+        # Sending a batch of notices the owner approved, from their own
+        # address, through Bridge's SMTP: a write on the mail account.
+        send = {
+          effect = "write";
+          description = "Send a batch of notices the owner approved by its digest (mailbox.approvedBatches), through Bridge";
+          command = "mailbox send";
+        };
         recurring = {
           effect = "read";
           description = "Every recurring charge read off receipts, renewal notices and bills, to a private file (the subscription tally)";
@@ -205,7 +221,7 @@ in
               pkgs.coreutils
             ];
             text = builtins.seq top.accounts.checked ''
-              usage="usage: mailbox login | senders [--since DAYS] | recurring --out FILE [--senders FILE] [--since DAYS] | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
+              usage="usage: mailbox login | senders [--since DAYS] | recurring --out FILE [--senders FILE] [--since DAYS] | send --batch FILE --log FILE | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
               governance-authorize proton:bridge proton
               args=()
               case "''${1:-}" in
@@ -214,6 +230,11 @@ in
                   governance-authorize proton:inventory proton
                   shift
                   args=(senders "$@")
+                  ;;
+                send)
+                  governance-authorize proton:send proton
+                  shift
+                  args=(send "$@")
                   ;;
                 recurring)
                   governance-authorize proton:recurring proton
@@ -246,6 +267,7 @@ in
               chmod 700 "$private"
               trap 'rm -rf "$private"' EXIT
               MAILBOX_PRIVATE=$private \
+                MAILBOX_APPROVED=${lib.escapeShellArg (lib.concatStringsSep "," top.mailbox.approvedBatches)} \
                 MAILBOX_BRIDGE=${lib.getExe pkgs.protonmail-bridge} \
                 MAILBOX_KEYCHAIN_DIR=${keychain}/bin \
                 MAILBOX_SECRETSPEC_FILE=${config.packages.secretspec-toml} \
