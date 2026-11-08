@@ -852,6 +852,11 @@ in
         dependsOn = [ "bank/aggregator-coverage" ];
       }
       {
+        id = "transaction-audit";
+        title = "Audit transaction history across every account (`bank-audit`): what recurs, where it rests, duplicates, fees, what moves before Chase and Credit One close";
+        status = "active";
+      }
+      {
         id = "bills-on-mercury";
         title = "Every kept bill on its own Mercury card; nothing kept on Chase (Lean over the tally's decisions)";
         dependsOn = [ "bank/subscription-tally" ];
