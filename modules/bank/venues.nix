@@ -349,7 +349,7 @@ in
         ];
         sessions = allWeek;
         active = false;
-        needs = "a Kraken account (the owner's sign-up; passkey or authenticator, no SMS), and a key that trades without withdrawals";
+        needs = "set aside (2026-11-08): Public's crypto covers every hour; only for lower crypto fees or perpetual futures, as the owner's sign-up";
         source = "https://docs.kraken.com/exchange/guides/rest/api-keys";
       };
       coinbase = {

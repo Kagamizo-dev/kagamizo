@@ -237,7 +237,7 @@
       crypto-venue = {
         question = "Open a crypto account for trading around the clock: Kraken (passkey or authenticator, keys that trade without withdrawals, a stable NautilusTrader adapter) or Coinbase? It is your sign-up; nothing is deposited until its paper days hold.";
         recommended = "Kraken.";
-        answer = "Kraken (2026-11-08).";
+        answer = "Public's own crypto (2026-11-08): with Kalshi it covers every hour on the account already held; Kraken (chosen earlier the same day) is not needed for now, only for lower crypto fees or perpetual futures.";
       };
       ibkr-gateway = {
         question = "Run IBKR's Gateway on the host for futures across time zones (CME, Eurex, ICE Europe, Osaka, ASX) and forex: it signs in daily with the LLC's authenticator code, which would be held in Proton Pass for it. Allow that daily sign-in?";
@@ -255,6 +255,7 @@
       account-hub = {
         question = "Consolidate the bank's markets on as few accounts as possible: IBKR (the LLC's, already open: stocks and options here and abroad, futures on about 150 venues, forex, spot crypto, ForecastTrader event contracts, about 27 currencies in one account) plus Kraken for round-the-clock crypto and perpetuals, with Public kept only while its paper days run? It means trading through the LLC (still on your 1040, as QSearch is disregarded) and IBKR's daily Gateway sign-in.";
         recommended = "Yes, after Kraken's paper days: two accounts reach almost every market. No exchange membership or registration of our own adds anything at our scale: a clearing firm is still required, and trading our own money needs no broker-dealer registration.";
+        answer = "Keep Public as it is (2026-11-08): it stays the trading account; no consolidation onto IBKR.";
       };
     };
   };

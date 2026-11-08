@@ -128,32 +128,9 @@ in
       submission-approval = human "account" "the owner approves the terms, disclosures and attestations, once, as one approval";
     };
 
-    accounts.dossiers = {
-      kraken = {
-        provider = "kraken";
-        kind = "person";
-        entity = "mirazo";
-        requires = [
-          "legal-name"
-          "date-of-birth"
-          "citizenship"
-          "ssn"
-          "residential-address"
-          "proof-of-address"
-          "id-document"
-          "employment"
-          "income-and-net-worth"
-          "trading-experience"
-          "login-email"
-          "api-key-slot"
-          "password-or-passkey"
-          "second-factor"
-          "liveness-check"
-          "submission-approval"
-        ];
-        source = "standard US exchange KYC (Kraken's own field list not re-verified, 2026-11-08)";
-      };
-    };
+    # No account is waiting to be opened (Kraken was set aside on 2026-11-08:
+    # Public's own crypto covers every hour).
+    accounts.dossiers = { };
 
     governance.problems = lib.concatLists (
       lib.mapAttrsToList (

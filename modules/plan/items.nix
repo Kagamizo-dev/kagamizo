@@ -831,13 +831,6 @@ in
       }
       (
         {
-          id = "crypto-venue";
-          title = "Kraken for around the clock: its typed Pass item prepared, the sign-up driven by the agents, a trade-only key, its NautilusTrader adapter, paper days";
-        }
-        // action
-      )
-      (
-        {
           id = "ibkr-gateway";
           title = "IBKR's Gateway on the host: futures across time zones and forex through the LLC's account, on NautilusTrader's adapter";
           dependsOn = [ "trading/nautilus-rust" ];
@@ -860,17 +853,15 @@ in
       }
       {
         id = "around-the-clock";
-        title = "Require every hour of the week covered (166 of 168 today: Kalshi's Thursday maintenance)";
-        dependsOn = [ "bank/crypto-venue" ];
+        title = "Require every hour of the week covered: Public's crypto with Kalshi gives 168 of 168";
+        dependsOn = [ "bank/public-crypto" ];
       }
-      (
-        {
-          id = "account-hub";
-          title = "As few accounts as reach every market: IBKR as the hub, Kraken for round-the-clock crypto, Public retired once its paper days are done";
-          dependsOn = [ "bank/crypto-venue" ];
-        }
-        // owner "account-hub"
-      )
+      {
+        id = "account-hub";
+        title = "Public kept as the trading account (the owner's choice, 2026-11-08); IBKR held as the LLC's, unused for now";
+        status = "done";
+        decision = "account-hub";
+      }
       {
         id = "holidays";
         title = "Federal holidays in due dates (MLK Day falls on January 15 in 2029)";
