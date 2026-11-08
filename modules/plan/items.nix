@@ -289,6 +289,7 @@ in
     // track "identity" [
       {
         id = "account-dossiers";
+        status = "active";
         title = "Every account a typed Proton Pass item holding every field its provider asks for (identity, address, tax ids, documents by reference), prepared by the agents through pass-cli; only the password or passkey, second factors and liveness left to the owner";
       }
       {
@@ -858,6 +859,14 @@ in
         title = "Require every hour of the week covered (166 of 168 today: Kalshi's Thursday maintenance)";
         dependsOn = [ "bank/crypto-venue" ];
       }
+      (
+        {
+          id = "account-hub";
+          title = "As few accounts as reach every market: IBKR as the hub, Kraken for round-the-clock crypto, Public retired once its paper days are done";
+          dependsOn = [ "bank/crypto-venue" ];
+        }
+        // owner "account-hub"
+      )
       {
         id = "holidays";
         title = "Federal holidays in due dates (MLK Day falls on January 15 in 2029)";

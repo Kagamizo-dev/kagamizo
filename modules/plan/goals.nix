@@ -252,6 +252,10 @@
       spectrum = {
         question = "Pay for Cloudflare Spectrum so a game client reaches the world (later)?";
       };
+      account-hub = {
+        question = "Consolidate the bank's markets on as few accounts as possible: IBKR (the LLC's, already open: stocks and options here and abroad, futures on about 150 venues, forex, spot crypto, ForecastTrader event contracts, about 27 currencies in one account) plus Kraken for round-the-clock crypto and perpetuals, with Public kept only while its paper days run? It means trading through the LLC (still on your 1040, as QSearch is disregarded) and IBKR's daily Gateway sign-in.";
+        recommended = "Yes, after Kraken's paper days: two accounts reach almost every market. No exchange membership or registration of our own adds anything at our scale: a clearing firm is still required, and trading our own money needs no broker-dealer registration.";
+      };
     };
   };
 }
