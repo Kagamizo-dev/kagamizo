@@ -225,6 +225,9 @@
         question = "What is the first order, built end to end?";
         answer = "The wearable kit (2026-11-08): a vest with many pockets, modular arm sleeves, a cloak over it all and quick-release carabiners; everything worn, never a backpack.";
       };
+      lean-iso = {
+        question = "The Yoga ISO is about 3.5 GB, over GitHub's 2 GB release limit (Ghidra and OpenJDK, clang and llvm, Wine, ZAP, trivy, nuclei, QtWebEngine). Keep a lean base ISO (shell, desktop, Firefox, CLIs) and load the reverse-engineering and security workbench on demand from the host's cache, or publish the full ISO another way?";
+      };
       data-access = {
         question = "How is product, inventory and logistics data reached: accounts, or open data?";
         answer = "Keyless first (2026-11-08): OSINT, open and government data and sanctioned keyless channels (Shopify's catalog, WooCommerce's Store API, OpenStreetMap, satellite and public APIs), read by our own Rust CLI and typed in Lean; storefront pages only where their robots rules allow, never where terms forbid; no tie to Amazon. An account only where a payment or a dispatch needs one, and only if its second factor is not a phone number; agents pilot it through a Proton alias (agents-sign-in).";

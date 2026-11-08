@@ -64,6 +64,13 @@ in
       }
     ]
     // track "os" [
+      (
+        {
+          id = "lean-iso";
+          title = "Bring the Yoga ISO under 2 GB so main promotes it to stable again";
+        }
+        // owner "lean-iso"
+      )
       {
         id = "vm-boot-tests";
         title = "Boot tests in CI for every NixOS image (the Yoga's USB image, the Pi's SD image)";

@@ -64,7 +64,19 @@ The only thing you ask me for is approving a sign-in or 2FA link. Ask before any
   materials is declared (estimates), every rate pending, and Lean refuses
   a should-cost with an unpriced line and a quote without an inspection
   plan or above the 15% premium.
-- **Next:** data/keyless-verify needs the hosts below allowed; then the
+- **Shell and image (later still):** the Logistics card's page is generated
+  from the declarations (kit, should-cost, hubs, channels by access),
+  seen in the web build; the CLI is on the Yoga image's PATH. The Yoga
+  system builds, but **its ISO is about 3.5 GB** (1,707,112 sectors), over
+  GitHub's 2 GB release-asset limit, so merged to main it would be kept as
+  a 14-day artifact and never promoted to stable. Not logistics: the
+  closure is 10 GB unpacked, led by Ghidra and OpenJDK (1.45 GB), clang and
+  llvm libraries (1.4 GB), Wine (0.5 GB), ZAP, trivy and nuclei (0.7 GB)
+  and QtWebEngine (0.45 GB), from modules/rea, modules/security and the
+  shell's runtimes. The owner decides how to shrink it (os/lean-iso).
+- **The owner's direction:** live checks run on the Hetzner host's scoped
+  agents, not through the session allowlist, which needs no more hosts.
+- **Next:** data/keyless-verify, run by the host's agents; then the
   readers (catalog, lockers, USPS tables), ILOSTAT wages into the rates,
   and make/rfq-send (waits on the open agent-mail decision).
 
