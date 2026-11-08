@@ -288,6 +288,18 @@ in
     ]
     // track "identity" [
       {
+        id = "account-dossiers";
+        title = "Every account a typed Proton Pass item holding every field its provider asks for (identity, address, tax ids, documents by reference), prepared by the agents through pass-cli; only the password or passkey, second factors and liveness left to the owner";
+      }
+      {
+        id = "signup-flows";
+        title = "Sign-ups driven by the agents from the account's Pass item: by API or CLI where offered, a governed browser flow otherwise, stopping for the owner's authentication and approval of the submission";
+        dependsOn = [
+          "identity/account-dossiers"
+          "agents/browser"
+        ];
+      }
+      {
         id = "footprint";
         title = "The owner's whole digital identity mapped onto the apps: documents, the professional and academic record, accounts, domains, public profiles; every value in Proton";
       }
@@ -819,9 +831,9 @@ in
       (
         {
           id = "crypto-venue";
-          title = "A crypto venue for around the clock (Kraken first): the account, a trade-only key in Proton Pass, its NautilusTrader adapter, paper days";
+          title = "Kraken for around the clock: its typed Pass item prepared, the sign-up driven by the agents, a trade-only key, its NautilusTrader adapter, paper days";
         }
-        // owner "crypto-venue"
+        // action
       )
       (
         {
@@ -838,7 +850,8 @@ in
       }
       {
         id = "daylight";
-        title = "Venue sessions kept in their exchanges' own time zones, so daylight saving moves them";
+        title = "Venue sessions in their exchanges' own time zones, turned into UTC by each daylight-saving rule, checked over seven reference weeks";
+        status = "done";
       }
       {
         id = "around-the-clock";

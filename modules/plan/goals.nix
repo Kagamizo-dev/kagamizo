@@ -139,7 +139,7 @@
       # Decided.
       agents-sign-in = {
         question = "Do agents sign up or sign in to third-party accounts?";
-        answer = "No (2026-11-07): agents act as scoped team users (their own Pass vault, address and Cedar grants) and send the owner the links; the owner is root admin.";
+        answer = "Revised 2026-11-08: every account is a typed vault item in Proton Pass, prepared by the agents through pass-cli with every field the provider asks for, mapped from the owner's Proton identity; the agents drive the sign-up (API, CLI, or a governed browser flow) and leave the owner only what is truly human: the password or passkey, second factors, a liveness check, and approving the final submission (its terms and attestations). They never hold the owner's sign-in. (Before: 2026-11-07, agents only sent links.)";
       };
       modules-are-apps = {
         question = "Are there base modules beside the apps?";
@@ -237,6 +237,7 @@
       crypto-venue = {
         question = "Open a crypto account for trading around the clock: Kraken (passkey or authenticator, keys that trade without withdrawals, a stable NautilusTrader adapter) or Coinbase? It is your sign-up; nothing is deposited until its paper days hold.";
         recommended = "Kraken.";
+        answer = "Kraken (2026-11-08).";
       };
       ibkr-gateway = {
         question = "Run IBKR's Gateway on the host for futures across time zones (CME, Eurex, ICE Europe, Osaka, ASX) and forex: it signs in daily with the LLC's authenticator code, which would be held in Proton Pass for it. Allow that daily sign-in?";
