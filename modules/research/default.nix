@@ -138,6 +138,15 @@ in
       inherit (cfg) deepModel quickModel;
       keyed = true;
     };
+    # The cheapest model on OpenRouter for dry runs of the whole lifecycle
+    # (deepseek-v4.1-flash: $0.05 in and $0.20 out per million tokens,
+    # ../openrouter/_spend/prices.json), on a key of its own.
+    cheap = {
+      url = "https://openrouter.ai/api/v1";
+      deepModel = "deepseek/deepseek-v4.1-flash";
+      quickModel = "deepseek/deepseek-v4.1-flash";
+      keyed = true;
+    };
     local = {
       url = "http://127.0.0.1:${toString config.hetzner.host.agents.tier1Port}/v1";
       deepModel = config.agents.tiers.small.model;
@@ -248,8 +257,14 @@ in
               shift
               RESEARCH_BACKEND=local exec research-run "$@"
             fi
+            # `research --cheap ...`: the cheapest OpenRouter model, on the
+            # profile RESEARCH_PROFILE names (research-host on the host).
+            if [ "''${1:-}" = --cheap ]; then
+              shift
+              export RESEARCH_BACKEND=cheap
+            fi
             export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
-            exec secretspec run --file ${config.packages.secretspec-toml} --profile research \
+            exec secretspec run --file ${config.packages.secretspec-toml} --profile "''${RESEARCH_PROFILE:-research}" \
               --reason "research $*" -- research-run "$@"
           '';
         };

@@ -109,6 +109,14 @@ in
           limitUsd = 20;
           why = "the research loops of the trading plan (research-jingzo)";
         };
+        # The agents' daily dry run on jingzo-host (the owner, 2026-11-08:
+        # test the whole strategy on cheap models, pennies a day): its own
+        # small cap, so a runaway dry run cannot touch the research budget.
+        research-host = {
+          profile = "research-host";
+          limitUsd = 5;
+          why = "the trading agents' daily dry run on jingzo-host (research --cheap)";
+        };
       };
     };
 

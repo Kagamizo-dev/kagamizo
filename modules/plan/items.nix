@@ -570,6 +570,13 @@ in
         title = "The agents' strategy dry-run daily at no cost: TradingAgents on the host's small quantized model, then its paper day and rehearsal";
         status = "done";
       }
+      (
+        {
+          id = "cheap-dry-run";
+          title = "The dry run on the cheapest OpenRouter model (deepseek-v4.1-flash) on the host's own $5 key: mint it with `openrouter apply`";
+        }
+        // action
+      )
       {
         id = "nautilus-adapter";
         title = "Public as a NautilusTrader adapter (data and execution clients); paper on Nautilus's sandbox, live on ours, the same node: a crypto round trip proved both ways";

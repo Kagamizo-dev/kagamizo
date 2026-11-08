@@ -59,28 +59,46 @@ let
   dry = f: lib.listToAttrs (lib.concatMap f dryRun.strategies);
   # The dry run's research: TradingAgents on the host's small model, writing
   # the day's decision where the strategy reads it; on success, the paper day.
-  researchUnit = s: {
-    description = "research --local run ${symbols.${s}} today (the dry run of ${s})";
-    after = [
-      "network-online.target"
-      "llama-cpp.service"
-    ];
-    wants = [ "network-online.target" ];
-    requires = [ "llama-cpp.service" ];
-    onSuccess = [ "trading-paper-day-${s}.service" ];
-    environment.HOME = "/root";
-    serviceConfig = {
-      Type = "oneshot";
-      WorkingDirectory = dir;
-      ExecStart = lib.escapeShellArgs [
-        (lib.getExe research)
-        "--local"
-        "run"
-        symbols.${s}
-        "today"
-      ];
+  researchUnit =
+    s:
+    let
+      cheap = dryRun.backend == "cheap";
+    in
+    {
+      description = "research --${dryRun.backend} run ${symbols.${s}} today (the dry run of ${s})";
+      after = [ "network-online.target" ] ++ lib.optional (!cheap) "llama-cpp.service";
+      wants = [ "network-online.target" ];
+      requires = lib.optional (!cheap) "llama-cpp.service";
+      onSuccess = [ "trading-paper-day-${s}.service" ];
+      path = lib.optional cheap passCli;
+      environment = {
+        HOME = "/root";
+      }
+      // lib.optionalAttrs cheap {
+        # The host's own capped key, through its vault (pass-cli signed in
+        # by trading-host with the host's token).
+        PROTON_PASS_KEY_PROVIDER = "fs";
+        PROTON_PASS_AGENT_REASON = "jingzo-host: research --cheap (${s})";
+        RESEARCH_PROFILE = "research-host";
+      };
+      serviceConfig = {
+        Type = "oneshot";
+        WorkingDirectory = dir;
+        ExecStart = lib.escapeShellArgs (
+          lib.optionals cheap [
+            launcher
+            tokenFile
+          ]
+          ++ [
+            (lib.getExe research)
+            "--${dryRun.backend}"
+            "run"
+            symbols.${s}
+            "today"
+          ]
+        );
+      };
     };
-  };
 in
 lib.mkIf enable {
   environment.systemPackages = [ trade ];

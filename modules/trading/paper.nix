@@ -51,6 +51,14 @@ in
         default = [ ];
         description = "Agent-option and agent-crypto strategies dry-run daily at no cost: TradingAgents on the host's small quantized model (research --local), then the paper day and its rehearsal. It proves the agents' whole lifecycle, not their judgement.";
       };
+      backend = mkOption {
+        type = types.enum [
+          "cheap"
+          "local"
+        ];
+        default = "cheap";
+        description = "Where the dry run's agents think: `cheap`, the cheapest OpenRouter model on the host's own $5 key (cents a run, the owner's choice of 2026-11-08), or `local`, the host's small quantized model at no cost.";
+      };
       at = mkOption {
         type = types.str;
         default = "*-*-* 11:07:00 UTC";

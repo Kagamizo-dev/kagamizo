@@ -41,6 +41,21 @@ in
           required = false;
         };
     };
+    # The host's dry-run key (openrouter.keys.research-host), in the host's
+    # vault, which its token opens.
+    research-host = {
+      defaults.providers = [ "host" ];
+      OPENROUTER_API_KEY =
+        secret {
+          kind = "api-token";
+          issuer = "automation:openrouter";
+          description = "OpenRouter key for the trading agents' dry run on jingzo-host, minted by `openrouter apply`";
+          item = "openrouter-research-host-key";
+        }
+        // {
+          required = false;
+        };
+    };
     host.OPENROUTER_API_KEY =
       secret {
         kind = "api-token";
