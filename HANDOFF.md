@@ -50,7 +50,16 @@ The only thing you ask me for is approving a sign-in or 2FA link. Ask before any
   send` (only a batch whose SHA-256 is in mailbox.approvedBatches).
   bank.aggregators holds Stripe FC, Plaid, SimpleFIN and Teller, all
   unverified; Lean refuses a choice until coverage is verified from the
-  provider's own search (the owner's rule). Next: the tally to the owner
+  provider's own search (the owner's rule). Measured: the mailbox is about
+  25 GB (7% synced in an hour, about 13 hours to go), too big for a
+  session (20 GB free, 2-hour background limit); the session's run was
+  stopped at its limit, so the stored Bridge session is stale (`mailbox
+  login` first). The full sync belongs on jingzo-host, where its cache
+  persists; the owner has put mail second to banking. Bridge's vault
+  records its first run's cache path (/tmp/tmp.f3tfEGjv9J), which the
+  wrapper's cleanup does not remove: fix before running it elsewhere.
+  The bank's dashboard design: https://claude.ai/artifact/7fbJjdRwHMfQa2hBfpc32P.
+  Next: the tally to the owner
   for keep/cancel, cards for kept bills, the notice batch's digest for
   approval, the coverage signups.
 
