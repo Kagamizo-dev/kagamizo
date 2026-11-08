@@ -81,6 +81,9 @@ def weak (c : Card) : Bool :=
 def covered (cards : List Card) (r : Ref) : Bool :=
   cards.any (fun c => c.vault == r.vault && c.title == r.title)
 
+/-- The cards whose factor is below what their provider offers. -/
+def weakCards (cards : List Card) : List String := (cards.filter weak).map (·.id)
+
 def sound (cards : List Card) : Bool :=
   unique cards && cards.all typed && cards.all factorOffered
 

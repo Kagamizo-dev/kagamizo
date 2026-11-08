@@ -14,7 +14,8 @@
 #
 # checks.bank-wallet (./_lean/Wallet.lean) proves the declared cards are
 # unique items (type, vault and title), typed, and that each known second factor is one its provider
-# offers. packages.wallet-report lists what is not yet a card: every login,
+# offers (Mercury and Capital One offer passkeys: each listed in the
+# report as a factor to raise). packages.wallet-report lists what is not yet a card: every login,
 # Mercury card and legal document the repository names with no card, and
 # every login weaker than its provider allows. Modules move onto cards one
 # at a time; each move turns its part of the report into a theorem.
@@ -29,6 +30,9 @@ let
     lib.mapAttrsToList (_: e: e.vault) entities
     ++ lib.attrValues config.proton.infraVaults
     ++ lib.mapAttrsToList (_: e: "${e.vault}-Sessions") entities
+    # A separate entity for now (the owner, 2026-11-08), not yet declared
+    # in identity.entities.
+    ++ [ "GoFundMe-NonProfit" ]
   );
   factors = [
     "passkey"
@@ -151,6 +155,245 @@ let
     }
   );
 
+  # The bank's own cards, written by hand: the accounts that hold money,
+  # as Pass holds them today (read 2026-11-08 by title and type only).
+  own = {
+    mercury-jingzo = {
+      type = "login";
+      vault = "Jingzo-LLC";
+      title = "Mercury";
+      account = "mercury-jingzo";
+      mint = "human:sign-up";
+      secondFactor = {
+        method = "passkey";
+        offered = [
+          "passkey"
+          "security-key"
+        ];
+      };
+      devices = [
+        {
+          device = "pixel-9a";
+          as = "passkey";
+        }
+      ];
+      target = "keep";
+      why = "Jingzo's treasury; its passkey was registered from the phone";
+    };
+    mercury-mirazo = {
+      type = "login";
+      vault = "Mirazo-Root";
+      title = "Mercury";
+      account = "mercury-mirazo";
+      mint = "human:sign-up";
+      # The owner, 2026-11-08: the banks confirm by SMS to their phone.
+      secondFactor = {
+        method = "sms";
+        via = "mirazo-identity";
+        offered = [
+          "passkey"
+          "security-key"
+          "sms"
+        ];
+      };
+      target = "keep";
+      why = "the owner's personal Mercury";
+    };
+    public-mirazo = {
+      type = "login";
+      vault = "Mirazo-Root";
+      title = "Public";
+      account = "public-mirazo";
+      mint = "human:sign-up";
+      secondFactor.method = "sms";
+      earns = true;
+      target = "keep";
+      why = "the brokerage: every trade; Public offers no security key (its help pages show SMS only)";
+    };
+    public-api-mirazo = {
+      type = "custom";
+      template = "api-credential";
+      vault = "Mirazo-Root";
+      title = "Public";
+      fields = [
+        "Secret"
+        "Permissions"
+      ];
+      account = "public-mirazo";
+      mint = "human:console-credential";
+      holders.trading-mirazo = [ "read" ];
+      earns = true;
+      target = "keep";
+      why = "the API credential the trading node reads";
+    };
+    capital-one-mirazo = {
+      type = "login";
+      vault = "Mirazo-Root";
+      title = "CapitalOne";
+      account = "capital-one-mirazo";
+      mint = "human:sign-up";
+      # The owner, 2026-11-08: the banks confirm by SMS to their phone.
+      secondFactor = {
+        method = "sms";
+        via = "mirazo-identity";
+        offered = [
+          "passkey"
+          "sms"
+        ];
+      };
+      target = "keep";
+      why = "the one outside card in the owner's target wallet";
+    };
+    capital-one-venture-x = {
+      type = "credit-card";
+      vault = "Mirazo-Root";
+      title = "Capital One - Venture X";
+      account = "capital-one-mirazo";
+      mint = "human:mint-card";
+      target = "keep";
+      why = "the Venture X ($10,000 line)";
+    };
+    chase-mirazo = {
+      type = "login";
+      vault = "Mirazo-Root";
+      title = "Chase";
+      account = "chase-mirazo";
+      mint = "human:sign-up";
+      # The owner, 2026-11-08: the banks confirm by SMS to their phone.
+      secondFactor = {
+        method = "sms";
+        via = "mirazo-identity";
+      };
+      target = "close";
+      why = "closes once no kept bill rests on Chase";
+    };
+    credit-one-mirazo = {
+      type = "login";
+      vault = "Mirazo-Root";
+      title = "creditonebank.com";
+      account = "credit-one-mirazo";
+      mint = "human:sign-up";
+      # The owner, 2026-11-08: the banks confirm by SMS to their phone.
+      secondFactor = {
+        method = "sms";
+        via = "mirazo-identity";
+      };
+      target = "close";
+      why = "closes once no kept bill rests on it";
+    };
+    discover-mirazo = {
+      type = "login";
+      vault = "Mirazo-Root";
+      title = "card.discover.com";
+      account = "discover-mirazo";
+      mint = "human:sign-up";
+      # The owner, 2026-11-08: the banks confirm by SMS to their phone.
+      secondFactor = {
+        method = "sms";
+        via = "mirazo-identity";
+      };
+      why = "its card moved onto Capital One's platform in 2026";
+    };
+    experian = {
+      type = "login";
+      vault = "Mirazo-Root";
+      title = "Experian";
+      account = "experian";
+      mint = "human:sign-up";
+      # The owner, 2026-11-08: the banks confirm by SMS to their phone.
+      secondFactor = {
+        method = "sms";
+        via = "mirazo-identity";
+      };
+      target = "keep";
+      why = "the credit file";
+    };
+    paypal-mirazo = {
+      type = "login";
+      vault = "Mirazo-Root";
+      title = "paypal.com";
+      account = "paypal-mirazo";
+      mint = "human:sign-up";
+      # The owner, 2026-11-08: the banks confirm by SMS to their phone.
+      secondFactor = {
+        method = "sms";
+        via = "mirazo-identity";
+      };
+      why = "PayPal";
+    };
+    proton = {
+      type = "login";
+      vault = "Mirazo-Root";
+      title = "Proton";
+      account = "proton";
+      mint = "human:sign-up";
+      secondFactor = {
+        method = "totp";
+        offered = [
+          "security-key"
+          "totp"
+        ];
+      };
+      target = "keep";
+      why = "the account every card lives in; Bridge signs in with its TOTP; a YubiKey would raise it";
+    };
+    mirazo-identity = {
+      type = "identity";
+      vault = "Mirazo-Root";
+      title = "ID";
+      fields = [
+        "full_name"
+        "birthdate"
+        "passport_number"
+        "license_number"
+      ];
+      mint = "human:sign-up";
+      holders.legal-mirazo = [ "read" ];
+      target = "keep";
+      why = "the owner's one identity card: passport and driver's licence together";
+    };
+  };
+
+  # Every other held account's login, as the login item it names; replaced
+  # by a hand-written card as each is read (its second factor, its URLs).
+  handAccounts = lib.unique (
+    lib.filter (a: a != null) (
+      lib.mapAttrsToList (_: c: if c.type == "login" then c.account else null) own
+    )
+  );
+  heldLogins = lib.mapAttrs' (
+    a: h:
+    lib.nameValuePair "login-${a}" {
+      type = "login";
+      vault = entities.${h.owner}.vault;
+      title = h.login.item;
+      account = a;
+      mint = "human:sign-up";
+      why = "the login of ${a}";
+    }
+  ) (lib.filterAttrs (a: _: !(lib.elem a handAccounts)) config.accounts.held);
+  # Every legal document, as the note it is attached to (its Proton Drive
+  # link), written by the legal team's tools.
+  documents = lib.listToAttrs (
+    lib.concatLists (
+      lib.mapAttrsToList (
+        e: r:
+        lib.mapAttrsToList (
+          d: doc:
+          lib.nameValuePair "doc-${e}-${d}" {
+            type = "note";
+            inherit (doc.where) vault;
+            title = doc.where.item;
+            mint = "automation:legal-documents";
+            holders."legal-${e}" = [ "read" ];
+            target = "keep";
+            why = doc.title;
+          }
+        ) (r.documents or { })
+      ) config.legal.records
+    )
+  );
+
   # What the repository names today, by vault and title.
   refs =
     lib.mapAttrsToList (a: h: {
@@ -185,6 +428,16 @@ let
     cards = lib.length (lib.attrNames cfg.cards);
     byType = lib.mapAttrs (_: lib.length) (lib.groupBy (c: c.type) (lib.attrValues cfg.cards));
     uncovered = lib.filter (r: !covered r) refs;
+    factorWeak = lib.attrNames (
+      lib.filterAttrs (
+        _: c:
+        let
+          rank = f: lib.lists.findFirstIndex (x: x == f) 9 factors;
+          best = lib.foldl' (m: f: lib.min m (rank f)) 9 c.secondFactor.offered;
+        in
+        c.secondFactor.method != null && best < rank c.secondFactor.method
+      ) cfg.cards
+    );
     factorUnknown = lib.attrNames (
       lib.filterAttrs (_: c: c.type == "login" && c.secondFactor.method == null) cfg.cards
     );
@@ -251,162 +504,9 @@ in
           target = "keep";
         }
       ) config.mercury.cards
-      // {
-        mercury-jingzo = {
-          type = "login";
-          vault = "Jingzo-LLC";
-          title = "Mercury";
-          account = "mercury-jingzo";
-          mint = "human:sign-up";
-          secondFactor = {
-            method = "passkey";
-            offered = [
-              "passkey"
-              "security-key"
-            ];
-          };
-          devices = [
-            {
-              device = "pixel-9a";
-              as = "passkey";
-            }
-          ];
-          target = "keep";
-          why = "Jingzo's treasury; its passkey was registered from the phone";
-        };
-        mercury-mirazo = {
-          type = "login";
-          vault = "Mirazo-Root";
-          title = "Mercury";
-          account = "mercury-mirazo";
-          mint = "human:sign-up";
-          secondFactor.offered = [
-            "passkey"
-            "security-key"
-          ];
-          target = "keep";
-          why = "the owner's personal Mercury";
-        };
-        public-mirazo = {
-          type = "login";
-          vault = "Mirazo-Root";
-          title = "Public";
-          account = "public-mirazo";
-          mint = "human:sign-up";
-          secondFactor.method = "sms";
-          earns = true;
-          target = "keep";
-          why = "the brokerage: every trade; Public offers no security key (its help pages show SMS only)";
-        };
-        public-api-mirazo = {
-          type = "custom";
-          template = "api-credential";
-          vault = "Mirazo-Root";
-          title = "Public";
-          fields = [
-            "Secret"
-            "Permissions"
-          ];
-          account = "public-mirazo";
-          mint = "human:console-credential";
-          holders.trading-mirazo = [ "read" ];
-          earns = true;
-          target = "keep";
-          why = "the API credential the trading node reads";
-        };
-        capital-one-mirazo = {
-          type = "login";
-          vault = "Mirazo-Root";
-          title = "CapitalOne";
-          account = "capital-one-mirazo";
-          mint = "human:sign-up";
-          target = "keep";
-          why = "the one outside card in the owner's target wallet";
-        };
-        capital-one-venture-x = {
-          type = "credit-card";
-          vault = "Mirazo-Root";
-          title = "Capital One - Venture X";
-          account = "capital-one-mirazo";
-          mint = "human:mint-card";
-          target = "keep";
-          why = "the Venture X ($10,000 line)";
-        };
-        chase-mirazo = {
-          type = "login";
-          vault = "Mirazo-Root";
-          title = "Chase";
-          account = "chase-mirazo";
-          mint = "human:sign-up";
-          target = "close";
-          why = "closes once no kept bill rests on Chase";
-        };
-        credit-one-mirazo = {
-          type = "login";
-          vault = "Mirazo-Root";
-          title = "creditonebank.com";
-          account = "credit-one-mirazo";
-          mint = "human:sign-up";
-          target = "close";
-          why = "closes once no kept bill rests on it";
-        };
-        discover-mirazo = {
-          type = "login";
-          vault = "Mirazo-Root";
-          title = "card.discover.com";
-          account = "discover-mirazo";
-          mint = "human:sign-up";
-          why = "its card moved onto Capital One's platform in 2026";
-        };
-        experian = {
-          type = "login";
-          vault = "Mirazo-Root";
-          title = "Experian";
-          account = "experian";
-          mint = "human:sign-up";
-          target = "keep";
-          why = "the credit file";
-        };
-        paypal-mirazo = {
-          type = "login";
-          vault = "Mirazo-Root";
-          title = "paypal.com";
-          account = "paypal-mirazo";
-          mint = "human:sign-up";
-          why = "PayPal";
-        };
-        proton = {
-          type = "login";
-          vault = "Mirazo-Root";
-          title = "Proton";
-          account = "proton";
-          mint = "human:sign-up";
-          secondFactor = {
-            method = "totp";
-            offered = [
-              "security-key"
-              "totp"
-            ];
-          };
-          target = "keep";
-          why = "the account every card lives in; Bridge signs in with its TOTP; a YubiKey would raise it";
-        };
-        mirazo-identity = {
-          type = "identity";
-          vault = "Mirazo-Root";
-          title = "ID";
-          fields = [
-            "full_name"
-            "birthdate"
-            "passport_number"
-            "license_number"
-          ];
-          mint = "human:sign-up";
-          holders.legal-mirazo = [ "read" ];
-          target = "keep";
-          why = "the owner's one identity card: passport and driver's licence together";
-        };
-      };
+      // own
+      // heldLogins
+      // documents;
 
     perSystem =
       { config, pkgs, ... }:
@@ -421,6 +521,8 @@ in
             def cards : List Card := [${lib.concatStringsSep ",\n  " rendered}]
             /-- The declared cards are unique items, typed, with offered factors. -/
             theorem wallet_sound : sound cards = true := by decide
+            -- Logins to raise to their provider's strongest factor (reported).
+            #eval weakCards cards
             end Kagamizo.Wallet
           '';
         };
