@@ -990,11 +990,36 @@ in
       (
         {
           id = "courier-accounts";
-          title = "Sign up for Uber Direct, Lalamove, UPS developer access and AliExpress's open platform";
+          title = "One courier account, only when an order needs a pickup (second factor not a phone number)";
           dependsOn = [ "data/logistics-book" ];
         }
         // action
       )
+      {
+        id = "keyless-sources";
+        title = "The keyless sources typed as channels: catalogs, lockers, rates, standards, routes, tariffs, wages";
+        status = "done";
+      }
+      {
+        id = "keyless-verify";
+        title = "One live call to each keyless source (allowlist), recording what it really returns";
+        dependsOn = [ "data/keyless-sources" ];
+      }
+      {
+        id = "catalog-reader";
+        title = "Rust readers for Shopify's Global Catalog, store UCP endpoints and WooCommerce's Store API";
+        dependsOn = [ "data/keyless-verify" ];
+      }
+      {
+        id = "lockers-osm";
+        title = "Lockers and post offices from Geofabrik extracts for every hub";
+        dependsOn = [ "data/keyless-verify" ];
+      }
+      {
+        id = "usps-tables";
+        title = "USPS prices, service standards and on-time reports as typed tables; reliability priors from them";
+        dependsOn = [ "data/keyless-verify" ];
+      }
       {
         id = "provider-pages";
         title = "Read every channel's developer pages whole (allowlist), moving evidence from snippet to page";
@@ -1002,8 +1027,8 @@ in
       }
       {
         id = "live-quotes";
-        title = "Live quotes into `logistics rank`: carriers, couriers and marketplaces per gated account";
-        dependsOn = [ "data/courier-accounts" ];
+        title = "Quotes into `logistics rank`: keyless rate tables first, a courier's API once its account exists";
+        dependsOn = [ "data/usps-tables" ];
       }
       {
         id = "flight-data";
@@ -1098,6 +1123,16 @@ in
         }
         // action
       )
+      {
+        id = "should-cost";
+        title = "Should-costs: bills of materials, machine time and labour, priced from ILOSTAT and suppliers' quotes";
+        status = "active";
+      }
+      {
+        id = "rfq-send";
+        title = "Send each request for quotes through the supplier's own channel, from a Proton alias, once the owner approves";
+        dependsOn = [ "make/should-cost" ];
+      }
       {
         id = "spec-previews";
         title = "Every specification previewed: images through OpenRouter, a 3D model, a Rust viewer to turn it around";

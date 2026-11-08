@@ -225,6 +225,14 @@
         question = "What is the first order, built end to end?";
         answer = "The wearable kit (2026-11-08): a vest with many pockets, modular arm sleeves, a cloak over it all and quick-release carabiners; everything worn, never a backpack.";
       };
+      data-access = {
+        question = "How is product, inventory and logistics data reached: accounts, or open data?";
+        answer = "Keyless first (2026-11-08): OSINT, open and government data and sanctioned keyless channels (Shopify's catalog, WooCommerce's Store API, OpenStreetMap, satellite and public APIs), read by our own Rust CLI and typed in Lean; storefront pages only where their robots rules allow, never where terms forbid; no tie to Amazon. An account only where a payment or a dispatch needs one, and only if its second factor is not a phone number; agents pilot it through a Proton alias (agents-sign-in).";
+      };
+      supplier-channel = {
+        question = "How do requests for quotes reach suppliers and makers?";
+        answer = "Through each supplier's own channel (2026-11-08): its quoting API where it has one, otherwise email; every request carries our bill of materials, machine time and labour (the should-cost) and an inspection plan, and is negotiated against it, China and Shopify stores alike.";
+      };
       hubs = {
         question = "Which hubs: the Texas airport, and the European and Asian hubs, picked by direct flights, price and transit?";
         answer = "Partly (2026-11-08): Texas is home (family), Brazil is South America's; most continents supported, heaviest in Europe, Asia and the US; each hub chosen by its airport's direct flights and travel. The cities wait on flight data (data/flight-data).";

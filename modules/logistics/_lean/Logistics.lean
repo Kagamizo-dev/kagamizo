@@ -25,11 +25,12 @@ namespace Kagamizo.Logistics
 
 /-! ## Channels -/
 
-/-- How software reaches one operation of a channel: open (self-serve
+/-- How software reaches one operation of a channel: keyless (no account
+at all), open (self-serve
 key), gated (an approval or an account first), partner (a contract), or
 none (by hand only). -/
 inductive Access where
-  | open | gated | partner | none
+  | keyless | open | gated | partner | none
   deriving DecidableEq, Repr
 
 /-- What a channel's own terms say about automated access. -/
@@ -233,6 +234,68 @@ theorem choose_sound (floorBp deadline : Nat) (rs : List Route) (b : Route)
         (hall x (List.Mem.head _)) (fun r hr => hall r (List.Mem.tail _ hr))
   · intro r hr he
     exact best_most_reliable _ b h r (List.mem_filter.mpr ⟨hr, he⟩)
+
+/-! ## Should-cost and quotes
+
+A thing's should-cost is its bill of materials, its machine time and its
+labour, each line a quantity in thousandths of its unit times a rate in
+cents per unit. A line without a sourced rate is unpriced, and a thing
+with an unpriced line has no should-cost: nothing is negotiated against a
+guess. A supplier's quote is acceptable only within a declared premium of
+the should-cost and only with an inspection plan, so quality is part of
+the price, not a later hope. -/
+
+structure Line where
+  name : String
+  qtyMilli : Nat
+  rateCents : Option Nat
+  deriving DecidableEq, Repr
+
+def Line.cents (l : Line) : Nat :=
+  match l.rateCents with
+  | some r => l.qtyMilli * r / 1000
+  | none => 0
+
+def total : List Line → Nat
+  | [] => 0
+  | l :: ls => l.cents + total ls
+
+def shouldCost (ls : List Line) : Option Nat :=
+  if ls.all (·.rateCents.isSome) then some (total ls) else none
+
+structure Quote where
+  supplier : String
+  cents : Nat
+  /-- An inspection plan agreed before production (ISO 2859-1 sampling). -/
+  inspection : Bool
+  deriving DecidableEq, Repr
+
+def acceptable (shouldCents premiumPct : Nat) (q : Quote) : Bool :=
+  q.inspection && decide (q.cents * 100 ≤ shouldCents * (100 + premiumPct))
+
+/-- More lines never cost less. -/
+theorem total_append_ge (ls ms : List Line) : total ls ≤ total (ls ++ ms) := by
+  induction ls with
+  | nil => exact Nat.zero_le _
+  | cons l ls ih => simp only [List.cons_append, total]; omega
+
+/-- A thing with an unpriced line has no should-cost. -/
+theorem unpriced_has_no_cost (ls : List Line) (l : Line) (hl : l ∈ ls)
+    (hn : l.rateCents = none) : shouldCost ls = none := by
+  unfold shouldCost
+  have : ls.all (·.rateCents.isSome) = false := by
+    rw [Bool.eq_false_iff]
+    intro h
+    have := List.all_eq_true.mp h l hl
+    simp [hn] at this
+  simp [this]
+
+/-- An accepted quote has an inspection plan and is within the premium. -/
+theorem accepted_is_bounded (s p : Nat) (q : Quote) (h : acceptable s p q = true) :
+    q.inspection = true ∧ q.cents * 100 ≤ s * (100 + p) := by
+  unfold acceptable at h
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at h
+  exact h
 
 def sound (cs : List Channel) (regions : List String) (hs : List Hub)
     (slots : List Slot) (worn : List String) (gs : List Garment) (maxMassG : Nat) : Bool :=

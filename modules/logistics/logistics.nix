@@ -43,18 +43,25 @@ let
     "locate"
     "collect"
     "proof"
+    "standards"
+    "reliability"
+    "tariff"
+    "routes"
+    "disruption"
+    "rates"
   ];
 
   op = types.submodule {
     options = {
       access = mkOption {
         type = types.enum [
+          "keyless"
           "open"
           "gated"
           "partner"
           "none"
         ];
-        description = "open: a self-serve key; gated: an account or approval first; partner: a contract; none: by hand.";
+        description = "keyless: no account at all; open: a self-serve key; gated: an account or approval first; partner: a contract; none: by hand.";
       };
       source = mkOption { type = url; };
       evidence = mkOption { type = evidence; };
@@ -233,6 +240,87 @@ let
         ];
       };
       note = mkOption { type = types.str; };
+      bom = mkOption {
+        type = types.nullOr bom;
+        default = null;
+        description = "Its bill of materials and operations, for a should-cost and a request for quotes.";
+      };
+    };
+  };
+
+  rateKey = types.enum (lib.attrNames cfg.rates);
+
+  bom = types.submodule {
+    options = {
+      quantity = mkOption {
+        type = types.ints.positive;
+        description = "Units in one order: the quantity quoted.";
+      };
+      materials = mkOption {
+        type = types.listOf (
+          types.submodule {
+            options = {
+              name = mkOption { type = types.str; };
+              rate = mkOption { type = rateKey; };
+              qty = mkOption {
+                type = types.numbers.nonnegative;
+                description = "Per unit made, in the rate's unit.";
+              };
+              basis = mkOption {
+                type = types.enum [
+                  "estimate"
+                  "measured"
+                ];
+                description = "estimate: from the specification; measured: from a pattern's marker or a maker's sheet.";
+              };
+            };
+          }
+        );
+      };
+      operations = mkOption {
+        type = types.listOf (
+          types.submodule {
+            options = {
+              name = mkOption { type = types.str; };
+              machine = mkOption { type = rateKey; };
+              labour = mkOption { type = rateKey; };
+              minutes = mkOption { type = types.numbers.positive; };
+            };
+          }
+        );
+      };
+    };
+  };
+
+  rate = types.submodule {
+    options = {
+      unit = mkOption {
+        type = types.enum [
+          "m2"
+          "m"
+          "piece"
+          "hour"
+        ];
+      };
+      cents = mkOption {
+        type = types.nullOr types.ints.unsigned;
+        default = null;
+        description = "US cents per unit; null until a source prices it.";
+      };
+      source = mkOption {
+        type = types.nullOr url;
+        default = null;
+        description = "Where the rate comes from; null while it waits on a supplier's quote.";
+      };
+      evidence = mkOption {
+        type = types.enum [
+          "page"
+          "snippet"
+          "secondary"
+          "quote"
+          "pending"
+        ];
+      };
     };
   };
 
@@ -243,6 +331,8 @@ let
       hubs
       outfit
       owner
+      rates
+      quotes
       ;
     kit = {
       inherit (config.kit) slots;
@@ -334,6 +424,53 @@ in
     regions = mkOption { type = types.nonEmptyListOf slug; };
     channels = mkOption { type = types.attrsOf channel; };
     hubs = mkOption { type = types.attrsOf hub; };
+    rates = mkOption {
+      type = types.attrsOf rate;
+      default = { };
+      description = "Materials, machine hours and labour hours, each priced from its source.";
+    };
+    quotes = {
+      premiumPct = mkOption {
+        type = types.ints.between 0 100;
+        description = "How far above the should-cost a quote may be accepted.";
+      };
+      incoterm = mkOption {
+        # Incoterms 2020: delivered duty paid keeps customs off the critical path.
+        type = types.enum [
+          "EXW"
+          "FCA"
+          "FOB"
+          "CIF"
+          "DAP"
+          "DDP"
+        ];
+      };
+      inspection = {
+        level = mkOption {
+          type = types.enum [
+            "I"
+            "II"
+            "III"
+          ];
+          description = "ISO 2859-1 general inspection level.";
+        };
+        majorAql = mkOption {
+          type = types.enum [
+            "1.0"
+            "1.5"
+            "2.5"
+            "4.0"
+          ];
+        };
+        minorAql = mkOption {
+          type = types.enum [
+            "2.5"
+            "4.0"
+            "6.5"
+          ];
+        };
+      };
+    };
     outfit = {
       worn = mkOption {
         type = types.listOf (types.enum kitSlots);

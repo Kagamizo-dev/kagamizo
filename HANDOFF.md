@@ -53,9 +53,20 @@ The only thing you ask me for is approving a sign-in or 2FA link. Ask before any
   openservice.aliexpress.com, docs.business.amazon.com,
   affiliate-program.amazon.com, developers.mercadolibre.com.ar,
   openrouter.ai) are outside the allowlist (data/provider-pages).
-- **Next:** the owner's sign-ups (data/courier-accounts), live quotes
-  into `rank`, body measurements for sizes, image and 3D previews of each
-  specification, the LLC comparison.
+- **Later the same evening, keyless first (the owner's direction):** no
+  account until a payment or a dispatch needs one, and only with a second
+  factor that is not a phone number. 20 keyless sources are typed
+  (`logistics channels --keyless`): Shopify's Global Catalog and stores,
+  WooCommerce, Web Data Commons, CPSC and Safety Gate, OpenStreetMap
+  lockers, USPS prices, standards and on-time reports, UPS rates,
+  OurAirports, BTS, Eurostat, ANAC, NWS, FAA, PortWatch, TARIC, NCM, HTS,
+  ILOSTAT. Should-costs: `logistics cost|rfq|accept`; the vest's bill of
+  materials is declared (estimates), every rate pending, and Lean refuses
+  a should-cost with an unpriced line and a quote without an inspection
+  plan or above the 15% premium.
+- **Next:** data/keyless-verify needs the hosts below allowed; then the
+  readers (catalog, lockers, USPS tables), ILOSTAT wages into the rates,
+  and make/rfq-send (waits on the open agent-mail decision).
 
 ## 2026-11-08: the bank, the venues, and Public as the one account
 
