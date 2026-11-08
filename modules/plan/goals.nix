@@ -234,6 +234,13 @@
         question = "Elect section 475(f) mark-to-market for 2027 (trader tax status), or not? The statement is due by 2027-04-15 and cannot be made late.";
         recommended = "Decide with the accountants once paper and live results show trading volume.";
       };
+      crypto-venue = {
+        question = "Open a crypto account for trading around the clock: Kraken (passkey or authenticator, keys that trade without withdrawals, a stable NautilusTrader adapter) or Coinbase? It is your sign-up; nothing is deposited until its paper days hold.";
+        recommended = "Kraken.";
+      };
+      ibkr-gateway = {
+        question = "Run IBKR's Gateway on the host for futures across time zones (CME, Eurex, ICE Europe, Osaka, ASX) and forex: it signs in daily with the LLC's authenticator code, which would be held in Proton Pass for it. Allow that daily sign-in?";
+      };
       canary = {
         question = "Place one real canary order to prove the live path end to end: an event contract limit far from the market (it should not fill), read back, then cancelled within the minute? Without it, place, read-back and cancel are proved only against the stub.";
         recommended = "Yes, once five paper days are in: a $0 expected cost, the owner approving it like any order.";

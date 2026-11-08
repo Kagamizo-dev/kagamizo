@@ -812,6 +812,40 @@ in
         // action
       )
       {
+        id = "venues";
+        title = "Every venue typed with its classes, weekly sessions in UTC and tax treatment; the hours of the week covered, proved";
+        status = "done";
+      }
+      (
+        {
+          id = "crypto-venue";
+          title = "A crypto venue for around the clock (Kraken first): the account, a trade-only key in Proton Pass, its NautilusTrader adapter, paper days";
+        }
+        // owner "crypto-venue"
+      )
+      (
+        {
+          id = "ibkr-gateway";
+          title = "IBKR's Gateway on the host: futures across time zones and forex through the LLC's account, on NautilusTrader's adapter";
+          dependsOn = [ "trading/nautilus-rust" ];
+        }
+        // owner "ibkr-gateway"
+      )
+      {
+        id = "public-overnight";
+        title = "Public's 24-hour weekday session in our order types";
+        dependsOn = [ "bank/public-orders" ];
+      }
+      {
+        id = "daylight";
+        title = "Venue sessions kept in their exchanges' own time zones, so daylight saving moves them";
+      }
+      {
+        id = "around-the-clock";
+        title = "Require every hour of the week covered (166 of 168 today: Kalshi's Thursday maintenance)";
+        dependsOn = [ "bank/crypto-venue" ];
+      }
+      {
         id = "holidays";
         title = "Federal holidays in due dates (MLK Day falls on January 15 in 2029)";
       }
