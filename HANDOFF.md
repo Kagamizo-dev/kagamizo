@@ -28,6 +28,31 @@ Then work the plan: in each track, the lowest unblocked item first; items waitin
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
+## 2026-11-08: the bank, the venues, and Public as the one account
+
+- **The owner's decisions today:** Public stays the one trading account
+  (no consolidation onto IBKR; Kraken set aside); round-the-clock comes
+  from Public's crypto plus Kalshi; no forex. Accounts are typed Proton
+  Pass items the agents prepare (accounts.dossierFields); the owner only
+  authenticates and approves submissions.
+- **Trading:** the live path is rehearsed daily (place cancels an order
+  still working after the read-back; `trade rehearse` and `trade cancel`);
+  the dry run of spy-agents on the host's small model starts 2026-11-09
+  at 11:07 UTC. **Crypto on Public landed:** dollar-amount CRYPTO orders in
+  the client and stub, the `agent-crypto` kind, `crypto-long` risk kind
+  (worst case amount plus zerohash's 0.60% API fee, from Public's fee
+  schedule), fee-marked paper settlement, and `btc-agents` (research
+  stage) dry-running daily: research BTC-USD, paper day, rehearsal,
+  settlement.
+- **Bank:** authorities and terms typed (checks.bank-authorities); venues
+  with sessions in their own zones (checks.bank-venues). Active venues
+  cover 166 of 168 hours; public-crypto makes 168 but stays inactive until
+  Public's daily pause is confirmed on its own page (help.public.com is
+  outside the allowlist, so it is not confirmed) and btc-agents has paper
+  days. Then set `bank.aroundTheClock`.
+- **Next:** a sell path for crypto positions; reconcile against the
+  portfolio; the approval link; the ledger.
+
 ## 2026-11-07, morning: the OS as a carried library (read this first)
 
 The owner's goal: a solo researcher's whole stack in the pockets and
