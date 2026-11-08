@@ -28,6 +28,32 @@ Then work the plan: in each track, the lowest unblocked item first; items waitin
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
+## 2026-11-08, later: Nautilus owns the trading; subscriptions next
+
+- **Nautilus:** `nautilus-public` is the Public adapter (data and
+  execution clients); paper runs on Nautilus's own sandbox, live on our
+  client, the same node (checks.nautilus-public: a crypto round trip both
+  ways and reconciliation after a restart, against public-stub). The
+  host does not run it yet: the next trading step is a `bank-node` CLI
+  and host unit (plan items trading/nautilus-strategies onward).
+- **The owner's convergence:** algorithmic investing, agents as the
+  bank's portfolio managers, publishing separately. That plan (portfolio
+  types, allocators, Validity gate, publish app, with a measured blocker
+  table) is parked behind the subscriptions work; dispatch is blocked on
+  the fleet key ($25 spent; the account has $4.97).
+- **Subscriptions (ASAP, in progress):** Bridge signs in from this
+  session with no owner step (`mailbox login`: password and TOTP from
+  Pass). Never kill a running `mailbox` command: Proton's refresh token
+  is single-use, and a killed run leaves the stored vault stale (fix:
+  `mailbox login` again). `mailbox recurring` (the tally, private file;
+  counts only printed), `mailbox notices` (drafts per "cancel"), `mailbox
+  send` (only a batch whose SHA-256 is in mailbox.approvedBatches).
+  bank.aggregators holds Stripe FC, Plaid, SimpleFIN and Teller, all
+  unverified; Lean refuses a choice until coverage is verified from the
+  provider's own search (the owner's rule). Next: the tally to the owner
+  for keep/cancel, cards for kept bills, the notice batch's digest for
+  approval, the coverage signups.
+
 ## 2026-11-08: the bank, the venues, and Public as the one account
 
 - **The owner's decisions today:** Public stays the one trading account
