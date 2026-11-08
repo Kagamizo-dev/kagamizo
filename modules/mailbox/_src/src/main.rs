@@ -26,6 +26,10 @@
 //!       as a JSON array to FILE (mode 600). Only the counts by kind are
 //!       printed; no subject, body or merchant reaches the terminal.
 //!
+//!   mailbox notices --tally FILE --from ADDR --name NAME --out FILE
+//!       the cancellation notices for every relationship in the tally the
+//!       owner marked "cancel", to its first human contact, as a batch for
+//!       `mailbox send`; prints its SHA-256 and how many lack a contact
 //!   mailbox send --batch FILE --log FILE
 //!       sends a batch of notices (a JSON array of {from, to, subject,
 //!       body}) through Bridge's own SMTP, but only a batch whose SHA-256
@@ -60,6 +64,7 @@ fn main() -> Result<()> {
         Some("senders") => senders(&args[1..]),
         Some("recurring") => recurring(&args[1..]),
         Some("send") => send(&args[1..]),
+        Some("notices") => notices(&args[1..]),
         _ => bail!("usage: mailbox login | link --to A --from D... --host H... [--path P] [--since M] [--wait M] | senders [--since DAYS] | recurring --out FILE [--since DAYS]"),
     }
 }
@@ -475,6 +480,40 @@ fn with_bridge<T>(wait_min: Option<u64>, f: impl FnOnce(&Served) -> Result<T>) -
     bridge.stop()?;
     home.save()?;
     result
+}
+
+/// The notices for the tally's "cancel" decisions, as a batch file.
+fn notices(args: &[String]) -> Result<()> {
+    use sha2::Digest;
+    let usage = "usage: mailbox notices --tally FILE --from ADDR --name NAME --out FILE";
+    let mut v: std::collections::HashMap<&str, String> = Default::default();
+    let mut it = args.iter();
+    while let Some(flag) = it.next() {
+        let val = it.next().context(usage)?.clone();
+        match flag.as_str() {
+            "--tally" => v.insert("tally", val),
+            "--from" => v.insert("from", val),
+            "--name" => v.insert("name", val),
+            "--out" => v.insert("out", val),
+            _ => bail!(usage),
+        };
+    }
+    let get = |k: &str| v.get(k).cloned().context(usage);
+    let decided: Vec<mailbox::recurring::Decided> = serde_json::from_slice(&std::fs::read(get("tally")?)?)?;
+    let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+    let date = imap_date(now + 86_400); // today, as day-month-year
+    let (from, name) = (get("from")?, get("name")?);
+    let batch: Vec<_> = decided.iter().filter_map(|d| mailbox::recurring::notice(d, &from, &name, &date)).collect();
+    let missing = decided.iter().filter(|d| d.decision.as_deref() == Some("cancel") && d.contacts.is_empty()).count();
+    let json = serde_json::to_vec_pretty(&batch)?;
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        let mut f = std::fs::OpenOptions::new().write(true).create(true).truncate(true).mode(0o600).open(get("out")?)?;
+        f.write_all(&json)?;
+    }
+    let digest: String = sha2::Sha256::digest(&json).iter().map(|b| format!("{b:02x}")).collect();
+    println!("{{\"batch\":\"{digest}\",\"notices\":{},\"cancel_without_contact\":{missing}}}", batch.len());
+    Ok(())
 }
 
 /// One notice of a batch.

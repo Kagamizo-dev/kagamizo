@@ -221,7 +221,7 @@ in
               pkgs.coreutils
             ];
             text = builtins.seq top.accounts.checked ''
-              usage="usage: mailbox login | senders [--since DAYS] | recurring --out FILE [--senders FILE] [--since DAYS] | send --batch FILE --log FILE | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
+              usage="usage: mailbox login | senders [--since DAYS] | recurring --out FILE [--senders FILE] [--since DAYS] | notices --tally FILE --from ADDR --name NAME --out FILE | send --batch FILE --log FILE | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
               governance-authorize proton:bridge proton
               args=()
               case "''${1:-}" in
@@ -230,6 +230,11 @@ in
                   governance-authorize proton:inventory proton
                   shift
                   args=(senders "$@")
+                  ;;
+                # Drafting touches no account: the batch is a local file.
+                notices)
+                  shift
+                  args=(notices "$@")
                   ;;
                 send)
                   governance-authorize proton:send proton

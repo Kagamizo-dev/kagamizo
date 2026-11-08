@@ -479,3 +479,97 @@ mod tests {
         assert_eq!(cadence(&[0, 50 * day, 300 * day]), Cadence::Irregular);
     }
 }
+
+/// One relationship as the tally file holds it, with the owner's decision.
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct Decided {
+    pub domain: String,
+    pub merchant: String,
+    pub kind: String,
+    #[serde(default)]
+    pub cards: Vec<String>,
+    #[serde(default)]
+    pub to: Vec<String>,
+    #[serde(default)]
+    pub contacts: Vec<String>,
+    /// "keep", "cancel", or null while undecided.
+    pub decision: Option<String>,
+}
+
+/// A notice to send: the batch `mailbox send` takes.
+#[derive(Debug, Clone, serde::Serialize, PartialEq)]
+pub struct Notice {
+    pub from: String,
+    pub to: String,
+    pub subject: String,
+    pub body: String,
+}
+
+/// The cancellation notice for a relationship the owner marked "cancel",
+/// to its first human contact: cancel, stop renewing, revoke every
+/// payment authorization, delete stored payment details, confirm in
+/// writing. None when it is not marked cancel or no contact is known.
+pub fn notice(d: &Decided, from: &str, name: &str, date: &str) -> Option<Notice> {
+    if d.decision.as_deref() != Some("cancel") {
+        return None;
+    }
+    let to = d.contacts.first()?.clone();
+    let what = match d.kind.as_str() {
+        "bill" => "service",
+        "subscription" => "subscription or membership",
+        _ => "recurring service",
+    };
+    let accounts = if d.to.is_empty() { String::new() } else { format!(" (the account registered to {})", d.to.join(", ")) };
+    let cards = if d.cards.is_empty() {
+        "any payment method you hold on file for me".to_string()
+    } else {
+        format!("every payment method you hold on file for me, including {}", d.cards.join(", "))
+    };
+    let body = format!(
+        "To {merchant},\n\n\
+         I am the holder of my account with you{accounts}.\n\n\
+         Effective immediately, please cancel my {what} and any automatic renewal, and stop every recurring \
+         charge. I revoke my authorization for you to charge {cards}, for any amount, from today. Please also \
+         delete my stored payment details.\n\n\
+         Please confirm in writing, by reply to this address, that the {what} is cancelled, the date it took \
+         effect, and that no further charges will be made.\n\n\
+         {name}\n{from}\n{date}\n",
+        merchant = d.merchant,
+    );
+    Some(Notice {
+        from: from.to_string(),
+        to,
+        subject: format!("Cancellation and revocation of recurring payment authorization: {}", d.merchant),
+        body,
+    })
+}
+
+#[cfg(test)]
+mod notice_tests {
+    use super::*;
+
+    fn decided(decision: Option<&str>, contacts: &[&str]) -> Decided {
+        Decided {
+            domain: "streamer.com".into(),
+            merchant: "Streamer".into(),
+            kind: "subscription".into(),
+            cards: vec!["chase 1234".into()],
+            to: vec!["owner@example.org".into()],
+            contacts: contacts.iter().map(|c| c.to_string()).collect(),
+            decision: decision.map(str::to_string),
+        }
+    }
+
+    #[test]
+    fn only_cancelled_relationships_with_a_contact_get_a_notice() {
+        assert!(notice(&decided(Some("keep"), &["support@streamer.com"]), "a@b.c", "A B", "2026-11-08").is_none());
+        assert!(notice(&decided(None, &["support@streamer.com"]), "a@b.c", "A B", "2026-11-08").is_none());
+        assert!(notice(&decided(Some("cancel"), &[]), "a@b.c", "A B", "2026-11-08").is_none());
+        let n = notice(&decided(Some("cancel"), &["support@streamer.com"]), "a@b.c", "A B", "2026-11-08").unwrap();
+        assert_eq!(n.to, "support@streamer.com");
+        assert!(n.body.contains("revoke my authorization"));
+        assert!(n.body.contains("chase 1234"));
+        assert!(n.body.contains("owner@example.org"));
+        assert!(n.body.contains("confirm in writing"));
+    }
+}
