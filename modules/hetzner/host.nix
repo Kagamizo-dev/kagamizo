@@ -264,7 +264,15 @@ let
         ;
       inherit (config.packages) trade;
       inherit (config.packages) research;
-      symbols = lib.mapAttrs (_: s: s.symbol) top.trading.strategies;
+      # What the research loop decides on: a coin by its research ticker.
+      symbols = lib.mapAttrs (
+        _: s: if s.crypto != null then s.crypto.researchTicker else s.symbol
+      ) top.trading.strategies;
+      # Dry-run strategies whose paper days settle without a model: a
+      # coin's buys are marked at the next day's price.
+      settles = lib.filter (
+        s: top.trading.strategies.${s}.kind == "agent-crypto"
+      ) top.trading.paper.dryRun.strategies;
       launcher = lib.getExe' config.packages.weather-backtest "trading-host";
       passCli = config.packages.pass-cli;
     }

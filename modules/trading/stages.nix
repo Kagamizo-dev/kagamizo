@@ -121,6 +121,9 @@ in
       # The weather rules: paper first (the owner's framing of 2026-11-04),
       # and paper only after a recorded backtest over settled contracts.
       weather-rules.stage = "research";
+      # Bitcoin on Public, the round-the-clock venue: research until its
+      # first recorded backtest, its dry run daily meanwhile.
+      btc-agents.stage = "research";
     };
 
     perSystem =

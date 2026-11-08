@@ -21,7 +21,16 @@ let
     lib.filterAttrs (_: s: s.kind == "event-rule") config.trading.strategies
   );
   agentOption = lib.attrNames (
-    lib.filterAttrs (_: s: s.kind == "agent-option") config.trading.strategies
+    lib.filterAttrs (
+      _: s:
+      lib.elem s.kind [
+        "agent-option"
+        "agent-crypto"
+      ]
+    ) config.trading.strategies
+  );
+  agentCrypto = lib.attrNames (
+    lib.filterAttrs (_: s: s.kind == "agent-crypto") config.trading.strategies
   );
 in
 {
@@ -32,15 +41,15 @@ in
       description = "Run the paper days and their settlement on jingzo-host.";
     };
     strategies = mkOption {
-      type = types.listOf (types.enum eventRule);
+      type = types.listOf (types.enum (eventRule ++ agentCrypto));
       default = [ ];
-      description = "The event-rule strategies papered daily (paper-settle settles event contracts).";
+      description = "The strategies papered and settled daily: event-rule (paper-settle settles event contracts) and agent-crypto (paper-settle marks each buy at the next day's price).";
     };
     dryRun = {
       strategies = mkOption {
         type = types.listOf (types.enum agentOption);
         default = [ ];
-        description = "Agent-option strategies dry-run daily at no cost: TradingAgents on the host's small quantized model (research --local), then the paper day and its rehearsal. It proves the agents' whole lifecycle, not their judgement.";
+        description = "Agent-option and agent-crypto strategies dry-run daily at no cost: TradingAgents on the host's small quantized model (research --local), then the paper day and its rehearsal. It proves the agents' whole lifecycle, not their judgement.";
       };
       at = mkOption {
         type = types.str;
@@ -88,7 +97,10 @@ in
       enable = true;
       strategies = [ "weather-rules" ];
       # The agents' lifecycle at no cost (the owner's ask, 2026-11-08).
-      dryRun.strategies = [ "spy-agents" ];
+      dryRun.strategies = [
+        "spy-agents"
+        "btc-agents"
+      ];
     };
   };
 }

@@ -44,7 +44,7 @@ fn stub() -> Stub {
 
 /// trading.limits as limits.nix declares them.
 fn limits() -> Value {
-    json!({"public": {"allowed": ["long-call", "long-put", "debit-spread", "event-yes", "event-no"],
+    json!({"public": {"allowed": ["long-call", "long-put", "debit-spread", "event-yes", "event-no", "crypto-long"],
         "dailyLossStopUsd": 25, "dailyTakeProfitUsd": 25, "maxContractPriceUsd": 10,
         "maxOpenPositions": 1, "maxPremiumUsd": 25, "seedUsd": 100}})
 }
@@ -53,6 +53,9 @@ fn limits() -> Value {
 fn strategies(dir: &Path, stage: &str) -> Value {
     let d = dir.join("research").display().to_string();
     json!({
+        "btc-agents": {"backend": "public", "bar": "1-DAY", "crypto": {"amountUsd": 25, "feePct": 0.6, "researchTicker": "BTC-USD"},
+            "decisions": d, "event": null, "holdDays": 1, "kind": "agent-crypto", "name": "btc-agents",
+            "option": null, "params": null, "stage": stage, "startingUsd": 10000, "symbol": "BTC", "venue": "PUBLIC"},
         "spy-agents": {"backend": "public", "bar": "1-DAY", "decisions": d, "event": null, "holdDays": 1,
             "kind": "agent-option", "name": "spy-agents",
             "option": {"expiryDaysMax": 21, "expiryDaysMin": 7, "minAbsDelta": 0.15},
@@ -362,4 +365,85 @@ fn the_ledger_is_not_read_as_a_paper_day() {
     let again = c.propose(&["paper-settle", "weather-rules"]);
     assert_eq!(first["days"], 1);
     assert_eq!(again["days"], 1);
+}
+
+#[test]
+fn a_crypto_buy_is_a_dollar_amount_at_the_ask() {
+    let c = Case::new("crypto");
+    c.write("research/2026-11-04/BTC-USD.json", json!({"decision": "BUY", "rationale": "the check"}));
+    let v = c.propose(&["paper-day", "btc-agents", "2026-11-04"]);
+    let p = &v["proposal"];
+    assert_eq!(p["kind"], "crypto-long");
+    assert_eq!(p["admissible"], true, "{p}");
+    assert_eq!(p["accepted"], true, "{p}");
+    // $25 and its 0.60% fee would be over the $25 cap: the amount is cut.
+    assert_eq!(p["amount_usd"], 24.85);
+    assert_eq!(p["max_loss_usd"], 25.0);
+    assert_eq!(p["order"]["instrument"], json!({"symbol": "BTC", "type": "CRYPTO"}));
+    assert_eq!(p["order"]["amount"], "24.85");
+    assert!(p["order"].get("quantity").is_none(), "a crypto order carries an amount, not a quantity: {p}");
+    assert_eq!(p["order"]["limitPrice"], "87505.00");
+    assert_eq!(p["preflight"]["estimatedCost"], "24.85");
+    assert_eq!(v["coin"]["last"], 87500.0);
+    assert!(c.dir.join("research/paper/2026-11-04-btc-agents.json").exists());
+}
+
+#[test]
+fn a_crypto_sell_or_hold_proposes_nothing_but_records_the_price() {
+    let c = Case::new("crypto-hold");
+    c.write("research/2026-11-04/BTC-USD.json", json!({"decision": "SELL"}));
+    let v = c.propose(&["propose", "btc-agents", "2026-11-04"]);
+    assert!(v["proposal"].is_null());
+    assert_eq!(v["why"], "decision SELL: no trade (spot is held long only)");
+    assert_eq!(v["coin"]["ask"], 87505.0);
+}
+
+#[test]
+fn a_crypto_paper_day_is_rehearsed_and_placed_live() {
+    let c = Case::at_stage("crypto-live", "live");
+    c.write("research/2026-11-04/BTC-USD.json", json!({"decision": "BUY", "rationale": "the check"}));
+    let v = c.propose(&["paper-day", "btc-agents", "2026-11-04"]);
+    let (code, r, err) = c.run(&["rehearse", "btc-agents", "2026-11-04"]);
+    assert_eq!(code, 0, "{err}");
+    assert_eq!(r["admissible"], true, "{r}");
+    c.write("proposal.json", v);
+    let (code, placed, err) = c.run(&["place", "proposal.json"]);
+    assert_eq!(code, 0, "{err}");
+    assert_eq!(placed["status"]["status"], "FILLED", "{placed}");
+    assert_eq!(placed["status"]["instrument"]["type"], "CRYPTO");
+    assert_eq!(placed["day"]["openPositions"], 1);
+}
+
+#[test]
+fn crypto_paper_days_are_marked_to_market() {
+    let c = Case::new("crypto-settle");
+    std::fs::create_dir_all(c.dir.join("research/paper")).unwrap();
+    let day = |date: &str, ask: f64, last: f64, buy: bool| {
+        let proposal = if buy {
+            json!({"kind": "crypto-long", "coin": {"symbol": "BTC", "ask": ask}, "amount_usd": 25.0,
+                "max_loss_usd": 25.0, "admissible": true})
+        } else {
+            Value::Null
+        };
+        c.write(&format!("research/paper/{date}-btc-agents.json"), json!({"strategy": "btc-agents", "as_of": date,
+            "coin": {"symbol": "BTC", "ask": ask, "last": last}, "proposal": proposal}));
+    };
+    // At 0.60% a side: bought at 80,000, next day's last 84,000 (+5%:
+    // 1.25 - 0.15 - 0.1575 = +0.94); bought at 84,000, the next record (a
+    // hold) at 79,800 (-5%: -1.25 - 0.15 - 0.1425 = -1.54); the last buy at
+    // 80,000 stays open, marked at the stub's 87,500 (2.34 - 0.15 - 0.164
+    // = +2.03).
+    day("2026-11-02", 80000.0, 80000.0, true);
+    day("2026-11-03", 84000.0, 84000.0, true);
+    day("2026-11-04", 79800.0, 79800.0, false);
+    day("2026-11-05", 80000.0, 80000.0, true);
+    let v = c.propose(&["paper-settle", "btc-agents"]);
+    assert_eq!(v["days"], 4);
+    assert_eq!(v["trades"], 3);
+    assert_eq!((v["won"].as_u64(), v["lost"].as_u64(), v["open"].as_u64()), (Some(1), Some(1), Some(1)));
+    assert_eq!(v["pnl_usd"], -0.6);
+    let statuses: Vec<&str> = v["record"].as_array().unwrap().iter().map(|d| d["status"].as_str().unwrap()).collect();
+    assert_eq!(statuses, vec!["won", "lost", "no-trade", "open"]);
+    assert_eq!(v["record"][3]["exit"], 87500.0);
+    assert_eq!(v["record"][3]["pnl_usd"], 2.03);
 }

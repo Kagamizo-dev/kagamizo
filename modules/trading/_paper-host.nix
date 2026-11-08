@@ -1,6 +1,7 @@
 # The paper-trading units on jingzo-host (./paper.nix), imported by
 # ../hetzner/host.nix. Per strategy: a paper day, its rehearsal of the live
-# path up to placing (started when the paper day succeeds) and a settlement,
+# path up to placing (started when the paper day succeeds) and a settlement
+# (for a dry-run strategy, only when it settles without a model: `settles`),
 # each a
 # oneshot that trading-host starts (no shell): it signs pass-cli in with the
 # host's token, then runs `trade`, which asks governance-authorize as the
@@ -9,6 +10,7 @@
   enable,
   strategies,
   dryRun,
+  settles,
   symbols,
   research,
   dayAt,
@@ -95,6 +97,9 @@ lib.mkIf enable {
         ))
         (lib.nameValuePair "trading-rehearse-${s}" (unit "rehearse" s))
       ])
+      // lib.listToAttrs (
+        map (s: lib.nameValuePair "trading-paper-settle-${s}" (unit "paper-settle" s)) settles
+      )
       // each (s: [
         # After a paper day succeeds, its rehearsal: the live path up to placing.
         (lib.nameValuePair "trading-paper-day-${s}" (
@@ -108,6 +113,7 @@ lib.mkIf enable {
       ]);
     timers =
       dry (s: [ (lib.nameValuePair "trading-research-${s}" (timer dryRun.at)) ])
+      // lib.listToAttrs (map (s: lib.nameValuePair "trading-paper-settle-${s}" (timer settleAt)) settles)
       // each (s: [
         (lib.nameValuePair "trading-paper-day-${s}" (timer dayAt))
         (lib.nameValuePair "trading-paper-settle-${s}" (timer settleAt))

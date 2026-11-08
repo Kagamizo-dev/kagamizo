@@ -338,7 +338,12 @@ in
           6
         ] "23:05" "22:30";
         active = false;
-        needs = "crypto orders in our Public client (the API takes them); fees from 0.60% a trade at low volume; the daily pause confirmed on Public's own page";
+        # Crypto orders are in our Public client, the stub and the engine
+        # (trading.strategies.btc-agents, paper; zerohash's 0.60% API fee
+        # from Public's fee schedule, 2026-11-08). What remains: the daily
+        # pause confirmed on Public's own page (its help centre is outside
+        # the allowlist) and the strategy's first paper days.
+        needs = "the daily pause confirmed on Public's own page, and btc-agents' first paper days";
         source = "https://public.com/api/docs/changelog";
       };
       kraken = {

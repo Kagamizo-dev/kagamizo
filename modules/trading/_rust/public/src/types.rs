@@ -431,7 +431,13 @@ pub struct OrderBody {
     #[serde(rename = "orderType")]
     pub order_type: String,
     pub expiration: OrderExpiration,
+    /// A count of shares, contracts or coins; empty (and not sent) for an
+    /// order sized by `amount`, as Public takes one or the other.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub quantity: String,
+    /// A notional value in dollars, for crypto (and fractional) orders.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub amount: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "limitPrice")]
     pub limit_price: Option<String>,

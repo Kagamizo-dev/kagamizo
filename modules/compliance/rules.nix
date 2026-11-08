@@ -62,6 +62,7 @@ let
     "debit-spread"
     "event-yes"
     "event-no"
+    "crypto-long"
   ];
   proposes = {
     ema-cross = [ ];
@@ -73,11 +74,13 @@ let
       "event-yes"
       "event-no"
     ];
+    agent-crypto = [ "crypto-long" ];
   };
   instrumentOf = {
     ema-cross = "equity";
     agent-option = "option";
     event-rule = "event-contract";
+    agent-crypto = "crypto";
   };
   leanInstrument = lib.replaceStrings [ "event-contract" ] [ "eventContract" ];
 
@@ -649,6 +652,7 @@ in
           debit-spread = 3;
           event-yes = 0;
           event-no = 0;
+          crypto-long = 0;
         };
       };
 

@@ -845,6 +845,10 @@ in
       {
         id = "public-crypto";
         title = "Crypto on Public in our client and its paper days: with Kalshi, all 168 hours of the week on the one account (the daily pause confirmed first)";
+        # 2026-11-08: crypto orders (an amount, not a quantity) in the client,
+        # the stub and the engine; btc-agents dry-runs daily on the host with
+        # its fee-marked ledger. Left: the pause, and the paper days.
+        status = "active";
       }
       {
         id = "daylight";

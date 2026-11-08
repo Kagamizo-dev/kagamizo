@@ -159,6 +159,16 @@ fn contract_price(sym: &str) -> f64 {
     }
 }
 
+/// The coins the stub quotes, at a fixed last price: Public names a coin by
+/// its symbol alone, with type CRYPTO.
+fn coin_price(sym: &str) -> Option<f64> {
+    match sym {
+        "BTC" => Some(87500.00),
+        "ETH" => Some(3200.00),
+        _ => None,
+    }
+}
+
 // ── HTTP helpers ─────────────────────────────────────────────────────────
 
 fn reply(mut stream: &TcpStream, status: u32, body: &str) {
@@ -424,6 +434,25 @@ fn main() {
                         cost, cost, qs
                     ));
                 }
+            } else if instr_type == "CRYPTO" {
+                // A crypto order is sized by a dollar amount, never a quantity.
+                let sym = instrument.and_then(|i| i.get("symbol")).and_then(|s| s.as_str()).unwrap_or("");
+                let amount = body.get("amount").and_then(|v| v.as_str()).and_then(|a| a.parse::<f64>().ok());
+                let limit = body.get("limitPrice").and_then(|v| v.as_str()).and_then(|p| p.parse::<f64>().ok());
+                let has_qty = body.get("quantity").and_then(|v| v.as_str()).map(|q| !q.is_empty()).unwrap_or(false);
+                if coin_price(sym).is_none() {
+                    reply(&stream, 400, r#"{"message":"unknown coin"}"#);
+                } else if has_qty || amount.is_none() || limit.is_none() {
+                    reply(&stream, 400, r#"{"message":"a crypto order takes an amount and a limit price, not a quantity"}"#);
+                } else if side == "SELL" {
+                    reply(&stream, 400, r#"{"message":"no coins held"}"#);
+                } else {
+                    let (a, p) = (amount.unwrap(), limit.unwrap());
+                    reply_fmt(&stream, 200, format!(
+                        r#"{{"instrument":{},"orderValue":"{:.2}","estimatedCost":"{:.2}","estimatedQuantity":"{:.8}"}}"#,
+                        instrument.unwrap(), a, a, a / p
+                    ));
+                }
             } else if side == "SELL" {
                 reply(&stream, 400, r#"{"message":"insufficient shares"}"#);
             } else {
@@ -478,6 +507,12 @@ fn main() {
                         r#"{{"instrument":{{"symbol":"{}","type":"{}"}},"outcome":"SUCCESS","last":"{:.2}","bid":"{:.2}","ask":"{:.2}","bidSize":50,"askSize":50,"volume":100}}"#,
                         sym, kind, price, bid, ask_
                     ));
+                } else if kind == "CRYPTO" && coin_price(sym).is_some() {
+                    let price = coin_price(sym).unwrap();
+                    quotes.push(format!(
+                        r#"{{"instrument":{{"symbol":"{}","type":"CRYPTO"}},"outcome":"SUCCESS","last":"{:.2}","bid":"{:.2}","ask":"{:.2}","bidSize":1,"askSize":1,"volume":1000}}"#,
+                        sym, price, price - 5.0, price + 5.0
+                    ));
                 } else {
                     quotes.push(format!(
                         r#"{{"instrument":{{"symbol":"{}","type":"{}"}},"outcome":"UNKNOWN"}}"#,
@@ -524,7 +559,12 @@ fn main() {
                     serde_json::from_str::<serde_json::Value>("{}").expect("{}")
                 );
                 let side = parsed.get("orderSide").and_then(|v| v.as_str()).unwrap_or("");
-                let qty = parsed.get("quantity").and_then(|v| v.as_str()).unwrap_or("");
+                // A crypto order sized by amount fills for amount / limit coins.
+                let sized = parsed.get("amount").and_then(|v| v.as_str()).and_then(|a| a.parse::<f64>().ok())
+                    .zip(parsed.get("limitPrice").and_then(|v| v.as_str()).and_then(|p| p.parse::<f64>().ok()))
+                    .map(|(a, p)| format!("{:.8}", a / p));
+                let qty_owned = sized.unwrap_or_else(|| parsed.get("quantity").and_then(|v| v.as_str()).unwrap_or("").to_string());
+                let qty = qty_owned.as_str();
                 let instr = parsed.get("instrument");
                 let instr_str = if instr.is_some() { instr.unwrap().to_string() } else { r#"{"symbol":"SPY","type":"EQUITY"}"#.to_string() };
                 // A cancelled order reads CANCELLED; a limit of 0.01 rests far

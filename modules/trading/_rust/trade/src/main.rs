@@ -17,8 +17,10 @@
 //!                                           the day's recorded paper proposal
 //!
 //! The agent-option strategy turns the day's research decision into one
-//! option order; the event-rule strategy prices every open weather contract
-//! with the weather rules and proposes the best edge. Both go through
+//! option order; the agent-crypto strategy turns it into one spot buy of a
+//! coin on Public, sized in dollars; the event-rule strategy prices every
+//! open weather contract with the weather rules and proposes the best edge.
+//! All go through
 //! `admissible` (Kagamizo.Risk.admissible in _lean/Risk.lean) and Public's
 //! preflight, which places nothing. Only `place` places, and only for a
 //! live strategy, after the risk check and a fresh preflight.
@@ -27,7 +29,7 @@
 //! Python engine until they move onto the Rust crates (nautilus-probe).
 
 use chrono::NaiveDate;
-use kagamizo_public::client::{event_contract_order_body, option_order_body, Public};
+use kagamizo_public::client::{crypto_order_body, event_contract_order_body, option_order_body, Public};
 use kagamizo_public::endpoints::{OrderStatus, SettledOutcome};
 use kagamizo_public::types::OrderBody;
 use kagamizo_weather::data::{Question, WeatherData};
@@ -47,6 +49,7 @@ enum Kind {
     EmaCross,
     AgentOption,
     EventRule,
+    AgentCrypto,
 }
 
 #[derive(Deserialize, Clone, Copy, PartialEq, Eq, Debug)]
@@ -88,6 +91,17 @@ struct EventParams {
     source: String,
 }
 
+/// For agent-crypto: how much one order buys, and the research ticker whose
+/// decision drives it (TradingAgents names a coin as BTC-USD; Public as BTC).
+#[derive(Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+struct CryptoParams {
+    amount_usd: f64,
+    research_ticker: String,
+    /// zerohash's fee on an API crypto trade, a percent of the amount.
+    fee_pct: f64,
+}
+
 #[derive(Deserialize, Clone, Debug)]
 struct Strategy {
     name: String,
@@ -98,6 +112,8 @@ struct Strategy {
     decisions: Option<String>,
     option: Option<OptionParams>,
     event: Option<EventParams>,
+    #[serde(default)]
+    crypto: Option<CryptoParams>,
 }
 
 /// trading.limits.<backend> (modules/trading/limits.nix).
@@ -208,7 +224,8 @@ fn day_state(decl: &Strategy) -> R<Day> {
 }
 
 fn decision_for(decl: &Strategy, date: NaiveDate) -> R<Decision> {
-    let path = decisions_dir(decl)?.join(date.to_string()).join(format!("{}.json", decl.symbol));
+    let ticker = decl.crypto.as_ref().map_or(decl.symbol.as_str(), |c| c.research_ticker.as_str());
+    let path = decisions_dir(decl)?.join(date.to_string()).join(format!("{}.json", ticker.to_uppercase()));
     if !path.exists() {
         return die(format!("no research decision at {}", path.display()));
     }
@@ -452,6 +469,83 @@ fn propose_option(
     Ok(out)
 }
 
+// ── The agent-crypto strategy ─────────────────────────────────────────────
+
+/// The day's research decision into one spot buy of a coin on Public,
+/// sized in dollars (Public's crypto orders take an amount, not a
+/// quantity), limited at the ask. Spot is bought with cash and held long
+/// only, so its worst case is the amount paid; SELL and HOLD propose
+/// nothing. The coin's quote is recorded every day, traded or not, so the
+/// paper ledger can mark each day's buy at the next day's price.
+fn propose_crypto(
+    decl: &Strategy,
+    (limits, limits_raw): &(Limits, Value),
+    decision: &Decision,
+    day: &Day,
+    api: &mut Public,
+    today: NaiveDate,
+) -> R<Map<String, Value>> {
+    let params = decl.crypto.as_ref().ok_or_else(|| Die(format!("{} declares no crypto parameters", decl.name), 2))?;
+    let mut out = Map::new();
+    out.insert("strategy".into(), json!(decl.name));
+    out.insert("symbol".into(), json!(decl.symbol));
+    out.insert("as_of".into(), json!(today.to_string()));
+    out.insert("decision".into(), json!(decision.decision));
+    out.insert("rationale".into(), decision.rationale.clone().unwrap_or(Value::Null));
+    out.insert("limits".into(), limits_raw.clone());
+    out.insert("day".into(), Value::Object(day.raw.clone()));
+    out.insert("proposal".into(), Value::Null);
+    let quote = api.quotes(vec![(decl.symbol.as_str(), "CRYPTO")]).map_err(api_die)?.into_iter().next();
+    let price = |s: &Option<String>| s.as_deref().and_then(|v| v.parse::<f64>().ok()).filter(|p| *p > 0.0);
+    let Some(q) = quote.filter(|q| q.outcome == "SUCCESS") else {
+        out.insert("why".into(), json!(format!("Public has no quote for {}", decl.symbol)));
+        return Ok(out);
+    };
+    let (ask, bid, last) = (price(&q.ask), price(&q.bid), price(&q.last));
+    out.insert("coin".into(), json!({"symbol": decl.symbol, "ask": ask, "bid": bid, "last": last}));
+    if decision.decision.as_deref() != Some("BUY") {
+        out.insert(
+            "why".into(),
+            json!(format!(
+                "decision {}: no trade (spot is held long only)",
+                decision.decision.as_deref().unwrap_or("None")
+            )),
+        );
+        return Ok(out);
+    }
+    let Some(ask) = ask else {
+        out.insert("why".into(), json!(format!("{} has no ask", decl.symbol)));
+        return Ok(out);
+    };
+    let kind = "crypto-long";
+    // The worst case is the amount and its fee: the amount is cut so both
+    // fit the cap.
+    let fee = params.fee_pct / 100.0;
+    let amount = round2(params.amount_usd.min((limits.max_premium_usd / (1.0 + fee) * 100.0).floor() / 100.0));
+    let max_loss = round2(amount * (1.0 + fee));
+    let (ok, why) = admissible(limits, day, kind, max_loss);
+    let order = crypto_order_body(
+        &decl.symbol,
+        "BUY",
+        &format!("{ask:.2}"),
+        &amount.to_string(),
+        Some(&uuid::Uuid::new_v4().to_string()),
+    )
+    .map_err(api_die)?;
+    let mut p = Map::new();
+    p.insert("kind".into(), json!(kind));
+    p.insert("coin".into(), json!({"symbol": decl.symbol, "ask": ask}));
+    p.insert("amount_usd".into(), json!(amount));
+    p.insert("quantity".into(), json!(round_to(amount / ask, 8)));
+    p.insert("fee_pct".into(), json!(params.fee_pct));
+    p.insert("max_loss_usd".into(), json!(max_loss));
+    p.insert("admissible".into(), json!(ok));
+    p.insert("refused_because".into(), json!(why));
+    p.insert("order".into(), json!(order));
+    out.insert("proposal".into(), Value::Object(preflighted(p, &order, api)));
+    Ok(out)
+}
+
 // ── The event-rule strategy ───────────────────────────────────────────────
 
 /// A contract's ask, when it is a price strictly between 0 and 1.
@@ -660,6 +754,13 @@ fn propose(name: &str, date: Option<&str>, record: bool, forecasts: Option<&str>
             let out = propose_option(&decl, &limits_for(&decl)?, &decision_for(&decl, today)?, &day_state(&decl)?, &mut api, today)?;
             (out, decl.symbol.clone())
         }
+        Kind::AgentCrypto => {
+            if forecasts.is_some() {
+                return die(format!("{name} is agent-crypto; --forecasts is for an event-rule strategy"));
+            }
+            let out = propose_crypto(&decl, &limits_for(&decl)?, &decision_for(&decl, today)?, &day_state(&decl)?, &mut api, today)?;
+            (out, name.to_string())
+        }
         Kind::EventRule => {
             let params = decl.event.as_ref().ok_or_else(|| Die(format!("{name} declares no event parameters"), 2))?;
             let data = forecasts_for(params, today, forecasts)?;
@@ -667,7 +768,7 @@ fn propose(name: &str, date: Option<&str>, record: bool, forecasts: Option<&str>
             (out, name.to_string())
         }
         Kind::EmaCross => {
-            return die(format!("{name} is ema-cross, which proposes nothing (agent-option and event-rule do)"));
+            return die(format!("{name} is ema-cross, which proposes nothing (agent-option, agent-crypto and event-rule do)"));
         }
     };
     if record {
@@ -888,6 +989,9 @@ fn max_drawdown_pct(seed: f64, pnls: &[f64]) -> f64 {
 /// settled its contract; the ledger written beside the records.
 fn paper_settle(name: &str) -> R<()> {
     let decl = declared(name)?;
+    if decl.kind == Kind::AgentCrypto {
+        return paper_settle_crypto(&decl);
+    }
     if decl.kind != Kind::EventRule {
         return die(format!(
             "{name} is {:?}: paper-settle settles event contracts; an option settles at expiry, which it does not price yet",
@@ -953,6 +1057,97 @@ fn paper_settle(name: &str) -> R<()> {
         "won": won,
         "lost": lost,
         "pnl_usd": pnl,
+        "hit_rate": if settled > 0 { round4(won as f64 / settled as f64) } else { 0.0 },
+        "max_drawdown_pct": max_drawdown_pct(seed, &pnls),
+        "from": days.first().map(|d| d["date"].clone()).unwrap_or(Value::Null),
+        "to": days.last().map(|d| d["date"].clone()).unwrap_or(Value::Null),
+        "record": days,
+    });
+    let out = folder.join(format!("ledger-{name}.json"));
+    std::fs::create_dir_all(&folder).map_err(|e| Die(format!("{}: {e}", folder.display()), 1))?;
+    std::fs::write(&out, serde_json::to_string_pretty(&ledger).expect("JSON serialises"))
+        .map_err(|e| Die(format!("{}: {e}", out.display()), 1))?;
+    emit(&ledger);
+    Ok(())
+}
+
+/// A spot buy of `amount` at `entry`, closed at `exit`, paying `fee` (a
+/// fraction) on the buy and on the sale: its P&L in dollars.
+fn mark_crypto(amount: f64, entry: f64, exit: f64, fee: f64) -> f64 {
+    if entry <= 0.0 {
+        return 0.0;
+    }
+    let proceeds = amount * exit / entry;
+    round2(proceeds - amount - fee * amount - fee * proceeds)
+}
+
+/// The recorded paper days of a crypto strategy, marked to market: each
+/// admissible buy is held a day and closed at the next recorded day's last
+/// price (every record carries the coin's quote, traded or not); the
+/// latest buy is marked at Public's quote now and stays open. Each buy and
+/// sale pays zerohash's fee (the strategy's feePct); the spread is in the
+/// ask paid.
+fn paper_settle_crypto(decl: &Strategy) -> R<()> {
+    let name = decl.name.as_str();
+    let fee = decl.crypto.as_ref().map_or(0.0, |c| c.fee_pct / 100.0);
+    let (_, limits_raw) = limits_for(decl)?;
+    let seed = limits_raw.get("seedUsd").and_then(Value::as_f64).unwrap_or(0.0);
+    let folder = decisions_dir(decl)?.join("paper");
+    let suffix = format!("-{name}.json");
+    let mut paths: Vec<PathBuf> = std::fs::read_dir(&folder)
+        .map(|d| d.filter_map(|e| e.ok().map(|e| e.path())).collect())
+        .unwrap_or_default();
+    paths.retain(|p| p.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.ends_with(&suffix) && n.len() == 10 + suffix.len()));
+    paths.sort();
+    let records: Vec<Value> = paths.iter().map(|p| read_json(p)).collect::<R<_>>()?;
+    let last_of = |r: &Value| r["coin"]["last"].as_f64().or_else(|| r["coin"]["ask"].as_f64());
+    let mut now: Option<f64> = None;
+    let (mut days, mut pnls) = (Vec::new(), Vec::new());
+    let (mut trades, mut won, mut lost, mut open) = (0u32, 0u32, 0u32, 0u32);
+    for (i, rec) in records.iter().enumerate() {
+        let date = rec["as_of"].as_str().unwrap_or_default().to_string();
+        let p = &rec["proposal"];
+        if p.is_null() || p["admissible"] != Value::Bool(true) {
+            days.push(json!({"date": date, "status": PaperStatus::NoTrade.name(), "why": rec.get("why").cloned().unwrap_or(json!(p["refused_because"]))}));
+            continue;
+        }
+        trades += 1;
+        let (entry, amount) = (p["coin"]["ask"].as_f64().unwrap_or(0.0), p["amount_usd"].as_f64().unwrap_or(0.0));
+        let exit = records[i + 1..].iter().find_map(last_of);
+        let (status, at, pnl) = match exit {
+            Some(x) => {
+                let pnl = mark_crypto(amount, entry, x, fee);
+                pnls.push(pnl);
+                (if pnl > 0.0 { PaperStatus::Won } else { PaperStatus::Lost }, x, pnl)
+            }
+            None => {
+                if now.is_none() {
+                    let q = Public::new(None, None).quotes(vec![(decl.symbol.as_str(), "CRYPTO")]).map_err(api_die)?;
+                    now = q.first().and_then(|q| q.last.as_deref()).and_then(|l| l.parse().ok());
+                }
+                let x = now.unwrap_or(entry);
+                (PaperStatus::Open, x, mark_crypto(amount, entry, x, fee))
+            }
+        };
+        match status {
+            PaperStatus::Won => won += 1,
+            PaperStatus::Lost => lost += 1,
+            _ => open += 1,
+        }
+        days.push(json!({"date": date, "status": status.name(), "coin": decl.symbol, "entry": entry,
+            "exit": at, "amount_usd": amount, "pnl_usd": pnl}));
+    }
+    let settled = won + lost;
+    let ledger = json!({
+        "strategy": name,
+        "seed_usd": seed,
+        "days": records.len(),
+        "trades": trades,
+        "settled": settled,
+        "open": open,
+        "won": won,
+        "lost": lost,
+        "pnl_usd": round2(pnls.iter().sum()),
         "hit_rate": if settled > 0 { round4(won as f64 / settled as f64) } else { 0.0 },
         "max_drawdown_pct": max_drawdown_pct(seed, &pnls),
         "from": days.first().map(|d| d["date"].clone()).unwrap_or(Value::Null),
@@ -1108,6 +1303,17 @@ mod tests {
         // 100 -> 110 -> 99 -> 104: the trough is 11 below the 110 peak.
         assert_eq!(max_drawdown_pct(100.0, &[10.0, -11.0, 5.0]), 10.0);
         assert_eq!(max_drawdown_pct(100.0, &[]), 0.0);
+    }
+
+    #[test]
+    fn a_spot_buy_is_marked_by_the_price_move() {
+        // $25 of BTC at 87,500, closed at 91,875 (+5%) and at 83,125 (-5%).
+        assert_eq!(mark_crypto(25.0, 87500.0, 91875.0, 0.0), 1.25);
+        assert_eq!(mark_crypto(25.0, 87500.0, 83125.0, 0.0), -1.25);
+        assert_eq!(mark_crypto(25.0, 0.0, 1.0, 0.0), 0.0);
+        // At 0.60% a side: 1.25 - 0.15 - 0.1575 = 0.9425; flat costs 0.30.
+        assert_eq!(mark_crypto(25.0, 87500.0, 91875.0, 0.006), 0.94);
+        assert_eq!(mark_crypto(25.0, 87500.0, 87500.0, 0.006), -0.3);
     }
 
     #[test]

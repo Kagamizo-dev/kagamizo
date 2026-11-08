@@ -609,7 +609,7 @@ pub fn order_body(
     let mut body = OrderBody {
         instrument: Instrument { symbol: symbol.to_uppercase(), kind: "EQUITY".to_string() },
         order_side: side.to_string(), order_type: order_type.to_string(),
-        expiration: expiration, quantity: quantity.to_string(),
+        expiration: expiration, quantity: quantity.to_string(), amount: None,
         limit_price: None, stop_price: None, open_close_indicator: None, order_id: None,
     };
     if order_type == "LIMIT" || order_type == "STOP_LIMIT" {
@@ -634,12 +634,41 @@ pub fn option_order_body(
         instrument: Instrument { symbol: osi_symbol.to_string(), kind: "OPTION".to_string() },
         order_side: side.to_string(), order_type: "LIMIT".to_string(),
         expiration: OrderExpiration { time_in_force: "DAY".to_string(), expiration_time: None },
-        quantity: quantity.to_string(),
+        quantity: quantity.to_string(), amount: None,
         limit_price: Some(format!("{:.2}", price_f)),
         stop_price: None, open_close_indicator: Some(open_close.to_string()), order_id: None,
     };
     if order_id.is_some() { body.order_id = Some(order_id.unwrap().to_string()); }
     Result::Ok(body)
+}
+
+/// A crypto order as Public documents it (changelog, 2026-01-26): a LIMIT
+/// order for a notional `amount` in dollars of a coin named by its symbol
+/// alone ("BTC", type CRYPTO), good for the DAY. Crypto trades around the
+/// clock; it cannot be bracketed.
+pub fn crypto_order_body(
+    symbol: &str, side: &str, limit_price: &str, amount_usd: &str, order_id: Option<&str>,
+) -> Result<OrderBody, String> {
+    if side != "BUY" && side != "SELL" { return Result::Err(format!("Public has no order side {}", side)); }
+    let coin = symbol.trim().to_uppercase();
+    if coin.is_empty() || coin.contains('-') || !coin.chars().all(|c| c.is_ascii_alphanumeric()) {
+        return Result::Err(format!("a crypto symbol is the coin alone, such as BTC, not {}", symbol));
+    }
+    let price = limit_price.trim();
+    if price.parse::<f64>().map(|p| p <= 0.0 || !p.is_finite()).unwrap_or(true) {
+        return Result::Err(format!("a crypto limit price is a positive number, not {}", limit_price));
+    }
+    let amount_f: f64 = amount_usd.parse::<f64>().unwrap_or(0.0);
+    if amount_f <= 0.0 || !amount_f.is_finite() { return Result::Err(format!("a crypto order's amount is a positive number of dollars, not {}", amount_usd)); }
+    Result::Ok(OrderBody {
+        instrument: Instrument { symbol: coin, kind: "CRYPTO".to_string() },
+        order_side: side.to_string(), order_type: "LIMIT".to_string(),
+        expiration: OrderExpiration { time_in_force: "DAY".to_string(), expiration_time: None },
+        quantity: String::new(), amount: Some(format!("{:.2}", amount_f)),
+        limit_price: Some(price.to_string()),
+        stop_price: None, open_close_indicator: None,
+        order_id: order_id.map(|o| o.to_string()),
+    })
 }
 
 pub fn event_contract_order_body(
@@ -655,7 +684,7 @@ pub fn event_contract_order_body(
         instrument: Instrument { symbol: symbol.trim().to_uppercase(), kind: "EVENTCONTRACT".to_string() },
         order_side: side.to_string(), order_type: "LIMIT".to_string(),
         expiration: OrderExpiration { time_in_force: "DAY".to_string(), expiration_time: None },
-        quantity: (qty_f as u32).to_string(),
+        quantity: (qty_f as u32).to_string(), amount: None,
         limit_price: Some(format!("{:.2}", price_f)),
         stop_price: None, open_close_indicator: None,
         order_id: if order_id.is_some() { Some(order_id.unwrap().to_string()) } else { None },

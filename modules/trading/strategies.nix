@@ -93,6 +93,7 @@ let
               {
                 ema-cross = if lib.hasSuffix "-DAY" config.bar then 0 else 5;
                 agent-option = 5;
+                agent-crypto = 5;
                 event-rule = 5;
               }
               .${config.kind};
@@ -110,6 +111,9 @@ let
             # The day's research decision into one defined-risk option within
             # the limits (./_propose.py, ./limits.nix).
             "agent-option"
+            # The day's research decision on a coin into one spot buy on
+            # Public, sized in dollars, held long only (./_rust/trade).
+            "agent-crypto"
             # Event contracts by rule: a forecast's probability against the
             # contract's price (./_weather.py, ./_propose.py).
             "event-rule"
@@ -160,6 +164,29 @@ let
           );
           default = null;
           description = "For event-rule: which contracts, which questions, and how much edge.";
+        };
+        crypto = mkOption {
+          type = types.nullOr (
+            types.submodule {
+              options = {
+                amountUsd = mkOption {
+                  type = types.ints.positive;
+                  description = "The dollars one buy spends (capped again by the backend's maxPremiumUsd).";
+                };
+                feePct = mkOption {
+                  type = types.numbers.between 0.0 5.0;
+                  default = 0.6;
+                  description = "zerohash's fee on a crypto trade through Public's API, a percent of the amount: 0.60% under $10K a month (https://public.com/disclosures/fee-schedule, section 3, read 2026-11-08).";
+                };
+                researchTicker = mkOption {
+                  type = types.strMatching "[A-Z][A-Z0-9]*-USD";
+                  description = "The ticker the research loop decides on (TradingAgents names a coin as BTC-USD; Public as BTC).";
+                };
+              };
+            }
+          );
+          default = null;
+          description = "For agent-crypto: how much one buy spends, and whose research decides it.";
         };
         option = mkOption {
           type = types.nullOr (
@@ -230,11 +257,15 @@ let
         s.kind == "agent-option" && (s.option == null || s.decisions == null)
       ) "trading.strategies.${name}: agent-option needs option and decisions"
       ++ lib.optional (
+        s.kind == "agent-crypto" && (s.crypto == null || s.decisions == null)
+      ) "trading.strategies.${name}: agent-crypto needs crypto and decisions"
+      ++ lib.optional (
         s.kind == "event-rule" && (s.event == null || s.decisions == null)
       ) "trading.strategies.${name}: event-rule needs event and decisions"
       ++ lib.optional (
         lib.elem s.kind [
           "agent-option"
+          "agent-crypto"
           "event-rule"
         ]
         && !(cfg.limits ? ${s.backend})
@@ -248,6 +279,7 @@ let
   );
   sourceKey = lib.replaceStrings [ "-" ] [ "_" ];
   eventRule = lib.attrNames (lib.filterAttrs (_: s: s.kind == "event-rule") cfg.strategies);
+  agentCrypto = lib.attrNames (lib.filterAttrs (_: s: s.kind == "agent-crypto") cfg.strategies);
 
   declared = lib.mapAttrs (
     name: s:
@@ -335,6 +367,23 @@ in
         # FINRA Rule 4210(f)(8)(B) restricts (modules/compliance, 2026-11-04).
         holdDays = 1;
       };
+      # Public as the one interface around the clock (the owner, 2026-11-08):
+      # the research teams' daily decision on bitcoin, as one spot buy of
+      # $25 on Public (an amount, not a quantity), held at least a day and
+      # never sold short. Crypto is not a security, so FINRA's
+      # pattern-day-trader rule does not reach it; the hold keeps the paper
+      # ledger's marks a day apart.
+      btc-agents = {
+        kind = "agent-crypto";
+        backend = "public";
+        symbol = "BTC";
+        crypto = {
+          amountUsd = 25;
+          researchTicker = "BTC-USD";
+        };
+        decisions = "research";
+        holdDays = 1;
+      };
     };
 
     # Public lists event contracts through its API (the pinned CLI's
@@ -360,6 +409,7 @@ in
         };
         # The event-rule strategies, for the wrapper's authorizations.
         eventRulePattern = if eventRule == [ ] then "--none--" else lib.concatStringsSep "|" eventRule;
+        cryptoPattern = if agentCrypto == [ ] then "--none--" else lib.concatStringsSep "|" agentCrypto;
         # The engine itself, with whatever Public credentials the caller set.
         run = pkgs.writeShellApplication {
           name = "trade-run";
@@ -401,11 +451,17 @@ in
                         governance-authorize public:event-contracts-summary "$account"
                         governance-authorize public:event-contracts-details "$account"
                         governance-authorize public:market-quotes "$account" ;;
+                      ${cryptoPattern}) governance-authorize public:market-quotes "$account" ;;
                       *) governance-authorize public:market-option-chain "$account" ;;
                     esac
                     governance-authorize public:order-preflight-single "$account" ;;
-                  # Settling paper days reads each recorded event's outcome.
-                  paper-settle) governance-authorize public:event-contracts-details "$account" ;;
+                  # Settling paper days reads each recorded event's outcome, or
+                  # marks a coin at its quote.
+                  paper-settle)
+                    case "''${2:-}" in
+                      ${cryptoPattern}) governance-authorize public:market-quotes "$account" ;;
+                      *) governance-authorize public:event-contracts-details "$account" ;;
+                    esac ;;
                   # The live path up to placing: the account and a preflight.
                   rehearse)
                     governance-authorize public:accounts-list "$account"

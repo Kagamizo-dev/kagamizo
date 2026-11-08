@@ -1,8 +1,9 @@
 /-
 The trading limits (modules/trading/limits.nix), as the owner set them on
 2026-11-02 and extended for event contracts on 2026-11-04: defined-risk
-trades only (a long option, a debit spread, or an event contract bought
-outright, each losing at most what was paid), a seed, the most one trade
+trades only (a long option, a debit spread, an event contract bought
+outright, or spot crypto bought with cash (2026-11-08), each losing at most
+what was paid), a seed, the most one trade
 may lose, one open position, a stop for the day and a take-profit for the
 day. `admissible` is the rule every proposal is held to before Public's
 preflight; the theorems are what it guarantees, whatever the strategy
@@ -20,6 +21,9 @@ inductive Kind where
   | debitSpread
   | eventYes
   | eventNo
+  /-- Spot crypto bought with cash (no margin, never short): it loses at
+  most the amount paid and its fee. -/
+  | cryptoLong
   deriving DecidableEq, Repr
 
 structure Limits where

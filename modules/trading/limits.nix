@@ -25,12 +25,13 @@ let
     "debit-spread"
     "event-yes"
     "event-no"
+    "crypto-long"
   ];
   camel =
     k:
     lib.replaceStrings
-      [ "long-call" "long-put" "debit-spread" "event-yes" "event-no" ]
-      [ "longCall" "longPut" "debitSpread" "eventYes" "eventNo" ]
+      [ "long-call" "long-put" "debit-spread" "event-yes" "event-no" "crypto-long" ]
+      [ "longCall" "longPut" "debitSpread" "eventYes" "eventNo" "cryptoLong" ]
       k;
   limits = types.submodule {
     options = {
@@ -57,7 +58,7 @@ let
       };
       allowed = mkOption {
         type = types.nonEmptyListOf (types.enum kinds);
-        description = "Defined-risk kinds only: a long option, a debit spread, or an event contract bought YES or NO.";
+        description = "Defined-risk kinds only: a long option, a debit spread, an event contract bought YES or NO, or spot crypto bought with cash.";
       };
     };
   };
@@ -113,6 +114,9 @@ in
         "debit-spread"
         "event-yes"
         "event-no"
+        # Spot crypto bought with cash on Public (2026-11-08): its worst case
+        # is the amount and zerohash's fee.
+        "crypto-long"
       ];
     };
 
