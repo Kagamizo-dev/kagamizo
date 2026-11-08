@@ -112,6 +112,11 @@ in
         exercised = "none";
         by = "the plan's promotion decision; the link to the owner is not built";
       };
+      agents = {
+        what = "the agents' whole lifecycle (analysts, the bull and bear debate, the trader, risk, the portfolio manager) deciding the day for an agent-option strategy";
+        exercised = "real";
+        by = "the daily dry run on the host's small quantized model (trading-research-*), at no cost; the paid models only once credit returns";
+      };
       observability = {
         what = "the paper days, rehearsals and settlements on the host's console";
         exercised = "real";

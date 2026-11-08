@@ -34,7 +34,13 @@ def config():
         made = json.loads(os.environ["RESEARCH_CONFIG"])
     except (KeyError, json.JSONDecodeError):
         die("RESEARCH_CONFIG is not set; run research through its wrapper", 2)
-    key = os.environ.get("OPENROUTER_API_KEY")
+    # The backend: OpenRouter on the research key, or the host's small
+    # quantized model (RESEARCH_BACKEND=local, `research --local`), keyless.
+    name = os.environ.get("RESEARCH_BACKEND", "openrouter")
+    backend = made["backends"].get(name)
+    if backend is None:
+        die(f"no research backend {name}", 2)
+    key = os.environ.get("OPENROUTER_API_KEY") if backend["keyed"] else "local"
     if not key:
         die("OPENROUTER_API_KEY is not set; run research through its wrapper (profile research)", 2)
     os.environ["OPENAI_API_KEY"] = key
@@ -44,9 +50,9 @@ def config():
     cfg.update(
         {
             "llm_provider": "openai",
-            "backend_url": made["backendUrl"],
-            "deep_think_llm": made["deepModel"],
-            "quick_think_llm": made["quickModel"],
+            "backend_url": backend["url"],
+            "deep_think_llm": backend["deepModel"],
+            "quick_think_llm": backend["quickModel"],
             "max_debate_rounds": made["debateRounds"],
             "max_risk_discuss_rounds": made["riskRounds"],
             "max_tokens": made["maxTokens"],
@@ -153,7 +159,9 @@ def main(argv):
         else:
             rest.append(a)
     if len(rest) == 3 and rest[0] == "run":
-        run(rest[1], rest[2], out_dir)
+        # "today": a timer names no date (the host's dry run).
+        date = __import__("datetime").date.today().isoformat() if rest[2] == "today" else rest[2]
+        run(rest[1], date, out_dir)
     elif len(rest) == 4 and rest[0] == "sweep":
         sweep(rest[1].split(","), rest[2], rest[3], out_dir, jobs)
     elif len(rest) == 4 and rest[0] == "backtest":

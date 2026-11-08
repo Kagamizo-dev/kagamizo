@@ -7,6 +7,8 @@
 # $20 a month). Its decisions are files `trade propose` reads.
 #
 #   nix run .#research -- run SPY 2026-11-04        research/2026-11-04/SPY.json
+#   nix run .#research -- --local run SPY today     the same on the host's small
+#                                                   quantized model: no key, no cost
 #   nix run .#research -- sweep SPY,QQQ FROM TO --jobs 2
 #   nix run .#research -- backtest SPY FROM TO      its own run_backtest
 #
@@ -38,6 +40,22 @@ in
       type = types.enum models;
       default = config.openrouter.defaultModel;
       description = "The analysts', researchers' and trader's model (tier 2).";
+    };
+    backends = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            url = mkOption { type = types.str; };
+            deepModel = mkOption { type = types.str; };
+            quickModel = mkOption { type = types.str; };
+            keyed = mkOption {
+              type = types.bool;
+              description = "Whether it needs the research key (OpenRouter's); a local model needs none.";
+            };
+          };
+        }
+      );
+      description = "Where the agents' models run: OpenRouter on the research key, or the host's small quantized model at no cost (`research --local`), for dry runs of the whole lifecycle.";
     };
     debateRounds = mkOption {
       type = types.ints.positive;
@@ -111,6 +129,23 @@ in
     };
   };
 
+  # The two backends: the paid models on OpenRouter, and the host's small
+  # quantized model (../agents/tiers.nix, served by llama.cpp on the loopback,
+  # ../hetzner/_tier1.nix) for dry runs at no cost.
+  config.research.backends = {
+    openrouter = {
+      url = "https://openrouter.ai/api/v1";
+      inherit (cfg) deepModel quickModel;
+      keyed = true;
+    };
+    local = {
+      url = "http://127.0.0.1:${toString config.hetzner.host.agents.tier1Port}/v1";
+      deepModel = config.agents.tiers.small.model;
+      quickModel = config.agents.tiers.small.model;
+      keyed = false;
+    };
+  };
+
   config.perSystem =
     { pkgs, config, ... }:
     let
@@ -173,7 +208,8 @@ in
       };
       python = pkgs.python313.withPackages (_: [ tradingagents ]);
       made = builtins.toJSON {
-        backendUrl = "https://openrouter.ai/api/v1";
+        backendUrl = cfg.backends.openrouter.url;
+        inherit (cfg) backends;
         inherit (cfg)
           deepModel
           quickModel
@@ -207,6 +243,11 @@ in
             config.packages.pass-cli
           ];
           text = ''
+            # `research --local ...`: the host's small model, no key, no cost.
+            if [ "''${1:-}" = --local ]; then
+              shift
+              RESEARCH_BACKEND=local exec research-run "$@"
+            fi
             export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
             exec secretspec run --file ${config.packages.secretspec-toml} --profile research \
               --reason "research $*" -- research-run "$@"
@@ -241,6 +282,13 @@ in
             assert cfg["backend_url"] == "https://openrouter.ai/api/v1" and cfg["llm_provider"] == "openai"
             from tradingagents.graph.trading_graph import TradingAgentsGraph
             TradingAgentsGraph(debug=False, config=cfg)
+            # The local backend: the host's small model, no key at all.
+            os.environ["RESEARCH_BACKEND"] = "local"
+            del os.environ["OPENROUTER_API_KEY"]
+            local = r.config()
+            assert local["backend_url"].startswith("http://127.0.0.1:") and os.environ["OPENAI_API_KEY"] == "local", local["backend_url"]
+            assert local["quick_think_llm"] == local["deep_think_llm"] == ${builtins.toJSON cfg.backends.local.quickModel}
+            TradingAgentsGraph(debug=False, config=local)
             assert r.signal_of("Final decision: **BUY**") == "BUY"
             assert r.signal_of("sell then hold... HOLD") == "HOLD"
             assert r.signal_of("nothing") == "HOLD"

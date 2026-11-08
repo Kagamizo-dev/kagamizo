@@ -20,6 +20,9 @@ let
   eventRule = lib.attrNames (
     lib.filterAttrs (_: s: s.kind == "event-rule") config.trading.strategies
   );
+  agentOption = lib.attrNames (
+    lib.filterAttrs (_: s: s.kind == "agent-option") config.trading.strategies
+  );
 in
 {
   options.trading.paper = {
@@ -32,6 +35,18 @@ in
       type = types.listOf (types.enum eventRule);
       default = [ ];
       description = "The event-rule strategies papered daily (paper-settle settles event contracts).";
+    };
+    dryRun = {
+      strategies = mkOption {
+        type = types.listOf (types.enum agentOption);
+        default = [ ];
+        description = "Agent-option strategies dry-run daily at no cost: TradingAgents on the host's small quantized model (research --local), then the paper day and its rehearsal. It proves the agents' whole lifecycle, not their judgement.";
+      };
+      at = mkOption {
+        type = types.str;
+        default = "*-*-* 11:07:00 UTC";
+        description = "When the dry run's research starts: early, as a small model on the CPU takes its time.";
+      };
     };
     dayAt = mkOption {
       type = types.str;
@@ -72,6 +87,8 @@ in
     trading.paper = {
       enable = true;
       strategies = [ "weather-rules" ];
+      # The agents' lifecycle at no cost (the owner's ask, 2026-11-08).
+      dryRun.strategies = [ "spy-agents" ];
     };
   };
 }

@@ -553,6 +553,11 @@ in
         status = "done";
       }
       {
+        id = "dry-run";
+        title = "The agents' strategy dry-run daily at no cost: TradingAgents on the host's small quantized model, then its paper day and rehearsal";
+        status = "done";
+      }
+      {
         id = "reconcile";
         title = "Reconcile the day's positions against Public's portfolio";
       }

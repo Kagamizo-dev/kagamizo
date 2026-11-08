@@ -256,12 +256,15 @@ let
       inherit (top.trading.paper)
         enable
         strategies
+        dryRun
         dayAt
         settleAt
         agent
         dir
         ;
       inherit (config.packages) trade;
+      inherit (config.packages) research;
+      symbols = lib.mapAttrs (_: s: s.symbol) top.trading.strategies;
       launcher = lib.getExe' config.packages.weather-backtest "trading-host";
       passCli = config.packages.pass-cli;
     }
@@ -386,12 +389,17 @@ let
             echo "-- failed units"; systemctl --failed --no-legend --plain || true
             [ -r /var/lib/kagamizo/host-token ] && echo "-- host token: present" || echo "-- host token: MISSING"
             echo "-- migration-staging"; journalctl -u migration-staging -b --no-pager -n 12 -o cat || true
-            echo "-- paper trading"; systemctl list-timers 'trading-paper-*' --no-legend --plain || true
+            echo "-- paper trading"; systemctl list-timers 'trading-*' --no-legend --plain || true
             ${lib.concatMapStrings (s: ''
               journalctl -u trading-paper-day-${s} --no-pager -n 6 -o cat || true
               journalctl -u trading-rehearse-${s} --no-pager -n 6 -o cat || true
               journalctl -u trading-paper-settle-${s} --no-pager -n 20 -o cat || true
             '') top.trading.paper.strategies}
+            ${lib.concatMapStrings (s: ''
+              journalctl -u trading-research-${s} --no-pager -n 4 -o cat || true
+              journalctl -u trading-paper-day-${s} --no-pager -n 4 -o cat || true
+              journalctl -u trading-rehearse-${s} --no-pager -n 4 -o cat || true
+            '') top.trading.paper.dryRun.strategies}
           '';
         };
       };
