@@ -211,7 +211,23 @@
         question = "When one entity pays another's costs (OpenRouter), record it as owed, or wait?";
       };
       kagamizo-purpose = {
-        question = "What does Kagamizo become now that consulting is off?";
+        question = "What does Kagamizo become now that consulting is off? Form the LLC only if a comparison shows real value (revenue, a service sold to others) and Northwest's CLI drives the formation end to end.";
+      };
+      buyer-entity = {
+        question = "Which entity buys, sources and ships (logistics.owner)?";
+        answer = "Mirazo, the owner himself (2026-11-08): Kagamizo is a name and a domain, not yet an LLC; it is formed only once a comparison shows its value (make/llc-comparison).";
+      };
+      order-approval = {
+        question = "May the logistics agents buy on their own, or does every order wait on the owner?";
+        answer = "Every order waits on the owner's approval of the payment (2026-11-08); agents search, specify, quote and rank.";
+      };
+      first-order = {
+        question = "What is the first order, built end to end?";
+        answer = "The wearable kit (2026-11-08): a vest with many pockets, modular arm sleeves, a cloak over it all and quick-release carabiners; everything worn, never a backpack.";
+      };
+      hubs = {
+        question = "Which hubs: the Texas airport, and the European and Asian hubs, picked by direct flights, price and transit?";
+        answer = "Partly (2026-11-08): Texas is home (family), Brazil is South America's; most continents supported, heaviest in Europe, Asia and the US; each hub chosen by its airport's direct flights and travel. The cities wait on flight data (data/flight-data).";
       };
       public-login = {
         question = "Move Public's sign-in to finance@mirazo.org, or change the declaration, before the exception ends on 2026-11-30?";

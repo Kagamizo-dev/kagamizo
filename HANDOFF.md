@@ -28,6 +28,35 @@ Then work the plan: in each track, the lowest unblocked item first; items waitin
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 ```
 
+## 2026-11-08, evening: logistics, from a specification to a thing in hand
+
+- **The owner's decisions today:** Mirazo (the owner) buys, sources and
+  ships; Kagamizo is formed only once a comparison shows its value
+  (make/llc-comparison). Every order waits on the owner's approval of the
+  payment. Reliability before price, always. Hubs on most continents,
+  heaviest in the US (Texas, home), Europe and Asia, Brazil for South
+  America, each picked by its airport. The first order is the wearable
+  kit: vest, arm sleeves, cloak, carabiners, never a backpack.
+- **Built (modules/logistics, paper in `_lean/Paper.lean`):** 30 channels
+  (marketplaces, resale, makers, carriers, couriers, holding points) typed
+  per operation (search, specs, quote, order, track, locate, collect,
+  proof) as open, gated, partner or none, each with its source and
+  evidence; hubs; the outfit as garments typed against the kit's slots;
+  `logistics channels|hubs|outfit|source|rank`. Lean proves no channel
+  whose terms forbid automation is automated, the outfit carries every
+  device with no pack, and the chosen route is the most reliable meeting
+  the deadline and floor (price only breaks ties); the CLI's tests hold
+  its ranking to Lean's.
+- **Not verified:** every channel fact is a search snippet or secondary:
+  the developer hosts (developer.uber.com, developer.doordash.com,
+  developers.lalamove.com, developer.ups.com, developer.ebay.com,
+  openservice.aliexpress.com, docs.business.amazon.com,
+  affiliate-program.amazon.com, developers.mercadolibre.com.ar,
+  openrouter.ai) are outside the allowlist (data/provider-pages).
+- **Next:** the owner's sign-ups (data/courier-accounts), live quotes
+  into `rank`, body measurements for sizes, image and 3D previews of each
+  specification, the LLC comparison.
+
 ## 2026-11-08: the bank, the venues, and Public as the one account
 
 - **The owner's decisions today:** Public stays the one trading account
