@@ -853,8 +853,14 @@ in
       }
       {
         id = "bank-links";
-        title = "Chase, Capital One and Credit One read daily through the chosen provider (one sign-in each, through Proton Pass)";
-        dependsOn = [ "bank/aggregator-coverage" ];
+        # The owner, 2026-11-09: the audit from one round of CSV exports,
+        # Chase and Credit One closed, then a live feed for the kept cards
+        # only (SimpleFIN first: its terms allow one's own accounts).
+        title = "The kept cards (Capital One; Discover and PayPal if kept) read daily through the chosen provider, after the audit and the closures (one sign-in each, through Proton Pass)";
+        dependsOn = [
+          "bank/aggregator-coverage"
+          "bank/transaction-audit"
+        ];
       }
       {
         id = "wallet-cards";
