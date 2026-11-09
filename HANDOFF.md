@@ -27,8 +27,51 @@ Then work the plan: in each track, the lowest unblocked item first; items waitin
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is exactly what modules/claude/_environment.nix declares (`nix build .#claude-allowed-domains`): never use or ask for a host outside it; a host a task needs is declared there with its reason and listed at the session's end. End the session with the full allowlist and the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 
-This session starts where HANDOFF.md's "2026-11-08 to 11-09: the bank becomes a wallet" ends: first confirm the new hosts answer (`curl -sI https://secure.chase.com`, `https://help.public.com`, `https://api.open-meteo.com`), then the bank links' coverage, then the wallet's next step.
+This session starts where HANDOFF.md's "2026-11-09, early: Stripe's coverage verified, agents hold cards" ends: first the wallet's step 4 (the Wallet view in the shell, bank/wallet-view), then the bank-link choice once a provider's own-account use is confirmed.
 ```
+
+## 2026-11-09, early: Stripe's coverage verified, agents hold cards (read this first)
+
+- **The hosts answer:** secure.chase.com (302 to its sign-in),
+  help.public.com (302 to /en/), api.open-meteo.com (200 on a forecast;
+  its bare root answers 503). cache.nixos.org answers; the flake's own
+  cache is ignored as an untrusted substituter, so `session-tools` builds
+  secretspec from source (slow, not blocked).
+- **Bank-link coverage (bank/aggregator-coverage, now active):** Stripe's
+  own institution search (`docs.stripe.com/_endpoint/get-financial-connections-institutions?query=`)
+  lists Chase, Capital One, Credit One Bank, "Discover - Credit Card"
+  and PayPal, each with balances and transactions; a credit card is a
+  Financial Connections account like any other (its fundamentals page).
+  Recorded as verified facts (2026-11-09); Lean proves
+  `stripe_covers_required`. Not yet choosable: own-account use is
+  unread. Stripe's Financial Connections Terms s2.1(a) require a
+  Proposed Purpose approved by Stripe in writing at least 14 days before
+  the first pull: that approval is the answer, and the signup step now
+  says so. Plaid's search is in its dashboard and SimpleFIN's behind its
+  sign-in (both wait on the owner's signups); Teller's api.teller.io
+  resets the tunnel (it asks for a client certificate the proxy cannot
+  present), a gap for any Teller use from a session.
+- **Wallet step 3 done (bank/wallet-holders):** `holders.<agent> =
+  { effects; why; }` on a card; on a card with an account each holder is
+  that agent's grant, and the wallet generates every
+  `governance.agents.<a>.grants` from them. No module writes grants: the
+  swarms hold the Northwest login, the OpenRouter login, Mercury's login
+  and the Public API card; trading-mirazo the Public API card; the
+  security testers the login card of each account they probe. The same
+  ten grants result (evaluated before and after); governance.problems
+  refuses one agent holding two cards on one account.
+- **Hosts declared for what comes next** (the owner, 11-09: every domain
+  from now on is allowlisted): discover.com, www.discover.com,
+  portal.discover.com, paypal.com, www.paypal.com, dashboard.stripe.com,
+  link.com, and the Google Wallet group (walletobjects.googleapis.com,
+  oauth2.googleapis.com, pay.google.com, developers.google.com).
+- **Waiting on the owner (unchanged, plus one):** a Stripe account for
+  Jingzo if Stripe is to be the bank link (a signup, the owner's), then
+  the Proposed Purpose; the Plaid and SimpleFIN signups; the rest as in
+  the entry below.
+- **Next:** wallet step 4 (the Wallet view in the shell); the bank-link
+  choice once one provider's own-account use is confirmed; the first
+  audit once there is a feed or the CSVs.
 
 ## 2026-11-08 to 11-09: the bank becomes a wallet (read this first)
 
@@ -567,6 +610,10 @@ root vault.
   emulator as the digital twin of the owner's Pixel 9a on GrapheneOS: a
   base image that rarely changes, everything else as settings
   configuration and custom apps, declared.
+- **2026-11-09:** every domain a task needs from now on is allowlisted:
+  declared in `modules/claude/_environment.nix` with its reason as soon as
+  it is known (ahead of use where the next steps name it), and listed at
+  the session's end.
 ## Where this session left it (2026-10-22)
 
 - Proton Pass signed in (`pass-cli login`, approved).
