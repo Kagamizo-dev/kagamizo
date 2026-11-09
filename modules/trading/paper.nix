@@ -95,13 +95,8 @@ in
       serves = "mirazo";
       purpose = "the owner's brokerage, read-only: the deterministic paper days and their settlement (tier 0, no model)";
       personas = [ "finance/finance-fpa-analyst" ];
-      grants = [
-        {
-          account = "public-mirazo";
-          effects = [ "read" ];
-          why = "paper days: event contracts, quotes and preflights, which place nothing, and their settlement (trading.paper)";
-        }
-      ];
+      # Its access is its holding of the Public API card (wallet.cards
+      # .public-api-mirazo.holders, modules/bank/wallet.nix).
     };
 
     trading.paper = {

@@ -845,6 +845,11 @@ in
       {
         id = "aggregator-coverage";
         title = "Each bank-link provider's coverage of Chase, Capital One, Credit One, Discover and PayPal, card transactions included, verified from its own institution search before one is chosen";
+        # 2026-11-09: Stripe's verified from its own institution search, all
+        # six covered with transactions (Lean: stripe_covers_required); its
+        # own-account use unread. Plaid's and SimpleFIN's searches wait on
+        # their signups; Teller's API needs a client certificate.
+        status = "active";
       }
       {
         id = "bank-links";
@@ -867,6 +872,8 @@ in
       {
         id = "wallet-holders";
         title = "Agents hold cards: grants become card holders, Cedar generated from them";
+        # 2026-11-09: every grant is a card holder; the wallet generates them.
+        status = "done";
         dependsOn = [ "bank/wallet-cards" ];
       }
       {

@@ -51,6 +51,37 @@ let
     else
       catalog.types.${c.type}.fields;
 
+  # An agent holding a card: the governance grant's effects and reason.
+  # Spending, destroying and signing in are never among them (Cedar's base
+  # layer forbids them whatever a holder says).
+  holder = types.submodule {
+    options = {
+      effects = mkOption {
+        type = types.nonEmptyListOf (
+          types.enum [
+            "read"
+            "write"
+            "probe"
+          ]
+        );
+      };
+      why = mkOption { type = types.str; };
+    };
+  };
+
+  # Every holder of a card with an account, as (agent, account, card).
+  holdings = lib.concatLists (
+    lib.mapAttrsToList (
+      id: c:
+      lib.optionals (c.account != null) (
+        lib.mapAttrsToList (agent: h: {
+          inherit agent id h;
+          inherit (c) account;
+        }) c.holders
+      )
+    ) cfg.cards
+  );
+
   card = types.submodule (
     { name, ... }:
     {
@@ -81,17 +112,9 @@ let
           description = "Who makes it: a declared human step, or a tool.";
         };
         holders = mkOption {
-          type = types.attrsOf (
-            types.listOf (
-              types.enum [
-                "read"
-                "write"
-                "probe"
-              ]
-            )
-          );
+          type = types.attrsOf holder;
           default = { };
-          description = "Agents that may use it, and how (Cedar's grants come from these).";
+          description = "Agents that may use it, how and why. On a card with an account, each holder is that agent's grant on the account: Cedar's permits are generated from these, and from nothing else.";
         };
         devices = mkOption {
           type = types.listOf (
@@ -221,7 +244,10 @@ let
       ];
       account = "public-mirazo";
       mint = "human:console-credential";
-      holders.trading-mirazo = [ "read" ];
+      holders.trading-mirazo = {
+        effects = [ "read" ];
+        why = "paper days: event contracts, quotes and preflights, which place nothing, and their settlement (trading.paper)";
+      };
       earns = true;
       target = "keep";
       why = "the API credential the trading node reads";
@@ -348,7 +374,10 @@ let
         "license_number"
       ];
       mint = "human:sign-up";
-      holders.legal-mirazo = [ "read" ];
+      holders.legal-mirazo = {
+        effects = [ "read" ];
+        why = "identity documents for the owner's filings";
+      };
       target = "keep";
       why = "the owner's one identity card: passport and driver's licence together";
     };
@@ -385,7 +414,10 @@ let
             inherit (doc.where) vault;
             title = doc.where.item;
             mint = "automation:legal-documents";
-            holders."legal-${e}" = [ "read" ];
+            holders."legal-${e}" = {
+              effects = [ "read" ];
+              why = "the legal record it belongs to";
+            };
             target = "keep";
             why = doc.title;
           }
@@ -507,6 +539,24 @@ in
       // own
       // heldLogins
       // documents;
+
+    # Wallet step 3 (2026-11-09): agents hold cards. Every governance grant
+    # is a holder of the card for its account; no module writes grants.
+    governance.agents = lib.mkMerge (
+      map (x: {
+        ${x.agent}.grants = [
+          {
+            inherit (x) account;
+            inherit (x.h) effects;
+            why = "${x.h.why} (holds ${x.id})";
+          }
+        ];
+      }) holdings
+    );
+    # One card per agent and account: Cedar names each grant by the pair.
+    governance.problems = lib.mapAttrsToList (
+      k: xs: "wallet: ${k} is held through ${lib.concatMapStringsSep " and " (x: x.id) xs}; hold one card"
+    ) (lib.filterAttrs (_: xs: lib.length xs > 1) (lib.groupBy (x: "${x.agent} on ${x.account}") holdings));
 
     perSystem =
       { config, pkgs, ... }:

@@ -24,6 +24,10 @@ let
   q = builtins.toJSON;
   zone = config.hetzner.host.agents.zone;
   entities = lib.attrNames config.identity.entities;
+  # The accounts hosting the online assets in scope, by their owner.
+  probed = lib.groupBy' (acc: a: lib.unique (acc ++ [ a.account ])) [ ] (
+    a: config.accounts.held.${a.account}.owner
+  ) (lib.filter (a: a.account != null && a.kind != "repo") (lib.attrValues cfg.scope));
 
   asset = types.submodule {
     options = {
@@ -58,21 +62,14 @@ let
     };
   };
 
-  # A penetration tester for one entity: probe grants on its accounts.
-  tester = entity: accounts: {
+  # A penetration tester for one entity; its probe grants are its holds on
+  # the login cards of the accounts hosting its scope (below).
+  tester = entity: {
     serves = entity;
     purpose = "the penetration tester for ${entity}'s own surface: probes only the assets in security.scope, through the accounts that host them";
     personas = [ "security/security-penetration-tester" ];
     # It runs scanners, not models: no share of a key.
     budgetUsdPerMonth = 0;
-    grants = map (account: {
-      inherit account;
-      effects = [
-        "read"
-        "probe"
-      ];
-      why = "probing ${account}'s assets in security.scope";
-    }) accounts;
   };
 in
 {
@@ -200,12 +197,30 @@ in
     };
 
     # The testers: one per entity whose accounts host online assets.
+    # Each tester holds the login card of every account it probes through
+    # (wallet step 3): the hold is its read and probe grant.
+    wallet.cards = lib.listToAttrs (
+      lib.concatLists (
+        lib.mapAttrsToList (
+          e: accounts:
+          map (
+            account:
+            lib.nameValuePair "login-${account}" {
+              holders."security-${e}" = {
+                effects = [
+                  "read"
+                  "probe"
+                ];
+                why = "probing ${account}'s assets in security.scope";
+              };
+            }
+          ) accounts
+        ) probed
+      )
+    );
+
     governance = {
-      agents = lib.mapAttrs' (e: accounts: lib.nameValuePair "security-${e}" (tester e accounts)) (
-        lib.groupBy' (acc: a: lib.unique (acc ++ [ a.account ])) [ ] (
-          a: config.accounts.held.${a.account}.owner
-        ) (lib.filter (a: a.account != null && a.kind != "repo") (lib.attrValues cfg.scope))
-      );
+      agents = lib.mapAttrs' (e: _: lib.nameValuePair "security-${e}" (tester e)) probed;
 
       # The probes, each a typed action of the account's provider.
       actions = {
