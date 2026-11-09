@@ -25,43 +25,94 @@ Sign the session in with `PROTON_PASS_KEY_PROVIDER=fs pass-cli login`; send me e
 
 Then work the plan: in each track, the lowest unblocked item first; items waiting on me are listed as its open decisions, which you ask me about by name. Before the session ends, record in modules/plan what moved (status, answers to decisions, new items) and keep `checks.plan` green.
 
-The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is complete: never add a host to it; end the session with the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
+The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is exactly what modules/claude/_environment.nix declares (`nix build .#claude-allowed-domains`): never use or ask for a host outside it; a host a task needs is declared there with its reason and listed at the session's end. End the session with the full allowlist and the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
+
+This session starts where HANDOFF.md's "2026-11-08 to 11-09: the bank becomes a wallet" ends: first confirm the new hosts answer (`curl -sI https://secure.chase.com`, `https://help.public.com`, `https://api.open-meteo.com`), then the bank links' coverage, then the wallet's next step.
 ```
 
-## 2026-11-08, later: Nautilus owns the trading; subscriptions next
+## 2026-11-08 to 11-09: the bank becomes a wallet (read this first)
 
-- **Nautilus:** `nautilus-public` is the Public adapter (data and
-  execution clients); paper runs on Nautilus's own sandbox, live on our
-  client, the same node (checks.nautilus-public: a crypto round trip both
-  ways and reconciliation after a restart, against public-stub). The
-  host does not run it yet: the next trading step is a `bank-node` CLI
-  and host unit (plan items trading/nautilus-strategies onward).
-- **The owner's convergence:** algorithmic investing, agents as the
-  bank's portfolio managers, publishing separately. That plan (portfolio
-  types, allocators, Validity gate, publish app, with a measured blocker
-  table) is parked behind the subscriptions work; dispatch is blocked on
-  the fleet key ($25 spent; the account has $4.97).
-- **Subscriptions (ASAP, in progress):** Bridge signs in from this
-  session with no owner step (`mailbox login`: password and TOTP from
-  Pass). Never kill a running `mailbox` command: Proton's refresh token
-  is single-use, and a killed run leaves the stored vault stale (fix:
-  `mailbox login` again). `mailbox recurring` (the tally, private file;
-  counts only printed), `mailbox notices` (drafts per "cancel"), `mailbox
-  send` (only a batch whose SHA-256 is in mailbox.approvedBatches).
-  bank.aggregators holds Stripe FC, Plaid, SimpleFIN and Teller, all
-  unverified; Lean refuses a choice until coverage is verified from the
-  provider's own search (the owner's rule). Measured: the mailbox is about
-  25 GB (7% synced in an hour, about 13 hours to go), too big for a
-  session (20 GB free, 2-hour background limit); the session's run was
-  stopped at its limit, so the stored Bridge session is stale (`mailbox
-  login` first). The full sync belongs on jingzo-host, where its cache
-  persists; the owner has put mail second to banking. Bridge's vault
-  records its first run's cache path (/tmp/tmp.f3tfEGjv9J), which the
-  wrapper's cleanup does not remove: fix before running it elsewhere.
-  The bank's dashboard design: https://claude.ai/artifact/7fbJjdRwHMfQa2hBfpc32P.
-  Next: the tally to the owner
-  for keep/cancel, cards for kept bills, the notice batch's digest for
-  approval, the coverage signups.
+The owner's vision, in their words' order: the bank is a **wallet**, a
+card-minting factory; every card is a Proton Pass item (logins, API
+credentials, Mercury cards, identity documents, addresses, device keys);
+nothing exists that is not typed in a card; agents hold cards; the
+portfolio is the cards that earn; fewer cards is better. Target wallet:
+Mercury (Jingzo's and personal) and Public for the money, Capital One as
+the one outside card; **Chase and Credit One close** once no kept bill
+rests on them. The approved plan's steps: (0) Pass inventory, done; (1) wallet.cards and Lean, done; (2) migrate every reference onto cards, done; (3) holders replace grants, Cedar from holders; (4) the Wallet view in the shell (an Apple-Wallet stack, react-cardstack's mechanics, a spring in egui); (5) `wallet pass --google` (owner signup, free) then `--apple` ($99/yr, the owner's decision).
+
+**Done this session (all on the branch, checks green):**
+- **Trading on NautilusTrader.** `nautilus-public` (modules/trading/_rust)
+  is Public's Nautilus adapter, the one gap: data client (quotes),
+  execution client (place, read back, fill, cancel through the governed
+  placer), position reports with cost basis. Paper attaches Nautilus's
+  own `nautilus-sandbox`; live attaches ours: the same node.
+  checks.nautilus-public: a crypto round trip both ways and
+  reconciliation after a restart, against public-stub. The reader and
+  placer bounds gained the portfolio read (Lean re-proved). The host does
+  not run the node yet (trading/nautilus-strategies onward).
+- **Crypto on Public:** `agent-crypto` kind, `crypto-long` risk kind
+  (0.60% zerohash API fee), `btc-agents` at research. The host's dry run
+  uses `research --local` (free); `--cheap` (deepseek-v4.1-flash) waits
+  on minting the research-host key (trading/cheap-dry-run).
+- **The wallet** (modules/bank/wallet.nix, checks.bank-wallet,
+  packages.wallet-report): 48 cards cover every login, Mercury card and
+  legal document the repo names; Lean proves them unique by type, vault
+  and title, typed against the catalog (alias and ssh-key now typed by
+  the extractor from pass-cli itself), factors offered. SMS recorded for
+  the banks (the owner, 11-08), to the phone on the identity card; to
+  raise: Capital One and Mercury (passkeys), Proton (security key). 20
+  derived login cards still lack their second factor and URLs.
+- **Pass inventory** (titles and types only, 203 items, 14 vaults;
+  Mirazo-Root 102, 52 undeclared): the collapse proposal was sent to the
+  owner (OpenRouter's 5 items to 3, Proton's two logins to one, Chase's
+  two to one, 6 stale agent tokens, `ID` as the one identity card).
+  **Nothing in Pass was changed**; apply only what the owner approves.
+  `GoFundMe-NonProfit` is a separate entity's vault for now.
+- **Bank links:** bank.aggregators (Stripe FC, Plaid, SimpleFIN, Teller;
+  checks.bank-aggregators): Lean refuses a choice until coverage, card
+  transactions included, is verified from the provider's own search.
+  All unverified (their hosts were blocked). Agents can never sign in to
+  a bank (Cedar: session is the owner's); a browser sign-in flow would
+  need the banks' terms read first.
+- **Audit:** `bank-audit` (modules/bank/_audit, checks.bank-audit) reads
+  bank CSV exports by header (unknown layouts refused) or the bank-link
+  feed as JSON: recurring charges, where each rests, merchants on several
+  accounts, fees, what must move off Chase and Credit One. Not yet run
+  on real data: needs the owner's CSVs or the bank link. Next: trace
+  each merchant to its domain and cancel route ("liquidity of
+  cancellation": every recurring charge with a known way to cancel).
+- **Mail:** `mailbox recurring` (tally, private), `mailbox notices`,
+  `mailbox send` (only a batch whose SHA-256 is in
+  mailbox.approvedBatches), contacts per merchant. The mailbox is about
+  25 GB (measured: 13 hours of sync); it belongs on the host. Bridge's
+  stored session is stale (run `mailbox login` first); never kill a
+  running `mailbox` command (single-use refresh token). Bridge's vault
+  keeps its first run's cache path, which the wrapper's cleanup misses.
+- **Designs:** the Wallet (and the earlier dashboard) at
+  https://claude.ai/artifact/7fbJjdRwHMfQa2hBfpc32P.
+- **Parked:** the portfolio plan (agents as portfolio managers against
+  1/N and 60/40, allocators, a validity gate, a publishing app); the
+  research behind it is in the plan's history.
+
+**Workers:** the agent runner on the host is off and, as written, would
+run with no budget cap on the chat key and has bugs (inline patch JSON,
+the request file made a directory, the brief as an argument, a stale
+checkout, a hardcoded team list). Measured cost: about $0.03 a job on
+baidu/fp8 (median 120 steps, 97% cached). The owner may add credit
+(recommended: $10, on a dedicated $10/month workers key); dispatch is
+blocked until then (orca-fleet spent; the account had $4.97).
+
+**Waiting on the owner:** keep/merge/delete on the Pass collapse; the
+Plaid (free) and SimpleFIN ($1.50/month) signups; bank CSV exports (12
+months) for the first audit; one Mercury sign-in approval; minting the 5
+declared Mercury cards; OpenRouter credit and the runner; the
+research-host key.
+
+**Next:** confirm the new hosts; read the banks' and providers' terms and
+institution lists into bank.terms and bank.aggregators; the first audit;
+wallet step 3 (holders replace grants; Cedar from holders) and step 4
+(the Wallet view in the shell).
 
 ## 2026-11-08: the bank, the venues, and Public as the one account
 
@@ -88,7 +139,7 @@ The only thing you ask me for is approving a sign-in or 2FA link. Ask before any
 - **Next:** a sell path for crypto positions; reconcile against the
   portfolio; the approval link; the ledger.
 
-## 2026-11-07, morning: the OS as a carried library (read this first)
+## 2026-11-07, morning: the OS as a carried library
 
 The owner's goal: a solo researcher's whole stack in the pockets and
 sleeves of their clothes; the OS organised like Steam's, the base being

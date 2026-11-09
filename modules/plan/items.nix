@@ -852,6 +852,34 @@ in
         dependsOn = [ "bank/aggregator-coverage" ];
       }
       {
+        id = "wallet-cards";
+        title = "Every Pass reference a typed wallet card (checks.bank-wallet): 48 cards, none uncovered";
+        status = "done";
+      }
+      (
+        {
+          id = "pass-collapse";
+          title = "Mirazo-Root collapsed into its generating set (102 items to about 85 cards): the owner's keep, merge or delete";
+          dependsOn = [ "bank/wallet-cards" ];
+        }
+        // action
+      )
+      {
+        id = "wallet-holders";
+        title = "Agents hold cards: grants become card holders, Cedar generated from them";
+        dependsOn = [ "bank/wallet-cards" ];
+      }
+      {
+        id = "wallet-view";
+        title = "The Bank app becomes the Wallet: a stacked, folding card view in the shell (native and web)";
+        dependsOn = [ "bank/wallet-cards" ];
+      }
+      {
+        id = "wallet-passes";
+        title = "Cards as Google Wallet passes (demo mode, the owner's issuer signup), then Apple (the owner's decision: $99/yr)";
+        dependsOn = [ "bank/wallet-view" ];
+      }
+      {
         id = "transaction-audit";
         title = "Audit transaction history across every account (`bank-audit`): what recurs, where it rests, duplicates, fees, what moves before Chase and Credit One close";
         status = "active";

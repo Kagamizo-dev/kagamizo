@@ -279,6 +279,59 @@ in
         reason = "Binary caches the flake trusts (nixos-raspberrypi)";
         hosts = [ "*.cachix.org" ];
       };
+      # Found needed on 2026-11-08 (the owner allows them for the next
+      # session): the bank's links and audit, the trading research, the
+      # build cache every command tried.
+      cache = {
+        reason = "The flake's own binary cache (nixConfig extra-substituters): refused all session";
+        hosts = [ "cache.kagamizo.com" ];
+      };
+      banks = {
+        reason = "Chase, Capital One and Credit One sign-in pages and their terms (bank links, the transaction audit)";
+        hosts = [
+          "chase.com"
+          "www.chase.com"
+          "secure.chase.com"
+          "capitalone.com"
+          "www.capitalone.com"
+          "verified.capitalone.com"
+          "myaccounts.capitalone.com"
+          "creditonebank.com"
+          "www.creditonebank.com"
+        ];
+      };
+      bank-links = {
+        reason = "Bank-link providers' own institution lists and APIs, to verify coverage before one is chosen (bank.aggregators)";
+        hosts = [
+          "plaid.com"
+          "dashboard.plaid.com"
+          "production.plaid.com"
+          "sandbox.plaid.com"
+          "bridge.simplefin.org"
+          "beta-bridge.simplefin.org"
+          "teller.io"
+          "api.teller.io"
+          "stripe.com"
+          "docs.stripe.com"
+          "api.stripe.com"
+        ];
+      };
+      public-help = {
+        reason = "Public's help centre: the crypto daily pause and account security (bank.venues)";
+        hosts = [ "help.public.com" ];
+      };
+      research-data = {
+        reason = "Market and weather data the research and weather strategies read (research.dataVendors, weather-rules)";
+        hosts = [
+          "api.open-meteo.com"
+          "api.weather.gov"
+          "query1.finance.yahoo.com"
+          "query2.finance.yahoo.com"
+          "fc.yahoo.com"
+          "api.stlouisfed.org"
+          "fred.stlouisfed.org"
+        ];
+      };
       # Live data for running World Monitor / God's Eye View in a session.
       globe-data = {
         enable = false;

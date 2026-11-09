@@ -56,8 +56,11 @@ in
           "cheap"
           "local"
         ];
-        default = "cheap";
-        description = "Where the dry run's agents think: `cheap`, the cheapest OpenRouter model on the host's own $5 key (cents a run, the owner's choice of 2026-11-08), or `local`, the host's small quantized model at no cost.";
+        # `local` until the research-host key is minted (plan item
+        # trading/cheap-dry-run): without it every research run fails and
+        # no paper day follows.
+        default = "local";
+        description = "Where the dry run's agents think: `cheap`, the cheapest OpenRouter model on the host's own $5 key (cents a run, the owner's choice of 2026-11-08, once the key is minted), or `local`, the host's small quantized model at no cost.";
       };
       at = mkOption {
         type = types.str;
