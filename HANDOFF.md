@@ -60,11 +60,25 @@ This session starts where HANDOFF.md's "2026-11-09, early: Stripe's coverage ver
   security testers the login card of each account they probe. The same
   ten grants result (evaluated before and after); governance.problems
   refuses one agent holding two cards on one account.
+- **Stripe reviewed in full (the owner's ask):** catalog/_json/stripe-api.json
+  maps the pinned stripe/openapi v2598 (API 2026-09-30) in Nix: 612
+  operations, 1538 objects, every enum. Financial Connections is 11
+  operations: sessions (create, retrieve), accounts (list, retrieve,
+  owners, refresh, subscribe, unsubscribe, disconnect), transactions
+  (list, retrieve). From Stripe's docs: up to 180 days of history,
+  daily refresh by subscription, transactions 30 cents per institution
+  per account holder a month ($1.50 for our five), live data only after
+  the Dashboard registration (the purpose review). A transaction has no
+  merchant or category field (amount, description, status, dates), so
+  bank-audit derives merchants from descriptions. Link's agent path
+  (link-cli, login.link.com, api.link.com) reads the same data with a
+  category field, but has no sandbox.
 - **Hosts declared for what comes next** (the owner, 11-09: every domain
   from now on is allowlisted): discover.com, www.discover.com,
   portal.discover.com, paypal.com, www.paypal.com, dashboard.stripe.com,
   link.com, and the Google Wallet group (walletobjects.googleapis.com,
-  oauth2.googleapis.com, pay.google.com, developers.google.com).
+  oauth2.googleapis.com, pay.google.com, developers.google.com), and
+  login.link.com, api.link.com.
 - **Waiting on the owner (unchanged, plus one):** a Stripe account for
   Jingzo if Stripe is to be the bank link (a signup, the owner's), then
   the Proposed Purpose; the Plaid and SimpleFIN signups; the rest as in
