@@ -297,6 +297,7 @@
         "rea": "rea",
         "rust-overlay": "rust-overlay",
         "secretspec-src": "secretspec-src",
+        "stripe-openapi": "stripe-openapi",
         "tradingagents": "tradingagents"
       }
     },
@@ -337,6 +338,24 @@
         "ref": "refs/tags/v0.21.1",
         "type": "git",
         "url": "https://github.com/cachix/secretspec"
+      }
+    },
+    "stripe-openapi": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793915904,
+        "narHash": "sha256-XzA4EI0bisyjU9wRej6nm47Duryh7klHOeeq/dre3MI=",
+        "ref": "refs/tags/v2598",
+        "rev": "e63fafc8ff863f2ec13d140a9ac95ce90cdd437e",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/stripe/openapi"
+      },
+      "original": {
+        "ref": "refs/tags/v2598",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/stripe/openapi"
       }
     },
     "tradingagents": {

@@ -53,6 +53,11 @@ let
         description = "Whether its terms allow linking one's own accounts.";
       };
       cost = mkOption { type = types.str; };
+      historyDays = mkOption {
+        type = types.nullOr types.ints.positive;
+        default = null;
+        description = "How far back the first pull reaches, in days, by the provider's own docs; null while unread. Older history comes from the banks' own exports.";
+      };
       signup = mkOption {
         type = types.str;
         description = "What confirming its coverage takes.";
@@ -132,7 +137,12 @@ in
       stripe-fc = {
         name = "Stripe Financial Connections";
         ownAccounts = "unknown";
-        cost = "per linked account (2022: $1.50 a verification); current price unread";
+        # stripe.com/financial-connections#pricing, read 2026-11-09.
+        cost = "transactions 30 cents per institution per account holder per month (Chase, Capital One, Credit One, Discover and PayPal: $1.50 a month); balances 10 cents per successful call; account owners $1.50 per call; account verification $1.50 per account (payments only, not needed)";
+        # docs.stripe.com/financial-connections/transactions: "up to the last
+        # 180 days of transaction history on an account, depending on the
+        # account's financial institution"; a subscription refreshes daily.
+        historyDays = 180;
         # Stripe Financial Connections Terms s2.1(a) (stripe.com/legal/financial-connections,
         # read 2026-11-09): a Proposed Purpose is submitted at least 14 days
         # before the first collection and needs Stripe's written approval.

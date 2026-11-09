@@ -326,6 +326,10 @@ in
           # Terms require each consent to meet
           "dashboard.stripe.com"
           "link.com"
+          # Link's agent path to the same data (docs.stripe.com/financial-connections/agents/financial-insights):
+          # the owner authorizes at login.link.com; the agent reads api.link.com
+          "login.link.com"
+          "api.link.com"
         ];
       };
       wallet-passes = {

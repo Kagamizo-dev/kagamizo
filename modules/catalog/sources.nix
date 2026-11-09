@@ -117,6 +117,10 @@ in
           from = "timlaing/pyicloud";
           version = tagOf "pyicloud-src";
         };
+        stripe-api = {
+          from = "stripe/openapi (openapi/spec3.json), read in Nix";
+          version = "${inputs.stripe-openapi.shortRev}, API ${(lib.importJSON ../catalog/_json/stripe-api.json).api.version}";
+        };
         cdp = {
           from = "the pinned Chromium's /json/protocol";
           version = "Chromium ${pkgs.chromium.version}, protocol ${(stamp "cdp").protocol}";

@@ -39,6 +39,11 @@
 #   _json/pyicloud.json             pyicloud's services, their methods and
 #                                     properties with their parameters,
 #                                     asked of the pinned library
+#   _json/stripe-api.json          Stripe's API from its published OpenAPI
+#                                     spec (the stripe-openapi input), read
+#                                     in Nix by _extract/stripe-api.nix: every
+#                                     operation, parameter, body field, object
+#                                     and enum; Financial Connections described
 #   _json/cdp.json                  every DevTools Protocol command (its
 #                                     parameters, returns) and enum of the
 #                                     pinned Chromium, asked of Chromium itself
@@ -148,7 +153,21 @@
         ${python} ${./_extract/bridge.py} ${pkgs.protonmail-bridge.src} $out
       '';
 
+      # Stripe's published OpenAPI spec, read in Nix (no extractor process).
+      stripe-api = (pkgs.formats.json { }).generate "stripe-api.json" (
+        import ./_extract/stripe-api.nix {
+          inherit lib;
+          spec = lib.importJSON "${inputs.stripe-openapi}/openapi/spec3.json";
+          inherit (inputs.stripe-openapi) rev;
+          date = inputs.stripe-openapi.lastModifiedDate;
+        }
+      );
+
       catalogs = pkgs.linkFarm "catalog" [
+        {
+          name = "stripe-api.json";
+          path = stripe-api;
+        }
         {
           name = "bridge.json";
           path = bridge;

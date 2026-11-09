@@ -50,6 +50,11 @@
       url = "git+https://github.com/cachix/secretspec?ref=refs/tags/v0.21.1";
       flake = false;
     };
+    # Stripe's published OpenAPI spec (modules/catalog/_json/stripe-api.json)
+    stripe-openapi = {
+      url = "git+https://github.com/stripe/openapi?ref=refs/tags/v2598&shallow=1";
+      flake = false;
+    };
     mercury-cli = {
       url = "git+https://github.com/MercuryTechnologies/mercury-cli?ref=refs/tags/v0.11.8";
       flake = false;
