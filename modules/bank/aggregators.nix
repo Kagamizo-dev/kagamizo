@@ -15,8 +15,11 @@
 # checks.bank-aggregators: Lean (./_lean/Aggregators.lean) refuses a choice
 # that is not acceptable: own accounts allowed, and every required
 # institution covered with card transactions by a verified fact, or an
-# accepted gap. Today every fact is unverified (this session's network
-# reaches none of the providers), so no choice can pass yet.
+# accepted gap. Stripe's coverage is verified (2026-11-09, its own
+# institution search: all six, transactions included); its own-account use
+# is not, so no choice passes yet. Plaid's and SimpleFIN's searches need
+# their signups; Teller's API wants a client certificate the session's
+# proxy cannot present.
 { lib, config, ... }:
 let
   inherit (lib) mkOption types;
@@ -71,6 +74,12 @@ let
     inherit source;
   };
   snippet = "search snippets only, 2026-11-08: the provider's pages were blocked from the session";
+  stripeSearch = name: {
+    supported = "yes";
+    cardTransactions = "yes";
+    source = "Stripe's institution search (docs.stripe.com/_endpoint/get-financial-connections-institutions): \"${name}\", supports_balances and supports_transactions true; credit_card is an account subcategory (docs.stripe.com/financial-connections/fundamentals)";
+    verified = "2026-11-09";
+  };
   render =
     n: p:
     "{ name := ${q n}, ownAccounts := .${p.ownAccounts}, coverage := [${
@@ -124,10 +133,22 @@ in
         name = "Stripe Financial Connections";
         ownAccounts = "unknown";
         cost = "per linked account (2022: $1.50 a verification); current price unread";
-        signup = "Stripe's supported-institutions page, a sandbox test, and Stripe support's written answer on linking the owner's own accounts";
-        coverage = lib.genAttrs institutions (_: unknown snippet) // {
-          chase-cards = unknown "Stripe lists Chase among featured institutions; credit_card accounts exist, their transactions unconfirmed (${snippet})";
-          capital-one-cards = unknown "Stripe lists Capital One among featured institutions (${snippet})";
+        # Stripe Financial Connections Terms s2.1(a) (stripe.com/legal/financial-connections,
+        # read 2026-11-09): a Proposed Purpose is submitted at least 14 days
+        # before the first collection and needs Stripe's written approval.
+        signup = "a Stripe account (Jingzo's), then the Proposed Purpose (reading the owner's own accounts for the bank's books) submitted under the Financial Connections Terms s2.1(a); Stripe's written approval, at least 14 days before the first collection, settles own-account use";
+        # Read 2026-11-09 from Stripe's own institution search (the endpoint
+        # behind docs.stripe.com/financial-connections/supported-institutions)
+        # and its fundamentals page: a linked credit card is a Financial
+        # Connections account like any other, and transactions are read per
+        # account, so an institution's supports_transactions covers its cards.
+        coverage = lib.mapAttrs (_: name: stripeSearch name) {
+          chase-checking = "Chase";
+          chase-cards = "Chase";
+          capital-one-cards = "Capital One";
+          credit-one = "Credit One Bank";
+          discover = "Discover - Credit Card";
+          paypal = "PayPal";
         };
       };
       plaid = {
@@ -170,6 +191,11 @@ in
             namespace Kagamizo.Aggregators
             def providers : List Provider := [${lib.concatStringsSep ",\n  " (lib.mapAttrsToList render cfg.aggregators)}]
             def required : List String := ${q cfg.aggregatorRequired}
+            /-- Stripe covers every required institution, card transactions
+            included, by facts verified from its own search (2026-11-09). -/
+            theorem stripe_covers_required :
+                required.all (fun i => (providers.find? (·.name == "stripe-fc")).any (covers · i)) = true := by
+              decide
             ${
               if cfg.aggregatorChoice == null then
                 ''

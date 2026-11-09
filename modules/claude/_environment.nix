@@ -298,6 +298,13 @@ in
           "myaccounts.capitalone.com"
           "creditonebank.com"
           "www.creditonebank.com"
+          # Discover and PayPal: the other two institutions bank.aggregators
+          # tracks, for their terms and statements
+          "discover.com"
+          "www.discover.com"
+          "portal.discover.com"
+          "paypal.com"
+          "www.paypal.com"
         ];
       };
       bank-links = {
@@ -314,6 +321,20 @@ in
           "stripe.com"
           "docs.stripe.com"
           "api.stripe.com"
+          # Jingzo's Stripe account and the Financial Connections purpose
+          # review (its Terms s2.1(a)); Link's consumer terms, which those
+          # Terms require each consent to meet
+          "dashboard.stripe.com"
+          "link.com"
+        ];
+      };
+      wallet-passes = {
+        reason = "Cards as Google Wallet passes (bank/wallet-passes): the Wallet API, its issuer console and its docs, mapped before use";
+        hosts = [
+          "walletobjects.googleapis.com"
+          "oauth2.googleapis.com"
+          "pay.google.com"
+          "developers.google.com"
         ];
       };
       public-help = {
