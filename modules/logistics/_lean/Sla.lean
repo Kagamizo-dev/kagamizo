@@ -193,9 +193,10 @@ def pathOk (ss : List Step) (excluded : List String) (target : Nat) (p : Path) :
   !p.steps.isEmpty && p.steps.all (stepOk ss excluded) && crossingsOk ss p &&
     decide (lead ss p ≤ target)
 
-/-- The steps of a path whose deadline rests on nothing yet. -/
+/-- The steps of a path, their fallbacks included, whose deadline rests on
+nothing yet. -/
 def unbacked (ss : List Step) (p : Path) : Nat :=
-  (p.steps.filter (fun n =>
+  ((p.steps ++ p.steps.filterMap (fun n => (find ss n).bind (·.fallback))).filter (fun n =>
     match find ss n with
     | some s => !s.backed
     | none => true)).length
