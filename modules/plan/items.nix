@@ -1227,6 +1227,36 @@ in
           "make/quotes"
         ];
       }
+      {
+        id = "bounded-steps";
+        title = "No unbounded step: every step of a path has a deadline and a breach action, proved (logistics.sla)";
+        status = "active";
+      }
+      {
+        id = "twin-graph";
+        title = "The product as a graph of twins (material, part, technique, machine, line, route); its price the sum over the graph, each leaf priced by a source a machine reads";
+        dependsOn = [ "make/should-cost" ];
+      }
+      {
+        id = "legal-twin";
+        title = "The law as typed data: goods rules in compliance, a frozen corpus (eCFR, Federal Register, the tariff schedule, customs rulings), indexed twice and proved to cover each product";
+        dependsOn = [ "make/twin-graph" ];
+      }
+      {
+        id = "api-sheets";
+        title = "A sheet per API with its life cycle, from found to retired; each provider's pages read whole from the host";
+        dependsOn = [ "make/bounded-steps" ];
+      }
+      {
+        id = "terms-read";
+        title = "Read the checkout terms of OSH Park, OSH Cut, Protolabs Network and Mouser, so their steps may join a path";
+        dependsOn = [ "make/api-sheets" ];
+      }
+      {
+        id = "sim-runner";
+        title = "Simulations on an hourly dedicated server, created and destroyed within the account's limits, each stage with a timeout";
+        dependsOn = [ "make/twin-graph" ];
+      }
     ]
     // track "kit" [
       {

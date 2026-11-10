@@ -1,8 +1,10 @@
 # Logistics: from a specification to a thing in the owner's hands,
 # anywhere, reliability first and price last (the owner's rule,
-# 2026-11-08). Owned by Mirazo, the owner himself, until an LLC earns its
-# keep (the owner's decision, 2026-11-08). Every order waits on the owner's
-# approval of the payment; agents search, specify, quote and rank.
+# 2026-11-08). Owned by Jingzo, whose accounts the suppliers' business
+# programmes expect (the owner's decision, 2026-11-10; Mirazo until then).
+# Agents search, specify, cost and rank, and no step waits on a person
+# (./sla.nix). Nothing is ordered yet; an order will be paid from the
+# buying agent's own bounded card, in place of an approval per order.
 #
 #   logistics.channels.<c>  a marketplace, resale site, maker, carrier,
 #                           courier or holding point, and per operation
@@ -15,6 +17,8 @@
 #
 #   packages.logistics-book  everything above as JSON
 #   packages.logistics       the CLI: channels, hubs, outfit, rank
+#   checks.logistics-sla     Lean (./_lean/Sla.lean): no step of a path
+#                            waits; see ./sla.nix
 #   checks.logistics         Lean (./_lean/Logistics.lean): no channel
 #                            whose terms forbid automation is automated;
 #                            every region has a hub and there is one home;
@@ -482,7 +486,7 @@ in
   };
 
   config = {
-    logistics.owner = "mirazo";
+    logistics.owner = "jingzo";
 
     perSystem =
       { pkgs, config, ... }:
