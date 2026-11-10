@@ -128,6 +128,7 @@ in
                 chat = "Element: talk to the agent teams (Matrix, one room each)";
                 harness = "DeepSeek Harness: the agents' own workbench, which they extend";
                 os = "Kagamizo: the shell, every app as a card in one column";
+                files = "Files: what the units of work publish, read-only";
               }
               .${s.name};
           in

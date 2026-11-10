@@ -324,6 +324,17 @@ let
     };
   };
 
+  # The units' published files, at files.<zone> (../agents/_files-host.nix).
+  unitFiles = import ../agents/_files-host.nix {
+    inherit
+      (lib.findFirst (
+        s: s.name == "files"
+      ) (throw "hetzner.host.agents: no files service") cfg.agents.services)
+      port
+      ;
+    root = "/var/lib/kagamizo/files";
+  };
+
   host =
     { pkgs, modulesPath, ... }:
     {
@@ -339,6 +350,7 @@ let
         githubApp
         harness
         shellWeb
+        unitFiles
         agentRunnerHost
         tradingPaperHost
         media
