@@ -21,7 +21,14 @@ passes, and a step is on a path only if software reaches it by itself.
     step that clears that border and is itself bounded
     (`goods_cross_only_cleared`). Which jurisdictions to make in is then an
     optimisation over the rules of each;
-  * no step of a path uses an excluded channel.
+  * no step of a path uses an excluded channel;
+  * no assumption is left bare: a deadline of ours is never shorter than
+    the provider's own figure (`deadline_covers_stated`), a fallback is
+    another channel than the one that failed (`fallback_is_another_channel`),
+    and every deadline no provider states rests on a declared assumption
+    with its backing (a dataset, a paper, a theorem, a simulation or a
+    measurement). Those not yet backed are counted, and the count may only
+    fall.
 -/
 namespace Kagamizo.Logistics.Sla
 
@@ -62,6 +69,10 @@ structure Step where
   /-- The store's terms on automated use were read whole. -/
   termsRead : Bool
   boundMin : Nat
+  /-- The provider's own figure for the step, where it states one. -/
+  statedMin : Option Nat
+  /-- The deadline is the provider's, or rests on a backed assumption. -/
+  backed : Bool
   onBreach : Breach
   fallback : Option String
   /-- Where the step happens (ISO 3166-1 alpha-2). -/
@@ -103,9 +114,15 @@ def checkoutOk (s : Step) : Bool :=
   | .browser => s.termsRead
   | _ => true
 
+/-- Our deadline is never shorter than the provider's own figure. -/
+def covers (s : Step) : Bool :=
+  match s.statedMin with
+  | some m => decide (m ≤ s.boundMin)
+  | none => true
+
 /-- A step that cannot wait on anyone. -/
 def bounded (s : Step) : Bool :=
-  decide (0 < s.boundMin) && selfServe s && machine s && read s && checkoutOk s
+  decide (0 < s.boundMin) && selfServe s && machine s && read s && checkoutOk s && covers s
 
 def find (ss : List Step) (n : String) : Option Step :=
   ss.find? (fun s => s.name == n)
@@ -122,7 +139,7 @@ def breachOk (ss : List Step) (s : Step) : Bool :=
   | .retry | .fail => true
   | .reroute =>
     match s.fallback.bind (find ss) with
-    | some f => bounded f && terminal f && (f.name != s.name)
+    | some f => bounded f && terminal f && (f.name != s.name) && (f.channel != s.channel)
     | none => false
 
 /-- The longest a step takes by itself: a retry runs it once more. -/
@@ -176,18 +193,30 @@ def pathOk (ss : List Step) (excluded : List String) (target : Nat) (p : Path) :
   !p.steps.isEmpty && p.steps.all (stepOk ss excluded) && crossingsOk ss p &&
     decide (lead ss p ≤ target)
 
-/-- Every path is sound and within the one target lead time. -/
-def sound (ss : List Step) (ps : List Path) (excluded : List String) (target : Nat) : Bool :=
-  !ps.isEmpty && ps.all (pathOk ss excluded target)
+/-- The steps of a path whose deadline rests on nothing yet. -/
+def unbacked (ss : List Step) (p : Path) : Nat :=
+  (p.steps.filter (fun n =>
+    match find ss n with
+    | some s => !s.backed
+    | none => true)).length
+
+def unbackedAll (ss : List Step) (ps : List Path) : Nat :=
+  (ps.map (unbacked ss)).foldl (· + ·) 0
+
+/-- Every path is sound and within the one target lead time, and the
+assumptions not yet backed are within the baseline. -/
+def sound (ss : List Step) (ps : List Path) (excluded : List String) (target : Nat)
+    (baseline : Nat) : Bool :=
+  !ps.isEmpty && ps.all (pathOk ss excluded target) && decide (unbackedAll ss ps ≤ baseline)
 
 /-- The outcome wanted, stated first: no sound path takes longer than the
 target, its breaches included. -/
 theorem lead_within_target (ss : List Step) (ps : List Path) (excluded : List String)
-    (target : Nat) (h : sound ss ps excluded target = true) (p : Path) (hp : p ∈ ps) :
-    lead ss p ≤ target := by
+    (target baseline : Nat) (h : sound ss ps excluded target baseline = true) (p : Path)
+    (hp : p ∈ ps) : lead ss p ≤ target := by
   unfold sound at h
   simp only [Bool.and_eq_true] at h
-  have hall := h.2
+  have hall := h.1.2
   rw [List.all_eq_true] at hall
   have hp' := hall p hp
   unfold pathOk at hp'
@@ -212,7 +241,7 @@ theorem bounded_is_self_serve (s : Step) (h : bounded s = true) :
     s.access = .keyless ∨ s.access = .open := by
   unfold bounded at h
   simp only [Bool.and_eq_true] at h
-  have hs := h.1.1.1.2
+  have hs := h.1.1.1.1.2
   unfold selfServe at hs
   cases ha : s.access <;> simp [ha] at hs ⊢
 
@@ -221,7 +250,7 @@ theorem bounded_waits_on_no_one (s : Step) (h : bounded s = true) :
     s.latency ≠ .human := by
   unfold bounded at h
   simp only [Bool.and_eq_true] at h
-  have hm := h.1.1.2
+  have hm := h.1.1.1.2
   unfold machine at hm
   intro hl
   simp [hl] at hm
@@ -230,16 +259,45 @@ theorem bounded_waits_on_no_one (s : Step) (h : bounded s = true) :
 theorem bounded_has_deadline (s : Step) (h : bounded s = true) : 0 < s.boundMin := by
   unfold bounded at h
   simp only [Bool.and_eq_true, decide_eq_true_eq] at h
-  exact h.1.1.1.1
+  exact h.1.1.1.1.1
 
 /-- A bounded browser checkout is one whose store's terms were read. -/
 theorem browser_checkout_has_terms (s : Step) (h : bounded s = true)
     (hb : s.checkout = .browser) : s.termsRead = true := by
   unfold bounded at h
   simp only [Bool.and_eq_true] at h
-  have hc := h.2
+  have hc := h.1.2
   unfold checkoutOk at hc
   simpa [hb] using hc
+
+/-- A deadline of ours is never shorter than what the provider states. -/
+theorem deadline_covers_stated (s : Step) (h : bounded s = true) (m : Nat)
+    (hm : s.statedMin = some m) : m ≤ s.boundMin := by
+  unfold bounded at h
+  simp only [Bool.and_eq_true] at h
+  have hc := h.2
+  unfold covers at hc
+  simpa [hm] using hc
+
+/-- A reroute lands on another channel than the one that failed. -/
+theorem fallback_is_another_channel (ss : List Step) (s : Step)
+    (h : breachOk ss s = true) (hr : s.onBreach = .reroute) :
+    ∃ f, s.fallback.bind (find ss) = some f ∧ f.channel ≠ s.channel := by
+  unfold breachOk at h
+  simp only [hr] at h
+  cases hf : s.fallback.bind (find ss) with
+  | none => simp [hf] at h
+  | some f =>
+    simp only [hf, Bool.and_eq_true] at h
+    exact ⟨f, rfl, by simpa using h.2⟩
+
+/-- The assumptions not yet backed are within the baseline. -/
+theorem unbacked_within_baseline (ss : List Step) (ps : List Path) (excluded : List String)
+    (target baseline : Nat) (h : sound ss ps excluded target baseline = true) :
+    unbackedAll ss ps ≤ baseline := by
+  unfold sound at h
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at h
+  exact h.2
 
 /-- Every step of a sound path is bounded. -/
 theorem path_steps_bounded (ss : List Step) (excluded : List String) (target : Nat)

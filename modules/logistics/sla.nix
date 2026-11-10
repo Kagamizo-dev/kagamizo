@@ -14,6 +14,13 @@
 #   logistics.sla.targetLeadMin  the outcome wanted, stated first: no path
 #                              takes longer, its breaches included (the
 #                              owner, 2026-11-10: fourteen days)
+#   logistics.sla.assumptions.<a>  what a deadline of ours rests on: the
+#                              claim and its backing, each a dataset, a
+#                              paper, a theorem, a simulation or a
+#                              measurement with its source. A step whose
+#                              deadline no provider states names one
+#   logistics.sla.unbackedBaseline  how many steps on paths still rest on an
+#                              assumption with no backing; it only falls
 #   logistics.sla.paths.<p>    a product's stages in order, the steps of a
 #                              stage side by side, and where it is delivered
 #   logistics.sla.excluded.<c> a channel that may be on no path, and why
@@ -80,6 +87,16 @@ let
         description = "The store's terms on automated use were read whole.";
       };
       boundMin = mkOption { type = types.ints.positive; };
+      statedMin = mkOption {
+        type = types.nullOr types.ints.positive;
+        default = null;
+        description = "The provider's own figure in minutes, where it states one; our deadline may not be shorter.";
+      };
+      assumption = mkOption {
+        type = types.nullOr (types.enum (lib.attrNames cfg.assumptions));
+        default = null;
+        description = "What a deadline of ours rests on.";
+      };
       basis = mkOption {
         type = types.enum [
           "stated"
@@ -135,6 +152,45 @@ let
     };
   };
 
+  assumption = types.submodule {
+    options = {
+      claim = mkOption { type = types.str; };
+      backing = mkOption {
+        type = types.listOf (
+          types.submodule {
+            options = {
+              kind = mkOption {
+                type = types.enum [
+                  "dataset"
+                  "paper"
+                  "theorem"
+                  "simulation"
+                  "measurement"
+                ];
+              };
+              ref = mkOption {
+                type = types.str;
+                description = "What it is: the dataset, the paper's key, the theorem's name, the run.";
+              };
+              source = mkOption { type = url; };
+              on = mkOption { type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}"; };
+            };
+          }
+        );
+        default = [ ];
+      };
+      wants = mkOption {
+        type = types.str;
+        description = "What would back it, or tighten it.";
+      };
+    };
+  };
+
+  # A deadline is backed when the provider states it, or when the
+  # assumption it rests on has a backing.
+  backed =
+    s: s.basis == "stated" || (s.assumption != null && cfg.assumptions.${s.assumption}.backing != [ ]);
+
   path = types.submodule {
     options = {
       destination = mkOption { type = types.strMatching "[A-Z]{2}"; };
@@ -154,7 +210,9 @@ let
       lib.concatStringsSep ",\n  " (
         lib.mapAttrsToList (
           n: s:
-          "{ name := ${q n}, channel := ${q s.channel}, access := .${s.access}, latency := .${s.latency}, checkout := .${s.checkout}, evidence := .${s.evidence}, termsRead := ${lib.boolToString s.termsRead}, boundMin := ${toString s.boundMin}, onBreach := .${s.onBreach}, fallback := ${
+          "{ name := ${q n}, channel := ${q s.channel}, access := .${s.access}, latency := .${s.latency}, checkout := .${s.checkout}, evidence := .${s.evidence}, termsRead := ${lib.boolToString s.termsRead}, boundMin := ${toString s.boundMin}, statedMin := ${
+            if s.statedMin == null then "none" else "some ${toString s.statedMin}"
+          }, backed := ${lib.boolToString (backed s)}, onBreach := .${s.onBreach}, fallback := ${
             if s.fallback == null then "none" else "some ${q s.fallback}"
           }, jurisdiction := ${q s.jurisdiction}, goods := ${lib.boolToString s.goods}, clears := ${
             if s.clears == null then "none" else "some (${q s.clears.from}, ${q s.clears.to})"
@@ -173,7 +231,7 @@ let
 
     def excluded : List String := ${q (lib.attrNames cfg.excluded)}
 
-    theorem sla_sound : sound steps paths excluded ${toString cfg.targetLeadMin} = true := by
+    theorem sla_sound : sound steps paths excluded ${toString cfg.targetLeadMin} ${toString cfg.unbackedBaseline} = true := by
       decide +kernel
 
     end Kagamizo.Logistics.Sla
@@ -184,6 +242,11 @@ in
     targetLeadMin = mkOption {
       type = types.ints.positive;
       description = "The longest any path may take, its breaches included, in minutes.";
+    };
+    assumptions = mkOption { type = types.attrsOf assumption; };
+    unbackedBaseline = mkOption {
+      type = types.ints.unsigned;
+      description = "Steps on paths whose deadline rests on an assumption with no backing; it only falls.";
     };
     steps = mkOption { type = types.attrsOf step; };
     paths = mkOption { type = types.attrsOf path; };
@@ -201,9 +264,66 @@ in
     logistics.sla = {
       targetLeadMin = 14 * day;
 
+      # Six deadlines on the first path rest on nothing measured yet:
+      # costing, part prices, material rates, the second fabric store,
+      # printed parts and transit.
+      unbackedBaseline = 6;
+
+      assumptions = {
+        twin-costs-in-half-an-hour = {
+          claim = "Every costing stage of a design ends within its timeout, thirty minutes in all";
+          wants = "A perf target per stage, measured on the host (slicing, toolpaths, board rules, nesting on a fixed budget)";
+        };
+        prices-answer-in-a-minute = {
+          claim = "A distributor's price and stock lookup answers within a minute";
+          wants = "Our own calls timed over a week; its rate limit (120 a minute) is stated, its latency is not";
+        };
+        rates-file-in-a-minute = {
+          claim = "The monthly commodity file downloads within a minute";
+          wants = "Our own downloads timed";
+        };
+        tariff-answers-in-a-minute = {
+          claim = "The tariff schedule answers a search within a minute";
+          backing = [
+            {
+              kind = "measurement";
+              ref = "one keyless search answered in 0.6 seconds";
+              source = "https://hts.usitc.gov/reststop/search?keyword=6211";
+              on = "2026-11-10";
+            }
+          ];
+          wants = "A week of timed calls in place of one";
+        };
+        screening-list-in-a-minute = {
+          claim = "The screening list's bulk file downloads within a minute and is under a day old";
+          backing = [
+            {
+              kind = "measurement";
+              ref = "the bulk file fetched in under two seconds, last modified the same day";
+              source = "https://developer.trade.gov";
+              on = "2026-11-10";
+            }
+          ];
+          wants = "A week of timed downloads and the file's age on each";
+        };
+        second-fabric-in-four-days = {
+          claim = "The second fabric store ships within four days";
+          wants = "Its own shipping page read whole (a search result says about three business days), then our own orders";
+        };
+        prints-in-five-business-days = {
+          claim = "A printed part ships within five business days of the order";
+          wants = "The maker states no lead time: our own orders, and a simulation of its queue from its published capacity";
+        };
+        domestic-transit-in-four-days = {
+          claim = "A parcel sent by a two- or three-day service arrives within four days";
+          wants = "The carriers' own service tables and on-time measurements (the published priors are for ground services), then our own deliveries";
+        };
+      };
+
       steps = {
         # The twin costs the design on our own host: no one else is asked.
         cost-design = {
+          assumption = "twin-costs-in-half-an-hour";
           channel = "own-twin";
           access = "keyless";
           latency = "instant";
@@ -216,6 +336,7 @@ in
           note = "Every stage has its own timeout; runtimes are not yet measured on the host";
         };
         part-prices = {
+          assumption = "prices-answer-in-a-minute";
           channel = "digikey";
           access = "open";
           latency = "instant";
@@ -228,6 +349,7 @@ in
           note = "Product Information v4: 120 requests a minute, 429 beyond; prices and stock only, its ordering needs a credit account";
         };
         material-rates = {
+          assumption = "rates-file-in-a-minute";
           channel = "world-bank-pink-sheet";
           access = "keyless";
           latency = "published";
@@ -240,6 +362,7 @@ in
           note = "A monthly file; the last dated value stands between issues";
         };
         tariff = {
+          assumption = "tariff-answers-in-a-minute";
           channel = "usitc-hts";
           access = "keyless";
           latency = "instant";
@@ -252,6 +375,7 @@ in
           note = "Answered in under a second with no key (called 2026-11-10; release 2026 Rev 22)";
         };
         screening = {
+          assumption = "screening-list-in-a-minute";
           channel = "trade-gov-screening-list";
           access = "keyless";
           latency = "published";
@@ -268,6 +392,7 @@ in
         # Fabric and notions: the one purchase whose every step a store
         # states and software reaches (Shopify's agent checkout).
         fabric = {
+          statedMin = 3 * day;
           goods = true;
           channel = "rockywoods";
           access = "keyless";
@@ -282,6 +407,7 @@ in
           note = "\"Processing Time 3 Business Days\"";
         };
         fabric-second = {
+          assumption = "second-fabric-in-four-days";
           goods = true;
           channel = "ripstop-by-the-roll";
           access = "keyless";
@@ -298,6 +424,7 @@ in
         # Cut parts. SendCutSend's own guide allows an automated checkout
         # with the buyer's authorization, requests a second apart.
         sheet-parts = {
+          statedMin = 4 * day;
           goods = true;
           channel = "sendcutsend";
           access = "open";
@@ -315,6 +442,7 @@ in
         # Printed parts: a self-serve key and an order API, but no lead time
         # is stated, so the deadline is ours.
         printed-parts = {
+          assumption = "prints-in-five-business-days";
           goods = true;
           channel = "slant3d";
           access = "open";
@@ -329,6 +457,7 @@ in
         };
 
         transit = {
+          assumption = "domestic-transit-in-four-days";
           channel = "seller-shipping";
           access = "open";
           latency = "instant";
@@ -343,6 +472,7 @@ in
 
         # Declared, and on no path until its provider's pages are read.
         buy-parts = {
+          statedMin = day;
           goods = true;
           channel = "mouser";
           access = "open";
@@ -356,6 +486,7 @@ in
           note = "Order API with a card saved on the account, same-day shipping before 8 p.m. Central: from search snippets only, its pages refused the reader";
         };
         bare-boards = {
+          statedMin = 5 * day;
           goods = true;
           channel = "osh-park";
           access = "open";
@@ -369,6 +500,7 @@ in
           note = "Super Swift \"4-5 business days\", made in the United States; its terms on automated checkout are not read yet";
         };
         cut-parts-guaranteed = {
+          statedMin = 3 * day;
           goods = true;
           channel = "osh-cut";
           access = "open";
