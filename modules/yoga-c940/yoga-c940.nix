@@ -22,6 +22,13 @@
           target = "yoga-c940";
         }
       ))
+      # The logistics CLI on the PATH (modules/logistics).
+      (withSystem "x86_64-linux" (
+        { config, ... }:
+        {
+          environment.systemPackages = [ config.packages.logistics ];
+        }
+      ))
       # Its runtimes: Windows and aarch64 programs (modules/shell).
       (config.shell.runtimeModule "yoga-c940")
       # Its reverse-engineering workbench (modules/rea).

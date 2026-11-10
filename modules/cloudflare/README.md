@@ -206,6 +206,15 @@ The rule for this repo: the only thing you ever do by hand is approve 2FA.
 Each item below breaks that rule today and is to be closed, not documented
 around.
 
+- **Logistics: a courier collecting at a staffed counter** (UPS Access
+  Point, FedEx Hold at Location, a DHL shop) needs a copy of the owner's ID
+  and often a signed letter, once per network; code lockers (InPost,
+  Cainiao stations) need only the pickup code. Until the ID copy is a typed
+  document in Proton Pass, routes through staffed counters are by hand
+  (modules/logistics).
+- **Logistics: resale sites with no buyer API** (Depop, Vinted, Poshmark,
+  Grailed, The RealReal, Mercari): the owner browses them; Depop's, Vinted's
+  and Poshmark's terms forbid automation, and Lean keeps them manual.
 - **OpenCode (v2.2.5) does not support a trusted-header auth mode.** Its web
   interface (`opencode web`) has no `Cf-Access-Authenticated-User-Email` or
   similar proxy-auth setting, so each user authenticates with OpenCode itself

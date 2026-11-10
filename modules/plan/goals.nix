@@ -211,7 +211,34 @@
         question = "When one entity pays another's costs (OpenRouter), record it as owed, or wait?";
       };
       kagamizo-purpose = {
-        question = "What does Kagamizo become now that consulting is off?";
+        question = "What does Kagamizo become now that consulting is off? Form the LLC only if a comparison shows real value (revenue, a service sold to others) and Northwest's CLI drives the formation end to end.";
+      };
+      buyer-entity = {
+        question = "Which entity buys, sources and ships (logistics.owner)?";
+        answer = "Mirazo, the owner himself (2026-11-08): Kagamizo is a name and a domain, not yet an LLC; it is formed only once a comparison shows its value (make/llc-comparison).";
+      };
+      order-approval = {
+        question = "May the logistics agents buy on their own, or does every order wait on the owner?";
+        answer = "Every order waits on the owner's approval of the payment (2026-11-08); agents search, specify, quote and rank.";
+      };
+      first-order = {
+        question = "What is the first order, built end to end?";
+        answer = "The wearable kit (2026-11-08): a vest with many pockets, modular arm sleeves, a cloak over it all and quick-release carabiners; everything worn, never a backpack.";
+      };
+      lean-iso = {
+        question = "The Yoga ISO is about 3.5 GB, over GitHub's 2 GB release limit (Ghidra and OpenJDK, clang and llvm, Wine, ZAP, trivy, nuclei, QtWebEngine). Keep a lean base ISO (shell, desktop, Firefox, CLIs) and load the reverse-engineering and security workbench on demand from the host's cache, or publish the full ISO another way?";
+      };
+      data-access = {
+        question = "How is product, inventory and logistics data reached: accounts, or open data?";
+        answer = "Keyless first (2026-11-08): OSINT, open and government data and sanctioned keyless channels (Shopify's catalog, WooCommerce's Store API, OpenStreetMap, satellite and public APIs), read by our own Rust CLI and typed in Lean; storefront pages only where their robots rules allow, never where terms forbid; no tie to Amazon. An account only where a payment or a dispatch needs one, and only if its second factor is not a phone number; agents pilot it through a Proton alias (agents-sign-in).";
+      };
+      supplier-channel = {
+        question = "How do requests for quotes reach suppliers and makers?";
+        answer = "Through each supplier's own channel (2026-11-08): its quoting API where it has one, otherwise email; every request carries our bill of materials, machine time and labour (the should-cost) and an inspection plan, and is negotiated against it, China and Shopify stores alike.";
+      };
+      hubs = {
+        question = "Which hubs: the Texas airport, and the European and Asian hubs, picked by direct flights, price and transit?";
+        answer = "Partly (2026-11-08): Texas is home (family), Brazil is South America's; most continents supported, heaviest in Europe, Asia and the US; each hub chosen by its airport's direct flights and travel. The cities wait on flight data (data/flight-data).";
       };
       public-login = {
         question = "Move Public's sign-in to finance@mirazo.org, or change the declaration, before the exception ends on 2026-11-30?";

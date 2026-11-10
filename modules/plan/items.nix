@@ -64,6 +64,13 @@ in
       }
     ]
     // track "os" [
+      (
+        {
+          id = "lean-iso";
+          title = "Bring the Yoga ISO under 2 GB so main promotes it to stable again";
+        }
+        // owner "lean-iso"
+      )
       {
         id = "vm-boot-tests";
         title = "Boot tests in CI for every NixOS image (the Yoga's USB image, the Pi's SD image)";
@@ -1053,6 +1060,58 @@ in
         title = "Charter a logistics team: suppliers, carriers, lockers, customs";
       }
       {
+        id = "logistics-book";
+        title = "The logistics module: channels typed by operation, hubs, routes ranked by reliability first";
+        status = "done";
+      }
+      (
+        {
+          id = "courier-accounts";
+          title = "One courier account, only when an order needs a pickup (second factor not a phone number)";
+          dependsOn = [ "data/logistics-book" ];
+        }
+        // action
+      )
+      {
+        id = "keyless-sources";
+        title = "The keyless sources typed as channels: catalogs, lockers, rates, standards, routes, tariffs, wages";
+        status = "done";
+      }
+      {
+        id = "keyless-verify";
+        title = "One live call to each keyless source (allowlist), recording what it really returns";
+        dependsOn = [ "data/keyless-sources" ];
+      }
+      {
+        id = "catalog-reader";
+        title = "Rust readers for Shopify's Global Catalog, store UCP endpoints and WooCommerce's Store API";
+        dependsOn = [ "data/keyless-verify" ];
+      }
+      {
+        id = "lockers-osm";
+        title = "Lockers and post offices from Geofabrik extracts for every hub";
+        dependsOn = [ "data/keyless-verify" ];
+      }
+      {
+        id = "usps-tables";
+        title = "USPS prices, service standards and on-time reports as typed tables; reliability priors from them";
+        dependsOn = [ "data/keyless-verify" ];
+      }
+      {
+        id = "provider-pages";
+        title = "Read every channel's developer pages whole (allowlist), moving evidence from snippet to page";
+        dependsOn = [ "data/logistics-book" ];
+      }
+      {
+        id = "live-quotes";
+        title = "Quotes into `logistics rank`: keyless rate tables first, a courier's API once its account exists";
+        dependsOn = [ "data/usps-tables" ];
+      }
+      {
+        id = "flight-data";
+        title = "Flight data as a typed source, to pick each continent's hub by its airport";
+      }
+      {
         id = "mercado-livre";
         title = "Mercado Livre's API: catalog, prices and stock in Brazil";
       }
@@ -1131,7 +1190,34 @@ in
       {
         id = "outfit-spec";
         title = "The outfit as a twin: the kit's slots as pockets, the fabric's requirements, its care";
-        dependsOn = [ "make/bom" ];
+        status = "active";
+      }
+      (
+        {
+          id = "body-measurements";
+          title = "The owner's body measurements (ISO 8559-1) for the outfit's sizes";
+          dependsOn = [ "make/outfit-spec" ];
+        }
+        // action
+      )
+      {
+        id = "should-cost";
+        title = "Should-costs: bills of materials, machine time and labour, priced from ILOSTAT and suppliers' quotes";
+        status = "active";
+      }
+      {
+        id = "rfq-send";
+        title = "Send each request for quotes through the supplier's own channel, from a Proton alias, once the owner approves";
+        dependsOn = [ "make/should-cost" ];
+      }
+      {
+        id = "spec-previews";
+        title = "Every specification previewed: images through OpenRouter, a 3D model, a Rust viewer to turn it around";
+        dependsOn = [ "make/outfit-spec" ];
+      }
+      {
+        id = "llc-comparison";
+        title = "Compare forming Kagamizo LLC against buying as Mirazo: cost, liability, tax, revenue";
       }
       {
         id = "outfit-quotes";
