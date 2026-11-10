@@ -11,8 +11,16 @@ passes, and a step is on a path only if software reaches it by itself.
     browser checkout is used only where the store's terms were read;
   * a breach either retries once, fails with the step named, or moves to a
     fallback step that is itself bounded and ends there (`breachOk`);
-  * a path's worst case is the sum of its steps' worst cases, and it is
-    within the lead time the path declares;
+  * a path is a sequence of stages; the steps of a stage run side by side,
+    so a stage takes as long as its slowest step and a path as long as its
+    stages together;
+  * the desired outcome is stated first and proved of every path: its worst
+    case is within the one target lead time (`lead_within_target`);
+  * a path is not tied to one country: every step has a jurisdiction and a
+    path a destination, and goods made elsewhere reach it only through a
+    step that clears that border and is itself bounded
+    (`goods_cross_only_cleared`). Which jurisdictions to make in is then an
+    optimisation over the rules of each;
   * no step of a path uses an excluded channel.
 -/
 namespace Kagamizo.Logistics.Sla
@@ -56,13 +64,24 @@ structure Step where
   boundMin : Nat
   onBreach : Breach
   fallback : Option String
+  /-- Where the step happens (ISO 3166-1 alpha-2). -/
+  jurisdiction : String
+  /-- Physical goods leave this step. -/
+  goods : Bool
+  /-- The border this step clears goods across, from and to. -/
+  clears : Option (String × String)
   deriving Repr
 
 structure Path where
   name : String
-  steps : List String
-  maxLeadMin : Nat
+  /-- Where the finished goods are delivered. -/
+  destination : String
+  /-- In order; the steps of one stage run side by side. -/
+  stages : List (List String)
   deriving Repr
+
+def Path.steps (p : Path) : List String :=
+  p.stages.foldr (· ++ ·) []
 
 def selfServe (s : Step) : Bool :=
   match s.access with
@@ -126,16 +145,67 @@ def stepOk (ss : List Step) (excluded : List String) (n : String) : Bool :=
   | some s => bounded s && breachOk ss s && !(excluded.contains s.channel)
   | none => false
 
+def stepWorst (ss : List Step) (n : String) : Nat :=
+  match find ss n with
+  | some s => worst ss s
+  | none => 0
+
+/-- A stage takes as long as its slowest step. -/
+def stageWorst (ss : List Step) (stage : List String) : Nat :=
+  (stage.map (stepWorst ss)).foldl max 0
+
 def lead (ss : List Step) (p : Path) : Nat :=
-  (p.steps.map (fun n => match find ss n with
-    | some s => worst ss s
-    | none => 0)).foldl (· + ·) 0
+  (p.stages.map (stageWorst ss)).foldl (· + ·) 0
 
-def pathOk (ss : List Step) (excluded : List String) (p : Path) : Bool :=
-  !p.steps.isEmpty && p.steps.all (stepOk ss excluded) && decide (lead ss p ≤ p.maxLeadMin)
+/-- Goods made outside the destination pass a step of the path that clears
+that border. -/
+def cleared (ss : List Step) (p : Path) (s : Step) : Bool :=
+  !s.goods || s.jurisdiction == p.destination ||
+    p.steps.any (fun n =>
+      match find ss n with
+      | some c => c.clears == some (s.jurisdiction, p.destination)
+      | none => false)
 
-def sound (ss : List Step) (ps : List Path) (excluded : List String) : Bool :=
-  !ps.isEmpty && ps.all (pathOk ss excluded)
+def crossingsOk (ss : List Step) (p : Path) : Bool :=
+  p.steps.all (fun n =>
+    match find ss n with
+    | some s => cleared ss p s
+    | none => false)
+
+def pathOk (ss : List Step) (excluded : List String) (target : Nat) (p : Path) : Bool :=
+  !p.steps.isEmpty && p.steps.all (stepOk ss excluded) && crossingsOk ss p &&
+    decide (lead ss p ≤ target)
+
+/-- Every path is sound and within the one target lead time. -/
+def sound (ss : List Step) (ps : List Path) (excluded : List String) (target : Nat) : Bool :=
+  !ps.isEmpty && ps.all (pathOk ss excluded target)
+
+/-- The outcome wanted, stated first: no sound path takes longer than the
+target, its breaches included. -/
+theorem lead_within_target (ss : List Step) (ps : List Path) (excluded : List String)
+    (target : Nat) (h : sound ss ps excluded target = true) (p : Path) (hp : p ∈ ps) :
+    lead ss p ≤ target := by
+  unfold sound at h
+  simp only [Bool.and_eq_true] at h
+  have hall := h.2
+  rw [List.all_eq_true] at hall
+  have hp' := hall p hp
+  unfold pathOk at hp'
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at hp'
+  exact hp'.2
+
+/-- Goods never cross a border on a sound path without a step that clears
+it. -/
+theorem goods_cross_only_cleared (ss : List Step) (excluded : List String) (target : Nat)
+    (p : Path) (h : pathOk ss excluded target p = true) (n : String) (hn : n ∈ p.steps)
+    (s : Step) (hf : find ss n = some s) : cleared ss p s = true := by
+  unfold pathOk at h
+  simp only [Bool.and_eq_true] at h
+  have hc := h.1.2
+  unfold crossingsOk at hc
+  rw [List.all_eq_true] at hc
+  have hs := hc n hn
+  simpa [hf] using hs
 
 /-- A bounded step is reached with no approval and no contract. -/
 theorem bounded_is_self_serve (s : Step) (h : bounded s = true) :
@@ -172,12 +242,12 @@ theorem browser_checkout_has_terms (s : Step) (h : bounded s = true)
   simpa [hb] using hc
 
 /-- Every step of a sound path is bounded. -/
-theorem path_steps_bounded (ss : List Step) (excluded : List String) (p : Path)
-    (h : pathOk ss excluded p = true) (n : String) (hn : n ∈ p.steps) :
+theorem path_steps_bounded (ss : List Step) (excluded : List String) (target : Nat)
+    (p : Path) (h : pathOk ss excluded target p = true) (n : String) (hn : n ∈ p.steps) :
     ∃ s, find ss n = some s ∧ bounded s = true := by
   unfold pathOk at h
   simp only [Bool.and_eq_true] at h
-  have hall := h.1.2
+  have hall := h.1.1.2
   rw [List.all_eq_true] at hall
   have hs := hall n hn
   unfold stepOk at hs

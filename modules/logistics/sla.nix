@@ -11,8 +11,11 @@
 #                              happens on a breach (retry once, reroute to a
 #                              fallback step, or fail with the step named;
 #                              never wait)
-#   logistics.sla.paths.<p>    a product's steps in order, with the lead
-#                              time it is published with
+#   logistics.sla.targetLeadMin  the outcome wanted, stated first: no path
+#                              takes longer, its breaches included (the
+#                              owner, 2026-11-10: fourteen days)
+#   logistics.sla.paths.<p>    a product's stages in order, the steps of a
+#                              stage side by side, and where it is delivered
 #   logistics.sla.excluded.<c> a channel that may be on no path, and why
 #   logistics.sla.open.<q>     what has no bounded channel yet: a gap, never
 #                              a step
@@ -23,8 +26,13 @@
 # checks.logistics-sla (./_lean/Sla.lean): every step of every path has a
 # deadline, is keyless or self-serve, has no person inside it, rests on the
 # provider's own page, and uses a browser checkout only where the store's
-# terms were read; every breach ends; no excluded channel is on a path; and
-# each path's worst case is within its published lead time.
+# terms were read; every breach ends; no excluded channel is on a path;
+# goods made outside the destination pass a step that clears that border;
+# and every path's worst case is within the target. A path is not tied to
+# one country: each step has its jurisdiction, so where to make a thing is
+# an optimisation over each country's rules (the legal twin), not a premise.
+# A deadline of ours that proves too tight shows as breaches, which is the
+# measurement that refines it.
 { lib, config, ... }:
 let
   inherit (lib) mkOption types;
@@ -90,6 +98,28 @@ let
         type = types.nullOr slug;
         default = null;
       };
+      jurisdiction = mkOption {
+        type = types.strMatching "[A-Z]{2}";
+        default = "US";
+        description = "Where the step happens (ISO 3166-1 alpha-2).";
+      };
+      goods = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Physical goods leave this step.";
+      };
+      clears = mkOption {
+        type = types.nullOr (
+          types.submodule {
+            options = {
+              from = mkOption { type = types.strMatching "[A-Z]{2}"; };
+              to = mkOption { type = types.strMatching "[A-Z]{2}"; };
+            };
+          }
+        );
+        default = null;
+        description = "The border this step clears goods across.";
+      };
       source = mkOption { type = url; };
       evidence = mkOption {
         type = types.enum [
@@ -107,8 +137,11 @@ let
 
   path = types.submodule {
     options = {
-      steps = mkOption { type = types.nonEmptyListOf (types.enum (lib.attrNames cfg.steps)); };
-      maxLeadMin = mkOption { type = types.ints.positive; };
+      destination = mkOption { type = types.strMatching "[A-Z]{2}"; };
+      stages = mkOption {
+        type = types.nonEmptyListOf (types.nonEmptyListOf (types.enum (lib.attrNames cfg.steps)));
+        description = "In order; the steps of one stage run side by side.";
+      };
       why = mkOption { type = types.str; };
     };
   };
@@ -123,6 +156,8 @@ let
           n: s:
           "{ name := ${q n}, channel := ${q s.channel}, access := .${s.access}, latency := .${s.latency}, checkout := .${s.checkout}, evidence := .${s.evidence}, termsRead := ${lib.boolToString s.termsRead}, boundMin := ${toString s.boundMin}, onBreach := .${s.onBreach}, fallback := ${
             if s.fallback == null then "none" else "some ${q s.fallback}"
+          }, jurisdiction := ${q s.jurisdiction}, goods := ${lib.boolToString s.goods}, clears := ${
+            if s.clears == null then "none" else "some (${q s.clears.from}, ${q s.clears.to})"
           } }"
         ) cfg.steps
       )
@@ -131,14 +166,14 @@ let
     def paths : List Path := [${
       lib.concatStringsSep ",\n  " (
         lib.mapAttrsToList (
-          n: p: "{ name := ${q n}, steps := ${q p.steps}, maxLeadMin := ${toString p.maxLeadMin} }"
+          n: p: "{ name := ${q n}, destination := ${q p.destination}, stages := ${q p.stages} }"
         ) cfg.paths
       )
     }]
 
     def excluded : List String := ${q (lib.attrNames cfg.excluded)}
 
-    theorem sla_sound : sound steps paths excluded = true := by
+    theorem sla_sound : sound steps paths excluded ${toString cfg.targetLeadMin} = true := by
       decide +kernel
 
     end Kagamizo.Logistics.Sla
@@ -146,6 +181,10 @@ let
 in
 {
   options.logistics.sla = {
+    targetLeadMin = mkOption {
+      type = types.ints.positive;
+      description = "The longest any path may take, its breaches included, in minutes.";
+    };
     steps = mkOption { type = types.attrsOf step; };
     paths = mkOption { type = types.attrsOf path; };
     excluded = mkOption {
@@ -160,6 +199,8 @@ in
 
   config = {
     logistics.sla = {
+      targetLeadMin = 14 * day;
+
       steps = {
         # The twin costs the design on our own host: no one else is asked.
         cost-design = {
@@ -227,6 +268,7 @@ in
         # Fabric and notions: the one purchase whose every step a store
         # states and software reaches (Shopify's agent checkout).
         fabric = {
+          goods = true;
           channel = "rockywoods";
           access = "keyless";
           latency = "instant";
@@ -240,11 +282,12 @@ in
           note = "\"Processing Time 3 Business Days\"";
         };
         fabric-second = {
+          goods = true;
           channel = "ripstop-by-the-roll";
           access = "keyless";
           latency = "instant";
           checkout = "protocol";
-          boundMin = business 5;
+          boundMin = 4 * day;
           basis = "ours";
           onBreach = "fail";
           source = "https://ripstopbytheroll.com/agents.md";
@@ -255,6 +298,7 @@ in
         # Cut parts. SendCutSend's own guide allows an automated checkout
         # with the buyer's authorization, requests a second apart.
         sheet-parts = {
+          goods = true;
           channel = "sendcutsend";
           access = "open";
           latency = "instant";
@@ -271,6 +315,7 @@ in
         # Printed parts: a self-serve key and an order API, but no lead time
         # is stated, so the deadline is ours.
         printed-parts = {
+          goods = true;
           channel = "slant3d";
           access = "open";
           latency = "instant";
@@ -288,16 +333,17 @@ in
           access = "open";
           latency = "instant";
           checkout = "read";
-          boundMin = 7 * day;
+          boundMin = 4 * day;
           basis = "ours";
           onBreach = "fail";
           source = "https://sendcutsend.com/shipping/";
           evidence = "page";
-          note = "Within the United States only, so no customs; a breach is an alert and a claim, tracked by the carrier's own number";
+          note = "Two- and three-day services at each seller's checkout; no border on this path; a breach is an alert and a claim, tracked by the carrier's own number";
         };
 
         # Declared, and on no path until its provider's pages are read.
         buy-parts = {
+          goods = true;
           channel = "mouser";
           access = "open";
           latency = "instant";
@@ -310,6 +356,7 @@ in
           note = "Order API with a card saved on the account, same-day shipping before 8 p.m. Central: from search snippets only, its pages refused the reader";
         };
         bare-boards = {
+          goods = true;
           channel = "osh-park";
           access = "open";
           latency = "instant";
@@ -322,6 +369,7 @@ in
           note = "Super Swift \"4-5 business days\", made in the United States; its terms on automated checkout are not read yet";
         };
         cut-parts-guaranteed = {
+          goods = true;
           channel = "osh-cut";
           access = "open";
           latency = "instant";
@@ -336,20 +384,22 @@ in
       };
 
       paths.vest-kit-of-parts = {
-        steps = [
-          "cost-design"
-          "part-prices"
-          "material-rates"
-          "tariff"
-          "screening"
-          "fabric"
-          "sheet-parts"
-          "printed-parts"
-          "transit"
+        destination = "US";
+        stages = [
+          [ "cost-design" ]
+          [
+            "part-prices"
+            "material-rates"
+            "tariff"
+            "screening"
+          ]
+          [
+            "fabric"
+            "sheet-parts"
+            "printed-parts"
+          ]
+          [ "transit" ]
         ];
-        # The purchases run side by side; the sum is the bound proved, so
-        # the published figure is safe and not yet tight.
-        maxLeadMin = 35 * day;
         why = "Everything the vest is made of, costed, screened, bought and delivered, with no step that waits";
       };
 
@@ -373,7 +423,7 @@ in
         bare-boards = "OSH Park is self-serve with a stated lead time; its terms on automated checkout are to be read";
         machined-parts = "No maker has an order API; Protolabs Network reviews within 48 hours and its checkout terms are to be read";
         buy-parts = "Mouser's order terms rest on search snippets until its pages are read from the host";
-        imports = "The de minimis exemption is suspended for every shipment (2026), so an import always meets customs: United States makers and stock only";
+        cross-border = "A path may be made in any country: its goods then need a step that clears each border and is itself bounded. None is typed yet (the United States suspended its de minimis exemption in 2026 and no carrier states a clearance time), so the first path stays inside one country; choosing jurisdictions is the legal twin's optimisation";
         payment = "An order is paid from the buying agent's own bounded card, whose limit is the control: an approval per order would be a wait";
       };
     };
