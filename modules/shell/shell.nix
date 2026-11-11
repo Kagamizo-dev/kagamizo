@@ -223,6 +223,7 @@ let
     {
       title = field "title";
       abstract = field "abstract";
+      theorems = strings "theorems";
       checks = strings "checks";
       packages = strings "packages";
       teams = strings "agents";

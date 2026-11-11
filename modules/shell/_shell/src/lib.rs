@@ -230,6 +230,7 @@ impl App {
                     card(ui, "PAPER", &format!("{}\n\n{}", page.title, page.summary));
                 }
                 for (head, xs) in [
+                    ("THEOREMS", &page.theorems),
                     ("CHECKS", &page.checks),
                     ("PACKAGES", &page.packages),
                     ("TEAMS", &page.teams),
