@@ -1,29 +1,25 @@
 /-
-The model sheet (../sheets.nix): a model is used by a unit of work only
-through a typed sheet that states the model, its licence, the engine and
-environment around it, how it is called and what it must achieve. The
-sheet is checked before anything runs.
+The model sheet (../sheets.nix): a unit of work calls a model only through
+a typed sheet. We run no weights ourselves (the owner, 2026-11-11): every
+model is a provider's, routed through the one held account, and what we
+build is the harness around its modality: what goes in, what must come
+out, how long it may take and what it may cost.
 
-  * hosted: the provider runs the weights; the sheet pins the API, the
-    held account that pays, and the host, which must be allowed;
-  * weights: we run them; the sheet pins the revision and every file's
-    hash, the engine that loads them, and an environment that is offline
-    with the engine's telemetry switched off.
-
-A sheet is `usable` only if its licence allows commercial use and its
-access waits on no one's approval; it is `live` only with a measured
-record inside its targets.
+A sheet is `usable` only if its licence allows commercial use, the account
+that pays is held and its host allowed, a harness exists for what it
+returns, and it takes only the inputs that harness sends. It is `live`
+only with a measured record inside its targets.
 -/
 namespace Kagamizo.Agents.Sheets
 
-inductive Access where
-  | hosted | weights
+/-- What a harness sends to a model. -/
+inductive Input where
+  | text | image
   deriving DecidableEq, Repr
 
-/-- How the weights are gated on their hub: not at all, by a click that is
-granted at once, or by an author's manual approval (no time bound). -/
-inductive Gate where
-  | open | automatic | manual
+/-- What a model returns. -/
+inductive Output where
+  | image | svg | mesh | text
   deriving DecidableEq, Repr
 
 inductive Status where
@@ -37,44 +33,36 @@ structure Record where
 
 structure Sheet where
   name : String
-  access : Access
+  inputs : List Input
+  output : Output
   commercial : Bool
-  gate : Gate
-  /-- Hosted: the account is held and the host is on the allowlist. -/
+  /-- The account that pays is held and the host is on the allowlist. -/
   reachable : Bool
-  /-- Weights: revision and every file's hash pinned, and an engine named. -/
-  pinned : Bool
-  /-- Weights: runs offline with the engine's telemetry off. -/
-  sealed : Bool
   maxSeconds : Nat
   maxCents : Nat
   record : Option Record
   status : Status
   deriving Repr
 
-def environmentOk (s : Sheet) : Bool :=
-  match s.access with
-  | .hosted => s.reachable
-  | .weights => s.pinned && s.sealed
-
-def approvalFree (s : Sheet) : Bool :=
-  match s.gate with
-  | .manual => false
-  | _ => true
+/-- The outputs a harness exists for (../_picture holds images and
+drawings to their format). -/
+def harnessed (o : Output) : Bool :=
+  match o with
+  | .image | .svg => true
+  | _ => false
 
 /-- A sheet a unit of work may call. -/
 def usable (s : Sheet) : Bool :=
-  s.commercial && approvalFree s && environmentOk s &&
+  s.commercial && s.reachable && harnessed s.output && !s.inputs.isEmpty &&
     decide (0 < s.maxSeconds) && decide (0 < s.maxCents)
 
 def within (s : Sheet) (r : Record) : Bool :=
   decide (r.seconds ≤ s.maxSeconds) && decide (r.cents ≤ s.maxCents)
 
-/-- A live sheet has a measured record inside its targets; a sheet that is
-not live claims nothing. -/
+/-- A live sheet has a measured record inside its targets, and any record
+a sheet carries is inside them. -/
 def perfOk (s : Sheet) : Bool :=
   match s.status, s.record with
-  | .live, some r => within s r
   | .live, none => false
   | _, some r => within s r
   | _, none => true
@@ -86,25 +74,22 @@ def sound (ss : List Sheet) : Bool :=
 theorem usable_is_commercial (s : Sheet) (h : usable s = true) : s.commercial = true := by
   unfold usable at h
   simp only [Bool.and_eq_true] at h
-  exact h.1.1.1.1
+  exact h.1.1.1.1.1
 
-/-- A usable model waits on no author's approval. -/
-theorem usable_waits_on_no_approval (s : Sheet) (h : usable s = true) : s.gate ≠ .manual := by
+/-- A usable model returns something a harness holds to its format. -/
+theorem usable_has_a_harness (s : Sheet) (h : usable s = true) :
+    s.output = .image ∨ s.output = .svg := by
   unfold usable at h
   simp only [Bool.and_eq_true] at h
-  have ha := h.1.1.1.2
-  unfold approvalFree at ha
-  intro hg
-  simp [hg] at ha
+  have hh := h.1.1.1.2
+  unfold harnessed at hh
+  cases ho : s.output <;> simp [ho] at hh ⊢
 
-/-- Weights we run are pinned and sealed. -/
-theorem weights_are_pinned_and_sealed (s : Sheet) (h : usable s = true)
-    (hw : s.access = .weights) : s.pinned = true ∧ s.sealed = true := by
+/-- A usable model is paid for by a held account on an allowed host. -/
+theorem usable_is_reachable (s : Sheet) (h : usable s = true) : s.reachable = true := by
   unfold usable at h
   simp only [Bool.and_eq_true] at h
-  have he := h.1.1.2
-  unfold environmentOk at he
-  simpa [hw] using he
+  exact h.1.1.1.1.2
 
 /-- A live model was measured, and inside its time and cost targets. -/
 theorem live_meets_its_targets (s : Sheet) (h : perfOk s = true) (hl : s.status = .live) :
