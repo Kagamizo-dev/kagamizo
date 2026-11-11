@@ -150,22 +150,10 @@ in
         title = "Launchers: a card that opens its own library of titles, with artwork";
         dependsOn = [ "shell/horizontal" ];
       }
-      (
-        {
-          id = "steam";
-          title = "The Steam launcher on the Yoga, and a perf target for the web build";
-          backlog = "upkeep/shell-steam-and-perf";
-          dependsOn = [ "shell/launchers" ];
-        }
-        // owner "steam"
-      )
       {
-        id = "minecraft";
-        title = "The Minecraft launcher (Prism), with our world as a title";
-        dependsOn = [
-          "shell/launchers"
-          "world/pumpkin"
-        ];
+        id = "web-perf";
+        title = "A perf target for the web build";
+        dependsOn = [ "shell/launchers" ];
       }
       {
         id = "trading-launcher";
@@ -1299,63 +1287,7 @@ in
         title = "A perf target for field endurance";
       }
     ]
-    // track "world" [
-      (
-        {
-          id = "pumpkin";
-          title = "The Pumpkin server on the host";
-          backlog = "twin/pumpkin-server";
-        }
-        // credit
-      )
-      {
-        id = "map-tiles";
-        title = "Map tiles and a Bevy viewer";
-        backlog = "twin/map-tiles";
-        dependsOn = [ "world/pumpkin" ];
-      }
-      {
-        id = "districts";
-        title = "Districts and rooms from the declarations";
-        backlog = "builders/districts-and-rooms";
-      }
-      (
-        {
-          id = "azalea";
-          title = "A bot per team in the world";
-          backlog = "twin/azalea-bots";
-          dependsOn = [ "world/pumpkin" ];
-        }
-        // upstream
-      )
-      {
-        id = "reconcile";
-        title = "Reconcile the Fabric mod and Mindcraft plans with Pumpkin and Azalea";
-      }
-      {
-        id = "templates";
-        title = "World templates as declarations";
-      }
-      {
-        id = "npc";
-        title = "The owner's character: a public schema, its values in Proton";
-      }
-      (
-        {
-          id = "spectrum";
-          title = "A game client reaching the world through Cloudflare";
-        }
-        // owner "spectrum"
-      )
-    ]
     // track "media" [
-      (
-        {
-          id = "discord";
-          title = "The Discord relay live";
-        }
-        // action
-      )
       {
         id = "drive-hop";
         title = "The Proton Drive hop on the host";

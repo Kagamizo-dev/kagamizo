@@ -16,8 +16,6 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | ci | `ci-pipeline` | build | none yet | none yet | 10% | Lean deciding every workflow sound |
 | cloudflare | `cloudflare-access` | build | none yet | none yet | 10% | Lean deciding every agent's Access token policy attached only to apps its tools justify, the owner first, none on status (decide +kernel over the rendered lists); moves with agents × tools |
 | compliance | `compliance-rules` | build | none yet | none yet | 10% | Lean deciding every strategy against the day-trade rule and its options level on its observed account |
-| discord | `discord-relay` | build | none yet | none yet | 10% | Lean deciding the relay rule on the declared ids, plus the crate's tests |
-| gamedev | `gamedev-profile` | build | none yet | none yet | 10% | Lean deciding the profile open source but its declared platform, plus the versions listing |
 | governance | `governance-cedar` | build | none yet | none yet | 10% | Cedar's test runner over every generated test (6169); moves with accounts × actions × agents |
 | governance | `governance-changes` | build | none yet | none yet | 10% | Lean deciding the change-class table's shape, plus the Rust tool's tests; moves with the table |
 | repo | `languages` | build | none yet | none yet | 10% | lang-scan walking the tree against the typed policy and its exceptions; moves with the number of files |
@@ -45,8 +43,6 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | trading | `trading-risk` | build | none yet | none yet | 10% | Lean proving what admissible guarantees (omega over Nat) and deciding the declared limits sane |
 | trading | `trading-stages` | build | none yet | none yet | 10% | Lean deciding every strategy's stage carries its evidence |
 | trading | `trading-weather` | build | none yet | none yet | 10% | The weather signal engine's unit tests over forecast fixtures (parsers, probabilities, edge) |
-| twin | `twin-adoptions` | build | none yet | none yet | 10% | Lean deciding every adoption licensed for its use, Rust where it runs, and tested before it is trusted (decide +kernel); moves with the adoptions |
-| twin | `twin-world` | build | none yet | none yet | 10% | Lean deciding the world's shape: every module has a building, every agent a character, every recipe's action declared |
 
 ## Baseline
 

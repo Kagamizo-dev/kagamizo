@@ -119,23 +119,11 @@
       attr = "checks.x86_64-linux.media-clips";
       method = "Lean proving a cut list's bounds and deciding the declared maximum, plus the crate's tests (a synthetic index and a byte-identical double render)";
     };
-    discord-relay = {
-      module = "discord";
-      kind = "build";
-      attr = "checks.x86_64-linux.discord-relay";
-      method = "Lean deciding the relay rule on the declared ids, plus the crate's tests";
-    };
     android-twin = {
       module = "android";
       kind = "build";
       attr = "checks.x86_64-linux.android-twin";
       method = "Lean deciding every base, app and setting pinned and typed, plus the rendered AVD config read back";
-    };
-    gamedev-profile = {
-      module = "gamedev";
-      kind = "build";
-      attr = "checks.x86_64-linux.gamedev-profile";
-      method = "Lean deciding the profile open source but its declared platform, plus the versions listing";
     };
     trading-weather = {
       module = "trading";
@@ -191,12 +179,6 @@
       attr = "checks.x86_64-linux.cloudflare-access";
       method = "Lean deciding every agent's Access token policy attached only to apps its tools justify, the owner first, none on status (decide +kernel over the rendered lists); moves with agents × tools";
     };
-    twin-world = {
-      module = "twin";
-      kind = "build";
-      attr = "checks.x86_64-linux.twin-world";
-      method = "Lean deciding the world's shape: every module has a building, every agent a character, every recipe's action declared";
-    };
     languages = {
       module = "repo";
       kind = "build";
@@ -232,12 +214,6 @@
       kind = "build";
       attr = "checks.x86_64-linux.agents-charters";
       method = "Lean deciding the lifecycles separated, trades reviewed by legal and accounting, and money and going live owner-gated (decide +kernel); moves with kinds x reviewers";
-    };
-    twin-adoptions = {
-      module = "twin";
-      kind = "build";
-      attr = "checks.x86_64-linux.twin-adoptions";
-      method = "Lean deciding every adoption licensed for its use, Rust where it runs, and tested before it is trusted (decide +kernel); moves with the adoptions";
     };
     open-webui = {
       module = "hetzner";

@@ -31,10 +31,6 @@
         title = "From a specification to a delivered thing";
         why = "Marketplaces, shipping, lockers and suppliers as data; digital twins of what we need, quoted on materials and machine time; our own storefront; the two outfits (2026-11-07).";
       };
-      world = {
-        title = "The business as a world";
-        why = "The twin: a world where modules are buildings and teams are characters, Steam and Minecraft as launchers (2026-11-04, 2026-11-06).";
-      };
     };
 
     tracks = {
@@ -103,11 +99,6 @@
         goal = "carried";
         team = "twin";
       };
-      world = {
-        title = "The twin world";
-        goal = "world";
-        team = "twin";
-      };
       media = {
         title = "Media and multimodal";
         goal = "carried";
@@ -170,10 +161,6 @@
       cloudflare-os = {
         question = "Apply the Cloudflare plan that serves os.jingzo.org and the testers' Access (re-planned first)?";
         recommended = "Yes, after reading the re-plan.";
-      };
-      steam = {
-        question = "Enable the unfree gamedev.steam on the Yoga?";
-        recommended = "Yes: Steam is a launcher of the shell.";
       };
       pixel-adb = {
         question = "Is attaching the real Pixel over USB for flashing and provisioning a declared human step?";
@@ -275,9 +262,6 @@
       };
       agent-mail = {
         question = "How agents send mail: Proton's business SMTP, or a Cloudflare-routed subdomain?";
-      };
-      spectrum = {
-        question = "Pay for Cloudflare Spectrum so a game client reaches the world (later)?";
       };
       account-hub = {
         question = "Consolidate the bank's markets on as few accounts as possible: IBKR (the LLC's, already open: stocks and options here and abroad, futures on about 150 venues, forex, spot crypto, ForecastTrader event contracts, about 27 currencies in one account) plus Kraken for round-the-clock crypto and perpetuals, with Public kept only while its paper days run? It means trading through the LLC (still on your 1040, as QSearch is disregarded) and IBKR's daily Gateway sign-in.";

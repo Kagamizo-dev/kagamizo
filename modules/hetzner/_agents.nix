@@ -16,8 +16,7 @@
 #
 #   agents-secrets   once a boot: the OpenRouter key (chat-and-code, capped)
 #                    and the tunnel token, from the host's read-only vault,
-#                    into /run/agents (mode 600, never printed); and the
-#                    Discord relay's env when its token is there, and each
+#                    into /run/agents (mode 600, never printed); and each
 #                    dsh team's Access service token as /run/agents/<team>.env
 #   open-webui       Open WebUI on OpenRouter, signing in whoever Access let
 #                    through (Cf-Access-Authenticated-User-Email)
@@ -32,7 +31,6 @@
   secretspecToml,
   opencodeConfig,
   tokenFile,
-  stateVault,
   alsoUnfree ? [ ], # further unfree packages admitted by name (../android)
 }:
 { lib, pkgs, ... }:
@@ -120,18 +118,6 @@ in
             unset token cid cs
           '') dshAgentTeams
         )}
-        # The Discord relay (modules/discord): the bot's token, pasted by the
-        # owner, and the agents' Matrix login (matrix-seed's item). Without
-        # either there is no file, and the relay's unit waits.
-        rm -f /run/agents/discord.env
-        discord=$(get DISCORD_BOT_TOKEN 2>/dev/null || true)
-        matrix=$(pass-cli item view --vault-name ${stateVault} --item-title matrix-agents --field password 2>/dev/null || true)
-        if [ -n "$discord" ] && [ -n "$matrix" ]; then
-          printf 'DISCORD_BOT_TOKEN=%s\nMATRIX_PASSWORD=%s\n' "$discord" "$matrix" >/run/agents/discord.env
-        else
-          echo "agents-secrets: no Discord relay yet (bot token in host/DISCORD_BOT_TOKEN, matrix-agents in ${stateVault})"
-        fi
-        unset discord matrix
       '';
     };
 

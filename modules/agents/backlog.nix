@@ -89,10 +89,6 @@ in
         status = "active";
         brief = ./_backlog/upkeep-shell-web.md;
       };
-      "upkeep/shell-steam-and-perf" = {
-        kind = "code";
-        brief = ./_backlog/upkeep-shell-steam-and-perf.md;
-      };
       "research-jingzo/weather-backtest" = {
         kind = "strategy";
         status = "active";
@@ -118,22 +114,6 @@ in
       "reverse-engineering/model-registry" = {
         kind = "reverse-engineering";
         brief = ./_backlog/reverse-engineering-model-registry.md;
-      };
-      "twin/pumpkin-server" = {
-        kind = "world";
-        brief = ./_backlog/twin-pumpkin-server.md;
-      };
-      "twin/map-tiles" = {
-        kind = "world";
-        brief = ./_backlog/twin-map-tiles.md;
-      };
-      "builders/districts-and-rooms" = {
-        kind = "world-content";
-        brief = ./_backlog/builders-districts-and-rooms.md;
-      };
-      "twin/azalea-bots" = {
-        kind = "world";
-        brief = ./_backlog/twin-azalea-bots.md;
       };
       "upkeep/account-links" = {
         kind = "code";
