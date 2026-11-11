@@ -23,6 +23,7 @@ Lean). Generated from `sources.nix`: `nix run .#catalog-readme`.
 | pyicloud | timlaing/pyicloud | 2026.10.1 (2d3d137e17cd) |
 | rclone | rclone (nixpkgs) | 1.75.2 |
 | rea | morluto/rea | rea-agents-6.7.0 (27dc42d10249) |
+| stripe-api | stripe/openapi (openapi/spec3.json), read in Nix | e63fafc, API 2026-09-30.endive |
 
 Two have no upstream versions and are stamped by content instead:
 Hetzner's OpenAPI spec (its SHA-256 and Last-Modified;

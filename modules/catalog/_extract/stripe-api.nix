@@ -42,23 +42,21 @@ let
           "array<${typeOf (s.items or { })}>"
         else if (s.type or null) == "object" then
           (if s ? title then "object:${s.title}" else "object")
-        else if s ? type then
-          s.type
         else
-          "any";
+          s.type or "any";
     in
     if s.nullable or false then "${base}|null" else base;
 
   enumOf =
     s:
-    if s ? enum then
-      s.enum
-    else if (s.type or null) == "array" && (s.items or { }) ? enum then
-      s.items.enum
-    else if s ? anyOf && lib.any (x: x ? enum) s.anyOf then
-      lib.concatMap (x: x.enum or [ ]) s.anyOf
-    else
-      null;
+    s.enum or (
+      if (s.type or null) == "array" && (s.items or { }) ? enum then
+        s.items.enum
+      else if s ? anyOf && lib.any (x: x ? enum) s.anyOf then
+        lib.concatMap (x: x.enum or [ ]) s.anyOf
+      else
+        null
+    );
 
   field =
     withDescription: required: n: s:

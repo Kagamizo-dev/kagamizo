@@ -554,9 +554,14 @@ in
       }) holdings
     );
     # One card per agent and account: Cedar names each grant by the pair.
-    governance.problems = lib.mapAttrsToList (
-      k: xs: "wallet: ${k} is held through ${lib.concatMapStringsSep " and " (x: x.id) xs}; hold one card"
-    ) (lib.filterAttrs (_: xs: lib.length xs > 1) (lib.groupBy (x: "${x.agent} on ${x.account}") holdings));
+    governance.problems =
+      lib.mapAttrsToList
+        (
+          k: xs: "wallet: ${k} is held through ${lib.concatMapStringsSep " and " (x: x.id) xs}; hold one card"
+        )
+        (
+          lib.filterAttrs (_: xs: lib.length xs > 1) (lib.groupBy (x: "${x.agent} on ${x.account}") holdings)
+        );
 
     perSystem =
       { config, pkgs, ... }:
