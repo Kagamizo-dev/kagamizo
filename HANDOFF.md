@@ -171,6 +171,58 @@ institution lists into bank.terms and bank.aggregators; the first audit;
 wallet step 3 (holders replace grants; Cedar from holders) and step 4
 (the Wallet view in the shell).
 
+## 2026-11-08, evening: logistics, from a specification to a thing in hand
+
+- **The owner's decisions today:** Mirazo (the owner) buys, sources and
+  ships; Kagamizo is formed only once a comparison shows its value
+  (make/llc-comparison). Every order waits on the owner's approval of the
+  payment. Reliability before price, always. Hubs on most continents,
+  heaviest in the US (Texas, home), Europe and Asia, Brazil for South
+  America, each picked by its airport. The first order is the wearable
+  kit: vest, arm sleeves, cloak, carabiners, never a backpack.
+- **Built (modules/logistics, paper in `_lean/Paper.lean`):** 30 channels
+  (marketplaces, resale, makers, carriers, couriers, holding points) typed
+  per operation (search, specs, quote, order, track, locate, collect,
+  proof) as open, gated, partner or none, each with its source and
+  evidence; hubs; the outfit as garments typed against the kit's slots;
+  `logistics channels|hubs|outfit|source|rank`. Lean proves no channel
+  whose terms forbid automation is automated, the outfit carries every
+  device with no pack, and the chosen route is the most reliable meeting
+  the deadline and floor (price only breaks ties); the CLI's tests hold
+  its ranking to Lean's.
+- **Not verified:** every channel fact is a search snippet or secondary:
+  the developer hosts (developer.uber.com, developer.doordash.com,
+  developers.lalamove.com, developer.ups.com, developer.ebay.com,
+  openservice.aliexpress.com, docs.business.amazon.com,
+  affiliate-program.amazon.com, developers.mercadolibre.com.ar,
+  openrouter.ai) are outside the allowlist (data/provider-pages).
+- **Later the same evening, keyless first (the owner's direction):** no
+  account until a payment or a dispatch needs one, and only with a second
+  factor that is not a phone number. 20 keyless sources are typed
+  (`logistics channels --keyless`): Shopify's Global Catalog and stores,
+  WooCommerce, Web Data Commons, CPSC and Safety Gate, OpenStreetMap
+  lockers, USPS prices, standards and on-time reports, UPS rates,
+  OurAirports, BTS, Eurostat, ANAC, NWS, FAA, PortWatch, TARIC, NCM, HTS,
+  ILOSTAT. Should-costs: `logistics cost|rfq|accept`; the vest's bill of
+  materials is declared (estimates), every rate pending, and Lean refuses
+  a should-cost with an unpriced line and a quote without an inspection
+  plan or above the 15% premium.
+- **Shell and image (later still):** the Logistics card's page is generated
+  from the declarations (kit, should-cost, hubs, channels by access),
+  seen in the web build; the CLI is on the Yoga image's PATH. The Yoga
+  system builds, but **its ISO is about 3.5 GB** (1,707,112 sectors), over
+  GitHub's 2 GB release-asset limit, so merged to main it would be kept as
+  a 14-day artifact and never promoted to stable. Not logistics: the
+  closure is 10 GB unpacked, led by Ghidra and OpenJDK (1.45 GB), clang and
+  llvm libraries (1.4 GB), Wine (0.5 GB), ZAP, trivy and nuclei (0.7 GB)
+  and QtWebEngine (0.45 GB), from modules/rea, modules/security and the
+  shell's runtimes. The owner decides how to shrink it (os/lean-iso).
+- **The owner's direction:** live checks run on the Hetzner host's scoped
+  agents, not through the session allowlist, which needs no more hosts.
+- **Next:** data/keyless-verify, run by the host's agents; then the
+  readers (catalog, lockers, USPS tables), ILOSTAT wages into the rates,
+  and make/rfq-send (waits on the open agent-mail decision).
+
 ## 2026-11-08: the bank, the venues, and Public as the one account
 
 - **The owner's decisions today:** Public stays the one trading account

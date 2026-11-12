@@ -31,10 +31,6 @@
         title = "From a specification to a delivered thing";
         why = "Marketplaces, shipping, lockers and suppliers as data; digital twins of what we need, quoted on materials and machine time; our own storefront; the two outfits (2026-11-07).";
       };
-      world = {
-        title = "The business as a world";
-        why = "The twin: a world where modules are buildings and teams are characters, Steam and Minecraft as launchers (2026-11-04, 2026-11-06).";
-      };
     };
 
     tracks = {
@@ -103,11 +99,6 @@
         goal = "carried";
         team = "twin";
       };
-      world = {
-        title = "The twin world";
-        goal = "world";
-        team = "twin";
-      };
       media = {
         title = "Media and multimodal";
         goal = "carried";
@@ -171,10 +162,6 @@
         question = "Apply the Cloudflare plan that serves os.jingzo.org and the testers' Access (re-planned first)?";
         recommended = "Yes, after reading the re-plan.";
       };
-      steam = {
-        question = "Enable the unfree gamedev.steam on the Yoga?";
-        recommended = "Yes: Steam is a launcher of the shell.";
-      };
       pixel-adb = {
         question = "Is attaching the real Pixel over USB for flashing and provisioning a declared human step?";
         recommended = "Yes: flashing our GrapheneOS image needs it once.";
@@ -211,7 +198,34 @@
         question = "When one entity pays another's costs (OpenRouter), record it as owed, or wait?";
       };
       kagamizo-purpose = {
-        question = "What does Kagamizo become now that consulting is off?";
+        question = "What does Kagamizo become now that consulting is off? Form the LLC only if a comparison shows real value (revenue, a service sold to others) and Northwest's CLI drives the formation end to end.";
+      };
+      buyer-entity = {
+        question = "Which entity buys, sources and ships (logistics.owner)?";
+        answer = "Mirazo, the owner himself (2026-11-08): Kagamizo is a name and a domain, not yet an LLC; it is formed only once a comparison shows its value (make/llc-comparison).";
+      };
+      order-approval = {
+        question = "May the logistics agents buy on their own, or does every order wait on the owner?";
+        answer = "Every order waits on the owner's approval of the payment (2026-11-08); agents search, specify, quote and rank.";
+      };
+      first-order = {
+        question = "What is the first order, built end to end?";
+        answer = "The wearable kit (2026-11-08): a vest with many pockets, modular arm sleeves, a cloak over it all and quick-release carabiners; everything worn, never a backpack.";
+      };
+      lean-iso = {
+        question = "The Yoga ISO is about 3.5 GB, over GitHub's 2 GB release limit (Ghidra and OpenJDK, clang and llvm, Wine, ZAP, trivy, nuclei, QtWebEngine). Keep a lean base ISO (shell, desktop, Firefox, CLIs) and load the reverse-engineering and security workbench on demand from the host's cache, or publish the full ISO another way?";
+      };
+      data-access = {
+        question = "How is product, inventory and logistics data reached: accounts, or open data?";
+        answer = "Keyless first (2026-11-08): OSINT, open and government data and sanctioned keyless channels (Shopify's catalog, WooCommerce's Store API, OpenStreetMap, satellite and public APIs), read by our own Rust CLI and typed in Lean; storefront pages only where their robots rules allow, never where terms forbid; no tie to Amazon. An account only where a payment or a dispatch needs one, and only if its second factor is not a phone number; agents pilot it through a Proton alias (agents-sign-in).";
+      };
+      supplier-channel = {
+        question = "How do requests for quotes reach suppliers and makers?";
+        answer = "Through each supplier's own channel (2026-11-08): its quoting API where it has one, otherwise email; every request carries our bill of materials, machine time and labour (the should-cost) and an inspection plan, and is negotiated against it, China and Shopify stores alike.";
+      };
+      hubs = {
+        question = "Which hubs: the Texas airport, and the European and Asian hubs, picked by direct flights, price and transit?";
+        answer = "Partly (2026-11-08): Texas is home (family), Brazil is South America's; most continents supported, heaviest in Europe, Asia and the US; each hub chosen by its airport's direct flights and travel. The cities wait on flight data (data/flight-data).";
       };
       public-login = {
         question = "Move Public's sign-in to finance@mirazo.org, or change the declaration, before the exception ends on 2026-11-30?";
@@ -248,9 +262,6 @@
       };
       agent-mail = {
         question = "How agents send mail: Proton's business SMTP, or a Cloudflare-routed subdomain?";
-      };
-      spectrum = {
-        question = "Pay for Cloudflare Spectrum so a game client reaches the world (later)?";
       };
       account-hub = {
         question = "Consolidate the bank's markets on as few accounts as possible: IBKR (the LLC's, already open: stocks and options here and abroad, futures on about 150 venues, forex, spot crypto, ForecastTrader event contracts, about 27 currencies in one account) plus Kraken for round-the-clock crypto and perpetuals, with Public kept only while its paper days run? It means trading through the LLC (still on your 1040, as QSearch is disregarded) and IBKR's daily Gateway sign-in.";

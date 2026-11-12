@@ -276,15 +276,17 @@ in
                 export ${v.ein}=00-0000000 ${v.filingNumber}=0000-000000 ${v.formed}="US-XX 2000-01-01"
               '') top.legal.variables
             )}
-            mkdir -p $out
+            # The renders are only tested: a PDF carries its own creation
+            # time, so keeping one would make the check differ on a rebuild.
+            mkdir -p $out renders
             for pair in $(jq -r 'to_entries[] | .key as $e | .value[] | "\($e)/\(.)"' <<<${lib.escapeShellArg catalogJson}); do
-              mkdir -p "$out/''${pair%/*}"
-              legal-render "''${pair%/*}" "''${pair#*/}" "$out/$pair.pdf" 2>/dev/null || {
+              mkdir -p "renders/''${pair%/*}"
+              legal-render "''${pair%/*}" "''${pair#*/}" "renders/$pair.pdf" 2>/dev/null || {
                 echo "legal-record: $pair does not render" >&2
-                legal-render "''${pair%/*}" "''${pair#*/}" "$out/$pair.pdf"
+                legal-render "''${pair%/*}" "''${pair#*/}" "renders/$pair.pdf"
                 exit 1
               }
-              test -s "$out/$pair.pdf"
+              test -s "renders/$pair.pdf"
             done
             cp Check.lean $out/
           '';

@@ -106,7 +106,7 @@ in
           a.sha-link, a.inline-link { display:inline-flex; min-width:44px; min-height:44px; align-items:center; justify-content:center; box-sizing:border-box; padding:12px 6px; line-height:1.6 }
         </style></head><body><div class="wrap">
         <nav>
-          <b>Start</b><a href="#apps">Apps</a><a href="#infra">Infrastructure</a><a href="#research">Research</a><a href="#world">World</a>
+          <b>Start</b><a href="#apps">Apps</a><a href="#infra">Infrastructure</a><a href="#research">Research</a>
           <b>Teams</b><a href="#areas">Who owns what</a>
           <b>Money</b><a href="#cards">Cards</a><a href="#ai">AI keys</a><a href="#credit">Credit lines</a><a href="#tax">Tax</a><a href="#rules">Rules</a>
           <b>Records</b><a href="#entities">Entities</a><a href="#legal">Legal record</a><a href="#domains">Domains</a><a href="#accounts">Accounts</a><a href="#gaps">Gaps</a><a href="#steps">Your steps</a><a href="#migration">Migration</a><a href="#ci">CI</a><a href="#pipelines">Pipelines</a><a href="#catalogs">Catalogs</a>
@@ -128,6 +128,7 @@ in
                 chat = "Element: talk to the agent teams (Matrix, one room each)";
                 harness = "DeepSeek Harness: the agents' own workbench, which they extend";
                 os = "Kagamizo: the shell, every app as a card in one column";
+                files = "Files: what the units of work publish, read-only";
               }
               .${s.name};
           in
@@ -173,13 +174,6 @@ in
             }<td><a class=\"inline-link\" href=\"papers/${s}.html\">paper</a> · <a class=\"inline-link\" href=\"papers/${s}.pdf\">PDF</a></td></tr>\n"
           ) (lib.filterAttrs (_: p: p.public) top.research.papers)
         )}
-
-        <h2 id="world">World</h2>
-        <p class="lede">The digital twin: every module, agent, key and card as a 2D pixel world. Tap or click a thing to open its recipes (JEI-style).</p>
-        <div style="width:100%;max-width:780px;height:70vh;min-height:320px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)">
-          <iframe src="twin.html" style="width:100%;height:100%;border:none" title="Digital twin world" loading="lazy"></iframe>
-        </div>
-        <p style="font-size:13px;color:var(--muted);margin-top:6px">A static world — <a class="inline-link" href="twin.html" target="_blank">open full screen</a> to see live agents when <code>window.__twinState</code> is set and for the full phone-optimised view.</p>
 
         <h2 id="areas">Who owns what</h2>
         <p class="lede">Every area is a mailbox role: one owning team, reviewers that are never the owner, the controller who signs off, and the change classes it may propose. Lean proves the shape (modules/organization).</p>
@@ -666,16 +660,10 @@ in
         </main></div></body></html>
       '';
       html = pkgs.writeText "index.html" htmlText;
-      site =
-        pkgs.runCommand "site-status"
-          {
-            twinWorld = config.packages.twin-world;
-          }
-          ''
-            mkdir $out
-            cp ${html} $out/index.html
-            cp $twinWorld/twin.html $out/
-          '';
+      site = pkgs.runCommand "site-status" { } ''
+        mkdir $out
+        cp ${html} $out/index.html
+      '';
       # The homepage with the public papers beside it, where its links point.
       research = pkgs.runCommand "site-research" { } ''
         mkdir -p $out/papers

@@ -180,28 +180,8 @@ let
       passCli = config.packages.pass-cli;
       opencodeConfig = config.packages.opencode-config;
       tokenFile = "/var/lib/kagamizo/host-token";
-      stateVault = top.proton.infraVaults.hostState;
-      # The Android SDK's packages (../android) and, when the owner enables
-      # it, Steam's (../gamedev), unfree in nixpkgs.
-      alsoUnfree = top.android.unfreeNames ++ top.gamedev.unfreeNames;
-    }
-  );
-
-  # The share-from-phone relay, Discord into the Matrix room (../discord).
-  discord = withSystem "x86_64-linux" (
-    { config, ... }:
-    let
-      svc = lib.findFirst (
-        s: s.name == "chat"
-      ) (throw "hetzner.host.agents: no chat service") cfg.agents.services;
-    in
-    import ../discord/_host.nix {
-      relay = config.packages.discord-relay;
-      inherit (top.discord) channelId ownerUserId;
-      matrixPort = (lib.head svc.paths).port;
-      inherit (cfg.agents) zone;
-      room = top.discord.matrixRoom;
-      owner = lib.head (lib.splitString "@" (lib.head cfg.agents.viewers));
+      # The Android SDK's packages (../android), unfree in nixpkgs.
+      alsoUnfree = top.android.unfreeNames;
     }
   );
 
@@ -245,9 +225,6 @@ let
       passCli = config.packages.pass-cli;
     }
   );
-
-  # Steam's tools, only while gamedev.steam.enable is (../gamedev/_host.nix).
-  gamedev = import ../gamedev/_host.nix { inherit (top.gamedev.steam) enable; };
 
   # Paper trading: the daily paper days and their settlement (../trading/paper.nix).
   tradingPaperHost = withSystem "x86_64-linux" (
@@ -324,6 +301,17 @@ let
     };
   };
 
+  # The units' published files, at files.<zone> (../agents/_files-host.nix).
+  unitFiles = import ../agents/_files-host.nix {
+    inherit
+      (lib.findFirst (
+        s: s.name == "files"
+      ) (throw "hetzner.host.agents: no files service") cfg.agents.services)
+      port
+      ;
+    root = "/var/lib/kagamizo/files";
+  };
+
   host =
     { pkgs, modulesPath, ... }:
     {
@@ -335,15 +323,14 @@ let
         tier1
         agents
         chat
-        discord
         githubApp
         harness
         shellWeb
+        unitFiles
         agentRunnerHost
         tradingPaperHost
         media
         androidTwin
-        gamedev
         money
       ];
       networking.hostName = cfg.name;

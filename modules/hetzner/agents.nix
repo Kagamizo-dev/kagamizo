@@ -59,6 +59,7 @@ in
                 "chat"
                 "harness"
                 "os"
+                "files"
               ];
               description = "agents: Open WebUI; code: OpenCode's web interface; chat: Element Web and the Matrix homeserver; harness: DeepSeek Harness's web UI; os: the Kagamizo shell's web target (../shell).";
             };
@@ -112,6 +113,11 @@ in
         {
           name = "os";
           port = 8084;
+        }
+        # What the units of work publish (../agents/_files-host.nix).
+        {
+          name = "files";
+          port = 8085;
         }
       ];
     };

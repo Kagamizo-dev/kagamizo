@@ -64,6 +64,13 @@ in
       }
     ]
     // track "os" [
+      (
+        {
+          id = "lean-iso";
+          title = "Bring the Yoga ISO under 2 GB so main promotes it to stable again";
+        }
+        // owner "lean-iso"
+      )
       {
         id = "vm-boot-tests";
         title = "Boot tests in CI for every NixOS image (the Yoga's USB image, the Pi's SD image)";
@@ -143,22 +150,10 @@ in
         title = "Launchers: a card that opens its own library of titles, with artwork";
         dependsOn = [ "shell/horizontal" ];
       }
-      (
-        {
-          id = "steam";
-          title = "The Steam launcher on the Yoga, and a perf target for the web build";
-          backlog = "upkeep/shell-steam-and-perf";
-          dependsOn = [ "shell/launchers" ];
-        }
-        // owner "steam"
-      )
       {
-        id = "minecraft";
-        title = "The Minecraft launcher (Prism), with our world as a title";
-        dependsOn = [
-          "shell/launchers"
-          "world/pumpkin"
-        ];
+        id = "web-perf";
+        title = "A perf target for the web build";
+        dependsOn = [ "shell/launchers" ];
       }
       {
         id = "trading-launcher";
@@ -1053,6 +1048,58 @@ in
         title = "Charter a logistics team: suppliers, carriers, lockers, customs";
       }
       {
+        id = "logistics-book";
+        title = "The logistics module: channels typed by operation, hubs, routes ranked by reliability first";
+        status = "done";
+      }
+      (
+        {
+          id = "courier-accounts";
+          title = "One courier account, only when an order needs a pickup (second factor not a phone number)";
+          dependsOn = [ "data/logistics-book" ];
+        }
+        // action
+      )
+      {
+        id = "keyless-sources";
+        title = "The keyless sources typed as channels: catalogs, lockers, rates, standards, routes, tariffs, wages";
+        status = "done";
+      }
+      {
+        id = "keyless-verify";
+        title = "One live call to each keyless source (allowlist), recording what it really returns";
+        dependsOn = [ "data/keyless-sources" ];
+      }
+      {
+        id = "catalog-reader";
+        title = "Rust readers for Shopify's Global Catalog, store UCP endpoints and WooCommerce's Store API";
+        dependsOn = [ "data/keyless-verify" ];
+      }
+      {
+        id = "lockers-osm";
+        title = "Lockers and post offices from Geofabrik extracts for every hub";
+        dependsOn = [ "data/keyless-verify" ];
+      }
+      {
+        id = "usps-tables";
+        title = "USPS prices, service standards and on-time reports as typed tables; reliability priors from them";
+        dependsOn = [ "data/keyless-verify" ];
+      }
+      {
+        id = "provider-pages";
+        title = "Read every channel's developer pages whole (allowlist), moving evidence from snippet to page";
+        dependsOn = [ "data/logistics-book" ];
+      }
+      {
+        id = "live-quotes";
+        title = "Quotes into `logistics rank`: keyless rate tables first, a courier's API once its account exists";
+        dependsOn = [ "data/usps-tables" ];
+      }
+      {
+        id = "flight-data";
+        title = "Flight data as a typed source, to pick each continent's hub by its airport";
+      }
+      {
         id = "mercado-livre";
         title = "Mercado Livre's API: catalog, prices and stock in Brazil";
       }
@@ -1131,7 +1178,34 @@ in
       {
         id = "outfit-spec";
         title = "The outfit as a twin: the kit's slots as pockets, the fabric's requirements, its care";
-        dependsOn = [ "make/bom" ];
+        status = "active";
+      }
+      (
+        {
+          id = "body-measurements";
+          title = "The owner's body measurements (ISO 8559-1) for the outfit's sizes";
+          dependsOn = [ "make/outfit-spec" ];
+        }
+        // action
+      )
+      {
+        id = "should-cost";
+        title = "Should-costs: bills of materials, machine time and labour, priced from ILOSTAT and suppliers' quotes";
+        status = "active";
+      }
+      {
+        id = "rfq-send";
+        title = "Send each request for quotes through the supplier's own channel, from a Proton alias, once the owner approves";
+        dependsOn = [ "make/should-cost" ];
+      }
+      {
+        id = "spec-previews";
+        title = "Every specification previewed: images through OpenRouter, a 3D model, a Rust viewer to turn it around";
+        dependsOn = [ "make/outfit-spec" ];
+      }
+      {
+        id = "llc-comparison";
+        title = "Compare forming Kagamizo LLC against buying as Mirazo: cost, liability, tax, revenue";
       }
       {
         id = "outfit-quotes";
@@ -1140,6 +1214,36 @@ in
           "make/outfit-spec"
           "make/quotes"
         ];
+      }
+      {
+        id = "bounded-steps";
+        title = "No unbounded step: every step of a path has a deadline and a breach action, proved (logistics.sla)";
+        status = "active";
+      }
+      {
+        id = "twin-graph";
+        title = "The product as a graph of twins (material, part, technique, machine, line, route); its price the sum over the graph, each leaf priced by a source a machine reads";
+        dependsOn = [ "make/should-cost" ];
+      }
+      {
+        id = "legal-twin";
+        title = "The law as typed data: goods rules in compliance, a frozen corpus (eCFR, Federal Register, the tariff schedule, customs rulings), indexed twice and proved to cover each product";
+        dependsOn = [ "make/twin-graph" ];
+      }
+      {
+        id = "api-sheets";
+        title = "A sheet per API with its life cycle, from found to retired; each provider's pages read whole from the host";
+        dependsOn = [ "make/bounded-steps" ];
+      }
+      {
+        id = "terms-read";
+        title = "Read the checkout terms of OSH Park, OSH Cut, Protolabs Network and Mouser, so their steps may join a path";
+        dependsOn = [ "make/api-sheets" ];
+      }
+      {
+        id = "sim-runner";
+        title = "Simulations on an hourly dedicated server, created and destroyed within the account's limits, each stage with a timeout";
+        dependsOn = [ "make/twin-graph" ];
       }
     ]
     // track "kit" [
@@ -1183,63 +1287,7 @@ in
         title = "A perf target for field endurance";
       }
     ]
-    // track "world" [
-      (
-        {
-          id = "pumpkin";
-          title = "The Pumpkin server on the host";
-          backlog = "twin/pumpkin-server";
-        }
-        // credit
-      )
-      {
-        id = "map-tiles";
-        title = "Map tiles and a Bevy viewer";
-        backlog = "twin/map-tiles";
-        dependsOn = [ "world/pumpkin" ];
-      }
-      {
-        id = "districts";
-        title = "Districts and rooms from the declarations";
-        backlog = "builders/districts-and-rooms";
-      }
-      (
-        {
-          id = "azalea";
-          title = "A bot per team in the world";
-          backlog = "twin/azalea-bots";
-          dependsOn = [ "world/pumpkin" ];
-        }
-        // upstream
-      )
-      {
-        id = "reconcile";
-        title = "Reconcile the Fabric mod and Mindcraft plans with Pumpkin and Azalea";
-      }
-      {
-        id = "templates";
-        title = "World templates as declarations";
-      }
-      {
-        id = "npc";
-        title = "The owner's character: a public schema, its values in Proton";
-      }
-      (
-        {
-          id = "spectrum";
-          title = "A game client reaching the world through Cloudflare";
-        }
-        // owner "spectrum"
-      )
-    ]
     // track "media" [
-      (
-        {
-          id = "discord";
-          title = "The Discord relay live";
-        }
-        // action
-      )
       {
         id = "drive-hop";
         title = "The Proton Drive hop on the host";

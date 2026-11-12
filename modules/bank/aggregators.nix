@@ -152,7 +152,7 @@ in
         # and its fundamentals page: a linked credit card is a Financial
         # Connections account like any other, and transactions are read per
         # account, so an institution's supports_transactions covers its cards.
-        coverage = lib.mapAttrs (_: name: stripeSearch name) {
+        coverage = lib.mapAttrs (_: stripeSearch) {
           chase-checking = "Chase";
           chase-cards = "Chase";
           capital-one-cards = "Capital One";

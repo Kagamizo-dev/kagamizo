@@ -49,6 +49,9 @@ pub struct Page {
     pub title: String,
     #[serde(rename = "abstract")]
     pub summary: String,
+    /// What the module's Lean proves, by name (its paper explains each).
+    #[serde(default)]
+    pub theorems: Vec<String>,
     pub checks: Vec<String>,
     pub packages: Vec<String>,
     pub teams: Vec<String>,

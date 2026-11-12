@@ -121,6 +121,15 @@ def openapi_ty(spec, items=None):
         return ("list", openapi_ty(items) if items else "json")
     if t in OPENAPI:
         return OPENAPI[t]
+    # Stripe's catalog (../../catalog/_extract/stripe-api.nix) writes a list
+    # as array<T>, a titled object as object:Title, a schema reference as
+    # ref:Name and a choice of types as a|b. A list keeps its element type;
+    # the rest are json, as an untitled object is.
+    m = re.fullmatch(r"array<([^|]+)>", t)
+    if m:
+        return ("list", openapi_ty({"type": m.group(1)}))
+    if "|" in t or t == "any" or t.startswith(("object:", "ref:", "array<")):
+        return "json"
     fail(f"OpenAPI type {spec.get('type')!r}")
 
 
