@@ -18,16 +18,8 @@ let
   names = map (s: s.name) cfg.services;
   ports = map (s: s.port) cfg.services;
 
-  # DSH agent teams that get Access service tokens.
-  # Must match the teams in _agents-access.nix (harness == "dsh" with apps).
-  dshAgentTeams = [
-    "review"
-    "research-jingzo"
-    "design"
-    "twin"
-    "builders"
-    "upkeep"
-  ];
+  # The teams that hold an Access service token (../cloudflare/options.nix).
+  dshAgentTeams = config.cloudflare.accessTeams;
 
   # The team variable name for secretspec: upper case, hyphens -> underscores.
   svcTokenVar =

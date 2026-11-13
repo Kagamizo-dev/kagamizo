@@ -180,6 +180,7 @@ let
       passCli = config.packages.pass-cli;
       opencodeConfig = config.packages.opencode-config;
       tokenFile = "/var/lib/kagamizo/host-token";
+      dshAgentTeams = top.cloudflare.accessTeams;
       # The Android SDK's packages (../android), unfree in nixpkgs.
       alsoUnfree = top.android.unfreeNames;
     }

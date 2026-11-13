@@ -41,6 +41,19 @@ in
 {
   options.cloudflare = {
     accountId = mkOption { type = types.str; };
+    accessTeams = mkOption {
+      type = types.listOf types.str;
+      readOnly = true;
+      default = lib.attrNames (
+        lib.filterAttrs (_: apps: apps != [ ])
+          (import ./_agents-access.nix {
+            inherit lib;
+            accountId = "";
+            agents = config.governance.agents;
+          })._agentAccessMapping
+      );
+      description = "The agent teams that hold an Access service token: every dsh agent whose tools map to an application (./_agents-access.nix). The one list the token's secret, its storing and the host's reading follow.";
+    };
     statusAuditors = mkOption {
       type = types.listOf types.str;
       default = [ ];

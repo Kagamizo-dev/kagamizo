@@ -4,7 +4,7 @@
 # ../statestore): CI holds it as editor, plans and agents as
 # viewer (proton.agents). The same variable names everywhere, so what a
 # process can do depends only on which vault resolved it.
-{ lib, ... }:
+{ lib, config, ... }:
 let
   secret = import ../_lib/secret.nix;
   state = {
@@ -24,15 +24,8 @@ let
   svcTokenVar =
     name: lib.toUpper (builtins.replaceStrings [ "-" ] [ "_" ] name) + "_ACCESS_SERVICE_TOKEN";
 
-  # DSH agent teams that get Access service tokens (matching _agents-access.nix).
-  dshAgentTeams = [
-    "review"
-    "research-jingzo"
-    "design"
-    "twin"
-    "builders"
-    "upkeep"
-  ];
+  # The teams that hold an Access service token (./options.nix: accessTeams).
+  dshAgentTeams = config.cloudflare.accessTeams;
 in
 {
   secrets.profiles = {
