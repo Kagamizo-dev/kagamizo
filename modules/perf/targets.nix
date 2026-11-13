@@ -177,7 +177,7 @@
       module = "cloudflare";
       kind = "build";
       attr = "checks.x86_64-linux.cloudflare-access";
-      method = "Lean deciding every agent's Access token policy attached only to apps its tools justify, the owner first, none on status (decide +kernel over the rendered lists); moves with agents × tools";
+      method = "Lean deciding every agent's Access token policy attached only to apps its tools justify, the owner first, status for the declared auditors only (decide +kernel over the rendered lists); moves with agents × tools";
     };
     languages = {
       module = "repo";

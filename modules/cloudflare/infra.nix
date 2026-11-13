@@ -63,6 +63,12 @@ in
                   zoneId = domains."mirazo.org".zoneId;
                   hostname = "status.mirazo.org";
                   viewers = [ "zach@mirazo.org" ];
+                  auditorPolicies =
+                    (import ./_agents-access.nix {
+                      inherit lib;
+                      inherit (top.cloudflare.checked) accountId;
+                      agents = top.governance.agents;
+                    }).agentPolicyRefs.status or [ ];
                   html = config.site.statusHtml;
                   repoFullName = "${top.github.org}/kagamizo";
                 }
@@ -223,8 +229,8 @@ in
 
       # Lean check: every agent team's Access service-token policy is attached
       # only to applications its tools justify, the owner's policy precedes
-      # every token policy, and no token policy reaches the status page
-      # (the owner's page only).
+      # every token policy, and only a declared auditor's token policy
+      # reaches the status page (cloudflare.statusAuditors).
       checks.cloudflare-access =
         let
           q = builtins.toJSON;
@@ -248,7 +254,8 @@ in
           agentPolicyData = lib.mapAttrsToList (
             agent: apps: renderPolicy agent apps
           ) agentsAccess._agentAccessMapping;
-          statusApp = "cloudflare_zero_trust_access_application.status";
+          statusApp = "status";
+          auditors = top.cloudflare.statusAuditors;
           facts = ''
             namespace Kagamizo.Cloudflare
 
@@ -265,16 +272,19 @@ in
             /-- The status page application resource key. -/
             def statusApp : String := ${q statusApp}
 
+            /-- The agents the owner lets read the status page. -/
+            def auditors : List String := ${q auditors}
+
             /-- Every service token policy is attached only to applications the team's tools map to. -/
-            theorem sound_access : sound toolApp agentPolicies statusApp = true := by
+            theorem sound_access : sound toolApp agentPolicies statusApp auditors = true := by
               decide +kernel
 
             /-- The owner's policy precedes every token policy (structural: owner at 1, agents at 2). -/
             theorem owner_first : ownerFirst agentPolicies = true := by
               decide +kernel
 
-            /-- No token policy is attached to the status page (the owner's page only). -/
-            theorem no_status : noStatusToken agentPolicies statusApp = true := by
+            /-- Only a declared auditor's token policy is attached to the status page. -/
+            theorem status_auditors_only : statusAuditorsOnly agentPolicies statusApp auditors = true := by
               decide +kernel
 
             end Kagamizo.Cloudflare

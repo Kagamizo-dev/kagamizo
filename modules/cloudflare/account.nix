@@ -5,6 +5,10 @@
   cloudflare = {
     accountId = "73f11fa58ac09529a4fb40284b8ce236";
 
+    # The security team audits our own pages without a sign-in (the owner,
+    # 2026-11-13): the one token that reaches status.mirazo.org.
+    statusAuditors = [ "security" ];
+
     # Every minted token stops working on this date. Bump it and run
     # `bootstrap apply` to extend them all in place.
     tokenExpiry = "2027-01-15T00:00:00Z";

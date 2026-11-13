@@ -12,6 +12,10 @@
 #   web    → "agents-harness"     (dsh's web tool uses the same app)
 #   twin   → "agents-harness"     (twin team's CAD and inventory tools)
 #   comfy  → null                 (ComfyUI — no Access yet; no GPU)
+#   os     → "agents-os"          (os.jingzo.org: the shell)
+#   files  → "agents-files"       (files.jingzo.org: what the units publish)
+#   status → "status"             (status.mirazo.org: the owner's page, read
+#                                  by the declared auditors only)
 #
 # Each agent whose harness is "dsh" gets:
 #   - one cloudflare_zero_trust_access_service_token "agents-<name>"
@@ -24,7 +28,8 @@
 # to Proton Pass (Kagamizo-Host-State) following the pattern of the tunnel
 # token (infra-tunnel-token) and the matrix-seed logins.
 #
-# There is no service token for "status" — that is the owner's page only.
+# The status page is the owner's: a token reaches it only through the
+# `status` tool, which the Lean check holds to cloudflare.statusAuditors.
 {
   lib,
   accountId,
@@ -54,6 +59,9 @@ let
     web = appKeyForService "harness";
     twin = appKeyForService "harness";
     comfy = null; # ComfyUI — not behind Access yet (GPU not provisioned)
+    os = appKeyForService "os";
+    files = appKeyForService "files";
+    status = "status"; # ./_status.nix's application, outside the tunnel
   };
 
   # Collect dsh agents only.

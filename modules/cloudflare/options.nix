@@ -41,6 +41,11 @@ in
 {
   options.cloudflare = {
     accountId = mkOption { type = types.str; };
+    statusAuditors = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      description = "The agents whose Access token may read the status page, which is otherwise the owner's alone.";
+    };
     tokenExpiry = mkOption { type = types.str; };
     monthlyBudgetUsd = mkOption { type = types.number; };
     tokens = mkOption {
