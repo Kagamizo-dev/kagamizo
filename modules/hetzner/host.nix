@@ -309,7 +309,9 @@ let
       ) (throw "hetzner.host.agents: no files service") cfg.agents.services)
       port
       ;
-    root = "/var/lib/kagamizo/files";
+    # A directory of its own: /var/lib/kagamizo holds the host's token and
+    # is closed to nginx, which answered 403 from under it.
+    root = "/var/lib/unit-files";
   };
 
   host =
