@@ -13,9 +13,14 @@
 # no two rooms share an alias, and a room's members are the owner and its
 # own team.
 #
-# What is declared here is not yet live: the rooms are created on the
-# homeserver by a tool still to be written, and no team answers until the
-# runner listens in its room.
+#   packages.matrix-rooms  the tool that makes them true on the homeserver
+#                          (./_rooms, Rust): `matrix-rooms look|apply BASE
+#                          VAULT`. It does only what is missing, removes
+#                          nothing, and reports anyone in a room who is not
+#                          declared. The rooms are compiled in. The host
+#                          runs it after the logins exist (../hetzner/_chat.nix).
+#
+# No team answers yet: that waits on the runner listening in its room.
 { lib, config, ... }:
 let
   inherit (lib) mkOption types;
@@ -89,8 +94,19 @@ in
     };
 
     perSystem =
-      { config, ... }:
+      { config, pkgs, ... }:
       {
+        packages.matrix-rooms = pkgs.rustPlatform.buildRustPackage {
+          pname = "matrix-rooms";
+          version = "0.1.0";
+          src = ./_rooms;
+          cargoLock.lockFile = ./_rooms/Cargo.lock;
+          MATRIX_ROOMS = pkgs.writeText "matrix-rooms.json" (q {
+            inherit (cfg.chat) owner server;
+            rooms = lib.mapAttrsToList (team: r: r // { inherit team; }) cfg.rooms;
+          });
+          meta.mainProgram = "matrix-rooms";
+        };
         checks.agents-rooms = config.kagamizo.leanCheck {
           name = "agents-rooms";
           source = ./_lean/Rooms.lean;

@@ -13,6 +13,10 @@
 #                  it as a Proton Pass login item (Kagamizo-Host-State,
 #                  which the host may write). The owner signs in to Element
 #                  with Proton Pass; nothing is typed by hand.
+#   matrix-rooms   after the seed: every declared room exists, with its
+#                  topic, holding the owner and its team
+#                  (modules/agents/_rooms). It fails, changing nothing
+#                  more, if a room holds someone not declared.
 {
   zone,
   elementPort,
@@ -20,6 +24,7 @@
   owner, # the owner's Matrix localpart, from their address
   teams, # every team: each its own login (modules/agents/rooms.nix)
   passCli,
+  roomsTool, # matrix-rooms, with the declared rooms compiled in
   tokenFile,
   stateVault,
 }:
@@ -158,6 +163,29 @@ in
           echo "matrix-seed: registered $user, login stored as ${stateVault}/$title"
         done
       '';
+    };
+
+    matrix-rooms = {
+      description = "The teams' rooms, as declared";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "matrix-seed.service" ];
+      requires = [ "matrix-seed.service" ];
+      path = [
+        passCli
+        roomsTool
+      ];
+      environment = {
+        PROTON_PASS_KEY_PROVIDER = "fs";
+        HOME = "/root";
+        PROTON_PASS_AGENT_REASON = "jingzo-host: the teams' Matrix rooms";
+      };
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        Restart = "on-failure";
+        RestartSec = 60;
+        ExecStart = "${roomsTool}/bin/matrix-rooms apply http://127.0.0.1:${toString matrixPort} ${stateVault}";
+      };
     };
   };
 }

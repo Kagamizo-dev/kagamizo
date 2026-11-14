@@ -27,7 +27,7 @@ Then work the plan: in each track, the lowest unblocked item first; items waitin
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is exactly what modules/claude/_environment.nix declares (`nix build .#claude-allowed-domains`): never use or ask for a host outside it; a host a task needs is declared there with its reason and listed at the session's end. End the session with the full allowlist and the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 
-This session starts where HANDOFF.md's "2026-11-10 to 11-14: one surface at os.jingzo.org" ends: first the tool that creates the declared rooms on the homeserver, then the bridge from a room to a unit of work; every control added to a page must pass checks.shell-e2e.
+This session starts where HANDOFF.md's "2026-11-10 to 11-14: one surface at os.jingzo.org" ends: first find out why the host's state vault holds no matrix-* login (matrix-seed), then the bridge from a room to a unit of work; every control added to a page must pass checks.shell-e2e.
 ```
 
 ## 2026-11-10 to 11-14: one surface at os.jingzo.org (read this first)
@@ -64,7 +64,11 @@ then an Android spike.
 
 Next, in order:
 
-1. A tool that creates the declared rooms on the homeserver.
+1. Done, not yet on the host: `matrix-rooms` (`modules/agents/_rooms`)
+   and the host's `matrix-rooms` service. Unverified against the real
+   homeserver. Seen from a session on 2026-11-14, Kagamizo-Host-State held
+   no `matrix-*` login at all, so `matrix-seed` may never have stored
+   one; check the host's console before trusting chat.
 2. The bridge: a room message becomes a unit of work, its reply and
    artifacts come back to the room.
 3. The runner fixed and switched on (waits on the owner: OpenRouter

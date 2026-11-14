@@ -65,6 +65,7 @@ let
       inherit (top.agents.chat) owner;
       teams = lib.attrNames top.agents.rooms;
       passCli = config.packages.pass-cli;
+      roomsTool = config.packages.matrix-rooms;
       tokenFile = "/var/lib/kagamizo/host-token";
       stateVault = top.proton.infraVaults.hostState;
     }
