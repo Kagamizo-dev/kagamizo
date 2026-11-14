@@ -63,6 +63,7 @@ fn main() -> Result<()> {
         Some("link") => link(&Query::parse(&args[1..])?),
         Some("senders") => senders(&args[1..]),
         Some("read") => read_card(&args[1..]),
+        Some("draft") => draft_reply(&args[1..]),
         Some("recurring") => recurring(&args[1..]),
         Some("send") => send(&args[1..]),
         Some("notices") => notices(&args[1..]),
@@ -779,6 +780,57 @@ fn read_card(args: &[String]) -> Result<()> {
         writeln!(file, "{l}")?;
     }
     println!("{} message(s) admitted by the card `{name}`", lines.len());
+    Ok(())
+}
+
+/// A reply a card's holder prepares, added to a batch file. It touches no
+/// account: the batch is sent only once the owner approves its digest.
+fn draft_reply(args: &[String]) -> Result<()> {
+    use sha2::Digest;
+    let usage = "usage: mailbox draft --card CARD --mail FILE --to ADDR --subject TEXT --body-file FILE --batch FILE";
+    let mut v: std::collections::HashMap<&str, String> = Default::default();
+    let mut it = args.iter();
+    while let Some(flag) = it.next() {
+        let val = it.next().context(usage)?.clone();
+        match flag.as_str() {
+            "--card" => v.insert("card", val),
+            "--mail" => v.insert("mail", val),
+            "--to" => v.insert("to", val),
+            "--subject" => v.insert("subject", val),
+            "--body-file" => v.insert("body", val),
+            "--batch" => v.insert("batch", val),
+            _ => bail!(usage),
+        };
+    }
+    let get = |k: &str| v.get(k).cloned().context(usage);
+    let name = get("card")?;
+    let cards = mailbox::cards::declared();
+    let Some(card) = cards.get(&name) else {
+        bail!("no card `{name}`; declared: {}", cards.keys().cloned().collect::<Vec<_>>().join(", "));
+    };
+    let principal = std::env::var("KAGAMIZO_PRINCIPAL").ok();
+    mailbox::cards::may_ask(card, principal.as_deref()).map_err(anyhow::Error::msg)?;
+    let today = mailbox::cards::day(SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs());
+    if today > card.until {
+        bail!("the card `{name}` expired on {}", card.until);
+    }
+    let mail = std::fs::read_to_string(get("mail")?).context("--mail FILE")?;
+    let body = std::fs::read_to_string(get("body")?).context("--body-file FILE")?;
+    let entry = mailbox::cards::draft(card, &mail, &get("to")?, &get("subject")?, &body).map_err(anyhow::Error::msg)?;
+    let path = PathBuf::from(get("batch")?);
+    let mut batch: Vec<serde_json::Value> = match std::fs::read(&path) {
+        Ok(raw) => serde_json::from_slice(&raw).context("the batch: a JSON array of {from, to, subject, body}")?,
+        Err(_) => Vec::new(),
+    };
+    batch.push(entry);
+    let json = serde_json::to_vec_pretty(&batch)?;
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        let mut f = std::fs::OpenOptions::new().write(true).create(true).truncate(true).mode(0o600).open(&path)?;
+        f.write_all(&json)?;
+    }
+    let digest: String = sha2::Sha256::digest(&json).iter().map(|b| format!("{b:02x}")).collect();
+    println!("{{\"batch\":\"{digest}\",\"drafts\":{}}}", batch.len());
     Ok(())
 }
 

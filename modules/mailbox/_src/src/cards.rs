@@ -121,6 +121,36 @@ pub fn view(card: &Card, raw: &[u8]) -> Option<serde_json::Value> {
     Some(out)
 }
 
+/// The most of a reply a card drafts.
+const DRAFT_LIMIT: usize = 10_000;
+
+/// A reply a card's holder prepares: from the card's address, to someone
+/// who wrote to it (by the mail the card's read gave, one JSON object a
+/// line), as one entry of a batch. Nothing is sent: a batch leaves only
+/// when the owner has approved it by its digest.
+pub fn draft(card: &Card, mail: &str, to: &str, subject: &str, body: &str) -> Result<serde_json::Value, String> {
+    if !card.may.contains(&May::Draft) {
+        return Err("the card does not let its holder draft".into());
+    }
+    let to = to.trim().to_lowercase();
+    let wrote = mail
+        .lines()
+        .filter_map(|l| serde_json::from_str::<serde_json::Value>(l).ok())
+        .filter_map(|v| v["from"].as_str().map(addresses))
+        .flatten()
+        .any(|a| a == to);
+    if !wrote {
+        return Err(format!("{to} has not written to {}: a card replies, it does not write first", card.address));
+    }
+    if subject.trim().is_empty() || subject.contains(['\r', '\n']) {
+        return Err("the subject is empty or runs over a line".into());
+    }
+    if body.trim().is_empty() || body.chars().count() > DRAFT_LIMIT {
+        return Err(format!("the body is empty or over {DRAFT_LIMIT} characters"));
+    }
+    Ok(serde_json::json!({ "from": card.address, "to": to, "subject": subject.trim(), "body": body }))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -184,6 +214,19 @@ mod tests {
         assert!(headers.get("body").is_none());
         let bodies = view(&card(&[], &[May::Headers, May::Bodies]), &m).unwrap();
         assert!(bodies["body"].as_str().unwrap().contains("You paid 20 dollars."));
+    }
+
+    #[test]
+    fn a_card_drafts_only_a_reply_and_only_if_it_may() {
+        let mail = "{\"from\":\"Shop <billing@shop.com>\",\"date\":\"\",\"subject\":\"Your receipt\"}\n";
+        let may = card(&[], &[May::Headers, May::Draft]);
+        let d = draft(&may, mail, "Billing@Shop.com", "Re: Your receipt", "Please send the invoice as a PDF.").unwrap();
+        assert_eq!(d["from"], "receipts@jingzo.org");
+        assert_eq!(d["to"], "billing@shop.com");
+        assert!(draft(&may, mail, "stranger@else.org", "Hello", "x").unwrap_err().contains("has not written"));
+        assert!(draft(&may, mail, "billing@shop.com", "Two\nlines", "x").is_err());
+        assert!(draft(&may, mail, "billing@shop.com", "Re", " ").is_err());
+        assert!(draft(&card(&[], &[May::Headers]), mail, "billing@shop.com", "Re", "x").unwrap_err().contains("does not let"));
     }
 
     #[test]
