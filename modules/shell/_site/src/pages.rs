@@ -9,6 +9,7 @@
 //!   m/<module>/index.html   a module's page: what it shows, its paper, and
 //!                           what its Lean proves
 //!   shell.css               the one stylesheet (./style.rs)
+use crate::a11y;
 use crate::html::{document, el, Node};
 use crate::model::{App, Declared, Kind, Page, Shell};
 use crate::style;
@@ -32,7 +33,7 @@ impl Here {
     }
 }
 
-fn frame(here: Here, title: &str, body: Vec<Node>) -> String {
+fn frame(here: Here, title: &str, body: Vec<Node>) -> Node {
     let root = here.root();
     let link = |to: Here, href: String, label: &str| {
         let a = el("a").attr("href", href).text(label);
@@ -65,7 +66,7 @@ fn frame(here: Here, title: &str, body: Vec<Node>) -> String {
             .child(el("main").attr("id", "main").children(body))
             .child(el("footer").text("Generated from the repository's declarations. Nothing on this page is typed by hand.")),
     );
-    document(&page)
+    page
 }
 
 fn count(n: usize, one: &str, many: &str) -> Node {
@@ -109,19 +110,25 @@ fn title_case(s: &str) -> String {
     }
 }
 
-fn home(shell: &Shell) -> String {
+fn home(shell: &Shell) -> Node {
     let mut body = vec![
         el("h1").text("Everything, on its shelf"),
         el("p").class("lede").text("Every app the repository declares for this screen, then the base it stands on. A card opens the module's own page."),
     ];
+    let mut shelves = Vec::new();
     for category in &shell.declared.categories {
         let apps: Vec<&App> = shell.apps.iter().map(|(_, a)| a).filter(|a| &a.category == category).collect();
         if apps.is_empty() {
             continue;
         }
-        body.push(el("h2").attr("id", format!("shelf-{category}")).text(title_case(category)).child(count(apps.len(), "app", "apps")));
-        body.push(el("ul").class("shelf").attr("aria-labelledby", format!("shelf-{category}")).children(apps.into_iter().map(app_card)));
+        shelves.push(
+            el("section")
+                .attr("aria-labelledby", format!("shelf-{category}"))
+                .child(el("h2").attr("id", format!("shelf-{category}")).text(title_case(category)).child(count(apps.len(), "app", "apps")))
+                .child(el("ul").class("shelf").children(apps.into_iter().map(app_card))),
+        );
     }
+    body.push(el("div").class("shelves").children(shelves));
     body.push(el("h2").attr("id", "shelf-base").text("The base").child(count(shell.declared.sections.len(), "section", "sections")));
     body.push(el("ul").class("shelf").attr("aria-labelledby", "shelf-base").children(shell.declared.sections.iter().map(|s| {
         card(
@@ -147,7 +154,7 @@ fn rows<'a>(entries: impl IntoIterator<Item = (&'a str, &'a str)>) -> Node {
     }))
 }
 
-fn settings(declared: &Declared) -> String {
+fn settings(declared: &Declared) -> Node {
     let mut body = vec![
         el("h1").text("Settings"),
         el("p").class("lede").text("The base: every target, device, account and team, read from the repository."),
@@ -167,7 +174,7 @@ fn chips(class: &str, items: &[String]) -> Node {
     el("ul").class(class).children(items.iter().map(|i| el("li").text(i.clone())))
 }
 
-fn module(name: &str, app: Option<&App>, page: &Page) -> String {
+fn module(name: &str, app: Option<&App>, page: &Page) -> Node {
     let shown = app.map(|a| a.name.clone()).unwrap_or_else(|| title_case(name));
     let mut main = Vec::new();
     for (i, v) in page.view.iter().enumerate() {
@@ -179,11 +186,11 @@ fn module(name: &str, app: Option<&App>, page: &Page) -> String {
         main.push(el("h2").text("What it shows"));
         main.push(el("p").class("none").text("This module generates no rows for its page yet."));
     }
-    let mut side = vec![el("h2").text("Paper")];
+    let mut side = vec![el("h2").attr("id", "paper").text("Paper")];
     if page.title.is_empty() {
         side.push(el("p").class("none").text("None yet: the module's paper is on the backlog."));
     } else {
-        side.push(el("section").class("panel").child(rows([(page.title.as_str(), page.summary.as_str())])));
+        side.push(el("section").class("panel").attr("aria-labelledby", "paper").child(rows([(page.title.as_str(), page.summary.as_str())])));
     }
     for (heading, class, items) in [
         ("What its Lean proves", "chips proved", &page.theorems),
@@ -205,18 +212,57 @@ fn module(name: &str, app: Option<&App>, page: &Page) -> String {
     frame(Here::Module, &format!("{shown} · Kagamizo"), body)
 }
 
-/// Every file of the site, by its path.
-pub fn site(declared: Declared, target: &str) -> BTreeMap<String, String> {
+/// Every page of the site as a document, by its path.
+pub fn documents(declared: Declared, target: &str) -> BTreeMap<String, Node> {
     let shell = Shell::new(declared, target);
-    let mut files = BTreeMap::new();
-    files.insert("index.html".to_string(), home(&shell));
-    files.insert("settings/index.html".to_string(), settings(&shell.declared));
+    let mut pages = BTreeMap::new();
+    pages.insert("index.html".to_string(), home(&shell));
+    pages.insert("settings/index.html".to_string(), settings(&shell.declared));
     for (name, page) in &shell.declared.pages {
         let app = shell.apps.iter().map(|(_, a)| a).find(|a| &a.module == name && a.kind == Kind::Module);
-        files.insert(format!("m/{name}/index.html"), module(name, app, page));
+        pages.insert(format!("m/{name}/index.html"), module(name, app, page));
     }
+    pages
+}
+
+/// Every accessibility rule the site breaks, page by page, and the palette's.
+pub fn audit(pages: &BTreeMap<String, Node>) -> Vec<String> {
+    let mut found: Vec<String> = pages.iter().flat_map(|(path, page)| a11y::problems(page).into_iter().map(move |p| format!("{path}: {p}"))).collect();
+    found.extend(a11y::low_contrast().into_iter().map(|p| format!("shell.css: {p}")));
+    found
+}
+
+/// Every file of the site, by its path: refused whole if a page breaks an
+/// accessibility rule, so none is ever written.
+pub fn site(declared: Declared, target: &str) -> Result<BTreeMap<String, String>, Vec<String>> {
+    let pages = documents(declared, target);
+    let found = audit(&pages);
+    if !found.is_empty() {
+        return Err(found);
+    }
+    let mut files: BTreeMap<String, String> = pages.iter().map(|(path, page)| (path.clone(), document(page))).collect();
     files.insert("shell.css".to_string(), style::render());
-    files
+    Ok(files)
+}
+
+/// A page as a screen reader meets it: its landmarks, headings and links in
+/// order. The tests hold each kind of page to its outline.
+pub fn outline(page: &Node) -> Vec<String> {
+    a11y::elements(page)
+        .into_iter()
+        .filter_map(|n| {
+            let Node::Element { name, attrs, .. } = n else { return None };
+            let get = |k: &str| attrs.iter().find(|(key, _)| *key == k).map(|(_, v)| v.as_str());
+            match *name {
+                "title" => Some(format!("title: {}", a11y::spoken(n))),
+                "main" | "header" | "footer" | "aside" => Some(format!("[{name}]")),
+                "nav" => Some(format!("[nav: {}]", get("aria-label").unwrap_or(""))),
+                "h1" | "h2" | "h3" => Some(format!("{name}: {}", a11y::spoken(n))),
+                "a" => Some(format!("link: {} -> {}", a11y::spoken(n), get("href").unwrap_or(""))),
+                _ => None,
+            }
+        })
+        .collect()
 }
 
 #[cfg(test)]
@@ -270,14 +316,14 @@ mod tests {
 
     #[test]
     fn every_screen_is_a_file() {
-        let files = site(declared(), "web");
+        let files = site(declared(), "web").unwrap();
         let paths: Vec<&str> = files.keys().map(String::as_str).collect();
         assert_eq!(paths, ["index.html", "m/hetzner/index.html", "m/logistics/index.html", "settings/index.html", "shell.css"]);
     }
 
     #[test]
     fn every_internal_link_lands_on_a_generated_file() {
-        let files = site(declared(), "web");
+        let files = site(declared(), "web").unwrap();
         for (path, html) in files.iter().filter(|(p, _)| p.ends_with(".html")) {
             for target in internal_links(path, html) {
                 assert!(files.contains_key(&target), "{path} links to {target}, which is not generated");
@@ -287,7 +333,7 @@ mod tests {
 
     #[test]
     fn every_page_has_one_heading_a_language_and_the_stylesheet() {
-        let files = site(declared(), "web");
+        let files = site(declared(), "web").unwrap();
         for (path, html) in files.iter().filter(|(p, _)| p.ends_with(".html")) {
             assert_eq!(html.matches("<h1>").count(), 1, "{path}");
             assert!(html.starts_with("<!doctype html><html lang=\"en\">"), "{path}");
@@ -298,7 +344,7 @@ mod tests {
 
     #[test]
     fn the_catalog_shows_this_target_s_apps_only_each_on_its_shelf() {
-        let home = &site(declared(), "web")["index.html"];
+        let home = &site(declared(), "web").unwrap()["index.html"];
         assert!(home.contains(">Logistics<") && home.contains(">Agents<") && home.contains(">Settings<"));
         assert!(!home.contains(">Terminal<"), "a native app is not on the web target");
         assert!(home.find("id=\"shelf-system\"").unwrap() < home.find("id=\"shelf-work\"").unwrap());
@@ -309,14 +355,14 @@ mod tests {
 
     #[test]
     fn a_value_is_never_read_as_markup() {
-        let home = &site(declared(), "web")["index.html"];
+        let home = &site(declared(), "web").unwrap()["index.html"];
         assert!(home.contains("From a &lt;spec&gt; to a thing &amp; back"));
         assert!(!home.contains("<spec>"));
     }
 
     #[test]
     fn a_module_s_page_shows_its_rows_its_paper_and_what_is_proved() {
-        let files = site(declared(), "web");
+        let files = site(declared(), "web").unwrap();
         let page = &files["m/logistics/index.html"];
         for wanted in ["No step waits", "within 5 d", "Reliability before price", "choose_sound", "chips proved", "modules/logistics"] {
             assert!(page.contains(wanted), "{wanted}");
@@ -327,7 +373,75 @@ mod tests {
     }
 
     #[test]
+    fn every_page_of_the_site_passes_the_accessibility_rules() {
+        assert_eq!(audit(&documents(declared(), "web")), Vec::<String>::new());
+    }
+
+    #[test]
+    fn the_catalog_reads_in_this_order() {
+        let pages = documents(declared(), "web");
+        assert_eq!(
+            outline(&pages["index.html"]),
+            [
+                "title: Kagamizo",
+                "link: Skip to the content -> #main",
+                "[header]",
+                "link: Kagamizo -> index.html",
+                "[nav: Sections]",
+                "link: Catalog -> index.html",
+                "link: Settings -> settings/index.html",
+                "[main]",
+                "h1: Everything, on its shelf",
+                "h2: System 1 app",
+                "link: base settings Settings The base -> settings/index.html",
+                "h2: Work 2 apps",
+                "link: opens agents.example.org Agents Chat -> https://agents.example.org/",
+                "link: page modules/logistics Logistics From a <spec> to a thing & back -> m/logistics/index.html",
+                "h2: The base 2 sections",
+                "link: settings 1 rows Accounts proton -> settings/index.html#accounts",
+                "link: settings 0 rows Devices -> settings/index.html#devices",
+                "[footer]",
+            ]
+        );
+    }
+
+    #[test]
+    fn a_module_s_page_reads_in_this_order() {
+        let pages = documents(declared(), "web");
+        assert_eq!(
+            outline(&pages["m/logistics/index.html"]),
+            [
+                "title: Logistics · Kagamizo",
+                "link: Skip to the content -> #main",
+                "[header]",
+                "link: Kagamizo -> ../../index.html",
+                "[nav: Sections]",
+                "link: Catalog -> ../../index.html",
+                "link: Settings -> ../../settings/index.html",
+                "[main]",
+                "h1: Logistics",
+                "h2: No step waits 1 row",
+                "[aside]",
+                "h2: Paper",
+                "h2: What its Lean proves",
+                "h2: Checks",
+                "h2: Packages",
+                "h2: Teams",
+                "[footer]",
+            ]
+        );
+    }
+
+    #[test]
+    fn the_settings_read_in_this_order() {
+        let pages = documents(declared(), "web");
+        let lines = outline(&pages["settings/index.html"]);
+        assert_eq!(&lines[8..], ["h1: Settings", "h2: Accounts 1 row", "h2: Devices 0 rows", "[footer]"]);
+        assert_eq!(lines[6], "link: Settings -> ../settings/index.html");
+    }
+
+    #[test]
     fn the_same_declarations_give_the_same_bytes() {
-        assert_eq!(site(declared(), "web"), site(declared(), "web"));
+        assert_eq!(site(declared(), "web").unwrap(), site(declared(), "web").unwrap());
     }
 }

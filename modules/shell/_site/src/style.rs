@@ -29,6 +29,42 @@ pub fn shelf_colour(category: &str) -> &'static str {
     }
 }
 
+/// Every category and section a shelf is coloured for.
+pub const SHELVES: &[&str] = &[
+    "system", "identity", "governance", "work", "build", "money", "accounts", "research", "infrastructure", "repository", "chat", "media", "play", "other",
+];
+
+/// A text colour, at its opacity, on the ground it is read against: the
+/// pairs ../a11y.rs holds to WCAG's contrast.
+pub struct Pair {
+    pub what: &'static str,
+    pub text: &'static str,
+    pub on: &'static str,
+    pub opacity: f64,
+}
+
+pub fn pairs() -> Vec<Pair> {
+    let pair = |what, text, on, opacity| Pair { what, text, on, opacity };
+    let mut all = vec![
+        pair("text on the ground", Palette::INK, Palette::GROUND, 1.0),
+        pair("muted text on the ground", Palette::MUTED, Palette::GROUND, 1.0),
+        pair("headings on the ground", Palette::ACCENT, Palette::GROUND, 1.0),
+        pair("text on a panel", Palette::INK, Palette::PANEL, 1.0),
+        pair("muted text on a panel", Palette::MUTED, Palette::PANEL, 1.0),
+        pair("a chip", Palette::INK, Palette::CARD, 1.0),
+        pair("a proved chip", Palette::GOOD, Palette::CARD, 1.0),
+        pair("the skip link", Palette::GROUND, Palette::ACCENT, 1.0),
+    ];
+    for shelf in SHELVES {
+        all.push(pair("a card's name on its shelf colour", Palette::INK, shelf_colour(shelf), 1.0));
+        all.push(pair("a card's small print on its shelf colour", Palette::INK, shelf_colour(shelf), CARD_PRINT_OPACITY));
+    }
+    all
+}
+
+/// How strongly a card's small print shows.
+pub const CARD_PRINT_OPACITY: f64 = 0.9;
+
 pub struct Rule {
     pub selector: &'static str,
     pub declarations: Vec<(&'static str, String)>,
@@ -66,14 +102,15 @@ pub fn sheet() -> (Vec<Rule>, Vec<Rule>) {
         rule(".lede", &[("color", Palette::MUTED), ("max-width", "70ch"), ("margin", "0")]),
         rule(".count", &[("font-family", MONO), ("font-size", "12px"), ("color", Palette::MUTED), ("margin-left", "8px")]),
         // A shelf scrolls sideways on a phone and wraps into a grid when wide.
-        rule(".shelf", &[("display", "grid"), ("grid-auto-flow", "column"), ("grid-auto-columns", "minmax(240px, 78%)"), ("gap", "16px"), ("overflow-x", "auto"), ("padding", "4px 4px 14px"), ("margin", "0 -4px"), ("scroll-snap-type", "x proximity"), ("list-style", "none")]),
+        rule(".shelves", &[("display", "flex"), ("flex-direction", "column"), ("gap", "8px")]),
+        rule(".shelf", &[("display", "grid"), ("grid-auto-flow", "column"), ("grid-auto-columns", "minmax(240px, 78%)"), ("gap", "16px"), ("overflow-x", "auto"), ("padding", "4px 8px 14px 4px"), ("margin", "0 -4px"), ("scroll-snap-type", "x proximity"), ("list-style", "none")]),
         rule(".shelf > li", &[("scroll-snap-align", "start"), ("display", "flex")]),
         rule(
             ".card",
             &[("display", "flex"), ("flex-direction", "column"), ("justify-content", "space-between"), ("gap", "14px"), ("width", "100%"), ("aspect-ratio", "1.586"), ("padding", "14px 16px"), ("border", &format!("3px solid {}", Palette::SHADOW)), ("box-shadow", &format!("5px 5px 0 {}", Palette::SHADOW)), ("background", "var(--shelf, #3a3a3a)")],
         ),
         rule("a.card:hover", &[("transform", "translate(-1px, -1px)"), ("box-shadow", &format!("7px 7px 0 {}", Palette::SHADOW))]),
-        rule(".card .kind", &[("display", "flex"), ("justify-content", "space-between"), ("gap", "8px"), ("font-family", MONO), ("font-size", "11px"), ("text-transform", "uppercase"), ("letter-spacing", "1px"), ("color", Palette::INK), ("opacity", "0.85")]),
+        rule(".card .kind", &[("display", "flex"), ("justify-content", "space-between"), ("gap", "8px"), ("font-family", MONO), ("font-size", "11px"), ("text-transform", "uppercase"), ("letter-spacing", "1px"), ("color", Palette::INK), ("opacity", "0.9")]),
         rule(".card .name", &[("font-size", "20px"), ("font-weight", "700"), ("line-height", "1.15")]),
         rule(".card .what", &[("font-size", "13px"), ("color", Palette::INK), ("opacity", "0.9"), ("display", "-webkit-box"), ("-webkit-line-clamp", "3"), ("-webkit-box-orient", "vertical"), ("overflow", "hidden")]),
         rule(".panel", &[("background", Palette::PANEL), ("border", &format!("3px solid {}", Palette::SHADOW)), ("box-shadow", &format!("6px 6px 0 {}", Palette::SHADOW)), ("padding", "4px 16px"), ("margin", "0")]),
@@ -91,7 +128,10 @@ pub fn sheet() -> (Vec<Rule>, Vec<Rule>) {
     let wide = vec![
         rule("body", &[("padding", "32px 32px 80px")]),
         rule("h1", &[("font-size", "40px")]),
-        rule(".shelf", &[("grid-auto-flow", "row"), ("grid-template-columns", "repeat(auto-fill, minmax(240px, 1fr))"), ("overflow-x", "visible")]),
+        // Shelves sit side by side, each as wide as its cards, and wrap.
+        rule(".shelves", &[("flex-direction", "row"), ("flex-wrap", "wrap"), ("gap", "8px 28px"), ("align-items", "flex-start")]),
+        rule(".shelf", &[("display", "flex"), ("flex-wrap", "wrap"), ("overflow-x", "visible")]),
+        rule(".shelf > li", &[("width", "264px")]),
         rule(".split", &[("display", "grid"), ("grid-template-columns", "minmax(0, 2fr) minmax(0, 1fr)"), ("gap", "32px"), ("align-items", "start")]),
     ];
     (base, wide)

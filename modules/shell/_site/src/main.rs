@@ -8,6 +8,7 @@
 #[allow(dead_code)]
 mod model;
 
+mod a11y;
 mod html;
 mod pages;
 mod style;
@@ -21,7 +22,7 @@ fn run(args: &[String]) -> Result<usize, String> {
     };
     let text = std::fs::read_to_string(declared).map_err(|e| format!("{declared}: {e}"))?;
     let declared: model::Declared = serde_json::from_str(&text).map_err(|e| format!("the declarations: {e}"))?;
-    let files = pages::site(declared, target);
+    let files = pages::site(declared, target).map_err(|found| format!("{} accessibility problem(s), so nothing is written:\n  {}", found.len(), found.join("\n  ")))?;
     for (path, content) in &files {
         let to = Path::new(out).join(path);
         if let Some(dir) = to.parent() {
