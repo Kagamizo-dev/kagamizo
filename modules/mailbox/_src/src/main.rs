@@ -62,6 +62,8 @@ fn main() -> Result<()> {
         Some("login") => login(),
         Some("link") => link(&Query::parse(&args[1..])?),
         Some("senders") => senders(&args[1..]),
+        Some("read") => read_card(&args[1..]),
+        Some("draft") => draft_reply(&args[1..]),
         Some("recurring") => recurring(&args[1..]),
         Some("send") => send(&args[1..]),
         Some("notices") => notices(&args[1..]),
@@ -710,6 +712,125 @@ fn senders(args: &[String]) -> Result<()> {
     for l in lines {
         println!("{l}");
     }
+    Ok(())
+}
+
+/// The mail a card admits, to a private file as one JSON object a line;
+/// only the count is printed. Asked by the card's holder or by the owner.
+fn read_card(args: &[String]) -> Result<()> {
+    let usage = "usage: mailbox read --card CARD --out FILE [--since DAYS] [--wait MIN]";
+    let (mut name, mut out, mut since_days, mut wait_min) = (None, None, 30u64, 45u64);
+    let mut it = args.iter();
+    while let Some(flag) = it.next() {
+        let v = it.next().context(usage)?;
+        match flag.as_str() {
+            "--card" => name = Some(v.clone()),
+            "--out" => out = Some(PathBuf::from(v)),
+            "--since" => since_days = v.parse().context("--since DAYS")?,
+            "--wait" => wait_min = v.parse().context("--wait MIN")?,
+            _ => bail!("{usage}"),
+        }
+    }
+    let (name, out) = (name.context(usage)?, out.context(usage)?);
+    let cards = mailbox::cards::declared();
+    let Some(card) = cards.get(&name) else {
+        bail!("no card `{name}`; declared: {}", cards.keys().cloned().collect::<Vec<_>>().join(", "));
+    };
+    let principal = std::env::var("KAGAMIZO_PRINCIPAL").ok();
+    mailbox::cards::may_ask(card, principal.as_deref()).map_err(anyhow::Error::msg)?;
+    let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+    let today = mailbox::cards::day(now);
+    if today > card.until {
+        bail!("the card `{name}` expired on {}", card.until);
+    }
+    let bodies = card.may.contains(&mailbox::cards::May::Bodies);
+    let lines = with_imap(wait_min, |port, user, pass, pem| {
+        let tls = native_tls::TlsConnector::builder()
+            .add_root_certificate(native_tls::Certificate::from_pem(pem)?)
+            .disable_built_in_roots(true)
+            .danger_accept_invalid_hostnames(true)
+            .build()?;
+        let client = imap::connect_starttls(("127.0.0.1", port), "127.0.0.1", &tls)?;
+        let mut session = client.login(user, pass).map_err(|e| e.0).context("Bridge's IMAP login")?;
+        session.select("All Mail")?;
+        // The address is one the declarations typed: no quote or space.
+        let query = format!("SINCE {} TO \"{}\"", imap_date(now.saturating_sub(since_days * 86400)), card.address);
+        let mut uids: Vec<u32> = session.uid_search(query)?.into_iter().collect();
+        uids.sort_unstable();
+        let what = if bodies { "BODY.PEEK[]" } else { "BODY.PEEK[HEADER.FIELDS (FROM TO CC DELIVERED-TO X-ORIGINAL-TO DATE SUBJECT)]" };
+        let mut lines = Vec::new();
+        for chunk in uids.chunks(200) {
+            let set = chunk.iter().map(u32::to_string).collect::<Vec<_>>().join(",");
+            for fetch in session.uid_fetch(set, what)?.iter() {
+                let Some(raw) = fetch.body().or(fetch.header()) else { continue };
+                // What the card does not admit is never written out.
+                if mailbox::cards::admits(card, raw, &today).is_ok() {
+                    if let Some(v) = mailbox::cards::view(card, raw) {
+                        lines.push(v.to_string());
+                    }
+                }
+            }
+        }
+        session.logout().ok();
+        Ok(lines)
+    })?;
+    use std::os::unix::fs::OpenOptionsExt;
+    let mut file = std::fs::OpenOptions::new().write(true).create(true).truncate(true).mode(0o600).open(&out).with_context(|| out.display().to_string())?;
+    for l in &lines {
+        writeln!(file, "{l}")?;
+    }
+    println!("{} message(s) admitted by the card `{name}`", lines.len());
+    Ok(())
+}
+
+/// A reply a card's holder prepares, added to a batch file. It touches no
+/// account: the batch is sent only once the owner approves its digest.
+fn draft_reply(args: &[String]) -> Result<()> {
+    use sha2::Digest;
+    let usage = "usage: mailbox draft --card CARD --mail FILE --to ADDR --subject TEXT --body-file FILE --batch FILE";
+    let mut v: std::collections::HashMap<&str, String> = Default::default();
+    let mut it = args.iter();
+    while let Some(flag) = it.next() {
+        let val = it.next().context(usage)?.clone();
+        match flag.as_str() {
+            "--card" => v.insert("card", val),
+            "--mail" => v.insert("mail", val),
+            "--to" => v.insert("to", val),
+            "--subject" => v.insert("subject", val),
+            "--body-file" => v.insert("body", val),
+            "--batch" => v.insert("batch", val),
+            _ => bail!(usage),
+        };
+    }
+    let get = |k: &str| v.get(k).cloned().context(usage);
+    let name = get("card")?;
+    let cards = mailbox::cards::declared();
+    let Some(card) = cards.get(&name) else {
+        bail!("no card `{name}`; declared: {}", cards.keys().cloned().collect::<Vec<_>>().join(", "));
+    };
+    let principal = std::env::var("KAGAMIZO_PRINCIPAL").ok();
+    mailbox::cards::may_ask(card, principal.as_deref()).map_err(anyhow::Error::msg)?;
+    let today = mailbox::cards::day(SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs());
+    if today > card.until {
+        bail!("the card `{name}` expired on {}", card.until);
+    }
+    let mail = std::fs::read_to_string(get("mail")?).context("--mail FILE")?;
+    let body = std::fs::read_to_string(get("body")?).context("--body-file FILE")?;
+    let entry = mailbox::cards::draft(card, &mail, &get("to")?, &get("subject")?, &body).map_err(anyhow::Error::msg)?;
+    let path = PathBuf::from(get("batch")?);
+    let mut batch: Vec<serde_json::Value> = match std::fs::read(&path) {
+        Ok(raw) => serde_json::from_slice(&raw).context("the batch: a JSON array of {from, to, subject, body}")?,
+        Err(_) => Vec::new(),
+    };
+    batch.push(entry);
+    let json = serde_json::to_vec_pretty(&batch)?;
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        let mut f = std::fs::OpenOptions::new().write(true).create(true).truncate(true).mode(0o600).open(&path)?;
+        f.write_all(&json)?;
+    }
+    let digest: String = sha2::Sha256::digest(&json).iter().map(|b| format!("{b:02x}")).collect();
+    println!("{{\"batch\":\"{digest}\",\"drafts\":{}}}", batch.len());
     Ok(())
 }
 

@@ -10,6 +10,12 @@
 #   nix run .#mailbox -- recurring --out FILE [--since DAYS]
 #       the subscription tally: every recurring charge in the mail, to a
 #       private file; only counts are printed
+#   nix run .#mailbox -- read --card CARD --out FILE [--since DAYS]
+#       the mail a mailbox card admits (./cards.nix), to a private file;
+#       only the count is printed
+#   nix run .#mailbox -- draft --card CARD --mail FILE --to ADDR ...
+#       a reply from the card's address to someone who wrote to it, added
+#       to a batch file; sent only once the owner approves the batch
 #   nix run .#mailbox -- send --batch FILE --log FILE
 #       a batch of notices the owner approved (mailbox.approvedBatches holds
 #       its SHA-256), sent from their address through Bridge's SMTP
@@ -179,6 +185,20 @@ in
           version = "0.1.0";
           src = ./_src;
           cargoLock.lockFile = ./_src/Cargo.lock;
+          # The mailbox cards the reader holds mail to (./cards.nix).
+          MAILBOX_CARDS = pkgs.writeText "mailbox-cards.json" (
+            builtins.toJSON (
+              lib.mapAttrs (_: c: {
+                inherit (c)
+                  address
+                  from
+                  may
+                  holder
+                  until
+                  ;
+              }) top.mailbox.cards
+            )
+          );
           nativeBuildInputs = [ pkgs.pkg-config ];
           buildInputs = [ pkgs.openssl ];
           meta.mainProgram = "mailbox";
@@ -221,7 +241,7 @@ in
               pkgs.coreutils
             ];
             text = builtins.seq top.accounts.checked ''
-              usage="usage: mailbox login | senders [--since DAYS] | recurring --out FILE [--senders FILE] [--since DAYS] | notices --tally FILE --from ADDR --name NAME --out FILE | send --batch FILE --log FILE | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
+              usage="usage: mailbox login | senders [--since DAYS] | read --card CARD --out FILE [--since DAYS] | draft --card CARD --mail FILE --to ADDR --subject TEXT --body-file FILE --batch FILE | recurring --out FILE [--senders FILE] [--since DAYS] | notices --tally FILE --from ADDR --name NAME --out FILE | send --batch FILE --log FILE | link --account A [--since MIN] [--wait MIN]; accounts: $(jq -r 'keys | join(", ")' ${accountsJson})"
               governance-authorize proton:bridge proton
               args=()
               case "''${1:-}" in
@@ -245,6 +265,16 @@ in
                   governance-authorize proton:recurring proton
                   shift
                   args=(recurring "$@")
+                  ;;
+                read)
+                  governance-authorize proton:read-card proton
+                  shift
+                  args=(read "$@")
+                  ;;
+                # Drafting a reply touches no account either.
+                draft)
+                  shift
+                  args=(draft "$@")
                   ;;
                 link)
                   [ "''${2:-}" = --account ] || { echo "$usage" >&2; exit 2; }

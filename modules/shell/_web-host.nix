@@ -1,7 +1,13 @@
 # The shell's web target on jingzo-host (./shell.nix): its WebAssembly and
 # page as static files on the loopback, reached only through the agents
-# tunnel at os.<zone> behind Access (modules/hetzner/agents.nix).
-{ web, port }:
+# tunnel at os.<zone> behind Access (modules/hetzner/agents.nix). The same
+# declarations as plain pages (./_site) are served beside it under /next/
+# until they replace it.
+{
+  web,
+  site,
+  port,
+}:
 {
   services.nginx = {
     enable = true;
@@ -13,6 +19,7 @@
         }
       ];
       root = "${web}";
+      locations."/next/".alias = "${site}/";
     };
   };
 }

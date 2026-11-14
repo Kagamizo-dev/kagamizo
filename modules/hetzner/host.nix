@@ -62,7 +62,8 @@ let
       inherit (cfg.agents) zone;
       elementPort = svc.port;
       matrixPort = (lib.head svc.paths).port;
-      owner = lib.head (lib.splitString "@" (lib.head cfg.agents.viewers));
+      inherit (top.agents.chat) owner;
+      teams = lib.attrNames top.agents.rooms;
       passCli = config.packages.pass-cli;
       tokenFile = "/var/lib/kagamizo/host-token";
       stateVault = top.proton.infraVaults.hostState;
@@ -74,6 +75,7 @@ let
     { config, ... }:
     import ../shell/_web-host.nix {
       web = config.packages.kagamizo-shell-web;
+      site = config.packages.kagamizo-site-html;
       inherit
         (lib.findFirst (s: s.name == "os") (throw "hetzner.host.agents: no os service") cfg.agents.services)
         port

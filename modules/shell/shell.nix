@@ -13,6 +13,11 @@
 #
 #   packages.kagamizo-shell     the shell, with the declarations it shows
 #   packages.kagamizo-shell-web the same shell as WebAssembly, with its page
+#   packages.kagamizo-site      the same declarations as plain pages (./_site)
+#   packages.kagamizo-e2e       those pages used in a real browser (./_e2e)
+#   checks.shell-e2e            every page at three widths, by pointer and by
+#                               keyboard, against the browser's accessibility
+#                               tree
 #   checks.shell                Lean (./_lean/Shell.lean): every app ships on
 #                               a target, the web target holds only web apps,
 #                               every native app's command is in its image,
@@ -323,13 +328,64 @@ in
       default = {
         inherit (cfg) apps;
         inherit sections categories;
-        pages = lib.genAttrs appModules (
+        # A page for every module, so none is only a row or unseen: what
+        # its apps show, its paper, and where it sits in the library.
+        pages = lib.genAttrs modules (
           m:
           paperOf m
           // {
             view = lib.concatMap (a: a.view) (lib.filter (a: a.module == m) (lib.attrValues cfg.apps));
+            place =
+              if cfg.base ? ${m} then
+                "base, under ${titleOf cfg.base.${m}.section}"
+              else if cfg.services ? ${m} then
+                "a service inside ${cfg.apps.${cfg.services.${m}.app}.name}"
+              else
+                "an app";
+            why = cfg.base.${m}.why or "";
           }
         );
+        # The wallet: every card by what it is and where it is held, names
+        # only (a card's values stay in Proton Pass), and every payment card
+        # with its limit.
+        wallet = {
+          cards = lib.mapAttrsToList (id: c: {
+            inherit id;
+            inherit (c)
+              type
+              vault
+              title
+              mint
+              target
+              ;
+            account = if c.account == null then "" else c.account;
+            factor = if c.secondFactor.method == null then "" else c.secondFactor.method;
+            holders = lib.attrNames c.holders;
+          }) config.wallet.cards;
+          mailbox = lib.mapAttrsToList (name: c: {
+            inherit name;
+            inherit (c)
+              address
+              from
+              may
+              holder
+              until
+              why
+              ;
+          }) config.mailbox.cards;
+          payment = lib.mapAttrsToList (name: c: {
+            inherit name;
+            inherit (c)
+              limitUsd
+              interval
+              account
+              why
+              ;
+            # As Mercury names it: the owner's own, or kagamizo/<vendor>.
+            nickname = if c.nickname == null then "kagamizo/${name}" else c.nickname;
+            lock = if c.merchantLock == null then "" else c.merchantLock;
+          }) config.mercury.cards;
+        };
       };
     };
   };
@@ -494,6 +550,37 @@ in
             ${shell}/bin/shell-page $out
           '';
         };
+        # The same declarations as plain pages (./_site): one HTML file per
+        # screen and one stylesheet, written at build time by a program that
+        # shares the shell's model. Its `html` output is the site.
+        site = pkgs.rustPlatform.buildRustPackage {
+          pname = "kagamizo-site";
+          version = "0.1.0";
+          src = lib.fileset.toSource {
+            root = ./.;
+            fileset = lib.fileset.unions [
+              ./_site
+              ./_shell/src/model.rs
+            ];
+          };
+          sourceRoot = "source/_site";
+          cargoLock.lockFile = ./_site/Cargo.lock;
+          outputs = [
+            "out"
+            "html"
+          ];
+          postInstall = "$out/bin/shell-site ${declared} web $html";
+          meta.mainProgram = "shell-site";
+        };
+        # The site used in a real browser (./_e2e): every page at a phone's,
+        # a tablet's and a desktop's width, by pointer and by keyboard.
+        e2e = pkgs.rustPlatform.buildRustPackage {
+          pname = "kagamizo-e2e";
+          version = "0.1.0";
+          src = ./_e2e;
+          cargoLock.lockFile = ./_e2e/Cargo.lock;
+          meta.mainProgram = "shell-e2e";
+        };
         # The PATH of each image a native app ships in, to check its command
         # is there (only those: reading a PATH builds the image's packages).
         imagePaths = lib.genAttrs nativeTargets (
@@ -506,8 +593,23 @@ in
         );
       in
       {
-        packages.kagamizo-shell = shell;
-        packages.kagamizo-shell-web = web;
+        packages = {
+          kagamizo-shell = shell;
+          kagamizo-shell-web = web;
+          kagamizo-site = site;
+          kagamizo-site-html = site.html;
+          kagamizo-e2e = e2e;
+        };
+        # Its output is the photographs, which CI keeps.
+        checks.shell-e2e = pkgs.stdenvNoCC.mkDerivation {
+          name = "shell-e2e";
+          dontUnpack = true;
+          nativeBuildInputs = [ e2e ];
+          E2E_CHROMIUM = lib.getExe pkgs.chromium;
+          E2E_NO_SANDBOX = "1";
+          FONTCONFIG_FILE = pkgs.makeFontsConf { fontDirectories = [ pkgs.dejavu_fonts ]; };
+          installPhase = "HOME=$TMPDIR shell-e2e ${site.html} $out";
+        };
         checks.shell = config.kagamizo.leanCheck {
           name = "shell";
           source = ./_lean/Shell.lean;
