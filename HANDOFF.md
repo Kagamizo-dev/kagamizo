@@ -27,8 +27,60 @@ Then work the plan: in each track, the lowest unblocked item first; items waitin
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is exactly what modules/claude/_environment.nix declares (`nix build .#claude-allowed-domains`): never use or ask for a host outside it; a host a task needs is declared there with its reason and listed at the session's end. End the session with the full allowlist and the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 
-This session starts where HANDOFF.md's "2026-11-09, early: Stripe's coverage verified, agents hold cards" ends: first the wallet's step 4 (the Wallet view in the shell, bank/wallet-view), then the bank-link choice once a provider's own-account use is confirmed.
+This session starts where HANDOFF.md's "2026-11-10 to 11-14: one surface at os.jingzo.org" ends: first the tool that creates the declared rooms on the homeserver, then the bridge from a room to a unit of work; every control added to a page must pass checks.shell-e2e.
 ```
+
+## 2026-11-10 to 11-14: one surface at os.jingzo.org (read this first)
+
+Merged into `ccr-a3dc11d9-lh43d5` as #27, #28 and #29.
+
+- **Logistics** (`modules/logistics/sla.nix`): no unbounded step; every
+  path within the 14-day target; goods cross a border only through a
+  step that clears it; unbacked assumptions counted, the count only falls.
+- **Access**: `os.jingzo.org`, `files.jingzo.org` and `status` are applied
+  on Cloudflare behind Access. Every team's service token is in Pass
+  (`host/<TEAM>_ACCESS_SERVICE_TOKEN`); the security team audits os, files
+  and status headlessly.
+- **The static shell** (`modules/shell/_site`): one HTML file per screen
+  (catalog, settings, wallet, a page per module) and one stylesheet,
+  generated in Rust, audited at build for structure and contrast, served
+  at `os.jingzo.org/next/` beside the egui shell at `/`.
+- **`checks.shell-e2e`** (`modules/shell/_e2e`): every page in the pinned
+  Chromium at three widths, by pointer and keyboard, against the
+  browser's accessibility tree. The pages hold links only; every control
+  added later goes through it. It needs CI: the pinned Chromium does not
+  fit a session's disk, and a local Chromium measures text differently.
+- **Mailbox cards** (`modules/mailbox/cards.nix`): `receipts@jingzo.org`
+  for `accounting-jingzo`, read and draft only. `mailbox read` has not
+  run against a real mailbox; it belongs on the host.
+- **Rooms** (`modules/agents/rooms.nix`): one room per team, the owner and
+  that team in it, and a homeserver account per team. Declared only.
+
+The owner's decisions in these sessions: static HTML plus one small wasm
+island for the web shell; chat is our own view over Matrix, no redirects;
+models run through OpenRouter, never on our own hardware; mailbox cards
+start as read and draft; the order is static shell, chat, card minting,
+then an Android spike.
+
+Next, in order:
+
+1. A tool that creates the declared rooms on the homeserver.
+2. The bridge: a room message becomes a unit of work, its reply and
+   artifacts come back to the room.
+3. The runner fixed and switched on (waits on the owner: OpenRouter
+   credit and a go-ahead).
+4. The chat view as the island, and a page of rooms and roles.
+5. Pixel comparison of the photographs `shell-e2e` already keeps; `/`
+   moved from the egui shell to the static site.
+6. Minting and attaching a card at run time; a sandbox that keeps Bridge
+   out of an agent's reach (the mailbox card's scope depends on it).
+
+Waiting on the owner: what in the visuals looks off; the fate of the
+`builders` and `twin` teams; the first real image through `picture`.
+
+Sessions have about 6 GB of disk: collect garbage between builds, pass
+`--accept-flake-config` to use the cache, and leave the full flake check
+to CI.
 
 ## 2026-11-09, early: Stripe's coverage verified, agents hold cards (read this first)
 
