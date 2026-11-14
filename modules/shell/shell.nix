@@ -13,6 +13,11 @@
 #
 #   packages.kagamizo-shell     the shell, with the declarations it shows
 #   packages.kagamizo-shell-web the same shell as WebAssembly, with its page
+#   packages.kagamizo-site      the same declarations as plain pages (./_site)
+#   packages.kagamizo-e2e       those pages used in a real browser (./_e2e)
+#   checks.shell-e2e            every page at three widths, by pointer and by
+#                               keyboard, against the browser's accessibility
+#                               tree
 #   checks.shell                Lean (./_lean/Shell.lean): every app ships on
 #                               a target, the web target holds only web apps,
 #                               every native app's command is in its image,
@@ -567,6 +572,15 @@ in
           postInstall = "$out/bin/shell-site ${declared} web $html";
           meta.mainProgram = "shell-site";
         };
+        # The site used in a real browser (./_e2e): every page at a phone's,
+        # a tablet's and a desktop's width, by pointer and by keyboard.
+        e2e = pkgs.rustPlatform.buildRustPackage {
+          pname = "kagamizo-e2e";
+          version = "0.1.0";
+          src = ./_e2e;
+          cargoLock.lockFile = ./_e2e/Cargo.lock;
+          meta.mainProgram = "shell-e2e";
+        };
         # The PATH of each image a native app ships in, to check its command
         # is there (only those: reading a PATH builds the image's packages).
         imagePaths = lib.genAttrs nativeTargets (
@@ -584,6 +598,17 @@ in
           kagamizo-shell-web = web;
           kagamizo-site = site;
           kagamizo-site-html = site.html;
+          kagamizo-e2e = e2e;
+        };
+        # Its output is the photographs, which CI keeps.
+        checks.shell-e2e = pkgs.stdenvNoCC.mkDerivation {
+          name = "shell-e2e";
+          dontUnpack = true;
+          nativeBuildInputs = [ e2e ];
+          E2E_CHROMIUM = lib.getExe pkgs.chromium;
+          E2E_NO_SANDBOX = "1";
+          FONTCONFIG_FILE = pkgs.makeFontsConf { fontDirectories = [ pkgs.dejavu_fonts ]; };
+          installPhase = "HOME=$TMPDIR shell-e2e ${site.html} $out";
         };
         checks.shell = config.kagamizo.leanCheck {
           name = "shell";
