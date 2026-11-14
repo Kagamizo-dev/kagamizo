@@ -95,10 +95,24 @@ pub struct Payment {
     pub lock: String,
 }
 
+/// A mailbox card: one address handed to one team, for what it says.
+#[derive(Deserialize, Clone, Debug, Default)]
+pub struct MailCard {
+    pub name: String,
+    pub address: String,
+    pub from: Vec<String>,
+    pub may: Vec<String>,
+    pub holder: String,
+    pub until: String,
+    pub why: String,
+}
+
 #[derive(Deserialize, Clone, Debug, Default)]
 pub struct Wallet {
     pub cards: Vec<Card>,
     pub payment: Vec<Payment>,
+    #[serde(default)]
+    pub mailbox: Vec<MailCard>,
 }
 
 #[derive(Deserialize, Clone, Debug, Default)]

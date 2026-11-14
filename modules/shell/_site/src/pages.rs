@@ -204,6 +204,22 @@ fn wallet(w: &Wallet) -> Node {
             card(card_colour("credit-card"), "payment card", &c.account, &c.nickname, &format!("${} {} · {} · {}", c.limit_usd, c.interval, lock, c.why), None)
         }))
     });
+    body.push(el("h2").attr("id", "mailbox").text("Mailbox cards").child(count(w.mailbox.len(), "card", "cards")));
+    body.push(if w.mailbox.is_empty() {
+        el("p").class("none").text("No mailbox card is handed out.")
+    } else {
+        el("ul").class("shelf").attr("aria-labelledby", "mailbox").children(w.mailbox.iter().map(|c| {
+            let from = if c.from.is_empty() { "from anyone".to_string() } else { format!("from {}", c.from.join(", ")) };
+            card(
+                card_colour("alias"),
+                "mailbox card",
+                &format!("until {}", c.until),
+                &c.address,
+                &format!("held by {} · may read {} · {} · {}", c.holder, c.may.join(", "), from, c.why),
+                None,
+            )
+        }))
+    });
     let mut vaults: Vec<&str> = w.cards.iter().map(|c| c.vault.as_str()).collect();
     vaults.sort();
     vaults.dedup();
@@ -347,6 +363,7 @@ mod tests {
               "wallet": {
                 "cards": [{"id": "mercury-jingzo", "type": "login", "vault": "Jingzo-LLC", "title": "Mercury", "mint": "human:sign-up", "target": "keep", "account": "mercury-jingzo", "factor": "passkey", "holders": ["accounting-jingzo"]},
                           {"id": "mirazo-identity", "type": "identity", "vault": "Mirazo-Root", "title": "ID", "mint": "human:sign-up", "target": "keep", "account": "", "factor": "", "holders": []}],
+                "mailbox": [{"name": "receipts", "address": "receipts@jingzo.org", "from": [], "may": ["headers", "bodies"], "holder": "accounting-jingzo", "until": "2027-01-31", "why": "for the books"}],
                 "payment": [{"name": "openrouter", "nickname": "Research-OpenRouter", "limitUsd": 50, "interval": "weekly", "account": "mercury-jingzo", "why": "the agents' keys", "lock": "OpenRouter"}]
               }
             }"#,
@@ -513,9 +530,9 @@ mod tests {
     fn the_wallet_reads_in_this_order_and_shows_no_value() {
         let pages = documents(declared(), "web");
         let lines = outline(&pages["wallet/index.html"]);
-        assert_eq!(&lines[9..], ["h1: Wallet", "h2: Payment cards 1 card", "h2: Jingzo-LLC 1 card", "h2: Mirazo-Root 1 card", "[footer]"]);
+        assert_eq!(&lines[9..], ["h1: Wallet", "h2: Payment cards 1 card", "h2: Mailbox cards 1 card", "h2: Jingzo-LLC 1 card", "h2: Mirazo-Root 1 card", "[footer]"]);
         let html = document(&pages["wallet/index.html"]);
-        for wanted in ["Research-OpenRouter", "$50 weekly", "locked to OpenRouter", "confirmed by passkey", "held by accounting-jingzo", "held by you alone", "minted by human: sign-up"] {
+        for wanted in ["Research-OpenRouter", "$50 weekly", "locked to OpenRouter", "confirmed by passkey", "held by accounting-jingzo", "held by you alone", "minted by human: sign-up", "receipts@jingzo.org", "until 2027-01-31", "from anyone"] {
             assert!(html.contains(wanted), "{wanted}");
         }
     }

@@ -357,6 +357,17 @@ in
             factor = if c.secondFactor.method == null then "" else c.secondFactor.method;
             holders = lib.attrNames c.holders;
           }) config.wallet.cards;
+          mailbox = lib.mapAttrsToList (name: c: {
+            inherit name;
+            inherit (c)
+              address
+              from
+              may
+              holder
+              until
+              why
+              ;
+          }) config.mailbox.cards;
           payment = lib.mapAttrsToList (name: c: {
             inherit name;
             inherit (c)
