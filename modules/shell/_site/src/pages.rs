@@ -6,12 +6,14 @@
 //!   index.html              the catalog: every app on its shelf, then the
 //!                           base, one card per Settings section
 //!   settings/index.html     the base, section by section
+//!   wallet/index.html       every card held: the payment cards with their
+//!                           limits, then each vault's cards by what they are
 //!   m/<module>/index.html   a module's page: what it shows, its paper, and
 //!                           what its Lean proves
 //!   shell.css               the one stylesheet (./style.rs)
 use crate::a11y;
 use crate::html::{document, el, Node};
-use crate::model::{App, Declared, Kind, Page, Shell};
+use crate::model::{App, Declared, Kind, Page, Shell, Wallet};
 use crate::style;
 use std::collections::BTreeMap;
 
@@ -19,6 +21,7 @@ use std::collections::BTreeMap;
 #[derive(Clone, Copy, PartialEq)]
 enum Here {
     Home,
+    Wallet,
     Settings,
     Module,
 }
@@ -27,7 +30,7 @@ impl Here {
     fn root(self) -> &'static str {
         match self {
             Here::Home => "",
-            Here::Settings => "../",
+            Here::Settings | Here::Wallet => "../",
             Here::Module => "../../",
         }
     }
@@ -57,6 +60,7 @@ fn frame(here: Here, title: &str, body: Vec<Node>) -> Node {
                 .class("top")
                 .attr("aria-label", "Sections")
                 .child(link(Here::Home, format!("{root}index.html"), "Catalog"))
+                .child(link(Here::Wallet, format!("{root}wallet/index.html"), "Wallet"))
                 .child(link(Here::Settings, format!("{root}settings/index.html"), "Settings")),
         );
     let page = el("html").attr("lang", "en").child(head).child(
@@ -140,6 +144,10 @@ fn home(shell: &Shell) -> Node {
             Some(format!("settings/index.html#{}", s.key)),
         )
     })));
+    body.push(el("h2").attr("id", "every-module").text("Every module").child(count(shell.declared.pages.len(), "module", "modules")));
+    body.push(el("nav").attr("aria-labelledby", "every-module").child(el("ul").class("index").children(
+        shell.declared.pages.keys().map(|m| el("li").child(el("a").attr("href", format!("m/{m}/index.html")).text(m.clone()))),
+    )));
     frame(Here::Home, "Kagamizo", body)
 }
 
@@ -168,6 +176,55 @@ fn settings(declared: &Declared) -> Node {
         }));
     }
     frame(Here::Settings, "Settings · Kagamizo", body)
+}
+
+/// A card's colour by the kind of Pass item it is.
+fn card_colour(kind: &str) -> &'static str {
+    style::shelf_colour(match kind {
+        "identity" => "identity",
+        "login" => "work",
+        "credit-card" => "money",
+        "custom" => "research",
+        "alias" => "chat",
+        _ => "other",
+    })
+}
+
+fn wallet(w: &Wallet) -> Node {
+    let mut body = vec![
+        el("h1").text("Wallet"),
+        el("p").class("lede").text("Every card we hold. A card is a Proton Pass item: what it is and who holds it are declared here, and its values are only ever in Pass."),
+    ];
+    body.push(el("h2").attr("id", "payment").text("Payment cards").child(count(w.payment.len(), "card", "cards")));
+    body.push(if w.payment.is_empty() {
+        el("p").class("none").text("No payment card is declared.")
+    } else {
+        el("ul").class("shelf").attr("aria-labelledby", "payment").children(w.payment.iter().map(|c| {
+            let lock = if c.lock.is_empty() { "any merchant".to_string() } else { format!("locked to {}", c.lock) };
+            card(card_colour("credit-card"), "payment card", &c.account, &c.nickname, &format!("${} {} · {} · {}", c.limit_usd, c.interval, lock, c.why), None)
+        }))
+    });
+    let mut vaults: Vec<&str> = w.cards.iter().map(|c| c.vault.as_str()).collect();
+    vaults.sort();
+    vaults.dedup();
+    for vault in vaults {
+        let held: Vec<_> = w.cards.iter().filter(|c| c.vault == vault).collect();
+        let id = format!("vault-{}", vault.to_lowercase());
+        body.push(el("h2").attr("id", id.clone()).text(vault).child(count(held.len(), "card", "cards")));
+        body.push(el("ul").class("shelf").attr("aria-labelledby", id).children(held.into_iter().map(|c| {
+            let mut facts = Vec::new();
+            if !c.account.is_empty() {
+                facts.push(format!("for {}", c.account));
+            }
+            if !c.factor.is_empty() {
+                facts.push(format!("confirmed by {}", c.factor));
+            }
+            facts.push(format!("minted by {}", c.mint.replace(':', ": ")));
+            facts.push(if c.holders.is_empty() { "held by you alone".to_string() } else { format!("held by {}", c.holders.join(", ")) });
+            card(card_colour(&c.kind), &c.kind.replace('-', " "), &c.target, &c.title, &facts.join(" · "), None)
+        })));
+    }
+    frame(Here::Wallet, "Wallet · Kagamizo", body)
 }
 
 fn chips(class: &str, items: &[String]) -> Node {
@@ -204,9 +261,9 @@ fn module(name: &str, app: Option<&App>, page: &Page) -> Node {
         }
     }
     let body = vec![
-        el("p").class("brand").text(format!("modules/{name}")),
+        el("p").class("brand").text(if page.place.is_empty() { format!("modules/{name}") } else { format!("modules/{name} · {}", page.place) }),
         el("h1").text(shown.clone()),
-        el("p").class("lede").text(app.map(|a| a.description.clone()).unwrap_or_default()),
+        el("p").class("lede").text(app.map(|a| a.description.clone()).filter(|d| !d.is_empty()).unwrap_or_else(|| page.why.clone())),
         el("div").class("split").child(el("div").children(main)).child(el("aside").attr("aria-label", "Paper and proofs").children(side)),
     ];
     frame(Here::Module, &format!("{shown} · Kagamizo"), body)
@@ -218,6 +275,7 @@ pub fn documents(declared: Declared, target: &str) -> BTreeMap<String, Node> {
     let mut pages = BTreeMap::new();
     pages.insert("index.html".to_string(), home(&shell));
     pages.insert("settings/index.html".to_string(), settings(&shell.declared));
+    pages.insert("wallet/index.html".to_string(), wallet(&shell.declared.wallet));
     for (name, page) in &shell.declared.pages {
         let app = shell.apps.iter().map(|(_, a)| a).find(|a| &a.module == name && a.kind == Kind::Module);
         pages.insert(format!("m/{name}/index.html"), module(name, app, page));
@@ -284,7 +342,12 @@ mod tests {
               "pages": {
                 "logistics": {"title": "Reliability before price", "abstract": "A typed path.", "theorems": ["choose_sound"], "checks": ["logistics"], "packages": ["logistics"], "teams": ["upkeep"],
                               "view": [{"title": "No step waits", "rows": [{"title": "fabric", "detail": "within 5 d"}]}]},
-                "hetzner": {"title": "", "abstract": "", "checks": [], "packages": [], "teams": []}
+                "hetzner": {"title": "", "abstract": "", "checks": [], "packages": [], "teams": [], "place": "base, under Infrastructure", "why": "the host"}
+              },
+              "wallet": {
+                "cards": [{"id": "mercury-jingzo", "type": "login", "vault": "Jingzo-LLC", "title": "Mercury", "mint": "human:sign-up", "target": "keep", "account": "mercury-jingzo", "factor": "passkey", "holders": ["accounting-jingzo"]},
+                          {"id": "mirazo-identity", "type": "identity", "vault": "Mirazo-Root", "title": "ID", "mint": "human:sign-up", "target": "keep", "account": "", "factor": "", "holders": []}],
+                "payment": [{"name": "openrouter", "nickname": "Research-OpenRouter", "limitUsd": 50, "interval": "weekly", "account": "mercury-jingzo", "why": "the agents' keys", "lock": "OpenRouter"}]
               }
             }"#,
         )
@@ -318,7 +381,7 @@ mod tests {
     fn every_screen_is_a_file() {
         let files = site(declared(), "web").unwrap();
         let paths: Vec<&str> = files.keys().map(String::as_str).collect();
-        assert_eq!(paths, ["index.html", "m/hetzner/index.html", "m/logistics/index.html", "settings/index.html", "shell.css"]);
+        assert_eq!(paths, ["index.html", "m/hetzner/index.html", "m/logistics/index.html", "settings/index.html", "shell.css", "wallet/index.html"]);
     }
 
     #[test]
@@ -389,6 +452,7 @@ mod tests {
                 "link: Kagamizo -> index.html",
                 "[nav: Sections]",
                 "link: Catalog -> index.html",
+                "link: Wallet -> wallet/index.html",
                 "link: Settings -> settings/index.html",
                 "[main]",
                 "h1: Everything, on its shelf",
@@ -400,6 +464,10 @@ mod tests {
                 "h2: The base 2 sections",
                 "link: settings 1 rows Accounts proton -> settings/index.html#accounts",
                 "link: settings 0 rows Devices -> settings/index.html#devices",
+                "h2: Every module 2 modules",
+                "[nav: ]",
+                "link: hetzner -> m/hetzner/index.html",
+                "link: logistics -> m/logistics/index.html",
                 "[footer]",
             ]
         );
@@ -417,6 +485,7 @@ mod tests {
                 "link: Kagamizo -> ../../index.html",
                 "[nav: Sections]",
                 "link: Catalog -> ../../index.html",
+                "link: Wallet -> ../../wallet/index.html",
                 "link: Settings -> ../../settings/index.html",
                 "[main]",
                 "h1: Logistics",
@@ -436,8 +505,26 @@ mod tests {
     fn the_settings_read_in_this_order() {
         let pages = documents(declared(), "web");
         let lines = outline(&pages["settings/index.html"]);
-        assert_eq!(&lines[8..], ["h1: Settings", "h2: Accounts 1 row", "h2: Devices 0 rows", "[footer]"]);
-        assert_eq!(lines[6], "link: Settings -> ../settings/index.html");
+        assert_eq!(&lines[9..], ["h1: Settings", "h2: Accounts 1 row", "h2: Devices 0 rows", "[footer]"]);
+        assert_eq!(lines[7], "link: Settings -> ../settings/index.html");
+    }
+
+    #[test]
+    fn the_wallet_reads_in_this_order_and_shows_no_value() {
+        let pages = documents(declared(), "web");
+        let lines = outline(&pages["wallet/index.html"]);
+        assert_eq!(&lines[9..], ["h1: Wallet", "h2: Payment cards 1 card", "h2: Jingzo-LLC 1 card", "h2: Mirazo-Root 1 card", "[footer]"]);
+        let html = document(&pages["wallet/index.html"]);
+        for wanted in ["Research-OpenRouter", "$50 weekly", "locked to OpenRouter", "confirmed by passkey", "held by accounting-jingzo", "held by you alone", "minted by human: sign-up"] {
+            assert!(html.contains(wanted), "{wanted}");
+        }
+    }
+
+    #[test]
+    fn a_base_module_s_page_says_where_it_sits_and_why() {
+        let page = document(&documents(declared(), "web")["m/hetzner/index.html"]);
+        assert!(page.contains("modules/hetzner · base, under Infrastructure"));
+        assert!(page.contains("<p class=\"lede\">the host</p>"));
     }
 
     #[test]

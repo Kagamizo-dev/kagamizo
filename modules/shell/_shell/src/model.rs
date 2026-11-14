@@ -58,6 +58,47 @@ pub struct Page {
     /// Sections of rows the module generates for its page (the plan's tracks).
     #[serde(default)]
     pub view: Vec<View>,
+    /// Where the module sits in the library: an app, the base, or a service.
+    #[serde(default)]
+    pub place: String,
+    /// Why a base module exists, in a sentence.
+    #[serde(default)]
+    pub why: String,
+}
+
+/// A card of the wallet: a Proton Pass item by its type, vault and title.
+/// Only what it is; its values are in Pass.
+#[derive(Deserialize, Clone, Debug, Default)]
+pub struct Card {
+    pub id: String,
+    #[serde(rename = "type")]
+    pub kind: String,
+    pub vault: String,
+    pub title: String,
+    pub mint: String,
+    pub target: String,
+    pub account: String,
+    pub factor: String,
+    pub holders: Vec<String>,
+}
+
+/// A payment card: its limit per interval and what it is locked to.
+#[derive(Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Payment {
+    pub name: String,
+    pub nickname: String,
+    pub limit_usd: u64,
+    pub interval: String,
+    pub account: String,
+    pub why: String,
+    pub lock: String,
+}
+
+#[derive(Deserialize, Clone, Debug, Default)]
+pub struct Wallet {
+    pub cards: Vec<Card>,
+    pub payment: Vec<Payment>,
 }
 
 #[derive(Deserialize, Clone, Debug, Default)]
@@ -72,6 +113,8 @@ pub struct Declared {
     pub sections: Vec<Section>,
     pub categories: Vec<String>,
     pub pages: BTreeMap<String, Page>,
+    #[serde(default)]
+    pub wallet: Wallet,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

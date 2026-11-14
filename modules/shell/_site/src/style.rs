@@ -107,11 +107,11 @@ pub fn sheet() -> (Vec<Rule>, Vec<Rule>) {
         rule(".shelf > li", &[("scroll-snap-align", "start"), ("display", "flex")]),
         rule(
             ".card",
-            &[("display", "flex"), ("flex-direction", "column"), ("justify-content", "space-between"), ("gap", "14px"), ("width", "100%"), ("aspect-ratio", "1.586"), ("padding", "14px 16px"), ("border", &format!("3px solid {}", Palette::SHADOW)), ("box-shadow", &format!("5px 5px 0 {}", Palette::SHADOW)), ("background", "var(--shelf, #3a3a3a)")],
+            &[("display", "flex"), ("flex-direction", "column"), ("justify-content", "space-between"), ("gap", "14px"), ("width", "100%"), ("min-width", "0"), ("aspect-ratio", "1.586"), ("padding", "14px 16px"), ("border", &format!("3px solid {}", Palette::SHADOW)), ("box-shadow", &format!("5px 5px 0 {}", Palette::SHADOW)), ("background", "var(--shelf, #3a3a3a)")],
         ),
         rule("a.card:hover", &[("transform", "translate(-1px, -1px)"), ("box-shadow", &format!("7px 7px 0 {}", Palette::SHADOW))]),
         rule(".card .kind", &[("display", "flex"), ("justify-content", "space-between"), ("gap", "8px"), ("font-family", MONO), ("font-size", "11px"), ("text-transform", "uppercase"), ("letter-spacing", "1px"), ("color", Palette::INK), ("opacity", "0.9")]),
-        rule(".card .name", &[("font-size", "20px"), ("font-weight", "700"), ("line-height", "1.15")]),
+        rule(".card .name", &[("font-size", "20px"), ("font-weight", "700"), ("line-height", "1.15"), ("overflow-wrap", "anywhere")]),
         rule(".card .what", &[("font-size", "13px"), ("color", Palette::INK), ("opacity", "0.9"), ("display", "-webkit-box"), ("-webkit-line-clamp", "3"), ("-webkit-box-orient", "vertical"), ("overflow", "hidden")]),
         rule(".panel", &[("background", Palette::PANEL), ("border", &format!("3px solid {}", Palette::SHADOW)), ("box-shadow", &format!("6px 6px 0 {}", Palette::SHADOW)), ("padding", "4px 16px"), ("margin", "0")]),
         rule(".rows", &[("margin", "0"), ("padding", "0"), ("list-style", "none")]),
@@ -122,6 +122,8 @@ pub fn sheet() -> (Vec<Rule>, Vec<Rule>) {
         rule(".chips", &[("display", "flex"), ("flex-wrap", "wrap"), ("gap", "8px"), ("margin", "0"), ("padding", "0"), ("list-style", "none")]),
         rule(".chips > li", &[("font-family", MONO), ("font-size", "12.5px"), ("padding", "6px 10px"), ("background", Palette::CARD), ("border", &format!("1px solid {}", Palette::LINE)), ("overflow-wrap", "anywhere")]),
         rule(".chips.proved > li", &[("border-color", Palette::GOOD), ("color", Palette::GOOD)]),
+        rule(".index", &[("display", "flex"), ("flex-wrap", "wrap"), ("gap", "8px"), ("margin", "0"), ("padding", "0"), ("list-style", "none")]),
+        rule(".index a", &[("display", "inline-flex"), ("align-items", "center"), ("min-height", "44px"), ("min-width", "44px"), ("padding", "0 12px"), ("font-family", MONO), ("font-size", "13px"), ("background", Palette::CARD), ("border", &format!("1px solid {}", Palette::LINE))]),
         rule(".none", &[("color", Palette::MUTED), ("font-style", "italic")]),
         rule("footer", &[("max-width", "1280px"), ("margin", "48px auto 0"), ("font-family", MONO), ("font-size", "12px"), ("color", Palette::MUTED)]),
     ];

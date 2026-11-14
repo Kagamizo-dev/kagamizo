@@ -323,13 +323,53 @@ in
       default = {
         inherit (cfg) apps;
         inherit sections categories;
-        pages = lib.genAttrs appModules (
+        # A page for every module, so none is only a row or unseen: what
+        # its apps show, its paper, and where it sits in the library.
+        pages = lib.genAttrs modules (
           m:
           paperOf m
           // {
             view = lib.concatMap (a: a.view) (lib.filter (a: a.module == m) (lib.attrValues cfg.apps));
+            place =
+              if cfg.base ? ${m} then
+                "base, under ${titleOf cfg.base.${m}.section}"
+              else if cfg.services ? ${m} then
+                "a service inside ${cfg.apps.${cfg.services.${m}.app}.name}"
+              else
+                "an app";
+            why = cfg.base.${m}.why or "";
           }
         );
+        # The wallet: every card by what it is and where it is held, names
+        # only (a card's values stay in Proton Pass), and every payment card
+        # with its limit.
+        wallet = {
+          cards = lib.mapAttrsToList (id: c: {
+            inherit id;
+            inherit (c)
+              type
+              vault
+              title
+              mint
+              target
+              ;
+            account = if c.account == null then "" else c.account;
+            factor = if c.secondFactor.method == null then "" else c.secondFactor.method;
+            holders = lib.attrNames c.holders;
+          }) config.wallet.cards;
+          payment = lib.mapAttrsToList (name: c: {
+            inherit name;
+            inherit (c)
+              limitUsd
+              interval
+              account
+              why
+              ;
+            # As Mercury names it: the owner's own, or kagamizo/<vendor>.
+            nickname = if c.nickname == null then "kagamizo/${name}" else c.nickname;
+            lock = if c.merchantLock == null then "" else c.merchantLock;
+          }) config.mercury.cards;
+        };
       };
     };
   };
