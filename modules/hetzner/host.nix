@@ -74,6 +74,7 @@ let
     { config, ... }:
     import ../shell/_web-host.nix {
       web = config.packages.kagamizo-shell-web;
+      site = config.packages.kagamizo-site-html;
       inherit
         (lib.findFirst (s: s.name == "os") (throw "hetzner.host.agents: no os service") cfg.agents.services)
         port
