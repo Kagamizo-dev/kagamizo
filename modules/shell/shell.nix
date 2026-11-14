@@ -494,6 +494,28 @@ in
             ${shell}/bin/shell-page $out
           '';
         };
+        # The same declarations as plain pages (./_site): one HTML file per
+        # screen and one stylesheet, written at build time by a program that
+        # shares the shell's model. Its `html` output is the site.
+        site = pkgs.rustPlatform.buildRustPackage {
+          pname = "kagamizo-site";
+          version = "0.1.0";
+          src = lib.fileset.toSource {
+            root = ./.;
+            fileset = lib.fileset.unions [
+              ./_site
+              ./_shell/src/model.rs
+            ];
+          };
+          sourceRoot = "source/_site";
+          cargoLock.lockFile = ./_site/Cargo.lock;
+          outputs = [
+            "out"
+            "html"
+          ];
+          postInstall = "$out/bin/shell-site ${declared} web $html";
+          meta.mainProgram = "shell-site";
+        };
         # The PATH of each image a native app ships in, to check its command
         # is there (only those: reading a PATH builds the image's packages).
         imagePaths = lib.genAttrs nativeTargets (
@@ -506,8 +528,12 @@ in
         );
       in
       {
-        packages.kagamizo-shell = shell;
-        packages.kagamizo-shell-web = web;
+        packages = {
+          kagamizo-shell = shell;
+          kagamizo-shell-web = web;
+          kagamizo-site = site;
+          kagamizo-site-html = site.html;
+        };
         checks.shell = config.kagamizo.leanCheck {
           name = "shell";
           source = ./_lean/Shell.lean;
