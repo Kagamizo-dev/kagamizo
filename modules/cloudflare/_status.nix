@@ -11,6 +11,7 @@
   zoneId,
   hostname,
   viewers,
+  auditorPolicies ? [ ], # the declared auditors' token policies (./_agents-access.nix)
   html,
   repoFullName,
 }:
@@ -103,7 +104,8 @@ in
           id = "\${cloudflare_zero_trust_access_policy.status-owner.id}";
           precedence = 1;
         }
-      ];
+      ]
+      ++ auditorPolicies;
     };
     cloudflare_workers_custom_domain.status = {
       account_id = accountId;

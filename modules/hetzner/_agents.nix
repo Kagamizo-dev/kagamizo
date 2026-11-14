@@ -31,6 +31,7 @@
   secretspecToml,
   opencodeConfig,
   tokenFile,
+  dshAgentTeams, # cloudflare.accessTeams: the teams holding an Access token
   alsoUnfree ? [ ], # further unfree packages admitted by name (../android)
 }:
 { lib, pkgs, ... }:
@@ -41,14 +42,6 @@ let
 
   # DSH agent teams that get Cloudflare Access service tokens
   # (matching modules/cloudflare/_agents-access.nix).
-  dshAgentTeams = [
-    "review"
-    "research-jingzo"
-    "design"
-    "twin"
-    "builders"
-    "upkeep"
-  ];
 
   # The secretspec variable name for a team: upper case, hyphens -> underscores.
   svcTokenVar =

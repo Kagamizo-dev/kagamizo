@@ -121,6 +121,11 @@ let
             "matrix"
             "twin"
             "comfy"
+            # Reading our own surfaces without a person signing in: the
+            # shell, the published files and the status page.
+            "os"
+            "files"
+            "status"
           ]
         );
         default = [ ];

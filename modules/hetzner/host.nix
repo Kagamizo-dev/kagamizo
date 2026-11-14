@@ -180,6 +180,7 @@ let
       passCli = config.packages.pass-cli;
       opencodeConfig = config.packages.opencode-config;
       tokenFile = "/var/lib/kagamizo/host-token";
+      dshAgentTeams = top.cloudflare.accessTeams;
       # The Android SDK's packages (../android), unfree in nixpkgs.
       alsoUnfree = top.android.unfreeNames;
     }
@@ -309,7 +310,9 @@ let
       ) (throw "hetzner.host.agents: no files service") cfg.agents.services)
       port
       ;
-    root = "/var/lib/kagamizo/files";
+    # A directory of its own: /var/lib/kagamizo holds the host's token and
+    # is closed to nginx, which answered 403 from under it.
+    root = "/var/lib/unit-files";
   };
 
   host =

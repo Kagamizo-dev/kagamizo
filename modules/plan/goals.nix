@@ -161,6 +161,7 @@
       cloudflare-os = {
         question = "Apply the Cloudflare plan that serves os.jingzo.org and the testers' Access (re-planned first)?";
         recommended = "Yes, after reading the re-plan.";
+        answer = "Applied (2026-11-13), after the owner read the re-plan: os.jingzo.org and files.jingzo.org behind Access, the tunnel's routes to both, and the browser, reverse-engineering and security teams' service tokens.";
       };
       pixel-adb = {
         question = "Is attaching the real Pixel over USB for flashing and provisioning a declared human step?";

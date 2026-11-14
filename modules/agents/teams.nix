@@ -104,7 +104,10 @@ in
           "security/security-penetration-tester"
           "security/security-threat-intelligence-analyst"
           "security/security-ai-generated-code-auditor"
-        ] [ "shell" "repo" "matrix" ] [ ]
+        ]
+        # os, files and status: it audits our own pages headlessly (the
+        # owner, 2026-11-13), the one team whose token reaches status.
+        [ "shell" "repo" "matrix" "os" "files" "status" ] [ ]
         3
         "the security team: reviews every change for vulnerabilities and secrets, tests what runs, watches advisories"
         "chat-and-code"

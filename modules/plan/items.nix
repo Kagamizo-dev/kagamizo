@@ -163,15 +163,12 @@ in
           "trading/nautilus-rust"
         ];
       }
-      (
-        {
-          id = "os-web";
-          title = "Serve the shell at os.jingzo.org behind Access";
-          status = "active";
-          backlog = "upkeep/shell-web";
-        }
-        // owner "cloudflare-os"
-      )
+      {
+        id = "os-web";
+        title = "Serve the shell at os.jingzo.org behind Access";
+        status = "done";
+        backlog = "upkeep/shell-web";
+      }
       {
         id = "app-views";
         title = "Every app draws its own view, live data included";
@@ -200,14 +197,11 @@ in
         id = "status-overflow";
         title = "Fix the status page's horizontal overflow at 390 px";
       }
-      (
-        {
-          id = "home-subdomain";
-          title = "The homepage at home.jingzo.org";
-          dependsOn = [ "shell/os-web" ];
-        }
-        // owner "cloudflare-os"
-      )
+      {
+        id = "home-subdomain";
+        title = "The homepage at home.jingzo.org";
+        dependsOn = [ "shell/os-web" ];
+      }
       (
         {
           id = "web-offline";

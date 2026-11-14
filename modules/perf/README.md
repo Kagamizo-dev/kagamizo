@@ -14,7 +14,7 @@ tolerance; a slower build fails. Rendered by `nix run .#perf-readme`.
 | mercury | `cards-declared` | build | none yet | none yet | 10% | Lean deciding the committed card discovery against the declarations |
 | catalog | `catalog-coverage` | build | none yet | none yet | 10% | Python walking every source file against 7 catalogs; moves with the number of sources and the regexes |
 | ci | `ci-pipeline` | build | none yet | none yet | 10% | Lean deciding every workflow sound |
-| cloudflare | `cloudflare-access` | build | none yet | none yet | 10% | Lean deciding every agent's Access token policy attached only to apps its tools justify, the owner first, none on status (decide +kernel over the rendered lists); moves with agents × tools |
+| cloudflare | `cloudflare-access` | build | none yet | none yet | 10% | Lean deciding every agent's Access token policy attached only to apps its tools justify, the owner first, status for the declared auditors only (decide +kernel over the rendered lists); moves with agents × tools |
 | compliance | `compliance-rules` | build | none yet | none yet | 10% | Lean deciding every strategy against the day-trade rule and its options level on its observed account |
 | governance | `governance-cedar` | build | none yet | none yet | 10% | Cedar's test runner over every generated test (6169); moves with accounts × actions × agents |
 | governance | `governance-changes` | build | none yet | none yet | 10% | Lean deciding the change-class table's shape, plus the Rust tool's tests; moves with the table |
