@@ -1,0 +1,17 @@
+[package]
+name = "public-stub"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+path = "src/main.rs"
+name = "public-stub"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+kagamizo-public = { path = "../public" }
+ureq = "2"

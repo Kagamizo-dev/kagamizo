@@ -1,0 +1,1159 @@
+{
+  "package": {
+    "name": "rea-agents",
+    "version": "6.7.0",
+    "sdk": {
+      "server": "2.3.1",
+      "client": "2.3.1",
+      "core": "2.3.1"
+    },
+    "skill_version": "42"
+  },
+  "tools": {
+    "total": 207,
+    "families": [
+      {
+        "id": "direct",
+        "surface": "official-proxy",
+        "count": 41,
+        "tools": [
+          "address_name",
+          "address_to_file_offset",
+          "annotate_native_function",
+          "comment",
+          "current_address",
+          "current_document",
+          "current_procedure",
+          "goto_address",
+          "inline_comment",
+          "inspect_native_data_type",
+          "inspect_native_instruction",
+          "inspect_native_load_image",
+          "list_bookmarks",
+          "list_documents",
+          "list_names",
+          "list_procedures",
+          "list_segments",
+          "list_strings",
+          "next_address",
+          "prev_address",
+          "procedure_address",
+          "procedure_assembly",
+          "procedure_callees",
+          "procedure_callers",
+          "procedure_info",
+          "procedure_pseudo_code",
+          "procedure_references",
+          "read_bytes",
+          "read_function_instructions",
+          "resolve_containing_procedure",
+          "resolve_native_call_targets",
+          "search_bytes",
+          "search_procedures",
+          "search_strings",
+          "set_address_name",
+          "set_addresses_names",
+          "set_bookmark",
+          "set_comment",
+          "set_inline_comment",
+          "unset_bookmark",
+          "xrefs"
+        ]
+      },
+      {
+        "id": "enhanced",
+        "surface": "enhanced",
+        "count": 14,
+        "tools": [
+          "analyze_function",
+          "analyze_swift_types",
+          "batch_decompile",
+          "binary_overview",
+          "find_xrefs_to_name",
+          "get_call_graph",
+          "get_objc_classes",
+          "get_objc_protocols",
+          "inspect_native_api",
+          "inspect_native_dispatch_metadata",
+          "trace_call_path",
+          "trace_feature",
+          "trace_native_ui_action",
+          "trace_native_values"
+        ]
+      },
+      {
+        "id": "native",
+        "surface": "native-provider",
+        "count": 23,
+        "tools": [
+          "capture_native_ui_scenario",
+          "close_gdb_session",
+          "close_rizin_debug_session",
+          "cutter_command",
+          "demangle_swift",
+          "execute_rizin_command",
+          "gdb_console",
+          "gdb_session_status",
+          "inspect_binary_layout",
+          "inspect_macho",
+          "inspect_pe_resources",
+          "inspect_plist",
+          "inspect_recorded_crash",
+          "inspect_signature",
+          "inspect_with_objdump",
+          "list_architectures",
+          "list_cutter_sessions",
+          "observe_native_calls",
+          "observe_native_ui",
+          "rizin_debug_command",
+          "rizin_debug_session_status",
+          "start_gdb_session",
+          "start_rizin_debug_session"
+        ]
+      },
+      {
+        "id": "artifact",
+        "surface": "artifact-provider",
+        "count": 16,
+        "tools": [
+          "compare_wasm_interfaces",
+          "decode_interface_builder",
+          "decode_signal_recording",
+          "extract_artifact",
+          "inspect_artifact",
+          "inspect_asset_catalog",
+          "inspect_evm_interface",
+          "inspect_go_binary",
+          "inspect_keyed_archive",
+          "inspect_packet_capture",
+          "inspect_packet_fields",
+          "inspect_rust_binary",
+          "inspect_signal_decoders",
+          "inspect_sqlite_database",
+          "inspect_wasm_artifact",
+          "trace_dylib_resolution"
+        ]
+      },
+      {
+        "id": "managed",
+        "surface": "managed",
+        "count": 7,
+        "tools": [
+          "compare_managed_members",
+          "import_managed_reconstruction",
+          "inspect_managed_artifact",
+          "inspect_managed_members",
+          "inspect_managed_native_boundaries",
+          "project_managed_application_graph",
+          "verify_managed_native_boundaries"
+        ]
+      },
+      {
+        "id": "firmware",
+        "surface": "firmware-provider",
+        "count": 2,
+        "tools": ["extract_firmware", "inspect_firmware_regions"]
+      },
+      {
+        "id": "android",
+        "surface": "android-provider",
+        "count": 5,
+        "tools": [
+          "inspect_android_class",
+          "inspect_android_method",
+          "inspect_android_package",
+          "search_android_classes",
+          "trace_android_references"
+        ]
+      },
+      {
+        "id": "pcap",
+        "surface": "pcap-provider",
+        "count": 2,
+        "tools": ["inspect_pcap_capture", "inspect_pcap_client"]
+      },
+      {
+        "id": "flutter",
+        "surface": "flutter-provider",
+        "count": 2,
+        "tools": ["identify_flutter_build", "inspect_dart_aot"]
+      },
+      {
+        "id": "frida",
+        "surface": "instrumentation-provider",
+        "count": 9,
+        "tools": [
+          "close_frida_session",
+          "frida_session_status",
+          "instrument_with_frida",
+          "list_frida_devices",
+          "list_frida_processes",
+          "load_frida_script",
+          "resume_frida_session",
+          "start_frida_session",
+          "unload_frida_script"
+        ]
+      },
+      {
+        "id": "apktool",
+        "surface": "apktool-provider",
+        "count": 2,
+        "tools": ["decode_android_resources", "inspect_apktool_client"]
+      },
+      {
+        "id": "jeb",
+        "surface": "jeb-provider",
+        "count": 4,
+        "tools": [
+          "decompile_jeb_item",
+          "inspect_jeb_client",
+          "list_jeb_units",
+          "open_jeb_project"
+        ]
+      },
+      {
+        "id": "adb",
+        "surface": "adb-provider",
+        "count": 24,
+        "tools": [
+          "capture_adb_screen",
+          "collect_adb_bugreport",
+          "inspect_adb_client",
+          "inspect_adb_device",
+          "inspect_adb_display",
+          "inspect_adb_package",
+          "inspect_adb_window",
+          "install_adb_package",
+          "list_adb_devices",
+          "list_adb_directory",
+          "list_adb_features",
+          "list_adb_packages",
+          "list_adb_processes",
+          "list_adb_services",
+          "pull_adb_file",
+          "pull_adb_package",
+          "push_adb_file",
+          "read_adb_logcat",
+          "read_adb_setting",
+          "resolve_adb_packages",
+          "start_adb_activity",
+          "start_adb_app",
+          "stop_adb_app",
+          "uninstall_adb_package"
+        ]
+      },
+      {
+        "id": "browser",
+        "surface": "browser-provider",
+        "count": 12,
+        "tools": [
+          "analyze_web_bundle",
+          "capture_browser_scenario",
+          "capture_web_screenshot",
+          "compare_web_captures",
+          "compare_web_screenshots",
+          "discover_webmcp_tools",
+          "inspect_web_event_listeners",
+          "inspect_web_network_capture",
+          "inspect_web_page",
+          "list_browser_targets",
+          "observe_web_execution",
+          "observe_web_session"
+        ]
+      },
+      {
+        "id": "electron",
+        "surface": "electron-provider",
+        "count": 6,
+        "tools": [
+          "analyze_javascript_application",
+          "capture_electron_scenario",
+          "inspect_electron_fuses",
+          "inspect_electron_page",
+          "list_electron_targets",
+          "reconcile_javascript_runtime"
+        ]
+      },
+      {
+        "id": "javascript-runtime",
+        "surface": "runtime-provider",
+        "count": 2,
+        "tools": [
+          "list_javascript_runtime_targets",
+          "observe_javascript_runtime"
+        ]
+      },
+      {
+        "id": "application",
+        "surface": "application-workflow",
+        "count": 15,
+        "tools": [
+          "build_reconstruction_obligation_ledger",
+          "compare_application_versions",
+          "compare_javascript_export_shapes",
+          "compare_source_to_bundle",
+          "evaluate_reconstruction_coverage",
+          "export_web_scripts",
+          "inspect_analysis_view",
+          "project_android_application_graph",
+          "project_apple_application_graph",
+          "project_harmony_application_graph",
+          "recover_javascript_sources",
+          "trace_application_feature",
+          "trace_javascript_semantics",
+          "trace_web_module_imports",
+          "trace_web_source_location"
+        ]
+      },
+      {
+        "id": "session",
+        "surface": "session",
+        "count": 21,
+        "tools": [
+          "binary_session",
+          "build_call_path",
+          "capture_process_scenario",
+          "close_binary",
+          "compare_artifacts",
+          "compare_bundles",
+          "compare_functions",
+          "compare_process_captures",
+          "correlate_static_and_runtime",
+          "export_evidence_bundle",
+          "find_changed_behavior",
+          "get_evidence_bundle",
+          "get_navigation_context",
+          "import_evidence_bundle",
+          "inspect_address_context",
+          "list_unknowns",
+          "open_binary",
+          "record_unknown",
+          "update_unknown",
+          "verify_reconstruction",
+          "verify_unknown_resolution"
+        ]
+      }
+    ]
+  },
+  "providers": [
+    {
+      "id": "adb",
+      "name": "Android Debug Bridge",
+      "version": null,
+      "capabilities": [
+        "capture_adb_screen",
+        "collect_adb_bugreport",
+        "inspect_adb_client",
+        "inspect_adb_device",
+        "inspect_adb_display",
+        "inspect_adb_package",
+        "inspect_adb_window",
+        "install_adb_package",
+        "list_adb_devices",
+        "list_adb_directory",
+        "list_adb_features",
+        "list_adb_packages",
+        "list_adb_processes",
+        "list_adb_services",
+        "pull_adb_file",
+        "pull_adb_package",
+        "push_adb_file",
+        "read_adb_logcat",
+        "read_adb_setting",
+        "resolve_adb_packages",
+        "start_adb_activity",
+        "start_adb_app",
+        "stop_adb_app",
+        "uninstall_adb_package"
+      ]
+    },
+    {
+      "id": "apktool",
+      "name": "Apktool",
+      "version": null,
+      "capabilities": ["decode_android_resources", "inspect_apktool_client"]
+    },
+    {
+      "id": "binwalk",
+      "name": "Binwalk",
+      "version": "3.1.0",
+      "capabilities": ["inspect_firmware_regions"]
+    },
+    {
+      "id": "cutter.python-plugin",
+      "name": "Cutter Python plugin",
+      "version": null,
+      "capabilities": ["cutter_command", "list_cutter_sessions"]
+    },
+    {
+      "id": "electron-fuses",
+      "name": "REA Electron fuse reader",
+      "version": "1",
+      "capabilities": ["inspect_electron_fuses"]
+    },
+    {
+      "id": "evmole-interface",
+      "name": "REA EVM interface adapter",
+      "version": "evmole@0.9.3",
+      "capabilities": ["inspect_evm_interface"]
+    },
+    {
+      "id": "fiddler-saz",
+      "name": "REA Fiddler SAZ capture adapter",
+      "version": "1;zip.js@2.15.0;xmldom@0.9.12",
+      "capabilities": ["inspect_web_network_capture"]
+    },
+    {
+      "id": "flutter",
+      "name": "Flutter build identification",
+      "version": null,
+      "capabilities": ["identify_flutter_build", "inspect_dart_aot"]
+    },
+    {
+      "id": "frida",
+      "name": "Frida",
+      "version": null,
+      "capabilities": [
+        "close_frida_session",
+        "frida_session_status",
+        "instrument_with_frida",
+        "list_frida_devices",
+        "list_frida_processes",
+        "load_frida_script",
+        "resume_frida_session",
+        "start_frida_session",
+        "unload_frida_script"
+      ]
+    },
+    {
+      "id": "ghidra",
+      "name": "Ghidra",
+      "version": null,
+      "capabilities": [
+        "address_name",
+        "address_to_file_offset",
+        "analyze_function",
+        "annotate_native_function",
+        "binary_overview",
+        "inspect_native_data_type",
+        "inspect_native_instruction",
+        "inspect_native_load_image",
+        "list_documents",
+        "list_names",
+        "list_procedures",
+        "list_segments",
+        "list_strings",
+        "procedure_address",
+        "procedure_assembly",
+        "procedure_callees",
+        "procedure_callers",
+        "procedure_info",
+        "procedure_pseudo_code",
+        "procedure_references",
+        "read_bytes",
+        "read_function_instructions",
+        "resolve_containing_procedure",
+        "resolve_native_call_targets",
+        "search_bytes",
+        "search_procedures",
+        "search_strings",
+        "set_address_name",
+        "set_addresses_names",
+        "xrefs"
+      ]
+    },
+    {
+      "id": "gnu.gdb",
+      "name": "GNU GDB",
+      "version": null,
+      "capabilities": [
+        "close_gdb_session",
+        "gdb_console",
+        "gdb_session_status",
+        "start_gdb_session"
+      ]
+    },
+    {
+      "id": "gnu.objdump",
+      "name": "GNU objdump",
+      "version": null,
+      "capabilities": ["inspect_with_objdump"]
+    },
+    {
+      "id": "go-build-info",
+      "name": "REA Go build-information reader",
+      "version": "1",
+      "capabilities": ["inspect_go_binary"]
+    },
+    {
+      "id": "har-schema/lossless-json",
+      "name": "REA HAR capture adapter",
+      "version": "har-schema@2.0.0;jsonc-parser@3.3.1;lossless-json@4.3.1",
+      "capabilities": ["inspect_web_network_capture"]
+    },
+    {
+      "id": "hopper",
+      "name": "Hopper Disassembler",
+      "version": null,
+      "capabilities": [
+        "address_name",
+        "address_to_file_offset",
+        "analyze_function",
+        "comment",
+        "current_address",
+        "current_document",
+        "current_procedure",
+        "goto_address",
+        "inline_comment",
+        "list_bookmarks",
+        "list_documents",
+        "list_names",
+        "list_procedures",
+        "list_segments",
+        "list_strings",
+        "next_address",
+        "prev_address",
+        "procedure_address",
+        "procedure_assembly",
+        "procedure_callees",
+        "procedure_callers",
+        "procedure_info",
+        "procedure_pseudo_code",
+        "procedure_references",
+        "read_bytes",
+        "read_function_instructions",
+        "resolve_containing_procedure",
+        "search_procedures",
+        "search_strings",
+        "set_address_name",
+        "set_addresses_names",
+        "set_bookmark",
+        "set_comment",
+        "set_inline_comment",
+        "unset_bookmark",
+        "xrefs"
+      ]
+    },
+    {
+      "id": "ida",
+      "name": "IDA MCP adapter",
+      "version": "1",
+      "capabilities": [
+        "analyze_function",
+        "list_documents",
+        "list_procedures",
+        "list_strings",
+        "procedure_address",
+        "procedure_assembly",
+        "procedure_callees",
+        "procedure_callers",
+        "procedure_pseudo_code",
+        "read_function_instructions",
+        "resolve_containing_procedure",
+        "search_procedures",
+        "search_strings",
+        "xrefs"
+      ]
+    },
+    {
+      "id": "jadx",
+      "name": "JADX headless",
+      "version": "0.7.1",
+      "capabilities": [
+        "inspect_android_class",
+        "inspect_android_method",
+        "inspect_android_package",
+        "search_android_classes",
+        "trace_android_references"
+      ]
+    },
+    {
+      "id": "jeb",
+      "name": "JEB",
+      "version": null,
+      "capabilities": [
+        "decompile_jeb_item",
+        "inspect_jeb_client",
+        "list_jeb_units",
+        "open_jeb_project"
+      ]
+    },
+    {
+      "id": "kuna",
+      "name": "Kuna",
+      "version": null,
+      "capabilities": [
+        "address_name",
+        "analyze_function",
+        "list_documents",
+        "list_procedures",
+        "list_strings",
+        "procedure_address",
+        "procedure_assembly",
+        "procedure_callees",
+        "procedure_callers",
+        "procedure_pseudo_code",
+        "search_procedures",
+        "search_strings",
+        "xrefs"
+      ]
+    },
+    {
+      "id": "mitmproxy-native-tnetstring",
+      "name": "REA offline native mitmproxy adapter",
+      "version": "12.2.3",
+      "capabilities": ["inspect_web_network_capture"]
+    },
+    {
+      "id": "native-macos",
+      "name": "macOS native inspection utilities",
+      "version": null,
+      "capabilities": [
+        "capture_native_ui_scenario",
+        "demangle_swift",
+        "inspect_macho",
+        "inspect_plist",
+        "inspect_signature",
+        "list_architectures",
+        "observe_native_calls",
+        "observe_native_ui"
+      ]
+    },
+    {
+      "id": "pcap",
+      "name": "Packet capture analysis",
+      "version": null,
+      "capabilities": ["inspect_pcap_capture", "inspect_pcap_client"]
+    },
+    {
+      "id": "pwntools-elf",
+      "name": "REA pwntools ELF adapter",
+      "version": "pwntools@4.15.0;pyelftools@0.33;unicorn@2.1.2",
+      "capabilities": ["inspect_binary_layout", "inspect_recorded_crash"]
+    },
+    {
+      "id": "rea-analysis-view",
+      "name": "REA analysis view projection",
+      "version": "1",
+      "capabilities": ["inspect_analysis_view"]
+    },
+    {
+      "id": "rea-android-application",
+      "name": "REA Android application workflows",
+      "version": "1",
+      "capabilities": ["project_android_application_graph"]
+    },
+    {
+      "id": "rea-apple-application",
+      "name": "REA Apple application workflows",
+      "version": "1",
+      "capabilities": ["project_apple_application_graph"]
+    },
+    {
+      "id": "rea-artifact-graph",
+      "name": "REA safe artifact graph provider",
+      "version": "1",
+      "capabilities": [
+        "decode_interface_builder",
+        "extract_artifact",
+        "inspect_artifact",
+        "inspect_asset_catalog",
+        "inspect_keyed_archive",
+        "trace_dylib_resolution"
+      ]
+    },
+    {
+      "id": "rea-cdp-browser",
+      "name": "REA Chrome DevTools Protocol observation provider",
+      "version": "2",
+      "capabilities": [
+        "analyze_web_bundle",
+        "capture_web_screenshot",
+        "compare_web_captures",
+        "compare_web_screenshots",
+        "discover_webmcp_tools",
+        "inspect_web_event_listeners",
+        "inspect_web_page",
+        "list_browser_targets",
+        "observe_web_execution",
+        "observe_web_session"
+      ]
+    },
+    {
+      "id": "rea-cdp-electron",
+      "name": "REA Electron file-page CDP observation provider",
+      "version": "1",
+      "capabilities": ["inspect_electron_page", "list_electron_targets"]
+    },
+    {
+      "id": "rea-dotnet-static",
+      "name": "REA managed static analysis provider",
+      "version": "1",
+      "capabilities": [
+        "inspect_managed_artifact",
+        "inspect_managed_members",
+        "inspect_managed_native_boundaries"
+      ]
+    },
+    {
+      "id": "rea-dotnet-workflows",
+      "name": "REA managed-code workflows",
+      "version": "1",
+      "capabilities": [
+        "compare_managed_members",
+        "import_managed_reconstruction",
+        "project_managed_application_graph",
+        "verify_managed_native_boundaries"
+      ]
+    },
+    {
+      "id": "rea-javascript-application",
+      "name": "REA JavaScript application analyzer",
+      "version": "1",
+      "capabilities": ["analyze_javascript_application"]
+    },
+    {
+      "id": "rea-javascript-application-workflows",
+      "name": "REA JavaScript application workflows",
+      "version": "1",
+      "capabilities": [
+        "build_reconstruction_obligation_ledger",
+        "compare_application_versions",
+        "compare_javascript_export_shapes",
+        "compare_source_to_bundle",
+        "evaluate_reconstruction_coverage",
+        "project_harmony_application_graph",
+        "trace_application_feature",
+        "trace_javascript_semantics"
+      ]
+    },
+    {
+      "id": "rea-javascript-runtime-reconciliation",
+      "name": "REA JavaScript runtime reconciliation",
+      "version": "1",
+      "capabilities": ["reconcile_javascript_runtime"]
+    },
+    {
+      "id": "rea-pe-resources",
+      "name": "REA PE resource parser",
+      "version": "1",
+      "capabilities": ["inspect_pe_resources"]
+    },
+    {
+      "id": "rea-playwright-browser-scenario",
+      "name": "REA Playwright browser scenario capture provider",
+      "version": "1",
+      "capabilities": ["capture_browser_scenario"]
+    },
+    {
+      "id": "rea-playwright-electron-active",
+      "name": "REA Playwright active Electron observation provider",
+      "version": "1",
+      "capabilities": ["capture_electron_scenario"]
+    },
+    {
+      "id": "rea-v8-inspector",
+      "name": "REA passive Node/Electron V8 Inspector provider",
+      "version": "1",
+      "capabilities": [
+        "list_javascript_runtime_targets",
+        "observe_javascript_runtime"
+      ]
+    },
+    {
+      "id": "rea-web-script-export",
+      "name": "REA captured script export",
+      "version": "1",
+      "capabilities": [
+        "export_web_scripts",
+        "trace_web_module_imports",
+        "trace_web_source_location"
+      ]
+    },
+    {
+      "id": "rizin",
+      "name": "Rizin",
+      "version": null,
+      "capabilities": ["execute_rizin_command"]
+    },
+    {
+      "id": "rizin.debugger",
+      "name": "Rizin debugger",
+      "version": null,
+      "capabilities": [
+        "close_rizin_debug_session",
+        "rizin_debug_command",
+        "rizin_debug_session_status",
+        "start_rizin_debug_session"
+      ]
+    },
+    {
+      "id": "rust-auditable",
+      "name": "REA Rust dependency reader",
+      "version": "1",
+      "capabilities": ["inspect_rust_binary"]
+    },
+    {
+      "id": "sigrok-recording",
+      "name": "REA sigrok recording adapter",
+      "version": "sigrok-cli@0.7.2",
+      "capabilities": ["decode_signal_recording", "inspect_signal_decoders"]
+    },
+    {
+      "id": "sqlite",
+      "name": "REA SQLite database inspector",
+      "version": null,
+      "capabilities": ["inspect_sqlite_database"]
+    },
+    {
+      "id": "tshark-capture",
+      "name": "REA TShark capture adapter",
+      "version": "tshark@4",
+      "capabilities": ["inspect_packet_capture", "inspect_packet_fields"]
+    },
+    {
+      "id": "unblob",
+      "name": "Unblob",
+      "version": "26.6.4",
+      "capabilities": ["extract_firmware"]
+    },
+    {
+      "id": "wabt-artifact",
+      "name": "REA WABT artifact adapter",
+      "version": "wabt@1.0.42",
+      "capabilities": ["inspect_wasm_artifact"]
+    },
+    {
+      "id": "wakaru",
+      "name": "Wakaru",
+      "version": "1.14.0",
+      "capabilities": ["recover_javascript_sources"]
+    }
+  ],
+  "setup_clients": [
+    {
+      "id": "claude_code",
+      "display_name": "Claude Code",
+      "format": "claude_code",
+      "configuration": "managed"
+    },
+    {
+      "id": "claude_desktop",
+      "display_name": "Claude Desktop",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "codex",
+      "display_name": "Codex",
+      "format": "toml",
+      "configuration": "managed"
+    },
+    {
+      "id": "cursor",
+      "display_name": "Cursor",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "gemini_cli",
+      "display_name": "Gemini CLI",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "windsurf",
+      "display_name": "Windsurf",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "devin",
+      "display_name": "Devin",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "opencode",
+      "display_name": "OpenCode",
+      "format": "opencode",
+      "configuration": "managed"
+    },
+    {
+      "id": "antigravity",
+      "display_name": "Antigravity",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "copilot_cli",
+      "display_name": "GitHub Copilot CLI",
+      "format": "copilot_cli",
+      "configuration": "managed"
+    },
+    {
+      "id": "commandcode",
+      "display_name": "Command Code",
+      "format": "commandcode",
+      "configuration": "managed"
+    },
+    {
+      "id": "qwen_code",
+      "display_name": "Qwen Code",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "kimi",
+      "display_name": "Kimi Code",
+      "format": "kimi",
+      "configuration": "managed"
+    },
+    {
+      "id": "vscode",
+      "display_name": "VS Code",
+      "format": "vscode",
+      "configuration": "managed"
+    },
+    {
+      "id": "trae",
+      "display_name": "Trae",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "workbuddy",
+      "display_name": "WorkBuddy",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "grok_build",
+      "display_name": "Grok Build",
+      "format": "grok",
+      "configuration": "managed"
+    },
+    {
+      "id": "omp",
+      "display_name": "OMP",
+      "format": "omp",
+      "configuration": "managed"
+    },
+    {
+      "id": "pi",
+      "display_name": "Pi",
+      "format": "pi",
+      "configuration": "managed"
+    },
+    {
+      "id": "hermes",
+      "display_name": "Hermes",
+      "format": "hermes",
+      "configuration": "managed"
+    },
+    {
+      "id": "qoder",
+      "display_name": "Qoder",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "droid",
+      "display_name": "Factory Droid",
+      "format": "json",
+      "configuration": "managed"
+    },
+    {
+      "id": "zcode",
+      "display_name": "ZCode",
+      "format": "zcode",
+      "configuration": "managed"
+    },
+    {
+      "id": "dsh",
+      "display_name": "DeepSeek Harness",
+      "format": "dsh",
+      "configuration": "managed"
+    },
+    {
+      "id": "grok_bot",
+      "display_name": "Grok Bot",
+      "format": "unsupported",
+      "configuration": "detect-only"
+    }
+  ],
+  "cli": {
+    "primary_count": 153,
+    "commands": [
+      "address-to-file-offset",
+      "analyze",
+      "analyze-javascript-application",
+      "analyze-web-bundle",
+      "annotate-native-function",
+      "build-reconstruction-obligation-ledger",
+      "capabilities",
+      "capture-adb-screen",
+      "capture-browser-scenario",
+      "capture-electron-scenario",
+      "capture-native-ui-scenario",
+      "capture-process",
+      "capture-web-screenshot",
+      "collect-adb-bugreport",
+      "compare",
+      "compare-application-versions",
+      "compare-javascript-export-shapes",
+      "compare-managed-members",
+      "compare-process-captures",
+      "compare-source-to-bundle",
+      "compare-wasm-interfaces",
+      "compare-web-captures",
+      "compare-web-screenshots",
+      "cutter-command",
+      "debug-with-gdb",
+      "debug-with-rizin",
+      "decode-android-resources",
+      "decode-interface-builder",
+      "decode-signal-recording",
+      "decompile",
+      "decompile-jeb-item",
+      "demangle-swift",
+      "discover-webmcp-tools",
+      "doctor",
+      "evaluate-reconstruction-coverage",
+      "evidence-export",
+      "evidence-import",
+      "execute-rizin-command",
+      "export-web-scripts",
+      "extract-artifact",
+      "extract-firmware",
+      "function",
+      "identify-flutter-build",
+      "import-managed-reconstruction",
+      "import-reference-source",
+      "inspect",
+      "inspect-adb-client",
+      "inspect-adb-device",
+      "inspect-adb-display",
+      "inspect-adb-package",
+      "inspect-adb-window",
+      "inspect-analysis-view",
+      "inspect-android-class",
+      "inspect-android-method",
+      "inspect-android-package",
+      "inspect-apktool-client",
+      "inspect-artifact",
+      "inspect-asset-catalog",
+      "inspect-binary-layout",
+      "inspect-dart-aot",
+      "inspect-electron-fuses",
+      "inspect-electron-page",
+      "inspect-evidence-bundle",
+      "inspect-evm-interface",
+      "inspect-firmware-regions",
+      "inspect-go-binary",
+      "inspect-jeb-client",
+      "inspect-keyed-archive",
+      "inspect-macho",
+      "inspect-managed-artifact",
+      "inspect-managed-members",
+      "inspect-managed-native-boundaries",
+      "inspect-native-api",
+      "inspect-native-data-type",
+      "inspect-native-dispatch-metadata",
+      "inspect-native-instruction",
+      "inspect-native-load-image",
+      "inspect-packet-capture",
+      "inspect-packet-fields",
+      "inspect-pcap-capture",
+      "inspect-pcap-client",
+      "inspect-pe-resources",
+      "inspect-plist",
+      "inspect-recorded-crash",
+      "inspect-rust-binary",
+      "inspect-signal-decoders",
+      "inspect-signature",
+      "inspect-sqlite-database",
+      "inspect-wasm-artifact",
+      "inspect-web-event-listeners",
+      "inspect-web-network-capture",
+      "inspect-web-page",
+      "inspect-with-objdump",
+      "install-adb-package",
+      "instructions",
+      "instrument-with-frida",
+      "list-adb-devices",
+      "list-adb-directory",
+      "list-adb-features",
+      "list-adb-packages",
+      "list-adb-processes",
+      "list-adb-services",
+      "list-architectures",
+      "list-browser-targets",
+      "list-cutter-sessions",
+      "list-electron-targets",
+      "list-frida-devices",
+      "list-frida-processes",
+      "list-javascript-runtime-targets",
+      "list-jeb-units",
+      "list-objdump-architectures",
+      "observe-javascript-runtime",
+      "observe-native-calls",
+      "observe-native-ui",
+      "observe-web-execution",
+      "observe-web-session",
+      "open-jeb-project",
+      "project-android-application-graph",
+      "project-apple-application-graph",
+      "project-harmony-application-graph",
+      "project-managed-application-graph",
+      "providers",
+      "pull-adb-file",
+      "pull-adb-package",
+      "push-adb-file",
+      "read-adb-logcat",
+      "read-adb-setting",
+      "read-bytes",
+      "reconcile-javascript-runtime",
+      "recover-javascript-sources",
+      "resolve-adb-packages",
+      "resolve-native-call-targets",
+      "search",
+      "search-android-classes",
+      "search-bytes",
+      "setup",
+      "start-adb-activity",
+      "start-adb-app",
+      "stop-adb-app",
+      "trace",
+      "trace-android-references",
+      "trace-application-feature",
+      "trace-dylib-resolution",
+      "trace-javascript-semantics",
+      "trace-native-ui-action",
+      "trace-native-values",
+      "trace-web-module-imports",
+      "trace-web-source-location",
+      "uninstall",
+      "uninstall-adb-package",
+      "update",
+      "verify-managed-native-boundaries",
+      "xrefs"
+    ],
+    "aliases": [
+      {
+        "name": "compare-bundles",
+        "target": "compare"
+      }
+    ]
+  },
+  "runtime_catalog": {
+    "counts": {
+      "cli_commands": 153,
+      "mcp_tools": 207,
+      "mcp_prompts": 6
+    },
+    "digests": {
+      "providers_sha256": "1a87ef73d414c8afbb3cfa942416cb0ceaefbe22bd9fcdfd53bc2f5e1c3cb124"
+    }
+  }
+}

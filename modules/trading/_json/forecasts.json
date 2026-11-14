@@ -1,0 +1,41 @@
+{
+  "as_of": "2026-11-04",
+  "source": "fixture",
+  "note": "The checks' forecasts: New York's high on 2026-11-06 is far above the stub contract's band, Chicago's November rain sits near its contract's price.",
+  "cities": {
+    "New York": {
+      "daily": [
+        { "date": "2026-11-01", "kind": "observed", "high_f": 58, "precip_in": 0.0, "snow_in": 0.0 },
+        { "date": "2026-11-02", "kind": "observed", "high_f": 61, "precip_in": 0.1, "snow_in": 0.0 },
+        { "date": "2026-11-03", "kind": "observed", "high_f": 63, "precip_in": 0.0, "snow_in": 0.0 },
+        { "date": "2026-11-04", "kind": "forecast", "high_f": 66, "precip_in": 0.0, "snow_in": 0.0 },
+        { "date": "2026-11-05", "kind": "forecast", "high_f": 72, "precip_in": 0.0, "snow_in": 0.0 },
+        { "date": "2026-11-06", "kind": "forecast", "high_f": 78, "precip_in": 0.0, "snow_in": 0.0 },
+        { "date": "2026-11-07", "kind": "forecast", "high_f": 70, "precip_in": 0.2, "snow_in": 0.0 },
+        { "date": "2026-11-08", "kind": "forecast", "high_f": 60, "precip_in": 0.4, "snow_in": 0.0 }
+      ],
+      "climatology": {
+        "11": { "precip_in_per_day_mean": 0.12, "precip_in_per_day_sd": 0.3, "snow_in_per_day_mean": 0.01, "snow_in_per_day_sd": 0.1 }
+      }
+    },
+    "Chicago": {
+      "daily": [
+        { "date": "2026-11-01", "kind": "observed", "high_f": 52, "precip_in": 0.4, "snow_in": 0.0 },
+        { "date": "2026-11-02", "kind": "observed", "high_f": 49, "precip_in": 0.0, "snow_in": 0.0 },
+        { "date": "2026-11-03", "kind": "observed", "high_f": 47, "precip_in": 0.2, "snow_in": 0.0 },
+        { "date": "2026-11-04", "kind": "forecast", "high_f": 50, "precip_in": 0.0, "snow_in": 0.0 },
+        { "date": "2026-11-05", "kind": "forecast", "high_f": 51, "precip_in": 0.3, "snow_in": 0.0 },
+        { "date": "2026-11-06", "kind": "forecast", "high_f": 48, "precip_in": 0.1, "snow_in": 0.0 },
+        { "date": "2026-11-07", "kind": "forecast", "high_f": 45, "precip_in": 0.0, "snow_in": 0.0 },
+        { "date": "2026-11-08", "kind": "forecast", "high_f": 44, "precip_in": 0.2, "snow_in": 0.0 },
+        { "date": "2026-11-09", "kind": "forecast", "high_f": 46, "precip_in": 0.0, "snow_in": 0.0 },
+        { "date": "2026-11-10", "kind": "forecast", "high_f": 43, "precip_in": 0.3, "snow_in": 0.1 },
+        { "date": "2026-11-11", "kind": "forecast", "high_f": 41, "precip_in": 0.0, "snow_in": 0.0 },
+        { "date": "2026-11-12", "kind": "forecast", "high_f": 42, "precip_in": 0.1, "snow_in": 0.0 }
+      ],
+      "climatology": {
+        "11": { "precip_in_per_day_mean": 0.09, "precip_in_per_day_sd": 0.25, "snow_in_per_day_mean": 0.05, "snow_in_per_day_sd": 0.2 }
+      }
+    }
+  }
+}

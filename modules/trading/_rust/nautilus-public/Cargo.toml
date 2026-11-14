@@ -1,0 +1,26 @@
+[package]
+name = "nautilus-public"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "A NautilusTrader adapter for Public (public.com): data and execution clients over kagamizo-public"
+
+[dependencies]
+kagamizo-public = { path = "../public" }
+serde.workspace = true
+serde_json.workspace = true
+anyhow = "1"
+async-trait = "0.1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+rust_decimal = "1"
+ahash = "0.8"
+nautilus-common = "=0.67.0"
+nautilus-core = "=0.67.0"
+nautilus-model = "=0.67.0"
+nautilus-execution = "=0.67.0"
+nautilus-live = "=0.67.0"
+nautilus-sandbox = "=0.67.0"
+nautilus-trading = "=0.67.0"
+
+[dev-dependencies]
+nautilus-testkit = "=0.67.0"

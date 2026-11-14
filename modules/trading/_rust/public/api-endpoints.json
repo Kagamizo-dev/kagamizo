@@ -1,0 +1,257 @@
+{
+  "source": "publicdotcom-cli v1.3.7, src/publicdotcom_cli/_generated/api (the pinned flake input)",
+  "endpoints": {
+    "cancel_order": {
+      "group": "order_placement",
+      "method": "DELETE",
+      "path": "/userapigateway/trading/{account_id}/order/{order_id}",
+      "command": "order cancel",
+      "effect": "write"
+    },
+    "create_personal_access_token": {
+      "group": "authorization",
+      "method": "POST",
+      "path": "/userapiauthservice/personal/access-tokens",
+      "command": "auth login",
+      "effect": "session"
+    },
+    "get_account_portfolio_v2": {
+      "group": "account_details",
+      "method": "GET",
+      "path": "/userapigateway/trading/{account_id}/portfolio/v2",
+      "command": "portfolio show",
+      "effect": "read"
+    },
+    "get_accounts": {
+      "group": "list_accounts",
+      "method": "GET",
+      "path": "/userapigateway/trading/account",
+      "command": "accounts list",
+      "effect": "read"
+    },
+    "get_all_instruments": {
+      "group": "instrument_details",
+      "method": "GET",
+      "path": "/userapigateway/trading/instruments",
+      "command": "instruments list",
+      "effect": "read"
+    },
+    "get_bars_v2": {
+      "group": "market_data",
+      "method": "GET",
+      "path": "/userapigateway/historicdata/{type_}/{symbol}/{period}",
+      "command": "historicdata bars",
+      "effect": "read"
+    },
+    "get_bars_v2_with_aggregation": {
+      "group": "market_data",
+      "method": "GET",
+      "path": "/userapigateway/historicdata/{type_}/{symbol}/{period}/{aggregation}",
+      "command": "historicdata bars",
+      "effect": "read"
+    },
+    "get_bond_details": {
+      "group": "market_data",
+      "method": "GET",
+      "path": "/userapigateway/marketdata/{account_id}/bond-details/{symbol}",
+      "command": "market bond-details",
+      "effect": "read"
+    },
+    "get_event_categories": {
+      "group": "event_contracts",
+      "method": "GET",
+      "path": "/userapigateway/eventcontract/summary/categories",
+      "command": "event-contracts categories",
+      "effect": "read"
+    },
+    "get_event_contract_bars": {
+      "group": "market_data",
+      "method": "GET",
+      "path": "/userapigateway/historicdata/event-contracts/{event_id}/bars/{period}",
+      "command": "historicdata event-contract-bars",
+      "effect": "read"
+    },
+    "get_event_details": {
+      "group": "event_contracts",
+      "method": "GET",
+      "path": "/userapigateway/eventcontract/details/{event_symbol}",
+      "command": "event-contracts details",
+      "effect": "read"
+    },
+    "get_event_summary": {
+      "group": "event_contracts",
+      "method": "POST",
+      "path": "/userapigateway/eventcontract/summary",
+      "command": "event-contracts summary",
+      "effect": "read"
+    },
+    "get_history": {
+      "group": "account_details",
+      "method": "GET",
+      "path": "/userapigateway/trading/{account_id}/history",
+      "command": "history list",
+      "effect": "read"
+    },
+    "get_instrument": {
+      "group": "instrument_details",
+      "method": "GET",
+      "path": "/userapigateway/trading/instruments/{symbol}/{type_}",
+      "command": "instruments get",
+      "effect": "read"
+    },
+    "get_option_chain": {
+      "group": "market_data",
+      "method": "POST",
+      "path": "/userapigateway/marketdata/{account_id}/option-chain",
+      "command": "market option-chain",
+      "effect": "read"
+    },
+    "get_option_expirations": {
+      "group": "market_data",
+      "method": "POST",
+      "path": "/userapigateway/marketdata/{account_id}/option-expirations",
+      "command": "market option-expirations",
+      "effect": "read"
+    },
+    "get_option_greeks": {
+      "group": "option_details",
+      "method": "GET",
+      "path": "/userapigateway/option-details/{account_id}/greeks",
+      "command": "options greeks",
+      "effect": "read"
+    },
+    "get_order": {
+      "group": "order_placement",
+      "method": "GET",
+      "path": "/userapigateway/trading/{account_id}/order/{order_id}",
+      "command": "order get",
+      "effect": "read"
+    },
+    "get_quotes": {
+      "group": "market_data",
+      "method": "POST",
+      "path": "/userapigateway/marketdata/{account_id}/quotes",
+      "command": "market quotes",
+      "effect": "read"
+    },
+    "get_strategy_quote": {
+      "group": "option_details",
+      "method": "POST",
+      "path": "/userapigateway/option-details/{account_id}/strategy-details/quote",
+      "command": "options strategy-quote",
+      "effect": "read"
+    },
+    "get_unrealized_tax_lots": {
+      "group": "tax_lot_selling",
+      "method": "GET",
+      "path": "/userapigateway/trading/{account_id}/taxlots/unrealized",
+      "command": "taxlots list",
+      "effect": "read"
+    },
+    "get_unrealized_tax_lots_csv": {
+      "group": "tax_lot_selling",
+      "method": "GET",
+      "path": "/userapigateway/trading/{account_id}/taxlots/csv/unrealized",
+      "command": "taxlots csv",
+      "effect": "read"
+    },
+    "get_unrealized_tax_lots_for_symbol": {
+      "group": "tax_lot_selling",
+      "method": "GET",
+      "path": "/userapigateway/trading/{account_id}/taxlots/unrealized/{symbol}",
+      "command": "taxlots symbol",
+      "effect": "read"
+    },
+    "place_multileg_order": {
+      "group": "order_placement",
+      "method": "POST",
+      "path": "/userapigateway/trading/{account_id}/order/multileg",
+      "command": "order place-multileg",
+      "effect": "spend"
+    },
+    "place_order": {
+      "group": "order_placement",
+      "method": "POST",
+      "path": "/userapigateway/trading/{account_id}/order",
+      "command": "order place",
+      "effect": "spend"
+    },
+    "preflight_multi_leg": {
+      "group": "order_placement",
+      "method": "POST",
+      "path": "/userapigateway/trading/{account_id}/preflight/multi-leg",
+      "command": "order preflight-multi",
+      "effect": "read"
+    },
+    "preflight_single_leg": {
+      "group": "order_placement",
+      "method": "POST",
+      "path": "/userapigateway/trading/{account_id}/preflight/single-leg",
+      "command": "order preflight-single",
+      "effect": "read"
+    },
+    "replace_order": {
+      "group": "order_placement",
+      "method": "PUT",
+      "path": "/userapigateway/trading/{account_id}/order",
+      "command": "order replace",
+      "effect": "spend"
+    },
+    "search_bonds": {
+      "group": "instrument_details",
+      "method": "GET",
+      "path": "/userapigateway/trading/instruments/bonds",
+      "command": "instruments bonds",
+      "effect": "read"
+    },
+    "search_orders": {
+      "group": "order_placement",
+      "method": "POST",
+      "path": "/userapigateway/trading/{account_id}/order/search",
+      "command": "order search",
+      "effect": "read"
+    }
+  },
+  "clients": {
+    "reader": {
+      "why": "every trade-run command but place: reads, quotes and preflights, which place nothing",
+      "endpoints": [
+        "create_personal_access_token",
+        "get_accounts",
+        "get_instrument",
+        "get_bars_v2_with_aggregation",
+        "preflight_single_leg",
+        "get_option_expirations",
+        "get_option_chain",
+        "get_option_greeks",
+        "get_quotes",
+        "get_event_summary",
+        "get_event_details",
+        "get_event_contract_bars",
+        "get_order",
+        "get_account_portfolio_v2"
+      ]
+    },
+    "placer": {
+      "why": "trade-run place alone: the reader's endpoints, the one single-leg order, and its cancel when it is still working after the read-back",
+      "endpoints": [
+        "create_personal_access_token",
+        "get_accounts",
+        "get_instrument",
+        "get_bars_v2_with_aggregation",
+        "preflight_single_leg",
+        "get_option_expirations",
+        "get_option_chain",
+        "get_option_greeks",
+        "get_quotes",
+        "get_event_summary",
+        "get_event_details",
+        "get_event_contract_bars",
+        "get_order",
+        "cancel_order",
+        "place_order",
+        "get_account_portfolio_v2"
+      ]
+    }
+  }
+}

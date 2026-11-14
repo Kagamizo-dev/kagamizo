@@ -1,0 +1,409 @@
+{
+ "asOf": "2026-11-06",
+ "source": "https://openrouter.ai/api/v1/models/<model>/endpoints",
+ "unit": "USD per million tokens",
+ "models": {
+  "deepseek/deepseek-v4.1-flash": [
+   {
+    "provider": "baidu/fp8",
+    "input": 0.0507,
+    "cacheRead": 0.001014,
+    "output": 0.2028
+   },
+   {
+    "provider": "coreweave/fp8",
+    "input": 0.13,
+    "cacheRead": 0.002,
+    "output": 0.65
+   },
+   {
+    "provider": "streamlake/fp8",
+    "input": 0.147,
+    "cacheRead": 0.00294,
+    "output": 0.588
+   },
+   {
+    "provider": "cohere",
+    "input": 0.3,
+    "cacheRead": 0.003,
+    "output": 1.2
+   },
+   {
+    "provider": "deepinfra/fp8/flex",
+    "input": 0.112,
+    "cacheRead": 0.00336,
+    "output": 0.336
+   },
+   {
+    "provider": "gmicloud/fp8",
+    "input": 0.18,
+    "cacheRead": 0.0036,
+    "output": 0.72
+   },
+   {
+    "provider": "novita/fp8",
+    "input": 0.195,
+    "cacheRead": 0.0039,
+    "output": 0.78
+   },
+   {
+    "provider": "open-inference/fp4",
+    "input": 0.0175,
+    "cacheRead": 0.004,
+    "output": 0.5
+   },
+   {
+    "provider": "morph/fp8",
+    "input": 0.022,
+    "cacheRead": 0.004,
+    "output": 0.4
+   },
+   {
+    "provider": "deepinfra/fp8",
+    "input": 0.14,
+    "cacheRead": 0.0042,
+    "output": 0.42
+   },
+   {
+    "provider": "fireworks/spot",
+    "input": 0.21,
+    "cacheRead": 0.0042,
+    "output": 0.84
+   },
+   {
+    "provider": "phala",
+    "input": 0.21,
+    "cacheRead": 0.0042,
+    "output": 0.84
+   },
+   {
+    "provider": "primeintellect",
+    "input": 0.156,
+    "cacheRead": 0.0048,
+    "output": 1.2
+   },
+   {
+    "provider": "relace/fp4",
+    "input": 0.006,
+    "cacheRead": 0.005,
+    "output": 0.5
+   },
+   {
+    "provider": "makora/fp8",
+    "input": 0.26,
+    "cacheRead": 0.0058,
+    "output": 1.17
+   },
+   {
+    "provider": "digitalocean",
+    "input": 0.225,
+    "cacheRead": 0.006,
+    "output": 0.9
+   },
+   {
+    "provider": "together",
+    "input": 0.3,
+    "cacheRead": 0.006,
+    "output": 1.2
+   },
+   {
+    "provider": "siliconflow/fp8",
+    "input": 0.3,
+    "cacheRead": 0.006,
+    "output": 1.2
+   },
+   {
+    "provider": "parasail/fp8",
+    "input": 0.3,
+    "cacheRead": 0.006,
+    "output": 1.2
+   },
+   {
+    "provider": "fireworks",
+    "input": 0.3,
+    "cacheRead": 0.006,
+    "output": 1.2
+   },
+   {
+    "provider": "deepinfra/fp8/priority",
+    "input": 0.21,
+    "cacheRead": 0.0063,
+    "output": 0.63
+   },
+   {
+    "provider": "crusoe/fp8",
+    "input": 0.29,
+    "cacheRead": 0.007,
+    "output": 1.2
+   },
+   {
+    "provider": "baseten/us",
+    "input": 0.3,
+    "cacheRead": 0.007,
+    "output": 1.2
+   },
+   {
+    "provider": "baseten",
+    "input": 0.3,
+    "cacheRead": 0.007,
+    "output": 1.2
+   },
+   {
+    "provider": "alibaba",
+    "input": 0.075,
+    "cacheRead": 0.0075,
+    "output": 0.3
+   },
+   {
+    "provider": "venice/fp8",
+    "input": 0.3,
+    "cacheRead": 0.0075,
+    "output": 1.2
+   },
+   {
+    "provider": "inference-net/us",
+    "input": 0.103,
+    "cacheRead": 0.008,
+    "output": 0.6
+   },
+   {
+    "provider": "inference-net/fp8",
+    "input": 0.103,
+    "cacheRead": 0.008,
+    "output": 0.6
+   },
+   {
+    "provider": "reka",
+    "input": 0.12,
+    "cacheRead": 0.008,
+    "output": 0.96
+   },
+   {
+    "provider": "parasail/fast",
+    "input": 0.45,
+    "cacheRead": 0.009,
+    "output": 1.8
+   },
+   {
+    "provider": "fireworks/us",
+    "input": 0.45,
+    "cacheRead": 0.009,
+    "output": 1.8
+   },
+   {
+    "provider": "nebius/fp8",
+    "input": 0.3,
+    "cacheRead": 0.01,
+    "output": 1.2
+   },
+   {
+    "provider": "wafer/mxfp4",
+    "input": 0.19,
+    "cacheRead": 0.012,
+    "output": 0.65
+   },
+   {
+    "provider": "atlas-cloud/fp8",
+    "input": 0.135,
+    "cacheRead": 0.0135,
+    "output": 0.54
+   },
+   {
+    "provider": "wafer/us",
+    "input": 0.051,
+    "cacheRead": 0.018,
+    "output": 0.567
+   },
+   {
+    "provider": "google-vertex/global",
+    "input": 0.3,
+    "cacheRead": 0.03,
+    "output": 1.2
+   },
+   {
+    "provider": "modal",
+    "input": 0.3,
+    "cacheRead": 0.03,
+    "output": 1.2
+   },
+   {
+    "provider": "mancer/fp8",
+    "input": 0.15,
+    "cacheRead": 0.15,
+    "output": 0.5
+   }
+  ],
+  "deepseek/deepseek-v4-flash": [
+   {
+    "provider": "streamlake/fp8",
+    "input": 0.084,
+    "cacheRead": 0.0168,
+    "output": 0.168
+   },
+   {
+    "provider": "baidu/fp8",
+    "input": 0.08988,
+    "cacheRead": 0.017976,
+    "output": 0.17976
+   },
+   {
+    "provider": "deepinfra/fp8",
+    "input": 0.09,
+    "cacheRead": 0.018,
+    "output": 0.18
+   },
+   {
+    "provider": "gmicloud/fp8",
+    "input": 0.091,
+    "cacheRead": 0.0182,
+    "output": 0.182
+   },
+   {
+    "provider": "venice",
+    "input": 0.0966,
+    "cacheRead": 0.0196,
+    "output": 0.1925
+   },
+   {
+    "provider": "digitalocean",
+    "input": 0.098,
+    "cacheRead": 0.0196,
+    "output": 0.196
+   },
+   {
+    "provider": "fireworks",
+    "input": 0.105,
+    "cacheRead": 0.021,
+    "output": 0.21
+   },
+   {
+    "provider": "siliconflow/fp8",
+    "input": 0.13,
+    "cacheRead": 0.028,
+    "output": 0.28
+   },
+   {
+    "provider": "atlas-cloud/fp4",
+    "input": 0.14,
+    "cacheRead": 0.028,
+    "output": 0.28
+   },
+   {
+    "provider": "azure/us",
+    "input": 0.21,
+    "cacheRead": 0.031,
+    "output": 0.56
+   },
+   {
+    "provider": "relace/fp4",
+    "input": 0.05,
+    "cacheRead": 0.05,
+    "output": 0.45
+   },
+   {
+    "provider": "parasail/fp8",
+    "input": 0.14,
+    "cacheRead": 0.07,
+    "output": 0.28
+   },
+   {
+    "provider": "mancer/fp8",
+    "input": 0.175,
+    "cacheRead": 0.175,
+    "output": 0.5
+   },
+   {
+    "provider": "wafer/mxfp4",
+    "input": 0.6,
+    "cacheRead": 0.2,
+    "output": 0.17
+   }
+  ],
+  "deepseek/deepseek-v4-pro": [
+   {
+    "provider": "baidu/fp8",
+    "input": 0.71825,
+    "cacheRead": 0.0595,
+    "output": 1.4365
+   },
+   {
+    "provider": "streamlake/fp8",
+    "input": 0.719664,
+    "cacheRead": 0.059972,
+    "output": 1.439328
+   },
+   {
+    "provider": "gmicloud/fp8",
+    "input": 0.957,
+    "cacheRead": 0.07975,
+    "output": 1.914
+   },
+   {
+    "provider": "deepinfra/fp8",
+    "input": 1.3,
+    "cacheRead": 0.1,
+    "output": 2.6
+   },
+   {
+    "provider": "alibaba/fp8",
+    "input": 1.416,
+    "cacheRead": 0.118,
+    "output": 2.832
+   },
+   {
+    "provider": "alibaba/fp8/us-east-1",
+    "input": 1.56,
+    "cacheRead": 0.13,
+    "output": 3.12
+   },
+   {
+    "provider": "atlas-cloud/fp4",
+    "input": 1.68,
+    "cacheRead": 0.13,
+    "output": 3.38
+   },
+   {
+    "provider": "siliconflow/fp8",
+    "input": 1.0,
+    "cacheRead": 0.135,
+    "output": 1.5
+   },
+   {
+    "provider": "novita/fp8",
+    "input": 1.6,
+    "cacheRead": 0.135,
+    "output": 3.2
+   },
+   {
+    "provider": "nebius/fp8",
+    "input": 1.75,
+    "cacheRead": 0.14,
+    "output": 3.5
+   },
+   {
+    "provider": "azure/us",
+    "input": 1.91,
+    "cacheRead": 0.16,
+    "output": 3.83
+   },
+   {
+    "provider": "digitalocean",
+    "input": 1.044,
+    "cacheRead": 0.2088,
+    "output": 2.088
+   },
+   {
+    "provider": "relace/fp4",
+    "input": 0.9,
+    "cacheRead": 0.25,
+    "output": 1.5
+   },
+   {
+    "provider": "venice",
+    "input": 1.65,
+    "cacheRead": 0.33,
+    "output": 3.301
+   }
+  ]
+ }
+}

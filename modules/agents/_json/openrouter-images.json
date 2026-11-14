@@ -1,0 +1,102 @@
+{
+  "operation": {
+    "id": "createImages",
+    "method": "POST",
+    "path": "/images"
+  },
+  "read": "2026-11-11",
+  "request": {
+    "required": [
+      "model",
+      "prompt"
+    ],
+    "unused": [
+      "background",
+      "frame_count",
+      "frame_duration_ms",
+      "markup",
+      "output_compression",
+      "provider",
+      "quality",
+      "resolution",
+      "seed",
+      "session_id",
+      "size",
+      "stream",
+      "trace",
+      "user"
+    ],
+    "used": {
+      "aspect_ratio": {
+        "enum": [
+          "1:1",
+          "1:2",
+          "1:4",
+          "1:8",
+          "2:1",
+          "2:3",
+          "2.35:1",
+          "3:2",
+          "3:4",
+          "4:1",
+          "4:3",
+          "4:5",
+          "5:2",
+          "5:4",
+          "5:7",
+          "7:5",
+          "8:1",
+          "9:16",
+          "16:9",
+          "9:19.5",
+          "19.5:9",
+          "9:20",
+          "20:9",
+          "9:21",
+          "21:9",
+          "auto"
+        ],
+        "type": "string"
+      },
+      "input_references": {
+        "items": {
+          "$ref": "#/components/schemas/ContentPartImage"
+        },
+        "maxItems": 16,
+        "type": "array"
+      },
+      "model": {
+        "type": "string"
+      },
+      "n": {
+        "type": "integer"
+      },
+      "output_format": {
+        "enum": [
+          "png",
+          "jpeg",
+          "webp",
+          "svg",
+          "gif"
+        ],
+        "type": "string"
+      },
+      "prompt": {
+        "minLength": 1,
+        "type": "string"
+      }
+    }
+  },
+  "response": {
+    "data": {
+      "b64_json": "string, required",
+      "media_type": "string"
+    },
+    "usage": {
+      "cost": "number or null, US dollars"
+    }
+  },
+  "server": "https://openrouter.ai/api/v1",
+  "sha256": "1f4c75def14438972c6bc7648f62b1f0accbb245a259203c732e6f6eb68d5cb5",
+  "source": "https://openrouter.ai/openapi.json"
+}

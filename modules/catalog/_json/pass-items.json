@@ -1,0 +1,125 @@
+{
+ "appTemplates": {
+  "api-credential": {
+   "fields": {
+    "API key": "hidden",
+    "Expiry date": "timestamp",
+    "Permissions": "text",
+    "Secret": "hidden"
+   },
+   "source": "Mirazo-Root/Public, an API credential made in the Proton Pass app (2026-10-31)"
+  }
+ },
+ "customFieldKinds": [
+  "hidden",
+  "text",
+  "timestamp",
+  "totp"
+ ],
+ "passCli": "2.4.2",
+ "types": {
+  "alias": {
+   "createdBy": "item alias create",
+   "fields": [
+    "prefix",
+    "title"
+   ]
+  },
+  "credit-card": {
+   "fields": [
+    "card_type",
+    "cardholder_name",
+    "cvv",
+    "expiration_date",
+    "note",
+    "number",
+    "pin",
+    "title"
+   ]
+  },
+  "custom": {
+   "customFieldKinds": [
+    "hidden",
+    "text",
+    "timestamp",
+    "totp"
+   ],
+   "fields": [
+    "note",
+    "title"
+   ]
+  },
+  "identity": {
+   "fields": [
+    "birthdate",
+    "city",
+    "company",
+    "country_or_region",
+    "county",
+    "email",
+    "facebook",
+    "first_name",
+    "floor",
+    "full_name",
+    "gender",
+    "instagram",
+    "job_title",
+    "last_name",
+    "license_number",
+    "linkedin",
+    "middle_name",
+    "note",
+    "organization",
+    "passport_number",
+    "personal_website",
+    "phone_number",
+    "reddit",
+    "second_phone_number",
+    "social_security_number",
+    "state_or_province",
+    "street_address",
+    "title",
+    "website",
+    "work_email",
+    "work_phone_number",
+    "x_handle",
+    "yahoo",
+    "zip_or_postal_code"
+   ]
+  },
+  "login": {
+   "fields": [
+    "email",
+    "password",
+    "title",
+    "totp_uri",
+    "urls",
+    "username"
+   ]
+  },
+  "note": {
+   "fields": [
+    "note",
+    "title"
+   ]
+  },
+  "ssh-key": {
+   "createdBy": "item create ssh-key generate",
+   "fields": [
+    "comment",
+    "key_type",
+    "password",
+    "title"
+   ]
+  },
+  "wifi": {
+   "fields": [
+    "note",
+    "password",
+    "security",
+    "ssid",
+    "title"
+   ]
+  }
+ }
+}

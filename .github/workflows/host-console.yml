@@ -1,0 +1,49 @@
+name: host-console
+
+# A screenshot of jingzo-host's console (modules/hetzner/console.nix), kept as
+# the run's artifact: the host has no SSH, so its screen shows its state
+# (host-report). Starts when .github/host-console.request changes.
+on:
+  push:
+    paths:
+      - .github/host-console.request
+
+permissions: {}
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+
+      - name: pass-cli 2.4.2 (the flake's)
+        run: nix profile install .#pass-cli && pass-cli --version
+
+      - name: Log in to Proton Pass (install vault)
+        run: pass-cli login
+        env:
+          PROTON_PASS_KEY_PROVIDER: fs
+          PROTON_PASS_PERSONAL_ACCESS_TOKEN: ${{ secrets.PROTON_PASS_HOST_INSTALL_TOKEN }}
+
+      - name: host-console
+        run: nix run .#host-console -- console.png
+        env:
+          PROTON_PASS_KEY_PROVIDER: fs
+
+      - name: Keep the screenshot
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: console
+          path: console.png
+          if-no-files-found: ignore

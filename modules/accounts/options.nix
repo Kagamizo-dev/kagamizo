@@ -1,0 +1,600 @@
+# Accounts and their plans, typed. Nothing the repo relies on about an
+# account (how many custom domains it may have, whether it has Bridge, whether
+# Pass access tokens exist on it) is assumed: each is a capability of the plan
+# the account is declared on, with the page that states it and when it was
+# read.
+#
+#   accounts.capabilities.<provider>  the provider's closed capability set
+#   accounts.plans.<provider>.<plan>  what a plan includes
+#   accounts.held.<name>              the accounts that exist or are planned,
+#                                     each on one declared plan, signed in
+#                                     with an address on its owner's domain
+#
+# This module only types and checks them: each provider's module (proton,
+# cloudflare, github, hetzner, openrouter, ...) declares its own.
+#   accounts.checked                  the held accounts with their plans'
+#                                     capabilities, after every demand the rest
+#                                     of the repo makes is checked against them
+#
+# Each provider has its own closed capability set, so a plan can neither omit
+# one nor invent one (checked below); a limit is a count or "unlimited".
+{ lib, config, ... }:
+let
+  inherit (lib) mkOption types;
+  cfg = config.accounts;
+  passTemplates = lib.attrNames (lib.importJSON ../catalog/_json/pass-items.json).appTemplates;
+
+  # A capability: its value and the evidence for it.
+  cap =
+    valueType:
+    types.submodule {
+      options = {
+        value = mkOption { type = valueType; };
+        source = mkOption {
+          type = types.strMatching "https://.+";
+          description = "The page that states it.";
+        };
+      };
+    };
+  # A limit is a count or "unlimited"; a flag is true or false.
+  Value = types.oneOf [
+    types.ints.unsigned
+    (types.enum [ "unlimited" ])
+    types.bool
+  ];
+  fits = kind: v: if kind == "flag" then builtins.isBool v else builtins.isInt v || v == "unlimited";
+  providers = lib.attrNames cfg.capabilities;
+
+  plan = types.submodule {
+    options = {
+      checked = mkOption {
+        type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+        description = "When the sources were last read.";
+      };
+      capabilities = mkOption { type = types.attrsOf (cap Value); };
+      # Whether the plan costs money, and how: anything but free needs a
+      # payment on every account held on it.
+      billing = mkOption {
+        type = cap (
+          types.enum [
+            "free"
+            "subscription"
+            "usage"
+          ]
+        );
+        description = "free, a subscription, or billed by usage; with the page that states it.";
+      };
+    };
+  };
+
+  # What pays for an account: exactly one of these.
+  payment = types.submodule {
+    options = {
+      mercuryCard = mkOption {
+        type = types.nullOr (types.enum (lib.attrNames config.mercury.cards));
+        default = null;
+        description = "A declared Mercury virtual card (mercury.cards), one per vendor: the default.";
+      };
+      ownerCard = mkOption {
+        type = types.nullOr (
+          types.submodule {
+            options = {
+              issuer = mkOption {
+                type = types.enum [
+                  "capital-one"
+                  "personal"
+                ];
+                description = "Whose card: a named issuer, or one of the owner's personal cards.";
+              };
+              lockedTo = mkOption {
+                type = types.nullOr types.str;
+                default = null;
+                description = "The one merchant the card is locked to, if it is.";
+              };
+              replacedBy = mkOption {
+                type = types.enum (lib.attrNames config.mercury.cards);
+                description = ''
+                  The Mercury virtual card that takes over: every payment ends
+                  on a Mercury card of its own (the owner's rule, 2026-11-01).
+                '';
+              };
+            };
+          }
+        );
+        default = null;
+        description = "A card the owner mints and manages outside Mercury (their decision, 2026-10-24).";
+      };
+      waived = mkOption {
+        type = types.nullOr (
+          types.submodule {
+            options = {
+              because = mkOption { type = types.str; };
+              source = mkOption { type = types.strMatching "https://.+"; };
+            };
+          }
+        );
+        default = null;
+        description = "The fee is waived, with the page that says when.";
+      };
+      fromBalance = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Charged against the account's own balance (a brokerage's commissions): what is charged.";
+      };
+      pending = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Not yet known what pays it: a Gap, listed until it is declared.";
+      };
+    };
+  };
+
+  # Every plan states exactly its provider's capabilities, each of its kind.
+  planProblems = lib.concatLists (
+    lib.mapAttrsToList (
+      provider: plans:
+      let
+        kinds = cfg.capabilities.${provider} or null;
+      in
+      if kinds == null then
+        [ "accounts.plans.${provider}: no provider declares accounts.capabilities.${provider}" ]
+      else
+        lib.concatLists (
+          lib.mapAttrsToList (
+            name: p:
+            let
+              at = "accounts.plans.${provider}.${name}";
+              have = lib.attrNames p.capabilities;
+              want = lib.attrNames kinds;
+            in
+            map (c: "${at}: missing capability `${c}`") (lib.subtractLists have want)
+            ++ map (c: "${at}: ${provider} has no capability `${c}`") (lib.subtractLists want have)
+            ++ lib.concatMap (
+              c:
+              lib.optional (
+                kinds ? ${c} && !(fits kinds.${c} p.capabilities.${c}.value)
+              ) "${at}.capabilities.${c}: a ${kinds.${c}} cannot be ${builtins.toJSON p.capabilities.${c}.value}"
+            ) have
+          ) plans
+        )
+    ) cfg.plans
+  );
+
+  held = types.submodule (
+    { name, config, ... }:
+    {
+      options = {
+        provider = mkOption { type = types.enum providers; };
+        plan = mkOption {
+          type = types.enum (lib.attrNames cfg.plans.${config.provider});
+          description = "One of the provider's declared plans.";
+        };
+        owner = mkOption {
+          type = types.enum (lib.attrNames config'.identity.entities);
+          description = "The entity the account belongs to.";
+        };
+        status = mkOption {
+          type = types.enum [
+            "active"
+            "planned"
+            "retiring"
+          ];
+          description = ''
+            retiring: an account being emptied and closed. It may still sign
+            in on an address off its owner's domains, but only while
+            migration.sources.<name> declares how it is emptied.
+          '';
+        };
+        payment = mkOption {
+          type = types.nullOr payment;
+          default = null;
+          description = "What pays for it; required when its plan is not free.";
+        };
+        signup = mkOption {
+          type = types.nullOr signup;
+          default = null;
+          description = "How the account is created, for `signup`.";
+        };
+        # Products the provider turns on only in its own console, each done
+        # once by hand (operations.humanSteps.enable-product) and recorded
+        # here with what showed it: a demand on a product not listed here
+        # fails evaluation.
+        products = mkOption {
+          type = types.attrsOf (
+            types.submodule {
+              options = {
+                by = mkOption {
+                  type = types.enum (lib.attrNames config'.operations.humanSteps);
+                  default = "enable-product";
+                  description = "The human step that turned it on.";
+                };
+                on = mkOption {
+                  type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+                  description = "When it was turned on.";
+                };
+                evidence = mkOption {
+                  type = types.str;
+                  description = "What showed it on, read through the API, never a screenshot.";
+                };
+                source = mkOption {
+                  type = types.strMatching "https://.+";
+                  description = "Where the provider says it is turned on by hand.";
+                };
+              };
+            }
+          );
+          default = { };
+          description = "Products turned on by hand; each must be in accounts.products.<provider>.";
+        };
+        # An account reached by a token (an API credential), not only by a
+        # web login: the token lives in a custom item of a Proton Pass app
+        # template in its owner's vault, and governance-authorize confirms
+        # that item's shape (its field names and kinds, never its values)
+        # before every action, as it confirms the login's address.
+        credential = mkOption {
+          type = types.nullOr (
+            types.submodule {
+              options = {
+                item = mkOption {
+                  type = types.str;
+                  description = "Title of the credential's custom item in its owner's vault.";
+                };
+                template = mkOption {
+                  type = types.enum passTemplates;
+                  description = "The app template it is made from (catalog/_json/pass-items.json).";
+                };
+              };
+            }
+          );
+          default = null;
+          description = "The account's API credential, when it is reached by token.";
+        };
+        # Proton Pass is the authority on who signs in where: the login item
+        # is what `identity-audit` and governance-authorize read (its address
+        # only, never the password), and it must say this address.
+        login = {
+          item = mkOption {
+            type = types.str;
+            default = name;
+            description = "Title of the account's login item in its owner's vault.";
+          };
+          email = mkOption {
+            type = types.nullOr (types.strMatching "[a-z0-9._+-]+@[a-z0-9.-]+");
+            default = if config.signup == null then null else config.signup.email;
+            defaultText = "signup.email";
+            description = ''
+              The address the account signs in with: on one of its owner's
+              domains, so a login always says whose it is.
+            '';
+          };
+          passkey = mkOption {
+            type = types.nullOr (
+              types.submodule {
+                options.rpId = mkOption {
+                  type = types.strMatching "([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}";
+                  description = "The site's WebAuthn relying party id, as its registration reported it.";
+                };
+                options.source = mkOption {
+                  type = types.enum [
+                    "engine"
+                    "login-item"
+                  ];
+                  default = "engine";
+                  description = ''
+                    Where the passkey is kept: "engine", registered by the
+                    browser engine and kept in its own secret; "login-item",
+                    saved by Proton Pass on the owner's device into the
+                    account's login item, which the engine reads.
+                  '';
+                };
+              }
+            );
+            default = null;
+            description = ''
+              The account's passkey, held by the browser engine's authenticator
+              and kept in its owner's vault (modules/browser): signing in then
+              needs no code. Only on a plan with the passkeys capability.
+            '';
+          };
+          exception = mkOption {
+            type = types.nullOr (
+              types.submodule {
+                options = {
+                  email = mkOption {
+                    type = types.strMatching "[a-z0-9._+-]+@[a-z0-9.-]+";
+                    description = "The one other address the account may be signed in with.";
+                  };
+                  until = mkOption {
+                    type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+                    description = "The last day it is admitted (governance-authorize passes the day).";
+                  };
+                  because = mkOption { type = types.str; };
+                  decided = mkOption {
+                    type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+                    description = "The owner's decision date.";
+                  };
+                };
+              }
+            );
+            default = null;
+            description = ''
+              A typed, dated exception to the login rule: while the account's
+              login is still another address (one the owner opened it on),
+              that address is admitted until the day given, and no other.
+            '';
+          };
+        };
+      };
+    }
+  );
+
+  # A web signup, prepared by `signup prepare` and done once by hand: the one
+  # step most providers offer no API for.
+  signup = types.submodule {
+    options = {
+      url = mkOption {
+        type = types.strMatching "https://.+";
+        description = "The page the signup starts on.";
+      };
+      handle = mkOption {
+        type = types.strMatching "[A-Za-z0-9][A-Za-z0-9-]*";
+        description = "The account or organization name to claim.";
+      };
+      email = mkOption {
+        type = types.enum addresses;
+        description = "A declared mailbox (identity.domains.*.mailboxes).";
+      };
+      credential = mkOption {
+        type = types.enum [
+          "password"
+          "parent"
+        ];
+        description = ''
+          password: a login of its own, with a generated password and its 2FA
+          seed in the vault item. parent: created from another account's
+          session (a GitHub organization under its owner's user account).
+        '';
+      };
+      parent = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "For credential = parent: the account it is created from, by its login.";
+      };
+      findings = mkOption {
+        type = types.listOf (
+          types.submodule {
+            options = {
+              fact = mkOption { type = types.str; };
+              source = mkOption { type = types.str; };
+              checked = mkOption { type = types.strMatching "[0-9]{4}-[0-9]{2}-[0-9]{2}"; };
+            };
+          }
+        );
+        default = [ ];
+        description = "What was learned about the provider before signing up, with where from.";
+      };
+    };
+  };
+  addresses = lib.concatLists (
+    lib.mapAttrsToList (
+      domain: d: map (m: "${m}@${domain}") d.mailboxes
+    ) config.identity.checked.domains
+  );
+  config' = config;
+
+  # Every demand the repo makes of an account: { account; capability; need; why; }.
+  # `need` is a count (the limit must cover it) or true (the flag must be set).
+  covers =
+    limit: need:
+    if builtins.isBool need then limit == true || !need else limit == "unlimited" || need <= limit;
+  signupProblems = lib.concatLists (
+    lib.mapAttrsToList (
+      name: a:
+      lib.optionals (a.signup != null) (
+        lib.optional (
+          (a.signup.credential == "parent") != (a.signup.parent != null)
+        ) "accounts.held.${name}.signup: `parent` is set exactly when credential = \"parent\""
+      )
+    ) cfg.held
+  );
+  # Every login is on its owner's domain, and two accounts never share one.
+  domainsOf =
+    e: lib.attrNames (lib.filterAttrs (_: d: d.entity == e) config.identity.checked.domains);
+  loginProblems =
+    lib.concatLists (
+      lib.mapAttrsToList (
+        name: a:
+        if a.status == "retiring" then
+          lib.optional (
+            !(config.migration.sources ? ${name})
+          ) "accounts.held.${name}: retiring, but migration.sources.${name} does not say how it is emptied"
+        else if a.login.email == null then
+          [ "accounts.held.${name}.login.email: say which address the account signs in with" ]
+        else
+          lib.optional (!lib.elem (lib.last (lib.splitString "@" a.login.email)) (domainsOf a.owner))
+            "accounts.held.${name}.login.email: ${a.login.email} is not on ${a.owner}'s domains (${lib.concatStringsSep ", " (domainsOf a.owner)})"
+      ) cfg.held
+    )
+    ++
+      lib.mapAttrsToList
+        (key: names: "accounts.held: ${lib.concatStringsSep ", " names} share the login ${key}")
+        (
+          lib.filterAttrs (_: ns: lib.length ns > 1) (
+            lib.groupBy' (ns: n: ns ++ [ n ]) [ ] (
+              n: "${cfg.held.${n}.provider}:${cfg.held.${n}.login.email}"
+            ) (lib.attrNames (lib.filterAttrs (_: a: a.login.email != null) cfg.held))
+          )
+        );
+  # Every account on a paid plan names exactly one thing that pays it, and
+  # a Mercury card that pays it is issued on its owner's own Mercury account
+  # (an expense is the entity's that incurs it), unless declared between
+  # them.
+  paymentProblems = lib.concatLists (
+    lib.mapAttrsToList (
+      name: a:
+      let
+        billing = cfg.plans.${a.provider}.${a.plan}.billing.value;
+        p = a.payment;
+        set = lib.filter (x: x != null) (
+          if p == null then
+            [ ]
+          else
+            [
+              p.mercuryCard
+              p.ownerCard
+              p.waived
+              p.fromBalance
+              p.pending
+            ]
+        );
+        cardName =
+          if p == null then
+            null
+          else if p.mercuryCard != null then
+            p.mercuryCard
+          else if p.ownerCard != null then
+            p.ownerCard.replacedBy
+          else
+            null;
+        card = if cardName == null then null else config.mercury.cards.${cardName};
+        cardOwner = if card == null then null else cfg.held.${card.account}.owner;
+      in
+      lib.optional (billing != "free" && p == null)
+        "accounts.held.${name}: its ${a.provider} ${a.plan} plan is billed (${billing}); declare its payment"
+      ++
+        lib.optional (p != null && lib.length set != 1)
+          "accounts.held.${name}.payment: exactly one of mercuryCard, ownerCard, waived, fromBalance, pending"
+      ++
+        lib.optional
+          (card != null && cardOwner != a.owner && (card.between == null || card.between.for != a.owner))
+          "accounts.held.${name}.payment: card ${cardName} is ${cardOwner}'s, the account ${a.owner}'s; declare the card `between` them"
+    ) cfg.held
+  );
+  productProblems = lib.concatLists (
+    lib.mapAttrsToList (
+      name: a:
+      map (
+        p:
+        "accounts.held.${name}.products.${p}: ${a.provider} has no such product (accounts.products.${a.provider})"
+      ) (lib.filter (p: !((cfg.products.${a.provider} or { }) ? ${p})) (lib.attrNames a.products))
+    ) cfg.held
+  );
+  problems =
+    productProblems
+    ++ planProblems
+    ++ paymentProblems
+    ++ signupProblems
+    ++ loginProblems
+    ++ lib.concatMap (
+      d:
+      let
+        a = cfg.held.${d.account} or null;
+        c =
+          if a == null || d.capability == null then
+            null
+          else
+            cfg.plans.${a.provider}.${a.plan}.capabilities.${d.capability};
+      in
+      if a == null then
+        [ "${d.why}: no account `${d.account}` is declared" ]
+      else if (d.capability == null) == (d.product == null) then
+        [ "${d.why}: a demand names exactly one of capability and product" ]
+      else if d.product != null then
+        if !((cfg.products.${a.provider} or { }) ? ${d.product}) then
+          [
+            "${d.why}: ${a.provider} has no product `${d.product}`; known: ${
+              lib.concatStringsSep ", " (lib.attrNames (cfg.products.${a.provider} or { }))
+            }"
+          ]
+        else if d.need != true then
+          [ "${d.why}: a product demand needs = true" ]
+        else if !(a.products ? ${d.product}) then
+          [
+            "${d.why}: ${d.account} has not turned on ${d.product} (${
+              cfg.products.${a.provider}.${d.product}
+            }); the owner's enable-product step, then declare accounts.held.${d.account}.products.${d.product}"
+          ]
+        else
+          [ ]
+      else if !(cfg.capabilities.${a.provider} ? ${d.capability}) then
+        [
+          "${d.why}: ${a.provider} plans have no capability `${d.capability}`; known: ${
+            lib.concatStringsSep ", " (lib.attrNames cfg.capabilities.${a.provider})
+          }"
+        ]
+      else if covers c.value d.need then
+        [ ]
+      else
+        [
+          "${d.why}: needs ${d.capability} = ${builtins.toJSON d.need}, but ${d.account} is on ${a.provider} ${a.plan} with ${builtins.toJSON c.value} (${c.source})"
+        ]
+    ) cfg.demands;
+in
+{
+  options.accounts = {
+    capabilities = mkOption {
+      type = types.attrsOf (
+        types.attrsOf (
+          types.enum [
+            "limit"
+            "flag"
+          ]
+        )
+      );
+      default = { };
+      description = "Per provider, its closed set of capabilities; declared by the provider's module.";
+    };
+    products = mkOption {
+      type = types.attrsOf (types.attrsOf types.str);
+      default = { };
+      description = "Per provider, its closed set of products turned on by hand, each with why it is manual.";
+    };
+    plans = mkOption {
+      type = types.attrsOf (types.attrsOf plan);
+      default = { };
+      description = "Per provider, what each plan includes, as the provider states it.";
+    };
+    held = mkOption {
+      type = types.attrsOf held;
+      default = { };
+    };
+    demands = mkOption {
+      type = types.listOf (
+        types.submodule {
+          options = {
+            account = mkOption { type = types.str; };
+            capability = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "A capability of the account's plan; or name a product instead.";
+            };
+            product = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "A product turned on by hand (accounts.held.<a>.products); need = true.";
+            };
+            need = mkOption { type = types.either types.ints.unsigned types.bool; };
+            why = mkOption { type = types.str; };
+          };
+        }
+      );
+      default = [ ];
+      description = "What the rest of the repo needs from each account; checked against its plan.";
+    };
+    checked = mkOption {
+      type = types.raw;
+      readOnly = true;
+    };
+  };
+
+  config.accounts.checked =
+    if problems == [ ] then
+      lib.mapAttrs (
+        _: a:
+        a // { capabilities = lib.mapAttrs (_: c: c.value) cfg.plans.${a.provider}.${a.plan}.capabilities; }
+      ) cfg.held
+    else
+      throw "accounts: the declared plans do not cover what the repo needs:\n${
+        lib.concatMapStrings (p: "  - ${p}\n") problems
+      }";
+}

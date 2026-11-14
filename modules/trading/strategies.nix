@@ -1,0 +1,541 @@
+# Trading as declarations: brokerages are backends, strategies run on them.
+#
+#   trading.backends.<name> = { account; adapter; stage; }
+#       a brokerage account (a held account with the brokerage role) and the
+#       NautilusTrader adapter that reaches it. stage is how far it may go:
+#       backtest, then paper, then live; live orders will be a spend action
+#       (modules/governance), so no agent ever places one.
+#   trading.strategies.<name> = { kind; backend; symbol; bar; params; option;
+#                                 event; decisions; holdDays;
+#                                 maxDayTradesPer5Days; }
+#       one strategy on one instrument (or, for event-rule, one category of
+#       event contracts) of one backend. holdDays is the least number of
+#       days a position is held (0: it may be closed the day it opens);
+#       maxDayTradesPer5Days is the most round trips the strategy can open
+#       and close on one day over five business days, defaulting per kind
+#       (0 with holdDays ≥ 1; ema-cross on daily bars 0, since one bar is
+#       one day; agent-option and event-rule 5, one proposal a day that
+#       nothing stops closing the same day) and held under FINRA's
+#       pattern-day-trader rule by modules/compliance.
+#
+#   nix run .#trade -- backtest <strategy> <bars.csv>
+#   nix run .#trade -- bars <symbol> <step> [period]     Public's bars as CSV
+#   nix run .#trade -- paper <strategy> [bars.csv] [--all]
+#   nix run .#trade -- propose <strategy> [date] [--forecasts file]
+#   nix run .#trade -- paper-day <strategy> [date] [--forecasts file]
+#   nix run .#trade -- rehearse <strategy> [date]     the live path up to placing
+#   nix run .#trade -- cancel <order-id>              end a working order
+#
+# Backtests touch no account: a simulated venue named after the backend, with
+# a simulated balance. Bars come from anywhere with the columns in _trade.py.
+# `bars`, `paper`, `propose` and `paper-day` read Public through our adapter
+# (_public.py) under the `public` secretspec profile, asking
+# governance-authorize first, as the matching `brokerage` commands would:
+# they preflight orders at Public, which places nothing. So they are the
+# owner's: no agent holds Public.
+#
+# Kinds: ema-cross (the engine's example), agent-option (the research
+# teams' decision into one option, ./_propose.py) and event-rule (the
+# owner's framing of 2026-11-04: Public's event contracts, Kalshi's, priced
+# by deterministic weather rules, ./_weather.py; never a model that talks).
+{ lib, config, ... }:
+let
+  inherit (lib) mkOption types;
+  top = config;
+  cfg = config.trading;
+  held = config.accounts.held;
+  brokerages = lib.attrNames (
+    lib.filterAttrs (_: a: lib.elem "brokerage" (config.accounts.roles.${a.provider} or [ ])) held
+  );
+
+  backend = types.submodule {
+    options = {
+      account = mkOption {
+        type = types.enum brokerages;
+        description = "A held account with the brokerage role.";
+      };
+      adapter = mkOption {
+        type = types.enum [
+          "public" # ours: Public's API has no NautilusTrader adapter
+          "interactive-brokers" # NautilusTrader's own
+        ];
+      };
+      stage = mkOption {
+        type = types.enum [
+          "backtest"
+          "paper"
+          "live"
+        ];
+        default = "backtest";
+      };
+    };
+  };
+
+  strategy = types.submodule (
+    { config, ... }:
+    {
+      options = {
+        holdDays = mkOption {
+          type = types.ints.unsigned;
+          default = 0;
+          description = ''
+            The least number of days a position is held once opened: 0 lets
+            the strategy close it the same day, 1 or more holds it overnight,
+            so no round trip is a day trade.
+          '';
+        };
+        maxDayTradesPer5Days = mkOption {
+          type = types.ints.unsigned;
+          default =
+            if config.holdDays >= 1 then
+              0
+            else
+              {
+                ema-cross = if lib.hasSuffix "-DAY" config.bar then 0 else 5;
+                agent-option = 5;
+                agent-crypto = 5;
+                event-rule = 5;
+              }
+              .${config.kind};
+          defaultText = lib.literalMD "0 with `holdDays` ≥ 1; else per kind: ema-cross 0 on daily bars and 5 below, agent-option 5, event-rule 5";
+          description = ''
+            The most round trips (a buy and a sell of the same instrument on
+            one business day) the strategy can make in five consecutive
+            business days. modules/compliance holds it under FINRA's
+            pattern-day-trader rule for the account it runs on.
+          '';
+        };
+        kind = mkOption {
+          type = types.enum [
+            "ema-cross"
+            # The day's research decision into one defined-risk option within
+            # the limits (./_propose.py, ./limits.nix).
+            "agent-option"
+            # The day's research decision on a coin into one spot buy on
+            # Public, sized in dollars, held long only (./_rust/trade).
+            "agent-crypto"
+            # Event contracts by rule: a forecast's probability against the
+            # contract's price (./_weather.py, ./_propose.py).
+            "event-rule"
+          ];
+          description = "A strategy _trade.py knows how to build.";
+        };
+        event = mkOption {
+          type = types.nullOr (
+            types.submodule {
+              options = {
+                category = mkOption {
+                  type = types.str;
+                  description = "Public's event category, as `event-contracts categories` names it.";
+                };
+                subcategory = mkOption {
+                  type = types.nullOr types.str;
+                  default = null;
+                  description = "One of the category's subcategories, or null for the whole category.";
+                };
+                minEdge = mkOption {
+                  type = types.numbers.between 0.0 1.0;
+                  description = "The least model-probability-over-price a contract needs to be proposed.";
+                };
+                maxContracts = mkOption {
+                  type = types.ints.positive;
+                  description = "The most contracts one proposal buys.";
+                };
+                questions = mkOption {
+                  type = types.nonEmptyListOf (
+                    types.enum [
+                      "rain-month"
+                      "snow-month"
+                      "high-temp-day"
+                    ]
+                  );
+                  description = "The question shapes the rules may trade (_weather.py's QUESTIONS); everything else is skipped.";
+                };
+                source = mkOption {
+                  type = types.enum [
+                    "open-meteo"
+                    "nws"
+                  ];
+                  default = "open-meteo";
+                  description = "Where live forecasts come from (research.dataSources); --forecasts FILE replaces it.";
+                };
+              };
+            }
+          );
+          default = null;
+          description = "For event-rule: which contracts, which questions, and how much edge.";
+        };
+        crypto = mkOption {
+          type = types.nullOr (
+            types.submodule {
+              options = {
+                amountUsd = mkOption {
+                  type = types.ints.positive;
+                  description = "The dollars one buy spends (capped again by the backend's maxPremiumUsd).";
+                };
+                feePct = mkOption {
+                  type = types.numbers.between 0.0 5.0;
+                  default = 0.6;
+                  description = "zerohash's fee on a crypto trade through Public's API, a percent of the amount: 0.60% under $10K a month (https://public.com/disclosures/fee-schedule, section 3, read 2026-11-08).";
+                };
+                researchTicker = mkOption {
+                  type = types.strMatching "[A-Z][A-Z0-9]*-USD";
+                  description = "The ticker the research loop decides on (TradingAgents names a coin as BTC-USD; Public as BTC).";
+                };
+              };
+            }
+          );
+          default = null;
+          description = "For agent-crypto: how much one buy spends, and whose research decides it.";
+        };
+        option = mkOption {
+          type = types.nullOr (
+            types.submodule {
+              options = {
+                expiryDaysMin = mkOption {
+                  type = types.ints.positive;
+                  default = 7;
+                };
+                expiryDaysMax = mkOption {
+                  type = types.ints.positive;
+                  default = 21;
+                };
+                minAbsDelta = mkOption {
+                  type = types.numbers.between 0.0 1.0;
+                  default = 0.15;
+                };
+              };
+            }
+          );
+          default = null;
+          description = "For agent-option: how the contract is chosen.";
+        };
+        decisions = mkOption {
+          type = types.nullOr types.str;
+          default = null;
+          description = "For agent-option: the directory of research decisions, <dir>/<date>/<symbol>.json; for event-rule, the directory of the day's state and paper records.";
+        };
+        backend = mkOption { type = types.enum (lib.attrNames cfg.backends); };
+        symbol = mkOption {
+          type = types.strMatching "[A-Z][A-Z0-9.]*";
+          description = "The instrument; for event-rule, the exchange whose contracts Public lists (KALSHI, the prefix of every event symbol).";
+        };
+        bar = mkOption {
+          type = types.strMatching "[0-9]+-(SECOND|MINUTE|HOUR|DAY)";
+          default = "1-DAY";
+          description = "The bar step, as NautilusTrader writes it.";
+        };
+        startingUsd = mkOption {
+          type = types.ints.positive;
+          default = 10000;
+          description = "The simulated balance a backtest starts with.";
+        };
+        params = mkOption {
+          type = types.nullOr (
+            types.submodule {
+              options = {
+                tradeSize = mkOption { type = types.ints.positive; };
+                fastPeriod = mkOption { type = types.ints.positive; };
+                slowPeriod = mkOption { type = types.ints.positive; };
+              };
+            }
+          );
+          default = null;
+          description = "For ema-cross.";
+        };
+      };
+    }
+  );
+
+  problems = lib.concatLists (
+    lib.mapAttrsToList (
+      name: s:
+      lib.optional (
+        s.kind == "ema-cross" && (s.params == null || s.params.fastPeriod >= s.params.slowPeriod)
+      ) "trading.strategies.${name}: ema-cross needs params with fastPeriod below slowPeriod"
+      ++ lib.optional (
+        s.kind == "agent-option" && (s.option == null || s.decisions == null)
+      ) "trading.strategies.${name}: agent-option needs option and decisions"
+      ++ lib.optional (
+        s.kind == "agent-crypto" && (s.crypto == null || s.decisions == null)
+      ) "trading.strategies.${name}: agent-crypto needs crypto and decisions"
+      ++ lib.optional (
+        s.kind == "event-rule" && (s.event == null || s.decisions == null)
+      ) "trading.strategies.${name}: event-rule needs event and decisions"
+      ++ lib.optional (
+        lib.elem s.kind [
+          "agent-option"
+          "agent-crypto"
+          "event-rule"
+        ]
+        && !(cfg.limits ? ${s.backend})
+      ) "trading.strategies.${name}: no trading.limits.${s.backend}"
+      ++ lib.optional (
+        s.kind == "event-rule"
+        && s.event != null
+        && !(config.research.dataSources ? ${sourceKey s.event.source})
+      ) "trading.strategies.${name}: research.dataSources has no ${sourceKey s.event.source}"
+    ) cfg.strategies
+  );
+  sourceKey = lib.replaceStrings [ "-" ] [ "_" ];
+  eventRule = lib.attrNames (lib.filterAttrs (_: s: s.kind == "event-rule") cfg.strategies);
+  agentCrypto = lib.attrNames (lib.filterAttrs (_: s: s.kind == "agent-crypto") cfg.strategies);
+
+  declared = lib.mapAttrs (
+    name: s:
+    s
+    // {
+      inherit name;
+      venue = lib.toUpper (lib.replaceStrings [ "-" ] [ "_" ] s.backend);
+    }
+  ) cfg.strategies;
+in
+{
+  options.trading = {
+    backends = mkOption {
+      type = types.attrsOf backend;
+      default = { };
+    };
+    strategies = mkOption {
+      type = types.attrsOf strategy;
+      default = { };
+    };
+  };
+
+  config = {
+    # Public first: your account, through an adapter of our own. Backtests
+    # only until the adapter exists and the account question is settled
+    # (HANDOFF.md).
+    trading.backends.public = {
+      account = "public-mirazo";
+      adapter = "public";
+    };
+
+    # The engine's own example, kept as the reference every backtest check
+    # runs: it proves the packaged engine trades end to end.
+    trading.strategies = {
+      ema-cross-spy = {
+        kind = "ema-cross";
+        backend = "public";
+        symbol = "SPY";
+        params = {
+          tradeSize = 10;
+          fastPeriod = 10;
+          slowPeriod = 20;
+        };
+      };
+      # The plan of 2026-11-02: the research teams' daily decision on SPY,
+      # as one long call or put within the limits; placed only by the
+      # owner (`trade place`), and only once the strategy's stage is live.
+      spy-agents = {
+        kind = "agent-option";
+        backend = "public";
+        symbol = "SPY";
+        option = { };
+        decisions = "research";
+        # The option is held at least overnight: the day's decision opens
+        # it, a later day's closes it, so no round trip is a day trade and
+        # the brokerage account (margin, far under $25,000) never meets
+        # FINRA's pattern-day-trader rule (modules/compliance, 2026-11-04).
+        holdDays = 1;
+      };
+      # The owner's framing of 2026-11-04: Kalshi's weather contracts on
+      # Public, each settling on an observation (its worst case the price
+      # paid), priced by the rules in _weather.py from NWS or Open-Meteo
+      # forecasts. The whole "Climate and Weather" category is read; only
+      # the question shapes named here are ever traded. Paper first: the
+      # stage gate (./stages.nix) holds it at research.
+      weather-rules = {
+        kind = "event-rule";
+        backend = "public";
+        symbol = "KALSHI";
+        event = {
+          category = "Climate and Weather";
+          minEdge = 0.15;
+          maxContracts = 10;
+          questions = [
+            "rain-month"
+            "snow-month"
+            "high-temp-day"
+          ];
+        };
+        decisions = "research";
+        # Contracts are held to settlement or at least overnight, never
+        # sold the day they are bought: at the default cadence (one
+        # proposal a day, closable the same day) the strategy would be five
+        # day trades in five days on a margin account under $25,000, which
+        # FINRA Rule 4210(f)(8)(B) restricts (modules/compliance, 2026-11-04).
+        holdDays = 1;
+      };
+      # Public as the one interface around the clock (the owner, 2026-11-08):
+      # the research teams' daily decision on bitcoin, as one spot buy of
+      # $25 on Public (an amount, not a quantity), held at least a day and
+      # never sold short. Crypto is not a security, so FINRA's
+      # pattern-day-trader rule does not reach it; the hold keeps the paper
+      # ledger's marks a day apart.
+      btc-agents = {
+        kind = "agent-crypto";
+        backend = "public";
+        symbol = "BTC";
+        crypto = {
+          amountUsd = 25;
+          researchTicker = "BTC-USD";
+        };
+        decisions = "research";
+        holdDays = 1;
+      };
+    };
+
+    # Public lists event contracts through its API (the pinned CLI's
+    # `event-contracts` and EVENTCONTRACT instrument type); the strategy
+    # relies on it, so the account's plan must state it.
+    accounts.demands = map (name: {
+      account = cfg.backends.${cfg.strategies.${name}.backend}.account;
+      capability = "eventContractsApi";
+      need = true;
+      why = "trading.strategies.${name} proposes event contracts";
+    }) eventRule;
+
+    perSystem =
+      { pkgs, config, ... }:
+      let
+        python = pkgs.python313.withPackages (_: [ config.packages.nautilus-trader ]);
+        scripts = pkgs.linkFarm "trade-scripts" {
+          "trade.py" = ./_trade.py;
+          "_public.py" = ./_public.py;
+          "_propose.py" = ./_propose.py;
+          "_weather.py" = ./_weather.py;
+          "_weather_test.py" = ./_weather_test.py;
+        };
+        # The event-rule strategies, for the wrapper's authorizations.
+        eventRulePattern = if eventRule == [ ] then "--none--" else lib.concatStringsSep "|" eventRule;
+        cryptoPattern = if agentCrypto == [ ] then "--none--" else lib.concatStringsSep "|" agentCrypto;
+        # The engine itself, with whatever Public credentials the caller set.
+        run = pkgs.writeShellApplication {
+          name = "trade-run";
+          runtimeInputs = [ python ];
+          text = builtins.seq (lib.assertMsg (problems == [ ]) (lib.concatStringsSep "\n" problems)) ''
+            export TRADE_STRATEGIES=${lib.escapeShellArg (builtins.toJSON declared)}
+            export TRADE_LIMITS=${lib.escapeShellArg (builtins.toJSON cfg.limits)}
+            # Rust (./_rust/trade) for every command but backtest and paper,
+            # which stay on the Python engine until they run on
+            # NautilusTrader's Rust crates (./_rust/nautilus-probe).
+            case "''${1:-}" in
+              backtest | paper) exec python3 -I ${scripts}/trade.py "$@" ;;
+              *) exec ${lib.getExe' config.packages.weather-backtest "trade-run"} "$@" ;;
+            esac
+          '';
+        };
+        trade = pkgs.writeShellApplication {
+          name = "trade";
+          runtimeInputs = [
+            run
+            config.packages.secretspec
+            config.packages.pass-cli
+            config.packages.governance-authorize
+          ];
+          text = builtins.seq top.accounts.checked ''
+            account=${top.trading.backends.public.account}
+            case "''${1:-}" in
+              account | bars | paper | propose | paper-day | paper-settle | rehearse | place | cancel)
+                export PROTON_PASS_KEY_PROVIDER=''${PROTON_PASS_KEY_PROVIDER:-fs}
+                case "$1" in
+                  account) governance-authorize public:accounts-list "$account" ;;
+                  bars) governance-authorize public:historicdata-bars "$account" ;;
+                  paper)
+                    governance-authorize public:historicdata-bars "$account"
+                    governance-authorize public:order-preflight-single "$account" ;;
+                  propose | paper-day)
+                    case "''${2:-}" in
+                      ${eventRulePattern})
+                        governance-authorize public:event-contracts-summary "$account"
+                        governance-authorize public:event-contracts-details "$account"
+                        governance-authorize public:market-quotes "$account" ;;
+                      ${cryptoPattern}) governance-authorize public:market-quotes "$account" ;;
+                      *) governance-authorize public:market-option-chain "$account" ;;
+                    esac
+                    governance-authorize public:order-preflight-single "$account" ;;
+                  # Settling paper days reads each recorded event's outcome, or
+                  # marks a coin at its quote.
+                  paper-settle)
+                    case "''${2:-}" in
+                      ${cryptoPattern}) governance-authorize public:market-quotes "$account" ;;
+                      *) governance-authorize public:event-contracts-details "$account" ;;
+                    esac ;;
+                  # The live path up to placing: the account and a preflight.
+                  rehearse)
+                    governance-authorize public:accounts-list "$account"
+                    governance-authorize public:order-preflight-single "$account" ;;
+                  # Ending a working order: a write, never a spend.
+                  cancel) governance-authorize public:order-cancel "$account" ;;
+                  # The one spend: the controller's, never an agent's (modules/governance).
+                  place)
+                    governance-authorize public:order-preflight-single "$account"
+                    governance-authorize public:order-place "$account" ;;
+                esac
+                exec secretspec run --file ${config.packages.secretspec-toml} --profile "''${PUBLIC_PROFILE:-public}" \
+                  --reason "trade $*" -- trade-run "$@"
+                ;;
+              *) exec trade-run "$@" ;;
+            esac
+          '';
+        };
+      in
+      {
+        packages.trade = trade;
+
+        # A deterministic random walk with a trend change, so the EMA cross
+        # must buy and sell at least once.
+        checks.trading-backtest =
+          pkgs.runCommand "trading-backtest"
+            {
+              nativeBuildInputs = [
+                run
+                pkgs.jq
+              ];
+            }
+            ''
+              ${pkgs.python313}/bin/python3 -I - > bars.csv <<'EOF'
+              import datetime, random
+              random.seed(7)
+              t = datetime.datetime(2025, 1, 2, 21, tzinfo=datetime.timezone.utc)
+              p = 100.0
+              print("timestamp,open,high,low,close,volume")
+              for i in range(300):
+                  drift = 0.4 if (i // 60) % 2 == 0 else -0.4
+                  o = p
+                  p = max(1.0, p + drift + random.uniform(-1, 1))
+                  print(f"{t.isoformat()},{o:.2f},{max(o, p) + 0.5:.2f},{min(o, p) - 0.5:.2f},{p:.2f},{random.randint(1000, 5000)}")
+                  t += datetime.timedelta(days=1)
+              EOF
+              trade-run backtest ema-cross-spy bars.csv > result.json
+              jq -e '.bars == 300 and .orders_filled >= 2' result.json
+
+              # The Public adapter against a stand-in for Public's API: the
+              # same bars back, BUY preflights taken, SELLs refused.
+              ${pkgs.python313}/bin/python3 -I ${./_stub_public.py} bars.csv > port &
+              while [ ! -s port ]; do sleep 0.1; done
+              export PUBLIC_API_BASE_URL=http://127.0.0.1:$(cat port) PUBLIC_PERSONAL_SECRET=stub-secret
+              trade-run bars SPY 1-DAY > public.csv
+              [ "$(wc -l < public.csv)" = 301 ]
+              trade-run paper ema-cross-spy --all > paper.json
+              jq -e --slurpfile b result.json '.orders_filled == $b[0].orders_filled
+                and (.preflight | length) >= 2
+                and any(.preflight[]; .accepted and .preflight.estimatedCost == "1000.00")
+                and any(.preflight[]; (.accepted | not) and .refused_by == "public" and .status == 400)' paper.json
+
+              # Proposals, the stage gate, placing and reading back, the
+              # paper day and the event endpoints are the Rust tests'
+              # (./_rust/trade/tests/checks.rs, run by checks.weather-backtest).
+              jq -s '{backtest: .[0], paper: .[1]}' result.json paper.json > $out
+            '';
+
+        # The weather rules over the fixture, offline: the parser's shapes
+        # and refusals, the probabilities, the two live sources' parsers.
+        checks.trading-weather = pkgs.runCommand "trading-weather" { } ''
+          ${pkgs.python313}/bin/python3 -I ${scripts}/_weather_test.py ${./_json/forecasts.json}
+          touch $out
+        '';
+      };
+  };
+}
