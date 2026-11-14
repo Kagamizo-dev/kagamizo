@@ -7,8 +7,8 @@
 #
 #   matrix-token   once a boot, before the server: a registration token the
 #                  seed alone knows (/run/matrix, never printed)
-#   matrix-seed    after the server: registers the owner and the agents'
-#                  bot if their logins are not in the host's state vault
+#   matrix-seed    after the server: registers the owner, the agents' bot
+#                  and every team if their logins are not in the host's state vault
 #                  yet, generating each password on the host and storing
 #                  it as a Proton Pass login item (Kagamizo-Host-State,
 #                  which the host may write). The owner signs in to Element
@@ -18,6 +18,7 @@
   elementPort,
   matrixPort,
   owner, # the owner's Matrix localpart, from their address
+  teams, # every team: each its own login (modules/agents/rooms.nix)
   passCli,
   tokenFile,
   stateVault,
@@ -45,7 +46,8 @@ let
   users = [
     owner
     "agents"
-  ];
+  ]
+  ++ teams;
 in
 {
   services.matrix-tuwunel = {
