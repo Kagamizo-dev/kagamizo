@@ -155,10 +155,11 @@ in
             ${lib.concatStringsSep "\n" (
               builtins.map (team: ''
                 var="${svcTokenVar team}"
-                # OpenTofu's structured output as JSON, extract the inner value
-                # (client_id, client_secret) and pipe it into secretspec's stdin.
+                # OpenTofu prints one named output as its bare value
+                # (client_id, client_secret), with no wrapper. Fail rather
+                # than store a value that lacks either field.
                 infra ci output -json agents-service-token-${team} |
-                  jq -r '.value' |
+                  jq -ce 'select(.client_id and .client_secret) | {client_id, client_secret}' |
                   secretspec set "$var" --file "$spec" --profile host \
                     --from-file - \
                     --reason "infra-service-tokens: store team ${team} Access service token" >/dev/null
