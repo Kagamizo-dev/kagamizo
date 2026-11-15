@@ -8,6 +8,11 @@
 #       derived from governance.agents: none is written by hand
 #   agents.chat.owner   the owner's localpart on the homeserver
 #   agents.chat.server  the homeserver's name
+#   agents.chat.address the owner's address, as Cloudflare Access vouches
+#                       for it: the one the chat pages talk for
+#   agents.chat.accessTeam, .port, .prefix
+#                       the Access team that signs assertions, and where
+#                       the gateway listens and is served
 #
 # checks.agents-rooms (./_lean/Rooms.lean): every team has exactly one room,
 # no two rooms share an alias, and a room's members are the owner and its
@@ -27,6 +32,16 @@
 #                          loopback: the rooms are made with the token
 #                          alone, a second run does nothing, a wrong token
 #                          is refused
+#
+#   packages.chat-gateway  the chat pages (./_chat, Rust): the owner reads a
+#                          team's room and talks in it on the shell's own
+#                          site, behind Access, with no second sign-in.
+#                          It serves only the address Access vouches for,
+#                          and reaches the homeserver with the application
+#                          service's token. Its second program,
+#                          chat-check-server, is the same pages over a
+#                          homeserver kept in memory, for
+#                          checks.shell-e2e (../shell/shell.nix).
 #
 # No team answers yet: that waits on the runner listening in its room.
 { lib, config, ... }:
@@ -77,6 +92,26 @@ in
         type = types.str;
         description = "The homeserver's name.";
       };
+      address = mkOption {
+        type = types.str;
+        description = "The owner's address, as Cloudflare Access vouches for it.";
+      };
+      accessTeam = mkOption {
+        type = types.str;
+        # As ../cloudflare/infra.nix names it to Cloudflare (auth_domain).
+        default = "kagamizo.cloudflareaccess.com";
+        description = "The Access team whose keys sign the assertions the gateway believes.";
+      };
+      port = mkOption {
+        type = types.port;
+        default = 8086;
+        description = "The loopback port the chat gateway listens on.";
+      };
+      prefix = mkOption {
+        type = types.strMatching "(/[a-z]+)+";
+        default = "/next/chat";
+        description = "Where the chat pages are served on the shell's site.";
+      };
     };
     rooms = mkOption {
       type = types.attrsOf room;
@@ -88,7 +123,8 @@ in
     agents = {
       chat = {
         # As ../hetzner/host.nix names the owner to the homeserver.
-        owner = lib.head (lib.splitString "@" (lib.head config.hetzner.host.agents.viewers));
+        owner = lib.head (lib.splitString "@" cfg.chat.address);
+        address = lib.head config.hetzner.host.agents.viewers;
         server = config.hetzner.host.agents.zone;
       };
       rooms = lib.genAttrs teams (t: {
@@ -114,6 +150,25 @@ in
             rooms = lib.mapAttrsToList (team: r: r // { inherit team; }) cfg.rooms;
           });
           meta.mainProgram = "matrix-rooms";
+        };
+        packages.chat-gateway = pkgs.rustPlatform.buildRustPackage {
+          pname = "chat-gateway";
+          version = "0.1.0";
+          # The gateway is built from the rooms crate and the site's own
+          # parts, each where it lives.
+          src = lib.fileset.toSource {
+            root = ../.;
+            fileset = lib.fileset.unions [
+              ./_chat
+              ./_rooms
+              ../shell/_site
+              ../shell/_shell/src/model.rs
+            ];
+          };
+          sourceRoot = "source/agents/_chat";
+          cargoLock.lockFile = ./_chat/Cargo.lock;
+          inherit (config.packages.matrix-rooms) MATRIX_ROOMS;
+          meta.mainProgram = "chat-gateway";
         };
         checks.matrix-rooms = pkgs.stdenvNoCC.mkDerivation {
           name = "matrix-rooms-check";

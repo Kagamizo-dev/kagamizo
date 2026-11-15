@@ -63,6 +63,8 @@ let
       elementPort = svc.port;
       matrixPort = (lib.head svc.paths).port;
       roomsTool = config.packages.matrix-rooms;
+      gateway = config.packages.chat-gateway;
+      inherit (top.agents) chat;
     }
   );
 
@@ -72,6 +74,7 @@ let
     import ../shell/_web-host.nix {
       web = config.packages.kagamizo-shell-web;
       site = config.packages.kagamizo-site-html;
+      inherit (top.agents) chat;
       inherit
         (lib.findFirst (s: s.name == "os") (throw "hetzner.host.agents: no os service") cfg.agents.services)
         port

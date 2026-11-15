@@ -47,11 +47,17 @@ session state is the exception to remove. Decided the same day:
    `Boundary.lean` (13 stored sessions today, a count that only falls),
    then the state.
 
-Stage 1, left to do: the gateway (`modules/agents/_chat`: rooms,
-messages, send, stream; trusts only Cloudflare's signed Access
-assertion and the owner's address), the Chat pages in
-`modules/shell/_site`, and `checks.shell-e2e` grown from links to
-controls.
+Stage 1 is built and not yet on the host: `chat-gateway`
+(`modules/agents/_chat`) serves the teams and each room at
+`os.jingzo.org/next/chat/`, only for the address Access vouches for, with
+a plain form and no script; `checks.shell-e2e` serves the site and the
+chat pages together and sends a message by keyboard. Not verified
+anywhere real yet: the gateway believing a real Access assertion, nginx
+passing `/next/chat` to it, and the rooms on the host's homeserver. Left
+in Stage 1: the audience of the assertion is not held to (the team, the
+signature, the expiry and the owner's address are); live updates wait on
+the island (the page has a "Check for new messages" link); the Lean
+statement that the gateway serves exactly the declared rooms.
 
 ## 2026-11-10 to 11-14: one surface at os.jingzo.org
 

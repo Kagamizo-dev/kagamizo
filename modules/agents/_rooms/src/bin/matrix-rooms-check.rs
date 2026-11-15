@@ -8,9 +8,10 @@
 //!   * with the service's token alone, every declared room is made, with
 //!     its topic, holding the owner and its team: no password exists;
 //!   * a second run does nothing;
-//!   * the same calls with a wrong token are refused.
+//!   * the same calls with a wrong token are refused;
+//!   * what the owner and a team say in a room reads back, oldest first.
 use matrix_rooms::http::{registration, Http};
-use matrix_rooms::{reconcile, Declared, Server};
+use matrix_rooms::{reconcile, Declared, Server, Talk};
 use std::process::{Command, ExitCode};
 
 const PORT: u16 = 6199;
@@ -67,7 +68,15 @@ fn check(binary: &str) -> Result<(), String> {
                 return Err(format!("{}: not its declared topic", room.alias));
             }
         }
-        println!("matrix-rooms-check: {} rooms made with the service's token alone; the second run did nothing; a wrong token was refused", declared.rooms.len());
+        let first = declared.rooms.first().ok_or("no room is declared")?;
+        let id = http.resolve(&declared.owner, &declared.alias(first))?.ok_or("a declared room is missing")?;
+        http.say(&declared.owner, &id, "one")?;
+        http.say(&first.team, &id, "two")?;
+        let said: Vec<(String, String)> = http.messages(&declared.owner, &id, 50)?.into_iter().map(|m| (m.from, m.body)).collect();
+        if said != vec![(declared.user(&declared.owner), "one".to_owned()), (declared.user(&first.team), "two".to_owned())] {
+            return Err(format!("the messages read back as {said:?}"));
+        }
+        println!("matrix-rooms-check: {} rooms made with the service's token alone; the second run did nothing; a wrong token was refused; what the owner and a team said reads back in order", declared.rooms.len());
         Ok(())
     })();
     let _ = server.kill();

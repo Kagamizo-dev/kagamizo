@@ -15,6 +15,11 @@
 #                  changing nothing more, if a room holds someone not
 #                  declared.
 #
+#   chat-gateway   the chat pages, on the loopback: the shell's site
+#                  (modules/shell/_web-host.nix) passes ${chat.prefix}/ to
+#                  it. It serves only the owner, as Access vouches for
+#                  them, and holds the application service's token.
+#
 # There is no password and no sign-in on this homeserver (the owner's
 # rule, 2026-11-15): registration is closed, every account is reached
 # through the application service's token, and the owner talks through
@@ -25,6 +30,8 @@
   elementPort,
   matrixPort,
   roomsTool, # matrix-rooms, with the declared rooms compiled in
+  gateway, # chat-gateway: the chat pages (modules/agents/_chat)
+  chat, # agents.chat: the owner's address, the Access team, the port, the prefix
 }:
 { pkgs, config, ... }:
 let
@@ -110,6 +117,22 @@ in
         chmod 0750 ${tokenDir}/appservices
         chmod 0640 ${tokenDir}/appservices/kagamizo.yaml
       '';
+    };
+
+    chat-gateway = {
+      description = "The chat pages: the owner talks to a team on the shell's own site";
+      wantedBy = [ "multi-user.target" ];
+      after = [
+        "matrix-rooms.service"
+        "network-online.target"
+      ];
+      wants = [ "network-online.target" ];
+      requires = [ "matrix-tuwunel.service" ];
+      serviceConfig = {
+        ExecStart = "${gateway}/bin/chat-gateway ${toString chat.port} ${chat.prefix} http://127.0.0.1:${toString matrixPort} ${tokenDir}/as-token ${chat.address} ${chat.accessTeam}";
+        Restart = "always";
+        RestartSec = 5;
+      };
     };
 
     matrix-rooms = {

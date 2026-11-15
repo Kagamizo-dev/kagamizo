@@ -11,6 +11,9 @@
 //!   m/<module>/index.html   a module's page: what it shows, its paper, and
 //!                           what its Lean proves
 //!   shell.css               the one stylesheet (./style.rs)
+//!
+//! The navigation's Chat link goes to chat/, which is not a file here: the
+//! chat gateway (../../agents/_chat) renders it, inside the same `frame`.
 use crate::a11y;
 use crate::html::{document, el, Node};
 use crate::model::{App, Declared, Kind, Page, Shell, Wallet};
@@ -19,8 +22,12 @@ use std::collections::BTreeMap;
 
 /// Where a page sits, as the path back to the site's root.
 #[derive(Clone, Copy, PartialEq)]
-enum Here {
+pub enum Here {
     Home,
+    /// The list of teams (the chat gateway's page, at chat/).
+    Chat,
+    /// One team's room, at chat/<team>/.
+    Room,
     Wallet,
     Settings,
     Module,
@@ -30,18 +37,27 @@ impl Here {
     fn root(self) -> &'static str {
         match self {
             Here::Home => "",
-            Here::Settings | Here::Wallet => "../",
-            Here::Module => "../../",
+            Here::Settings | Here::Wallet | Here::Chat => "../",
+            Here::Module | Here::Room => "../../",
+        }
+    }
+    /// The section a page belongs to, for the navigation's current mark.
+    fn section(self) -> Here {
+        match self {
+            Here::Room => Here::Chat,
+            other => other,
         }
     }
 }
 
-fn frame(here: Here, title: &str, body: Vec<Node>) -> Node {
+/// A whole page: the head, the skip link, the navigation, the content and
+/// the footer.
+pub fn frame(here: Here, title: &str, body: Vec<Node>) -> Node {
     let root = here.root();
     let link = |to: Here, href: String, label: &str| {
         let a = el("a").attr("href", href).text(label);
-        if to == here {
-            a.attr("aria-current", "page")
+        if to == here.section() {
+            a.attr("aria-current", if to == here { "page" } else { "true" })
         } else {
             a
         }
@@ -60,6 +76,7 @@ fn frame(here: Here, title: &str, body: Vec<Node>) -> Node {
                 .class("top")
                 .attr("aria-label", "Sections")
                 .child(link(Here::Home, format!("{root}index.html"), "Catalog"))
+                .child(link(Here::Chat, format!("{root}chat/"), "Chat"))
                 .child(link(Here::Wallet, format!("{root}wallet/index.html"), "Wallet"))
                 .child(link(Here::Settings, format!("{root}settings/index.html"), "Settings")),
         );
@@ -406,7 +423,8 @@ mod tests {
         let files = site(declared(), "web").unwrap();
         for (path, html) in files.iter().filter(|(p, _)| p.ends_with(".html")) {
             for target in internal_links(path, html) {
-                assert!(files.contains_key(&target), "{path} links to {target}, which is not generated");
+                // chat/ is the gateway's, not a file of this site.
+                assert!(target == "chat" || files.contains_key(&target), "{path} links to {target}, which is not generated");
             }
         }
     }
@@ -469,6 +487,7 @@ mod tests {
                 "link: Kagamizo -> index.html",
                 "[nav: Sections]",
                 "link: Catalog -> index.html",
+                "link: Chat -> chat/",
                 "link: Wallet -> wallet/index.html",
                 "link: Settings -> settings/index.html",
                 "[main]",
@@ -502,6 +521,7 @@ mod tests {
                 "link: Kagamizo -> ../../index.html",
                 "[nav: Sections]",
                 "link: Catalog -> ../../index.html",
+                "link: Chat -> ../../chat/",
                 "link: Wallet -> ../../wallet/index.html",
                 "link: Settings -> ../../settings/index.html",
                 "[main]",
@@ -522,15 +542,15 @@ mod tests {
     fn the_settings_read_in_this_order() {
         let pages = documents(declared(), "web");
         let lines = outline(&pages["settings/index.html"]);
-        assert_eq!(&lines[9..], ["h1: Settings", "h2: Accounts 1 row", "h2: Devices 0 rows", "[footer]"]);
-        assert_eq!(lines[7], "link: Settings -> ../settings/index.html");
+        assert_eq!(&lines[10..], ["h1: Settings", "h2: Accounts 1 row", "h2: Devices 0 rows", "[footer]"]);
+        assert_eq!(lines[8], "link: Settings -> ../settings/index.html");
     }
 
     #[test]
     fn the_wallet_reads_in_this_order_and_shows_no_value() {
         let pages = documents(declared(), "web");
         let lines = outline(&pages["wallet/index.html"]);
-        assert_eq!(&lines[9..], ["h1: Wallet", "h2: Payment cards 1 card", "h2: Mailbox cards 1 card", "h2: Jingzo-LLC 1 card", "h2: Mirazo-Root 1 card", "[footer]"]);
+        assert_eq!(&lines[10..], ["h1: Wallet", "h2: Payment cards 1 card", "h2: Mailbox cards 1 card", "h2: Jingzo-LLC 1 card", "h2: Mirazo-Root 1 card", "[footer]"]);
         let html = document(&pages["wallet/index.html"]);
         for wanted in ["Research-OpenRouter", "$50 weekly", "locked to OpenRouter", "confirmed by passkey", "held by accounting-jingzo", "held by you alone", "minted by human: sign-up", "receipts@jingzo.org", "until 2027-01-31", "from anyone"] {
             assert!(html.contains(wanted), "{wanted}");

@@ -5,7 +5,7 @@
 //! the homeserver allows because that account is in the service's
 //! namespace (`registration`). An account is registered the first time it
 //! is used.
-use crate::{Declared, Room, Server};
+use crate::{Declared, Message, Room, Server, Talk};
 use serde_json::{json, Value};
 use std::collections::BTreeSet;
 
@@ -14,6 +14,7 @@ pub struct Http {
     server: String,
     token: String,
     known: BTreeSet<String>,
+    sent: u64,
 }
 
 /// A path segment or query value, percent-encoded.
@@ -63,7 +64,7 @@ pub fn registration(d: &Declared, as_token: &str, hs_token: &str) -> String {
 
 impl Http {
     pub fn new(base: &str, server: &str, token: &str) -> Self {
-        Http { base: base.trim_end_matches('/').to_owned(), server: server.to_owned(), token: token.trim().to_owned(), known: BTreeSet::new() }
+        Http { base: base.trim_end_matches('/').to_owned(), server: server.to_owned(), token: token.trim().to_owned(), known: BTreeSet::new(), sent: 0 }
     }
 
     /// The account exists: registered now, or already there.
@@ -90,7 +91,8 @@ impl Http {
     fn call(&mut self, by: &str, method: &str, path: &str, body: Option<Value>) -> Result<Value, ureq::Error> {
         self.ensure(by).map_err(|e| ureq::Error::from(std::io::Error::other(e)))?;
         let user = format!("@{by}:{}", self.server);
-        let request = ureq::request(method, &format!("{}/_matrix/client/v3{path}", self.base)).query("user_id", &user).set("Authorization", &format!("Bearer {}", self.token));
+        let join = if path.contains('?') { '&' } else { '?' };
+        let request = ureq::request(method, &format!("{}/_matrix/client/v3{path}{join}user_id={}", self.base, seg(&user))).set("Authorization", &format!("Bearer {}", self.token));
         let response = match body {
             Some(b) => request.send_json(b)?,
             None => request.call()?,
@@ -138,6 +140,37 @@ impl Server for Http {
     }
     fn set_topic(&mut self, by: &str, room_id: &str, topic: &str) -> Result<(), String> {
         self.call(by, "PUT", &format!("/rooms/{}/state/m.room.topic", seg(room_id)), Some(json!({ "topic": topic }))).map(drop).map_err(|e| failure("setting the topic", e))
+    }
+}
+
+impl Talk for Http {
+    fn messages(&mut self, by: &str, room_id: &str, limit: usize) -> Result<Vec<Message>, String> {
+        let got = self.call(by, "GET", &format!("/rooms/{}/messages?dir=b&limit={limit}", seg(room_id)), None).map_err(|e| failure("reading the messages", e))?;
+        let mut found: Vec<Message> = got["chunk"]
+            .as_array()
+            .map(|events| {
+                events
+                    .iter()
+                    .filter(|e| e["type"] == "m.room.message")
+                    .filter_map(|e| {
+                        Some(Message {
+                            id: e["event_id"].as_str()?.to_owned(),
+                            from: e["sender"].as_str()?.to_owned(),
+                            body: e["content"]["body"].as_str()?.to_owned(),
+                            at: e["origin_server_ts"].as_u64().unwrap_or(0),
+                        })
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        found.reverse();
+        Ok(found)
+    }
+    fn say(&mut self, by: &str, room_id: &str, body: &str) -> Result<(), String> {
+        self.sent += 1;
+        let nanos = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
+        let path = format!("/rooms/{}/send/m.room.message/{nanos}-{}", seg(room_id), self.sent);
+        self.call(by, "PUT", &path, Some(json!({ "msgtype": "m.text", "body": body }))).map(drop).map_err(|e| failure("sending the message", e))
     }
 }
 

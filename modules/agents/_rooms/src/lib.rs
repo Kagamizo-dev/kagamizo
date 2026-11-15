@@ -10,6 +10,7 @@
 //! against one kept in memory (the tests below); ./http.rs is the one that
 //! speaks HTTP, as the homeserver's application service.
 pub mod http;
+pub mod memory;
 
 use serde::Deserialize;
 use std::collections::BTreeSet;
@@ -55,6 +56,24 @@ pub trait Server {
     fn join(&mut self, by: &str, room_id: &str) -> Result<(), String>;
     fn topic(&mut self, by: &str, room_id: &str) -> Result<Option<String>, String>;
     fn set_topic(&mut self, by: &str, room_id: &str, topic: &str) -> Result<(), String>;
+}
+
+/// One thing said in a room.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Message {
+    pub id: String,
+    /// The full account, `@localpart:server`.
+    pub from: String,
+    pub body: String,
+    /// Milliseconds since 1970, by the homeserver's clock.
+    pub at: u64,
+}
+
+/// Talking in a room: what the chat page needs of a homeserver.
+pub trait Talk: Server {
+    /// The latest messages, oldest first.
+    fn messages(&mut self, by: &str, room_id: &str, limit: usize) -> Result<Vec<Message>, String>;
+    fn say(&mut self, by: &str, room_id: &str, body: &str) -> Result<(), String>;
 }
 
 /// One thing done, or (when only looking) one thing that would be.
@@ -142,84 +161,8 @@ pub fn reconcile(d: &Declared, s: &mut impl Server, look: bool) -> Result<Vec<St
 
 #[cfg(test)]
 mod tests {
+    use super::memory::Fake;
     use super::*;
-    use std::collections::BTreeMap;
-
-    #[derive(Default)]
-    struct Kept {
-        topic: Option<String>,
-        joined: BTreeSet<String>,
-        invited: BTreeSet<String>,
-    }
-
-    /// A homeserver kept in memory, with the rules that matter here: only a
-    /// member reads or invites, and only an invited account joins.
-    #[derive(Default)]
-    struct Fake {
-        rooms: BTreeMap<String, Kept>,
-        aliases: BTreeMap<String, String>,
-        writes: usize,
-    }
-
-    impl Fake {
-        fn member(&self, by: &str, id: &str) -> Result<&Kept, String> {
-            let room = self.rooms.get(id).ok_or("no such room")?;
-            if room.joined.contains(&format!("@{by}:example.org")) {
-                Ok(room)
-            } else {
-                Err(format!("{by} is not in {id}"))
-            }
-        }
-    }
-
-    impl Server for Fake {
-        fn resolve(&mut self, _by: &str, alias: &str) -> Result<Option<String>, String> {
-            Ok(self.aliases.get(alias).cloned())
-        }
-        fn create(&mut self, by: &str, room: &Room, invite: &[String]) -> Result<String, String> {
-            self.writes += 1;
-            let id = format!("!{}:example.org", room.alias);
-            let kept = Kept {
-                topic: Some(room.topic.clone()),
-                joined: BTreeSet::from([format!("@{by}:example.org")]),
-                invited: invite.iter().cloned().collect(),
-            };
-            self.rooms.insert(id.clone(), kept);
-            self.aliases.insert(format!("#{}:example.org", room.alias), id.clone());
-            Ok(id)
-        }
-        fn joined(&mut self, by: &str, id: &str) -> Result<BTreeSet<String>, String> {
-            Ok(self.member(by, id)?.joined.clone())
-        }
-        fn invite(&mut self, by: &str, id: &str, user: &str) -> Result<(), String> {
-            self.member(by, id)?;
-            self.writes += 1;
-            let room = self.rooms.get_mut(id).unwrap();
-            if !room.invited.insert(user.to_owned()) {
-                return Err("already invited".into());
-            }
-            Ok(())
-        }
-        fn join(&mut self, by: &str, id: &str) -> Result<(), String> {
-            self.writes += 1;
-            let user = format!("@{by}:example.org");
-            let room = self.rooms.get_mut(id).ok_or("no such room")?;
-            if !room.invited.contains(&user) {
-                return Err(format!("{by} was not invited"));
-            }
-            room.joined.insert(user);
-            Ok(())
-        }
-        fn topic(&mut self, by: &str, id: &str) -> Result<Option<String>, String> {
-            Ok(self.member(by, id)?.topic.clone())
-        }
-        fn set_topic(&mut self, by: &str, id: &str, topic: &str) -> Result<(), String> {
-            self.member(by, id)?;
-            self.writes += 1;
-            self.rooms.get_mut(id).unwrap().topic = Some(topic.to_owned());
-            Ok(())
-        }
-    }
 
     fn declared() -> Declared {
         let room = |team: &str| Room {
@@ -233,7 +176,7 @@ mod tests {
 
     #[test]
     fn an_empty_server_gets_every_room_with_its_two_members() {
-        let (d, mut s) = (declared(), Fake::default());
+        let (d, mut s) = (declared(), Fake::named("example.org"));
         let steps = reconcile(&d, &mut s, false).unwrap();
         assert_eq!(steps.iter().filter(|s| matches!(s, Step::Created { .. })).count(), 2);
         for room in &d.rooms {
@@ -245,7 +188,7 @@ mod tests {
 
     #[test]
     fn a_second_run_does_nothing() {
-        let (d, mut s) = (declared(), Fake::default());
+        let (d, mut s) = (declared(), Fake::named("example.org"));
         reconcile(&d, &mut s, false).unwrap();
         let writes = s.writes;
         assert_eq!(reconcile(&d, &mut s, false).unwrap(), vec![]);
@@ -254,7 +197,7 @@ mod tests {
 
     #[test]
     fn looking_writes_nothing_and_says_what_a_run_would_do() {
-        let (d, mut s) = (declared(), Fake::default());
+        let (d, mut s) = (declared(), Fake::named("example.org"));
         let looked = reconcile(&d, &mut s, true).unwrap();
         assert_eq!(s.writes, 0);
         assert_eq!(looked, reconcile(&d, &mut s, false).unwrap());
@@ -262,7 +205,7 @@ mod tests {
 
     #[test]
     fn a_team_missing_from_its_room_is_brought_in_even_when_already_invited() {
-        let (d, mut s) = (declared(), Fake::default());
+        let (d, mut s) = (declared(), Fake::named("example.org"));
         reconcile(&d, &mut s, false).unwrap();
         let id = s.aliases["#design:example.org"].clone();
         s.rooms.get_mut(&id).unwrap().joined.remove("@design:example.org");
@@ -279,7 +222,7 @@ mod tests {
 
     #[test]
     fn a_changed_topic_is_set_back() {
-        let (d, mut s) = (declared(), Fake::default());
+        let (d, mut s) = (declared(), Fake::named("example.org"));
         reconcile(&d, &mut s, false).unwrap();
         let id = s.aliases["#review:example.org"].clone();
         s.rooms.get_mut(&id).unwrap().topic = Some("something else".into());
@@ -289,7 +232,7 @@ mod tests {
 
     #[test]
     fn someone_undeclared_is_reported_and_left() {
-        let (d, mut s) = (declared(), Fake::default());
+        let (d, mut s) = (declared(), Fake::named("example.org"));
         reconcile(&d, &mut s, false).unwrap();
         let id = s.aliases["#design:example.org"].clone();
         s.rooms.get_mut(&id).unwrap().joined.insert("@review:example.org".into());
@@ -301,7 +244,7 @@ mod tests {
 
     #[test]
     fn no_team_is_ever_put_in_another_teams_room() {
-        let (d, mut s) = (declared(), Fake::default());
+        let (d, mut s) = (declared(), Fake::named("example.org"));
         reconcile(&d, &mut s, false).unwrap();
         for room in &d.rooms {
             let kept = &s.rooms[&s.aliases[&d.alias(room)]];

@@ -17,7 +17,8 @@
 #   packages.kagamizo-e2e       those pages used in a real browser (./_e2e)
 #   checks.shell-e2e            every page at three widths, by pointer and by
 #                               keyboard, against the browser's accessibility
-#                               tree
+#                               tree; the chat pages with them, a message
+#                               typed and sent by keyboard
 #   checks.shell                Lean (./_lean/Shell.lean): every app ships on
 #                               a target, the web target holds only web apps,
 #                               every native app's command is in its image,
@@ -608,7 +609,7 @@ in
           E2E_CHROMIUM = lib.getExe pkgs.chromium;
           E2E_NO_SANDBOX = "1";
           FONTCONFIG_FILE = pkgs.makeFontsConf { fontDirectories = [ pkgs.dejavu_fonts ]; };
-          installPhase = "HOME=$TMPDIR shell-e2e ${site.html} $out";
+          installPhase = "HOME=$TMPDIR shell-e2e ${site.html} $out ${config.packages.chat-gateway}/bin/chat-check-server";
         };
         checks.shell = config.kagamizo.leanCheck {
           name = "shell";

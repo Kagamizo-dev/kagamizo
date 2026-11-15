@@ -54,6 +54,8 @@ pub fn pairs() -> Vec<Pair> {
         pair("a chip", Palette::INK, Palette::CARD, 1.0),
         pair("a proved chip", Palette::GOOD, Palette::CARD, 1.0),
         pair("the skip link", Palette::GROUND, Palette::ACCENT, 1.0),
+        pair("a button", Palette::GROUND, Palette::ACCENT, 1.0),
+        pair("what is typed", Palette::INK, Palette::PANEL, 1.0),
     ];
     for shelf in SHELVES {
         all.push(pair("a card's name on its shelf colour", Palette::INK, shelf_colour(shelf), 1.0));
@@ -89,7 +91,7 @@ pub fn sheet() -> (Vec<Rule>, Vec<Rule>) {
         rule("body", &[("margin", "0"), ("padding", "20px 16px 64px")]),
         rule("main, header.top", &[("max-width", "1280px"), ("margin", "0 auto")]),
         rule("a", &[("color", "inherit"), ("text-decoration", "none")]),
-        rule("a:focus-visible, summary:focus-visible", &[("outline", &format!("3px solid {}", Palette::ACCENT)), ("outline-offset", "3px")]),
+        rule("a:focus-visible, summary:focus-visible, textarea:focus-visible, button:focus-visible", &[("outline", &format!("3px solid {}", Palette::ACCENT)), ("outline-offset", "3px")]),
         rule(".skip", &[("position", "absolute"), ("left", "-999px")]),
         rule(".skip:focus", &[("left", "16px"), ("top", "12px"), ("background", Palette::ACCENT), ("color", Palette::GROUND), ("padding", "0 12px"), ("min-height", "44px"), ("min-width", "44px"), ("display", "inline-flex"), ("align-items", "center")]),
         rule("header.top", &[("display", "flex"), ("flex-wrap", "wrap"), ("align-items", "center"), ("gap", "8px 20px"), ("padding-bottom", "20px")]),
@@ -124,6 +126,15 @@ pub fn sheet() -> (Vec<Rule>, Vec<Rule>) {
         rule(".chips.proved > li", &[("border-color", Palette::GOOD), ("color", Palette::GOOD)]),
         rule(".index", &[("display", "flex"), ("flex-wrap", "wrap"), ("gap", "8px"), ("margin", "0"), ("padding", "0"), ("list-style", "none")]),
         rule(".index a", &[("display", "inline-flex"), ("align-items", "center"), ("min-height", "44px"), ("min-width", "44px"), ("padding", "0 12px"), ("font-family", MONO), ("font-size", "13px"), ("background", Palette::CARD), ("border", &format!("1px solid {}", Palette::LINE))]),
+        // A room: what was said, oldest first, then the box to answer in.
+        rule(".said", &[("list-style", "none"), ("margin", "16px 0"), ("padding", "0"), ("display", "flex"), ("flex-direction", "column"), ("gap", "12px"), ("max-width", "80ch")]),
+        rule(".said li", &[("background", Palette::PANEL), ("border", &format!("1px solid {}", Palette::LINE)), ("padding", "12px 16px")]),
+        rule(".said .who", &[("font-family", MONO), ("font-size", "12px"), ("color", Palette::MUTED), ("display", "block"), ("margin-bottom", "4px")]),
+        rule(".said p", &[("margin", "0"), ("white-space", "pre-wrap"), ("overflow-wrap", "anywhere")]),
+        rule("form.say", &[("display", "flex"), ("flex-direction", "column"), ("gap", "8px"), ("max-width", "80ch"), ("margin-top", "24px")]),
+        rule("form.say label", &[("font-family", MONO), ("font-size", "13px"), ("color", Palette::MUTED)]),
+        rule("form.say textarea", &[("min-height", "96px"), ("padding", "12px"), ("font", "inherit"), ("color", Palette::INK), ("background", Palette::PANEL), ("border", &format!("1px solid {}", Palette::LINE)), ("resize", "vertical")]),
+        rule("form.say button, a.again", &[("align-self", "flex-start"), ("min-height", "44px"), ("min-width", "44px"), ("padding", "0 20px"), ("font", "inherit"), ("font-weight", "600"), ("color", Palette::GROUND), ("background", Palette::ACCENT), ("border", "0"), ("cursor", "pointer"), ("display", "inline-flex"), ("align-items", "center")]),
         rule(".none", &[("color", Palette::MUTED), ("font-style", "italic")]),
         rule("footer", &[("max-width", "1280px"), ("margin", "48px auto 0"), ("font-family", MONO), ("font-size", "12px"), ("color", Palette::MUTED)]),
     ];
