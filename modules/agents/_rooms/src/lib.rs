@@ -7,8 +7,10 @@
 //! that holds someone undeclared is reported, not changed.
 //!
 //! The homeserver is behind `Server`, so the whole of `reconcile` is tested
-//! against one kept in memory (the tests below); ./main.rs is the one that
-//! speaks HTTP.
+//! against one kept in memory (the tests below); ./http.rs is the one that
+//! speaks HTTP, as the homeserver's application service.
+pub mod http;
+
 use serde::Deserialize;
 use std::collections::BTreeSet;
 
@@ -30,6 +32,11 @@ pub struct Declared {
 }
 
 impl Declared {
+    /// The rooms this build was given (MATRIX_ROOMS, from Nix).
+    pub fn compiled() -> Result<Declared, String> {
+        serde_json::from_str(include_str!(env!("MATRIX_ROOMS"))).map_err(|e| format!("the declared rooms do not read: {e}"))
+    }
+
     pub fn user(&self, localpart: &str) -> String {
         format!("@{localpart}:{}", self.server)
     }

@@ -14,11 +14,19 @@
 # own team.
 #
 #   packages.matrix-rooms  the tool that makes them true on the homeserver
-#                          (./_rooms, Rust): `matrix-rooms look|apply BASE
-#                          VAULT`. It does only what is missing, removes
-#                          nothing, and reports anyone in a room who is not
-#                          declared. The rooms are compiled in. The host
-#                          runs it after the logins exist (../hetzner/_chat.nix).
+#                          (./_rooms, Rust). It is the homeserver's one
+#                          application service: its namespace is exactly
+#                          the declared accounts and aliases, and its token
+#                          is the only credential. No account has a
+#                          password; nothing signs in (the owner's rule,
+#                          2026-11-15). It does only what is missing,
+#                          removes nothing, and reports anyone in a room
+#                          who is not declared. The host runs it
+#                          (../hetzner/_chat.nix).
+#   checks.matrix-rooms    the tool against the pinned homeserver on the
+#                          loopback: the rooms are made with the token
+#                          alone, a second run does nothing, a wrong token
+#                          is refused
 #
 # No team answers yet: that waits on the runner listening in its room.
 { lib, config, ... }:
@@ -106,6 +114,18 @@ in
             rooms = lib.mapAttrsToList (team: r: r // { inherit team; }) cfg.rooms;
           });
           meta.mainProgram = "matrix-rooms";
+        };
+        checks.matrix-rooms = pkgs.stdenvNoCC.mkDerivation {
+          name = "matrix-rooms-check";
+          dontUnpack = true;
+          nativeBuildInputs = [ config.packages.matrix-rooms ];
+          # The homeserver reads /etc/resolv.conf and the system's
+          # certificates at its start, and a build has neither: it is shown
+          # a resolver that names the loopback and the pinned bundle.
+          SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+          LD_PRELOAD = "${pkgs.libredirect}/lib/libredirect.so";
+          NIX_REDIRECTS = "/etc/resolv.conf=${pkgs.writeText "resolv.conf" "nameserver 127.0.0.1\n"}";
+          installPhase = "matrix-rooms-check ${lib.getExe pkgs.matrix-tuwunel} > $out";
         };
         checks.agents-rooms = config.kagamizo.leanCheck {
           name = "agents-rooms";

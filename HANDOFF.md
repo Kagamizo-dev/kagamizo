@@ -27,10 +27,33 @@ Then work the plan: in each track, the lowest unblocked item first; items waitin
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is exactly what modules/claude/_environment.nix declares (`nix build .#claude-allowed-domains`): never use or ask for a host outside it; a host a task needs is declared there with its reason and listed at the session's end. End the session with the full allowlist and the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 
-This session starts where HANDOFF.md's "2026-11-10 to 11-14: one surface at os.jingzo.org" ends: first find out why the host's state vault holds no matrix-* login (matrix-seed), then the bridge from a room to a unit of work; every control added to a page must pass checks.shell-e2e.
+This session starts where HANDOFF.md's "2026-11-10 to 11-14: one surface at os.jingzo.org" ends: first the chat gateway and the Chat page of the shell (Stage 1 of "Tokens, not sign-ins"), then the bridge from a room to a unit of work; every control added to a page must pass checks.shell-e2e.
 ```
 
-## 2026-11-10 to 11-14: one surface at os.jingzo.org (read this first)
+## 2026-11-15: tokens, not sign-ins (the owner's rule; read this first)
+
+No account integration may redirect to a separate sign-in. Every account
+is reached by scoped API tokens; Proton Pass stays the root; stored
+session state is the exception to remove. Decided the same day:
+
+1. Chat is our own page on `os.jingzo.org`, Access the only sign-in;
+   behind it a gateway speaks to the homeserver with the application
+   service's token. WhatsApp is out (official groups need an Official
+   Business Account; unofficial libraries are a stored session).
+2. OpenTofu state moves to R2 with the existing encryption; `statestore`
+   goes. The migration and any apply wait on the owner's word.
+3. A cloud session keeps the one Proton Pass approval link.
+4. Order: chat, then the token rule typed in `modules/accounts` and
+   `Boundary.lean` (13 stored sessions today, a count that only falls),
+   then the state.
+
+Stage 1, left to do: the gateway (`modules/agents/_chat`: rooms,
+messages, send, stream; trusts only Cloudflare's signed Access
+assertion and the owner's address), the Chat pages in
+`modules/shell/_site`, and `checks.shell-e2e` grown from links to
+controls.
+
+## 2026-11-10 to 11-14: one surface at os.jingzo.org
 
 Merged into `ccr-a3dc11d9-lh43d5` as #27, #28 and #29.
 
@@ -65,10 +88,11 @@ then an Android spike.
 Next, in order:
 
 1. Done, not yet on the host: `matrix-rooms` (`modules/agents/_rooms`)
-   and the host's `matrix-rooms` service. Unverified against the real
-   homeserver. Seen from a session on 2026-11-14, Kagamizo-Host-State held
-   no `matrix-*` login at all, so `matrix-seed` may never have stored
-   one; check the host's console before trusting chat.
+   is the homeserver's one application service. Its token, made each
+   boot and kept only in `/run/matrix`, is the only credential: no
+   account has a password, registration is closed, `matrix-seed` is gone
+   (the owner's rule of 2026-11-15, plan in "Tokens, not sign-ins"
+   below). `checks.matrix-rooms` proves it against the pinned homeserver.
 2. The bridge: a room message becomes a unit of work, its reply and
    artifacts come back to the room.
 3. The runner fixed and switched on (waits on the owner: OpenRouter
