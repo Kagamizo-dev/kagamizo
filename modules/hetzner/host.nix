@@ -182,6 +182,7 @@ let
       opencodeConfig = config.packages.opencode-config;
       tokenFile = "/var/lib/kagamizo/host-token";
       dshAgentTeams = top.cloudflare.accessTeams;
+      inherit (top.agents) answering;
       # The Android SDK's packages (../android), unfree in nixpkgs.
       alsoUnfree = top.android.unfreeNames;
     }
@@ -254,6 +255,22 @@ let
       ) top.trading.paper.dryRun.strategies;
       launcher = lib.getExe' config.packages.weather-backtest "trading-host";
       passCli = config.packages.pass-cli;
+    }
+  );
+
+  # The answering agents and the bridge (../agents/bridge.nix, ./_bridge.nix).
+  agentBridge = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ./_bridge.nix {
+      inherit (top.agents) answering;
+      bridge = config.packages.agent-bridge;
+      opencodeConfig = config.packages.opencode-answering-config;
+      matrixPort =
+        (lib.head
+          (lib.findFirst (
+            s: s.name == "chat"
+          ) (throw "hetzner.host.agents: no chat service") cfg.agents.services).paths
+        ).port;
     }
   );
 
@@ -332,6 +349,7 @@ let
         shellWeb
         unitFiles
         agentRunnerHost
+        agentBridge
         tradingPaperHost
         media
         androidTwin

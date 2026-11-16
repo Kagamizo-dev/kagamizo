@@ -27,10 +27,48 @@ Then work the plan: in each track, the lowest unblocked item first; items waitin
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is exactly what modules/claude/_environment.nix declares (`nix build .#claude-allowed-domains`): never use or ask for a host outside it; a host a task needs is declared there with its reason and listed at the session's end. End the session with the full allowlist and the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 
-This session starts where HANDOFF.md's "2026-11-10 to 11-14: one surface at os.jingzo.org" ends: first the chat gateway and the Chat page of the shell (Stage 1 of "Tokens, not sign-ins"), then the bridge from a room to a unit of work; every control added to a page must pass checks.shell-e2e.
+This session starts where HANDOFF.md's "2026-11-16: one chat for everything" ends: finish Stage A (the front room first, progress and Stop, the hand-off to a team), then Stage B (skills, images, video); every control added to a page must pass checks.shell-e2e. Minting the front key, credit and any apply wait on my word.
 ```
 
-## 2026-11-15: tokens, not sign-ins (the owner's rule; read this first)
+## 2026-11-16: one chat for everything (the owner's direction; read this first)
+
+Every workflow runs through one chat on our own domain: a front agent
+answers there, uses skills (image and video among them) and hands work
+to the teams. Decided: the harness is OpenCode run headless
+(`opencode serve`), with a harness per team as a declaration; the front
+agent has its own key at $20 a month; our chat replaces Open WebUI at
+`agents.jingzo.org`; one front room that routes, each team keeping its
+own. The plan is in three stages.
+
+**Stage A, built, not on the host, nothing funded:**
+
+- `governance.agents.front` with its room and its key `front`
+  (`modules/agents/teams.nix`, `modules/openrouter`). Not minted.
+- `agent-bridge` (`modules/agents/_bridge`, `bridge.nix`): only the
+  owner starts a turn; the answer is said in the same room as its agent;
+  an agent stops at its month's cap and says so; nothing is answered
+  twice. It polls the answering rooms every two seconds.
+- One `opencode serve` per answering agent on the host
+  (`modules/hetzner/_bridge.nix`), every tool denied, started only once
+  its key is on the host. The bridge's calls are held to the pinned
+  server's own API (`modules/agents/_json/opencode-serve.json`).
+- Not done in Stage A: progress lines while a turn runs, a Stop
+  control, the front room as the chat's first page, handing a brief to a
+  team, a check that runs a whole turn through `opencode serve` against
+  a stub model, and a check that the catalog still matches the pinned
+  server.
+
+**Stage B:** skills as declarations rendered to SKILL.md; `picture
+--publish` to `files.jingzo.org`; `motion` for OpenRouter's `/videos`
+(read its schema and model list first); the chat page showing an image.
+
+**Stage C:** the chat at `agents.jingzo.org`, Open WebUI removed (an
+infrastructure apply, on the owner's word).
+
+Waiting on the owner: minting the `front` key (`openrouter apply`) and
+OpenRouter credit; the PR for this branch.
+
+## 2026-11-15: tokens, not sign-ins (the owner's rule)
 
 No account integration may redirect to a separate sign-in. Every account
 is reached by scoped API tokens; Proton Pass stays the root; stored
