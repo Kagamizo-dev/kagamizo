@@ -9,9 +9,12 @@
 //!     room, never starts a turn, so two agents cannot set each other off;
 //!   * an answer is said only in the room that was spoken in, and as that
 //!     room's own agent;
-//!   * an agent's month has a cap in dollars. The cost of every turn, as
-//!     the harness reports it, is added to the month's sum; at the cap the
-//!     agent answers nothing more that month and says so, once;
+//!   * an agent's month has a cap in dollars. Every turn is charged at the
+//!     dearest pinned price of the agent's model for the tokens the
+//!     harness reports, never at the harness's own figure for the cost
+//!     (a harness prices by its own table, which is not what the provider
+//!     bills; seen 2026-11-17). The charge is added to the month's sum; at
+//!     the cap the agent answers nothing more that month and says so, once;
 //!   * what was already there when the bridge first sees a room is not
 //!     answered, and nothing is answered twice: the last message handled
 //!     in each room is kept in the bridge's state.
@@ -43,12 +46,27 @@ pub struct Agent {
     /// The most it may spend in a month, in dollars.
     #[serde(rename = "capUsd")]
     pub cap_usd: f64,
+    /// The dearest pinned price of its model, dollars per million tokens.
+    #[serde(rename = "inputUsdPerMillion")]
+    pub input_usd_per_million: f64,
+    #[serde(rename = "outputUsdPerMillion")]
+    pub output_usd_per_million: f64,
+}
+
+impl Agent {
+    /// What a turn is charged: its tokens at the dearest pinned price.
+    pub fn charge(&self, reply: &Reply) -> f64 {
+        (reply.tokens_in as f64 * self.input_usd_per_million + reply.tokens_out as f64 * self.output_usd_per_million) / 1_000_000.0
+    }
 }
 
 pub struct Reply {
     pub text: String,
-    /// What the turn cost, in dollars, as the harness reports it.
-    pub cost_usd: f64,
+    /// The tokens the turn read, cached ones included, as the harness
+    /// reports them.
+    pub tokens_in: u64,
+    /// The tokens it wrote, reasoning included.
+    pub tokens_out: u64,
 }
 
 /// What the bridge needs of a harness: one turn in a room's own thread.
@@ -141,14 +159,18 @@ impl<S: Talk, H: Harness> Bridge<S, H> {
                 }
             };
             let Some(latest) = said.last().map(|m| m.id.clone()) else {
+                // An empty room is seen from its beginning: the first
+                // thing said in it is new.
+                self.state.seen.entry(alias).or_default();
                 continue;
             };
             // What is new: everything after the last message handled. A
             // room seen for the first time, or one whose marker has left
             // the window, starts from its latest message: old talk is not
             // answered.
-            let new = match self.state.seen.get(&alias).and_then(|seen| said.iter().position(|m| &m.id == seen)) {
-                Some(at) => said[at + 1..].to_vec(),
+            let new = match self.state.seen.get(&alias) {
+                Some(seen) if seen.is_empty() => said.clone(),
+                Some(seen) => said.iter().position(|m| &m.id == seen).map(|at| said[at + 1..].to_vec()).unwrap_or_default(),
                 None => Vec::new(),
             };
             self.state.seen.insert(alias.clone(), latest);
@@ -165,7 +187,8 @@ impl<S: Talk, H: Harness> Bridge<S, H> {
                 match self.harness.turn(&agent, session.as_deref(), &message.body) {
                     Ok((session, reply)) => {
                         self.state.sessions.insert(alias.clone(), session);
-                        *self.state.spent.entry(agent.name.clone()).or_insert(0.0) += reply.cost_usd.max(0.0);
+                        let cost_usd = agent.charge(&reply);
+                        *self.state.spent.entry(agent.name.clone()).or_insert(0.0) += cost_usd;
                         let parts = pieces(&reply.text);
                         let parts = if parts.is_empty() { vec!["(The agent answered nothing.)".to_owned()] } else { parts };
                         for part in parts {
@@ -173,7 +196,7 @@ impl<S: Talk, H: Harness> Bridge<S, H> {
                                 did.push(fail(e));
                             }
                         }
-                        did.push(Did::Answered { room: alias.clone(), cost_usd: reply.cost_usd });
+                        did.push(Did::Answered { room: alias.clone(), cost_usd });
                     }
                     Err(why) => {
                         let _ = self.server.say(&agent.name, &id, "I could not answer that just now. Nothing was done; say it again to retry.");
@@ -196,11 +219,11 @@ mod tests {
     use matrix_rooms::memory::Fake;
     use matrix_rooms::{reconcile, Room, Server};
 
-    /// A harness that answers with what it was told, at a fixed price.
+    /// A harness that answers with what it was told. Every turn reports a
+    /// million tokens read, so a turn is charged the agent's input price.
     #[derive(Default)]
     struct Echo {
         turns: Vec<(String, Option<String>, String)>,
-        price: f64,
         broken: bool,
     }
 
@@ -210,7 +233,7 @@ mod tests {
                 return Err("the harness is down".into());
             }
             self.turns.push((agent.name.clone(), session.map(str::to_owned), said.to_owned()));
-            Ok((format!("ses-{}", agent.name), Reply { text: format!("{} heard: {said}", agent.name), cost_usd: self.price }))
+            Ok((format!("ses-{}", agent.name), Reply { text: format!("{} heard: {said}", agent.name), tokens_in: 1_000_000, tokens_out: 0 }))
         }
     }
 
@@ -219,9 +242,9 @@ mod tests {
         let declared = Declared { server: "example.org".into(), owner: "zach".into(), rooms: vec![room("front"), room("design"), room("review")] };
         let mut server = Fake::named("example.org");
         reconcile(&declared, &mut server, false).unwrap();
-        let agent = |name: &str| Agent { name: name.into(), model: "m".into(), port: 1, cap_usd: 1.0 };
+        let agent = |name: &str| Agent { name: name.into(), model: "m".into(), port: 1, cap_usd: 1.0, input_usd_per_million: price, output_usd_per_million: 0.0 };
         // review has a room and no answering agent.
-        Bridge { declared, agents: vec![agent("front"), agent("design")], server, harness: Echo { price, ..Echo::default() }, state: State::default() }
+        Bridge { declared, agents: vec![agent("front"), agent("design")], server, harness: Echo::default(), state: State::default() }
     }
 
     fn room(b: &Bridge<Fake, Echo>, team: &str) -> String {
@@ -261,6 +284,17 @@ mod tests {
         assert_eq!(said(&mut b, "design").len(), 1);
         assert_eq!(b.step("2026-11"), vec![]);
         assert_eq!(b.harness.turns.len(), 1);
+    }
+
+    #[test]
+    fn the_first_thing_said_in_an_empty_room_is_answered() {
+        let mut b = bridge(0.01);
+        assert_eq!(b.step("2026-11"), vec![]);
+        let id = room(&b, "front");
+        b.server.say("zach", &id, "first words").unwrap();
+        assert!(matches!(b.step("2026-11")[..], [Did::Answered { .. }]));
+        assert_eq!(said(&mut b, "front").last().unwrap().1, "front heard: first words");
+        assert_eq!(b.step("2026-11"), vec![]);
     }
 
     #[test]
@@ -340,6 +374,13 @@ mod tests {
         b.state = kept;
         assert_eq!(b.step("2026-11"), vec![]);
         assert!(b.harness.turns.is_empty());
+    }
+
+    #[test]
+    fn a_turn_is_charged_its_tokens_at_the_pinned_price() {
+        let agent = Agent { name: "a".into(), model: "m".into(), port: 1, cap_usd: 1.0, input_usd_per_million: 0.3, output_usd_per_million: 1.2 };
+        let reply = Reply { text: String::new(), tokens_in: 2245, tokens_out: 11 };
+        assert!((agent.charge(&reply) - (2245.0 * 0.3 + 11.0 * 1.2) / 1_000_000.0).abs() < 1e-15);
     }
 
     #[test]

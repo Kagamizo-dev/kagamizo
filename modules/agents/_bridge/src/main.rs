@@ -1,7 +1,10 @@
 //! agent-bridge: what the owner says in a room becomes a turn of that
 //! room's agent (./lib.rs).
 //!
-//!   agent-bridge HOMESERVER_URL AS_TOKEN_FILE STATE_FILE
+//!   agent-bridge HOMESERVER_URL AS_TOKEN_FILE STATE_FILE [TURN_SECONDS]
+//!
+//! TURN_SECONDS is the longest a turn may take before it is stopped and
+//! reported as failed (180 unless given).
 //!
 //! It reaches the homeserver with the application service's token, each
 //! agent's harness on the loopback, and keeps its state (what was handled,
@@ -26,15 +29,17 @@ fn month() -> String {
 }
 
 fn run(args: &[String]) -> Result<(), String> {
-    let [homeserver, token_file, state_file] = args else {
-        return Err("usage: agent-bridge HOMESERVER_URL AS_TOKEN_FILE STATE_FILE".into());
+    let (homeserver, token_file, state_file, seconds) = match args {
+        [h, t, s] => (h, t, s, 180),
+        [h, t, s, n] => (h, t, s, n.parse::<u64>().ok().filter(|n| *n > 0).ok_or(format!("{n} is not a number of seconds"))?),
+        _ => return Err("usage: agent-bridge HOMESERVER_URL AS_TOKEN_FILE STATE_FILE [TURN_SECONDS]".into()),
     };
     let declared = Declared::compiled()?;
     let agents: Vec<Agent> = serde_json::from_str(include_str!(env!("BRIDGE_AGENTS"))).map_err(|e| format!("the declared agents do not read: {e}"))?;
     let token = std::fs::read_to_string(token_file).map_err(|e| format!("{token_file}: {e}"))?;
     let state: State = std::fs::read_to_string(state_file).ok().and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default();
     let server = Http::new(homeserver, &declared.server, &token);
-    let harness = OpenCode { patience: Duration::from_secs(600) };
+    let harness = OpenCode { patience: Duration::from_secs(seconds) };
     let mut bridge = Bridge { declared, agents, server, harness, state };
     println!("agent-bridge: {} agent(s) answering", bridge.agents.len());
     loop {

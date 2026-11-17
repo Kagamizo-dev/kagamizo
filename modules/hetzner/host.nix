@@ -265,6 +265,8 @@ let
       inherit (top.agents) answering;
       bridge = config.packages.agent-bridge;
       opencodeConfig = config.packages.opencode-answering-config;
+      inherit (top.agents) provider rehearsalPort;
+      inherit (config.packages) rehearsal;
       matrixPort =
         (lib.head
           (lib.findFirst (

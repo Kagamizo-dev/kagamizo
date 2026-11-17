@@ -68,6 +68,29 @@ Order: the PR for the branch; the price catalog; the rehearsal and
 `chat-whole`; Stage A's remainder; the typed tools, `picture --publish`
 and `motion`; readiness; merge and the gates.
 
+Done so far (PR #30, not merged, CI pending):
+
+- `media-prices` and `modules/agents/_json/media-prices.json`: image
+  prices per provider with their unit, video price codes; Lean bounds
+  the image sheets (one, billed by token, is in the unbounded baseline).
+  Text prices were already pinned (`modules/openrouter/_spend/prices.json`).
+- `rehearsal` and `agents.provider` (default `"rehearsal"`); on the host
+  the harness holds no key and calls the stand-in.
+- `checks.chat-whole`: the real homeserver, rooms, bridge, `opencode
+  serve` and the stand-in together. It passes.
+- Found by it and fixed: the harness's own cost figure is not what the
+  provider bills, so a turn is charged its reported tokens at the
+  dearest pinned price; the first message in an empty room was never
+  answered; the harness retries a failing provider without end, so a
+  turn has a deadline (180 s) after which it is stopped and reported.
+
+Not yet in `chat-whole`: the gateway and the browser (it speaks to the
+homeserver as the gateway does, but not through it), the cap refusal
+(unit-tested only), images and video, the faults `no-cost` and `dear`.
+Not yet built: the typed tools, `picture --publish`, `motion`, the
+readiness gate and its Lean, the Lean bound on a text turn's worst
+cost, the daily price re-read on the host, video sheets.
+
 ## 2026-11-16: one chat for everything (the owner's direction)
 
 Every workflow runs through one chat on our own domain: a front agent
