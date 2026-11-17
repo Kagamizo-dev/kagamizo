@@ -27,10 +27,48 @@ Then work the plan: in each track, the lowest unblocked item first; items waitin
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is exactly what modules/claude/_environment.nix declares (`nix build .#claude-allowed-domains`): never use or ask for a host outside it; a host a task needs is declared there with its reason and listed at the session's end. End the session with the full allowlist and the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 
-This session starts where HANDOFF.md's "2026-11-16: one chat for everything" ends: finish Stage A (the front room first, progress and Stop, the hand-off to a team), then Stage B (skills, images, video); every control added to a page must pass checks.shell-e2e. Minting the front key, credit and any apply wait on my word.
+This session starts where HANDOFF.md's "2026-11-17: proof before a dollar" ends: work its order (the price catalog pinned from OpenRouter's API, the rehearsal provider and checks.chat-whole, Stage A's remainder, the typed tools, readiness). No SKILL.md or prose pointers for agents, ever; every fact pinned from its source and typed. Adding OpenRouter credit is the last step of all and, like minting a key or any apply, waits on my word.
 ```
 
-## 2026-11-16: one chat for everything (the owner's direction; read this first)
+## 2026-11-17: proof before a dollar (the owner's rules; read this first)
+
+Three rules, all standing:
+
+1. **Credit is the very last step.** Before a dollar goes to OpenRouter,
+   everything is tested, checked, validated and shown to the owner.
+2. **No skills as prose.** No SKILL.md, no loose text files as pointers
+   for an agent. What an agent can do is a typed tool: stated in Lean,
+   wired in Rust, wrapped in Nix. This replaces Stage B's "skills".
+3. **Everything we need to know is pinned from its source of authority
+   and typed, without exception.** Prices, units, model names, providers
+   and routing options come from OpenRouter's own API, pinned with their
+   address and date; costs are proved from them, not estimated.
+
+How it is done (the plan approved the same day):
+
+- **A rehearsal provider** (`modules/agents/_rehearsal`): a stand-in for
+  the three OpenRouter calls we use, billing at the pinned prices, able
+  to misbehave on request. The real stack runs against it at no cost.
+  `agents.provider = "rehearsal" | "openrouter"` is the one switch.
+- **Typed tools** (`modules/agents/tools.nix`, `_tools`, Lean): each a
+  governance action with typed input and output, offered to the harness
+  over the Model Context Protocol; the harness's own tools stay denied.
+  First: `image`, `video`, `hand-off`.
+- **The price catalog** (`modules/openrouter/_json/prices.json`) and
+  Lean bounds: the worst cost of a turn and of a sheet proved within
+  their caps.
+- **Four gates**: (1) `checks.chat-whole`, the whole chain in one check;
+  (2) the host in rehearsal, checked headlessly; (3) the owner talks to
+  the rehearsal and reads the readiness page; (4) the switch, the key,
+  free probes, the smallest credit, three measured real calls. Gate 4
+  is the owner's word at each step. Lean holds the provider to
+  `rehearsal` until gates 1 to 3 are recorded as passed.
+
+Order: the PR for the branch; the price catalog; the rehearsal and
+`chat-whole`; Stage A's remainder; the typed tools, `picture --publish`
+and `motion`; readiness; merge and the gates.
+
+## 2026-11-16: one chat for everything (the owner's direction)
 
 Every workflow runs through one chat on our own domain: a front agent
 answers there, uses skills (image and video among them) and hands work
@@ -58,8 +96,8 @@ own. The plan is in three stages.
   a stub model, and a check that the catalog still matches the pinned
   server.
 
-**Stage B:** skills as declarations rendered to SKILL.md; `picture
---publish` to `files.jingzo.org`; `motion` for OpenRouter's `/videos`
+**Stage B** (skills are replaced by typed tools, 2026-11-17, above):
+`picture --publish` to `files.jingzo.org`; `motion` for OpenRouter's `/videos`
 (read its schema and model list first); the chat page showing an image.
 
 **Stage C:** the chat at `agents.jingzo.org`, Open WebUI removed (an
@@ -751,6 +789,13 @@ nine swarm agent tokens (legal, accounting and governance per identity) in the
 root vault.
 
 ## The owner's standing decisions
+
+- Credit is the very last step: nothing is funded until everything is
+  tested, validated and shown (2026-11-17).
+- No SKILL.md or other prose pointers for agents: an agent's abilities
+  are typed tools, Lean, Rust and Nix (2026-11-17).
+- Every fact is pinned from its source of authority and typed, prices
+  included, without exception (2026-11-17).
 
 - The owner's only manual step is approving 2FA or a sign-in link. Never
   hand them a form, a click-path, a value to copy or a command. The
