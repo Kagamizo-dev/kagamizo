@@ -148,6 +148,15 @@ fn check(args: &[String]) -> Result<(), String> {
         let agent = declared.user(&front.name);
 
         let mut bridge_process = spawn_bridge()?;
+        // The bridge answers what is said after its first pass, which is
+        // done once it has kept its state.
+        let first_pass = Instant::now() + Duration::from_secs(60);
+        while !state_file.exists() {
+            if Instant::now() > first_pass {
+                return Err("the bridge did not make its first pass".into());
+            }
+            std::thread::sleep(Duration::from_millis(200));
+        }
         // 1. The owner is answered in the front room, as the front agent.
         http.say(&owner, &front_room, "Hello from the whole check")?;
         let answer = awaited(&mut http, &owner, &front_room, &agent)?;
