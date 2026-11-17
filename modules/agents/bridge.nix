@@ -123,27 +123,55 @@ in
     perSystem =
       { pkgs, self', ... }:
       {
-        packages.agent-bridge = pkgs.rustPlatform.buildRustPackage {
-          pname = "agent-bridge";
-          version = "0.1.0";
-          src = lib.fileset.toSource {
-            root = ./.;
-            fileset = lib.fileset.unions [
-              ./_bridge
-              ./_rooms
-            ];
+        packages = {
+          agent-bridge = pkgs.rustPlatform.buildRustPackage {
+            pname = "agent-bridge";
+            version = "0.1.0";
+            src = lib.fileset.toSource {
+              root = ./.;
+              fileset = lib.fileset.unions [
+                ./_bridge
+                ./_rooms
+              ];
+            };
+            sourceRoot = "source/_bridge";
+            cargoLock.lockFile = ./_bridge/Cargo.lock;
+            MATRIX_ROOMS = pkgs.writeText "matrix-rooms.json" (
+              builtins.toJSON {
+                inherit (cfg.chat) owner server;
+                rooms = lib.mapAttrsToList (team: r: r // { inherit team; }) cfg.rooms;
+              }
+            );
+            BRIDGE_AGENTS = pkgs.writeText "bridge-agents.json" (builtins.toJSON cfg.answering);
+            BRIDGE_CALLS = pkgs.writeText "bridge-calls.json" (builtins.toJSON cfg.opencodeCalls);
+            meta.mainProgram = "agent-bridge";
           };
-          sourceRoot = "source/_bridge";
-          cargoLock.lockFile = ./_bridge/Cargo.lock;
-          MATRIX_ROOMS = pkgs.writeText "matrix-rooms.json" (
+
+          rehearsal = pkgs.rustPlatform.buildRustPackage {
+            pname = "rehearsal";
+            version = "0.1.0";
+            src = ./_rehearsal;
+            cargoLock.lockFile = ./_rehearsal/Cargo.lock;
+            REHEARSAL_PRICES = ../openrouter/_spend/prices.json;
+            meta.mainProgram = "rehearsal";
+          };
+
+          opencode-answering-config = pkgs.writeText "opencode-answering.json" (
             builtins.toJSON {
-              inherit (cfg.chat) owner server;
-              rooms = lib.mapAttrsToList (team: r: r // { inherit team; }) cfg.rooms;
+              "$schema" = "https://opencode.ai/config.json";
+              model = "openrouter/${config.openrouter.defaultModel}";
+              enabled_providers = [ "openrouter" ];
+              provider.openrouter = {
+                models = lib.genAttrs config.openrouter.models (_: { });
+              }
+              // lib.optionalAttrs (cfg.provider == "rehearsal") {
+                options.baseURL = "http://127.0.0.1:${toString rehearsalPort}/api/v1";
+              };
+              permission = "deny";
+              share = "disabled";
+              autoupdate = false;
             }
           );
-          BRIDGE_AGENTS = pkgs.writeText "bridge-agents.json" (builtins.toJSON cfg.answering);
-          BRIDGE_CALLS = pkgs.writeText "bridge-calls.json" (builtins.toJSON cfg.opencodeCalls);
-          meta.mainProgram = "agent-bridge";
         };
 
         # The whole chain on the loopback, with nothing billed: the pinned
@@ -161,32 +189,6 @@ in
           SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
           installPhase = "HOME=$TMPDIR chat-whole-check ${lib.getExe pkgs.matrix-tuwunel} ${lib.getExe pkgs.opencode} ${self'.packages.opencode-answering-config} ${lib.getExe self'.packages.rehearsal} ${lib.getExe self'.packages.agent-bridge} > $out";
         };
-
-        packages.rehearsal = pkgs.rustPlatform.buildRustPackage {
-          pname = "rehearsal";
-          version = "0.1.0";
-          src = ./_rehearsal;
-          cargoLock.lockFile = ./_rehearsal/Cargo.lock;
-          REHEARSAL_PRICES = ../openrouter/_spend/prices.json;
-          meta.mainProgram = "rehearsal";
-        };
-
-        packages.opencode-answering-config = pkgs.writeText "opencode-answering.json" (
-          builtins.toJSON {
-            "$schema" = "https://opencode.ai/config.json";
-            model = "openrouter/${config.openrouter.defaultModel}";
-            enabled_providers = [ "openrouter" ];
-            provider.openrouter = {
-              models = lib.genAttrs config.openrouter.models (_: { });
-            }
-            // lib.optionalAttrs (cfg.provider == "rehearsal") {
-              options.baseURL = "http://127.0.0.1:${toString rehearsalPort}/api/v1";
-            };
-            permission = "deny";
-            share = "disabled";
-            autoupdate = false;
-          }
-        );
       };
   };
 }
