@@ -17,7 +17,15 @@
 //!     the cap the agent answers nothing more that month and says so, once;
 //!   * what was already there when the bridge first sees a room is not
 //!     answered, and nothing is answered twice: the last message handled
-//!     in each room is kept in the bridge's state.
+//!     in each room is kept in the bridge's state;
+//!   * nothing the owner says is lost. A pass handles the messages it
+//!     read at its start and marks its place at the last of those, never
+//!     at whatever the room holds by its end: what the owner says while a
+//!     turn runs is new to the next pass (a later reading of the room once
+//!     marked such a message as handled, found by the whole-chain check,
+//!     2026-11-18);
+//!   * a refusal is never silent: if saying that the cap is reached
+//!     fails, the message it answers is kept for the next pass.
 //!
 //! `Bridge::step` is one pass over the rooms, a function of the homeserver,
 //! the harness and the state, so it is tested whole against the homeserver
@@ -173,16 +181,37 @@ impl<S: Talk, H: Harness> Bridge<S, H> {
                 Some(seen) => said.iter().position(|m| &m.id == seen).map(|at| said[at + 1..].to_vec()).unwrap_or_default(),
                 None => Vec::new(),
             };
+            // The place kept is the last message this pass read. What the
+            // agent says below, and what the owner says meanwhile, come
+            // after it and are new to the next pass, where the agent's own
+            // words start nothing.
+            let before = self.state.seen.get(&alias).cloned();
             self.state.seen.insert(alias.clone(), latest);
-            for message in new.iter().filter(|m| m.from == owner) {
-                if self.state.spent.get(&agent.name).copied().unwrap_or(0.0) >= agent.cap_usd {
-                    if !self.state.told.contains(&agent.name) {
-                        self.state.told.push(agent.name.clone());
-                        let _ = self.server.say(&agent.name, &id, &format!("I have reached this month's cap of ${:.2} and answer nothing more until it resets or is raised.", agent.cap_usd));
-                    }
-                    did.push(Did::Refused { room: alias.clone() });
+            let mut handled = before;
+            for message in new.iter() {
+                if message.from != owner {
+                    handled = Some(message.id.clone());
                     continue;
                 }
+                if self.state.spent.get(&agent.name).copied().unwrap_or(0.0) >= agent.cap_usd {
+                    if !self.state.told.contains(&agent.name) {
+                        let notice = format!("I have reached this month's cap of ${:.2} and answer nothing more until it resets or is raised.", agent.cap_usd);
+                        if let Err(e) = self.server.say(&agent.name, &id, &notice) {
+                            // Not said: this message waits for the next pass.
+                            match &handled {
+                                Some(place) => self.state.seen.insert(alias.clone(), place.clone()),
+                                None => self.state.seen.remove(&alias),
+                            };
+                            did.push(fail(e));
+                            break;
+                        }
+                        self.state.told.push(agent.name.clone());
+                    }
+                    did.push(Did::Refused { room: alias.clone() });
+                    handled = Some(message.id.clone());
+                    continue;
+                }
+                handled = Some(message.id.clone());
                 let session = self.state.sessions.get(&alias).cloned();
                 match self.harness.turn(&agent, session.as_deref(), &message.body) {
                     Ok((session, reply)) => {
@@ -203,10 +232,6 @@ impl<S: Talk, H: Harness> Bridge<S, H> {
                         did.push(fail(why));
                     }
                 }
-            }
-            // What the agent itself just said is handled too.
-            if let Ok(Some(last)) = self.server.messages(&agent.name, &id, 1).map(|m| m.last().map(|m| m.id.clone())) {
-                self.state.seen.insert(alias, last);
             }
         }
         did
@@ -235,6 +260,95 @@ mod tests {
             self.turns.push((agent.name.clone(), session.map(str::to_owned), said.to_owned()));
             Ok((format!("ses-{}", agent.name), Reply { text: format!("{} heard: {said}", agent.name), tokens_in: 1_000_000, tokens_out: 0 }))
         }
+    }
+
+    /// A homeserver on which the owner says something more at the moment
+    /// the agent first speaks: that is, while a pass is under way. It can
+    /// also refuse what an agent says, a number of times.
+    struct Busy {
+        inner: Fake,
+        interject: Option<String>,
+        refuse: usize,
+    }
+
+    impl Server for Busy {
+        fn resolve(&mut self, by: &str, alias: &str) -> Result<Option<String>, String> {
+            self.inner.resolve(by, alias)
+        }
+        fn create(&mut self, by: &str, room: &Room, invite: &[String]) -> Result<String, String> {
+            self.inner.create(by, room, invite)
+        }
+        fn joined(&mut self, by: &str, id: &str) -> Result<std::collections::BTreeSet<String>, String> {
+            self.inner.joined(by, id)
+        }
+        fn invite(&mut self, by: &str, id: &str, user: &str) -> Result<(), String> {
+            self.inner.invite(by, id, user)
+        }
+        fn join(&mut self, by: &str, id: &str) -> Result<(), String> {
+            self.inner.join(by, id)
+        }
+        fn topic(&mut self, by: &str, id: &str) -> Result<Option<String>, String> {
+            self.inner.topic(by, id)
+        }
+        fn set_topic(&mut self, by: &str, id: &str, topic: &str) -> Result<(), String> {
+            self.inner.set_topic(by, id, topic)
+        }
+    }
+
+    impl Talk for Busy {
+        fn messages(&mut self, by: &str, id: &str, limit: usize) -> Result<Vec<matrix_rooms::Message>, String> {
+            self.inner.messages(by, id, limit)
+        }
+        fn say(&mut self, by: &str, id: &str, body: &str) -> Result<(), String> {
+            if by != "zach" && self.refuse > 0 {
+                self.refuse -= 1;
+                return Err("the homeserver refused it".into());
+            }
+            self.inner.say(by, id, body)?;
+            if by != "zach" {
+                if let Some(more) = self.interject.take() {
+                    self.inner.say("zach", id, &more)?;
+                }
+            }
+            Ok(())
+        }
+    }
+
+    fn busy(price: f64) -> Bridge<Busy, Echo> {
+        let b = started(price);
+        Bridge { declared: b.declared, agents: b.agents, server: Busy { inner: b.server, interject: None, refuse: 0 }, harness: b.harness, state: b.state }
+    }
+
+    #[test]
+    fn what_the_owner_says_while_a_turn_runs_is_answered_next() {
+        let mut b = busy(0.01);
+        let id = b.server.inner.aliases["#front:example.org"].clone();
+        b.server.interject = Some("and another thing".into());
+        b.server.say("zach", &id, "first").unwrap();
+        assert!(matches!(b.step("2026-11")[..], [Did::Answered { .. }]));
+        // The second message arrived as the agent answered the first.
+        assert!(matches!(b.step("2026-11")[..], [Did::Answered { .. }]));
+        let heard: Vec<&str> = b.harness.turns.iter().map(|t| t.2.as_str()).collect();
+        assert_eq!(heard, ["first", "and another thing"]);
+        assert_eq!(b.step("2026-11"), vec![]);
+        assert_eq!(b.harness.turns.len(), 2);
+    }
+
+    #[test]
+    fn a_cap_notice_that_could_not_be_said_is_said_on_the_next_pass() {
+        let mut b = busy(2.0);
+        let id = b.server.inner.aliases["#front:example.org"].clone();
+        b.server.say("zach", &id, "one").unwrap();
+        b.step("2026-11");
+        // The cap of 1.00 is now spent. The next refusal cannot be said once.
+        b.server.refuse = 1;
+        b.server.say("zach", &id, "two").unwrap();
+        assert!(matches!(b.step("2026-11")[..], [Did::Failed { .. }]));
+        assert!(b.state.told.is_empty());
+        assert_eq!(b.step("2026-11"), vec![Did::Refused { room: "#front:example.org".into() }]);
+        let all = b.server.inner.messages("zach", &id, 99).unwrap();
+        assert_eq!(all.iter().filter(|m| m.body.contains("this month's cap")).count(), 1);
+        assert_eq!(b.step("2026-11"), vec![]);
     }
 
     fn bridge(price: f64) -> Bridge<Fake, Echo> {

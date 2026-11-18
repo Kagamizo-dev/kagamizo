@@ -71,7 +71,8 @@ fn awaited(http: &mut Http, by: &str, id: &str, from: &str) -> Result<String, St
         }
         std::thread::sleep(Duration::from_millis(500));
     }
-    Err(format!("{from} did not speak"))
+    let tail: Vec<(String, String)> = said(http, by, id)?.into_iter().rev().take(3).collect();
+    Err(format!("{from} did not speak; the room ends (latest first) {tail:?}"))
 }
 
 fn check(args: &[String]) -> Result<(), String> {
@@ -123,7 +124,14 @@ fn check(args: &[String]) -> Result<(), String> {
         let out = std::fs::OpenOptions::new().create(true).append(true).open(&rehearsal_log).map_err(|e| e.to_string())?;
         Command::new(rehearsal).arg(&rehearsal_port).arg(fault).stdout(Stdio::from(out)).spawn().map_err(|e| format!("{rehearsal}: {e}"))
     };
-    let spawn_bridge = || Command::new(bridge).arg(format!("http://127.0.0.1:{HOMESERVER}")).arg(&token_file).arg(&state_file).arg("20").stdout(quiet()).spawn().map_err(|e| format!("{bridge}: {e}"));
+    let bridge_log = dir.join("bridge.log");
+    let spawn_bridge = || {
+        let out = std::fs::OpenOptions::new().create(true).append(true).open(&bridge_log).map_err(|e| e.to_string())?;
+        let err = out.try_clone().map_err(|e| e.to_string())?;
+        Command::new(bridge).arg(format!("http://127.0.0.1:{HOMESERVER}")).arg(&token_file).arg(&state_file).arg("20").stdout(Stdio::from(out)).stderr(Stdio::from(err)).spawn().map_err(|e| format!("{bridge}: {e}"))
+    };
+    // The step being proved, so a failure names it.
+    let step = std::cell::Cell::new("starting the homeserver and the harness");
 
     let mut running = Running(Vec::new());
     // Inside a build the homeserver, and it alone, is shown a resolver file
@@ -165,6 +173,7 @@ fn check(args: &[String]) -> Result<(), String> {
         let other_room = room_of(&mut http, &other)?;
         let agent = declared.user(&front.name);
 
+        step.set("the bridge's first pass");
         let mut bridge_process = spawn_bridge()?;
         // The bridge answers what is said after its first pass, which is
         // done once it has kept its state.
@@ -176,6 +185,7 @@ fn check(args: &[String]) -> Result<(), String> {
             std::thread::sleep(Duration::from_millis(200));
         }
         // 1. The owner is answered in the front room, as the front agent.
+        step.set("1, the owner is answered in the front room");
         http.say(&owner, &front_room, "Hello from the whole check")?;
         let answer = awaited(&mut http, &owner, &front_room, &agent)?;
         if answer != "Rehearsal: you said: Hello from the whole check" {
@@ -183,6 +193,7 @@ fn check(args: &[String]) -> Result<(), String> {
         }
         // 2. A room with no answering agent is left alone, and
         // 3. what the agent itself says starts nothing.
+        step.set("2 and 3, nothing else starts a turn");
         http.say(&owner, &other_room, "Anyone there?")?;
         http.say(&front.name, &front_room, "Talking to myself")?;
         std::thread::sleep(Duration::from_secs(8));
@@ -194,12 +205,14 @@ fn check(args: &[String]) -> Result<(), String> {
             return Err(format!("the agent's own words started a turn: {front_said:?}"));
         }
         // 4. The turn was charged at the pinned price.
+        step.set("4, the turn was charged");
         let read_state = || -> Result<State, String> { serde_json::from_str(&std::fs::read_to_string(&state_file).map_err(|e| format!("the bridge kept no state: {e}"))?).map_err(|e| e.to_string()) };
         let spent = read_state()?.spent.get(&front.name).copied().unwrap_or(0.0);
         if spent <= 0.0 {
             return Err("the turn was not charged".into());
         }
         // 5. A bridge started again answers nothing twice.
+        step.set("5, a restart answers nothing twice");
         let _ = bridge_process.kill();
         let _ = bridge_process.wait();
         bridge_process = spawn_bridge()?;
@@ -209,6 +222,7 @@ fn check(args: &[String]) -> Result<(), String> {
         }
         // The browser, against all of it, while it runs.
         if let Some((gateway, site, port, command)) = then {
+            step.set("the browser against the whole chain");
             let mut pages = Command::new(gateway).arg(site).arg(port).arg(&hs).arg(&token_file).spawn().map_err(|e| format!("{gateway}: {e}"))?;
             let outcome = up(&format!("http://127.0.0.1:{port}/next/chat/"), "the chat pages").and_then(|()| Command::new(&command[0]).args(&command[1..]).status().map_err(|e| format!("{}: {e}", command[0])));
             let _ = pages.kill();
@@ -219,6 +233,7 @@ fn check(args: &[String]) -> Result<(), String> {
         }
         // 7. At its month's cap the agent answers nothing and says so: the
         // bridge is started on a state in which the cap is already spent.
+        step.set("7, the month's cap");
         let _ = bridge_process.kill();
         let _ = bridge_process.wait();
         let kept = read_state()?;
@@ -243,6 +258,7 @@ fn check(args: &[String]) -> Result<(), String> {
         std::thread::sleep(Duration::from_secs(4));
         let spent = read_state()?.spent.get(&front.name).copied().unwrap_or(0.0);
         // 6. When the provider fails, the agent says so and nothing is charged.
+        step.set("6, a failing provider");
         let _ = stand_in.kill();
         let _ = stand_in.wait();
         stand_in = spawn_rehearsal("error")?;
@@ -266,16 +282,19 @@ fn check(args: &[String]) -> Result<(), String> {
     drop(running);
     if result.is_err() {
         // What the harness itself said, to find the cause.
-        for file in ["rehearsal.log", "opencode.log", "opencode.err"] {
+        for (file, most, width) in [("bridge.log", 12, 400), ("rehearsal.log", 6, 300), ("opencode.err", 3, 300)] {
             let text = std::fs::read_to_string(dir.join(file)).unwrap_or_default();
-            let lines: Vec<&str> = text.lines().filter(|l| file != "opencode.err" || l.starts_with("ERROR") || l.starts_with("WARN")).collect();
-            for line in &lines[lines.len().saturating_sub(4)..] {
-                eprintln!("  {file}: {}", line.chars().take(2500).collect::<String>());
+            let lines: Vec<&str> = text.lines().filter(|l| file != "opencode.err" || l.starts_with("ERROR")).collect();
+            for line in &lines[lines.len().saturating_sub(most)..] {
+                eprintln!("  {file}: {}", line.chars().take(width).collect::<String>());
             }
+        }
+        if let Ok(text) = std::fs::read_to_string(&state_file) {
+            eprintln!("  state: {}", text.chars().take(600).collect::<String>());
         }
     }
     let _ = std::fs::remove_dir_all(Path::new(&dir));
-    result
+    result.map_err(|e| format!("at step {}: {e}", step.get()))
 }
 
 fn main() -> ExitCode {
