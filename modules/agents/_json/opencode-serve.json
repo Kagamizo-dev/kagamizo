@@ -1,0 +1,662 @@
+{
+  "opencode": "1.15.10",
+  "operations": [
+    {
+      "id": "app.agents",
+      "method": "GET",
+      "path": "/agent"
+    },
+    {
+      "id": "v2.model.list",
+      "method": "GET",
+      "path": "/api/model"
+    },
+    {
+      "id": "v2.provider.list",
+      "method": "GET",
+      "path": "/api/provider"
+    },
+    {
+      "id": "v2.provider.get",
+      "method": "GET",
+      "path": "/api/provider/{providerID}"
+    },
+    {
+      "id": "v2.session.list",
+      "method": "GET",
+      "path": "/api/session"
+    },
+    {
+      "id": "v2.session.compact",
+      "method": "POST",
+      "path": "/api/session/{sessionID}/compact"
+    },
+    {
+      "id": "v2.session.context",
+      "method": "GET",
+      "path": "/api/session/{sessionID}/context"
+    },
+    {
+      "id": "v2.session.messages",
+      "method": "GET",
+      "path": "/api/session/{sessionID}/message"
+    },
+    {
+      "id": "v2.session.prompt",
+      "method": "POST",
+      "path": "/api/session/{sessionID}/prompt"
+    },
+    {
+      "id": "v2.session.wait",
+      "method": "POST",
+      "path": "/api/session/{sessionID}/wait"
+    },
+    {
+      "id": "auth.remove",
+      "method": "DELETE",
+      "path": "/auth/{providerID}"
+    },
+    {
+      "id": "auth.set",
+      "method": "PUT",
+      "path": "/auth/{providerID}"
+    },
+    {
+      "id": "command.list",
+      "method": "GET",
+      "path": "/command"
+    },
+    {
+      "id": "config.get",
+      "method": "GET",
+      "path": "/config"
+    },
+    {
+      "id": "config.update",
+      "method": "PATCH",
+      "path": "/config"
+    },
+    {
+      "id": "config.providers",
+      "method": "GET",
+      "path": "/config/providers"
+    },
+    {
+      "id": "event.subscribe",
+      "method": "GET",
+      "path": "/event"
+    },
+    {
+      "id": "experimental.console.get",
+      "method": "GET",
+      "path": "/experimental/console"
+    },
+    {
+      "id": "experimental.console.listOrgs",
+      "method": "GET",
+      "path": "/experimental/console/orgs"
+    },
+    {
+      "id": "experimental.console.switchOrg",
+      "method": "POST",
+      "path": "/experimental/console/switch"
+    },
+    {
+      "id": "experimental.resource.list",
+      "method": "GET",
+      "path": "/experimental/resource"
+    },
+    {
+      "id": "experimental.session.list",
+      "method": "GET",
+      "path": "/experimental/session"
+    },
+    {
+      "id": "tool.list",
+      "method": "GET",
+      "path": "/experimental/tool"
+    },
+    {
+      "id": "tool.ids",
+      "method": "GET",
+      "path": "/experimental/tool/ids"
+    },
+    {
+      "id": "experimental.workspace.list",
+      "method": "GET",
+      "path": "/experimental/workspace"
+    },
+    {
+      "id": "experimental.workspace.create",
+      "method": "POST",
+      "path": "/experimental/workspace"
+    },
+    {
+      "id": "experimental.workspace.adapter.list",
+      "method": "GET",
+      "path": "/experimental/workspace/adapter"
+    },
+    {
+      "id": "experimental.workspace.status",
+      "method": "GET",
+      "path": "/experimental/workspace/status"
+    },
+    {
+      "id": "experimental.workspace.syncList",
+      "method": "POST",
+      "path": "/experimental/workspace/sync-list"
+    },
+    {
+      "id": "experimental.workspace.warp",
+      "method": "POST",
+      "path": "/experimental/workspace/warp"
+    },
+    {
+      "id": "experimental.workspace.remove",
+      "method": "DELETE",
+      "path": "/experimental/workspace/{id}"
+    },
+    {
+      "id": "worktree.remove",
+      "method": "DELETE",
+      "path": "/experimental/worktree"
+    },
+    {
+      "id": "worktree.list",
+      "method": "GET",
+      "path": "/experimental/worktree"
+    },
+    {
+      "id": "worktree.create",
+      "method": "POST",
+      "path": "/experimental/worktree"
+    },
+    {
+      "id": "worktree.reset",
+      "method": "POST",
+      "path": "/experimental/worktree/reset"
+    },
+    {
+      "id": "file.list",
+      "method": "GET",
+      "path": "/file"
+    },
+    {
+      "id": "file.read",
+      "method": "GET",
+      "path": "/file/content"
+    },
+    {
+      "id": "file.status",
+      "method": "GET",
+      "path": "/file/status"
+    },
+    {
+      "id": "find.text",
+      "method": "GET",
+      "path": "/find"
+    },
+    {
+      "id": "find.files",
+      "method": "GET",
+      "path": "/find/file"
+    },
+    {
+      "id": "find.symbols",
+      "method": "GET",
+      "path": "/find/symbol"
+    },
+    {
+      "id": "formatter.status",
+      "method": "GET",
+      "path": "/formatter"
+    },
+    {
+      "id": "global.config.get",
+      "method": "GET",
+      "path": "/global/config"
+    },
+    {
+      "id": "global.config.update",
+      "method": "PATCH",
+      "path": "/global/config"
+    },
+    {
+      "id": "global.dispose",
+      "method": "POST",
+      "path": "/global/dispose"
+    },
+    {
+      "id": "global.event",
+      "method": "GET",
+      "path": "/global/event"
+    },
+    {
+      "id": "global.health",
+      "method": "GET",
+      "path": "/global/health"
+    },
+    {
+      "id": "global.upgrade",
+      "method": "POST",
+      "path": "/global/upgrade"
+    },
+    {
+      "id": "instance.dispose",
+      "method": "POST",
+      "path": "/instance/dispose"
+    },
+    {
+      "id": "app.log",
+      "method": "POST",
+      "path": "/log"
+    },
+    {
+      "id": "lsp.status",
+      "method": "GET",
+      "path": "/lsp"
+    },
+    {
+      "id": "mcp.status",
+      "method": "GET",
+      "path": "/mcp"
+    },
+    {
+      "id": "mcp.add",
+      "method": "POST",
+      "path": "/mcp"
+    },
+    {
+      "id": "mcp.auth.remove",
+      "method": "DELETE",
+      "path": "/mcp/{name}/auth"
+    },
+    {
+      "id": "mcp.auth.start",
+      "method": "POST",
+      "path": "/mcp/{name}/auth"
+    },
+    {
+      "id": "mcp.auth.authenticate",
+      "method": "POST",
+      "path": "/mcp/{name}/auth/authenticate"
+    },
+    {
+      "id": "mcp.auth.callback",
+      "method": "POST",
+      "path": "/mcp/{name}/auth/callback"
+    },
+    {
+      "id": "mcp.connect",
+      "method": "POST",
+      "path": "/mcp/{name}/connect"
+    },
+    {
+      "id": "mcp.disconnect",
+      "method": "POST",
+      "path": "/mcp/{name}/disconnect"
+    },
+    {
+      "id": "path.get",
+      "method": "GET",
+      "path": "/path"
+    },
+    {
+      "id": "permission.list",
+      "method": "GET",
+      "path": "/permission"
+    },
+    {
+      "id": "permission.reply",
+      "method": "POST",
+      "path": "/permission/{requestID}/reply"
+    },
+    {
+      "id": "project.list",
+      "method": "GET",
+      "path": "/project"
+    },
+    {
+      "id": "project.current",
+      "method": "GET",
+      "path": "/project/current"
+    },
+    {
+      "id": "project.initGit",
+      "method": "POST",
+      "path": "/project/git/init"
+    },
+    {
+      "id": "project.update",
+      "method": "PATCH",
+      "path": "/project/{projectID}"
+    },
+    {
+      "id": "provider.list",
+      "method": "GET",
+      "path": "/provider"
+    },
+    {
+      "id": "provider.auth",
+      "method": "GET",
+      "path": "/provider/auth"
+    },
+    {
+      "id": "provider.oauth.authorize",
+      "method": "POST",
+      "path": "/provider/{providerID}/oauth/authorize"
+    },
+    {
+      "id": "provider.oauth.callback",
+      "method": "POST",
+      "path": "/provider/{providerID}/oauth/callback"
+    },
+    {
+      "id": "pty.list",
+      "method": "GET",
+      "path": "/pty"
+    },
+    {
+      "id": "pty.create",
+      "method": "POST",
+      "path": "/pty"
+    },
+    {
+      "id": "pty.shells",
+      "method": "GET",
+      "path": "/pty/shells"
+    },
+    {
+      "id": "pty.remove",
+      "method": "DELETE",
+      "path": "/pty/{ptyID}"
+    },
+    {
+      "id": "pty.get",
+      "method": "GET",
+      "path": "/pty/{ptyID}"
+    },
+    {
+      "id": "pty.update",
+      "method": "PUT",
+      "path": "/pty/{ptyID}"
+    },
+    {
+      "id": "pty.connect",
+      "method": "GET",
+      "path": "/pty/{ptyID}/connect"
+    },
+    {
+      "id": "pty.connectToken",
+      "method": "POST",
+      "path": "/pty/{ptyID}/connect-token"
+    },
+    {
+      "id": "question.list",
+      "method": "GET",
+      "path": "/question"
+    },
+    {
+      "id": "question.reject",
+      "method": "POST",
+      "path": "/question/{requestID}/reject"
+    },
+    {
+      "id": "question.reply",
+      "method": "POST",
+      "path": "/question/{requestID}/reply"
+    },
+    {
+      "id": "session.list",
+      "method": "GET",
+      "path": "/session"
+    },
+    {
+      "id": "session.create",
+      "method": "POST",
+      "path": "/session"
+    },
+    {
+      "id": "session.status",
+      "method": "GET",
+      "path": "/session/status"
+    },
+    {
+      "id": "session.delete",
+      "method": "DELETE",
+      "path": "/session/{sessionID}"
+    },
+    {
+      "id": "session.get",
+      "method": "GET",
+      "path": "/session/{sessionID}"
+    },
+    {
+      "id": "session.update",
+      "method": "PATCH",
+      "path": "/session/{sessionID}"
+    },
+    {
+      "id": "session.abort",
+      "method": "POST",
+      "path": "/session/{sessionID}/abort"
+    },
+    {
+      "id": "session.children",
+      "method": "GET",
+      "path": "/session/{sessionID}/children"
+    },
+    {
+      "id": "session.command",
+      "method": "POST",
+      "path": "/session/{sessionID}/command"
+    },
+    {
+      "id": "session.diff",
+      "method": "GET",
+      "path": "/session/{sessionID}/diff"
+    },
+    {
+      "id": "session.fork",
+      "method": "POST",
+      "path": "/session/{sessionID}/fork"
+    },
+    {
+      "id": "session.init",
+      "method": "POST",
+      "path": "/session/{sessionID}/init"
+    },
+    {
+      "id": "session.messages",
+      "method": "GET",
+      "path": "/session/{sessionID}/message"
+    },
+    {
+      "id": "session.prompt",
+      "method": "POST",
+      "path": "/session/{sessionID}/message"
+    },
+    {
+      "id": "session.deleteMessage",
+      "method": "DELETE",
+      "path": "/session/{sessionID}/message/{messageID}"
+    },
+    {
+      "id": "session.message",
+      "method": "GET",
+      "path": "/session/{sessionID}/message/{messageID}"
+    },
+    {
+      "id": "part.delete",
+      "method": "DELETE",
+      "path": "/session/{sessionID}/message/{messageID}/part/{partID}"
+    },
+    {
+      "id": "part.update",
+      "method": "PATCH",
+      "path": "/session/{sessionID}/message/{messageID}/part/{partID}"
+    },
+    {
+      "id": "permission.respond",
+      "method": "POST",
+      "path": "/session/{sessionID}/permissions/{permissionID}"
+    },
+    {
+      "id": "session.prompt_async",
+      "method": "POST",
+      "path": "/session/{sessionID}/prompt_async"
+    },
+    {
+      "id": "session.revert",
+      "method": "POST",
+      "path": "/session/{sessionID}/revert"
+    },
+    {
+      "id": "session.unshare",
+      "method": "DELETE",
+      "path": "/session/{sessionID}/share"
+    },
+    {
+      "id": "session.share",
+      "method": "POST",
+      "path": "/session/{sessionID}/share"
+    },
+    {
+      "id": "session.shell",
+      "method": "POST",
+      "path": "/session/{sessionID}/shell"
+    },
+    {
+      "id": "session.summarize",
+      "method": "POST",
+      "path": "/session/{sessionID}/summarize"
+    },
+    {
+      "id": "session.todo",
+      "method": "GET",
+      "path": "/session/{sessionID}/todo"
+    },
+    {
+      "id": "session.unrevert",
+      "method": "POST",
+      "path": "/session/{sessionID}/unrevert"
+    },
+    {
+      "id": "app.skills",
+      "method": "GET",
+      "path": "/skill"
+    },
+    {
+      "id": "sync.history.list",
+      "method": "POST",
+      "path": "/sync/history"
+    },
+    {
+      "id": "sync.replay",
+      "method": "POST",
+      "path": "/sync/replay"
+    },
+    {
+      "id": "sync.start",
+      "method": "POST",
+      "path": "/sync/start"
+    },
+    {
+      "id": "sync.steal",
+      "method": "POST",
+      "path": "/sync/steal"
+    },
+    {
+      "id": "tui.appendPrompt",
+      "method": "POST",
+      "path": "/tui/append-prompt"
+    },
+    {
+      "id": "tui.clearPrompt",
+      "method": "POST",
+      "path": "/tui/clear-prompt"
+    },
+    {
+      "id": "tui.control.next",
+      "method": "GET",
+      "path": "/tui/control/next"
+    },
+    {
+      "id": "tui.control.response",
+      "method": "POST",
+      "path": "/tui/control/response"
+    },
+    {
+      "id": "tui.executeCommand",
+      "method": "POST",
+      "path": "/tui/execute-command"
+    },
+    {
+      "id": "tui.openHelp",
+      "method": "POST",
+      "path": "/tui/open-help"
+    },
+    {
+      "id": "tui.openModels",
+      "method": "POST",
+      "path": "/tui/open-models"
+    },
+    {
+      "id": "tui.openSessions",
+      "method": "POST",
+      "path": "/tui/open-sessions"
+    },
+    {
+      "id": "tui.openThemes",
+      "method": "POST",
+      "path": "/tui/open-themes"
+    },
+    {
+      "id": "tui.publish",
+      "method": "POST",
+      "path": "/tui/publish"
+    },
+    {
+      "id": "tui.selectSession",
+      "method": "POST",
+      "path": "/tui/select-session"
+    },
+    {
+      "id": "tui.showToast",
+      "method": "POST",
+      "path": "/tui/show-toast"
+    },
+    {
+      "id": "tui.submitPrompt",
+      "method": "POST",
+      "path": "/tui/submit-prompt"
+    },
+    {
+      "id": "vcs.get",
+      "method": "GET",
+      "path": "/vcs"
+    },
+    {
+      "id": "vcs.apply",
+      "method": "POST",
+      "path": "/vcs/apply"
+    },
+    {
+      "id": "vcs.diff",
+      "method": "GET",
+      "path": "/vcs/diff"
+    },
+    {
+      "id": "vcs.diff.raw",
+      "method": "GET",
+      "path": "/vcs/diff/raw"
+    },
+    {
+      "id": "vcs.status",
+      "method": "GET",
+      "path": "/vcs/status"
+    }
+  ],
+  "read": "2026-11-16",
+  "source": "GET /doc of `opencode serve`, the pinned package"
+}

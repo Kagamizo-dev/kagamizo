@@ -17,7 +17,11 @@
 #   packages.kagamizo-e2e       those pages used in a real browser (./_e2e)
 #   checks.shell-e2e            every page at three widths, by pointer and by
 #                               keyboard, against the browser's accessibility
-#                               tree
+#                               tree; the chat pages with them, served by
+#                               the whole chain (the real homeserver,
+#                               bridge and harness, the model rehearsed):
+#                               a message typed and sent by keyboard is
+#                               answered by the front agent on the page
 #   checks.shell                Lean (./_lean/Shell.lean): every app ships on
 #                               a target, the web target holds only web apps,
 #                               every native app's command is in its image,
@@ -608,7 +612,15 @@ in
           E2E_CHROMIUM = lib.getExe pkgs.chromium;
           E2E_NO_SANDBOX = "1";
           FONTCONFIG_FILE = pkgs.makeFontsConf { fontDirectories = [ pkgs.dejavu_fonts ]; };
-          installPhase = "HOME=$TMPDIR shell-e2e ${site.html} $out";
+          # The whole chain (../agents/bridge.nix: the pinned homeserver,
+          # the rooms, the bridge, `opencode serve` and the stand-in for
+          # OpenRouter) serves the site and the chat pages, and the browser
+          # check runs against it: what it sends is answered by the agent.
+          # The homeserver alone is shown a resolver file and certificates.
+          CHECK_PRELOAD = "${pkgs.libredirect}/lib/libredirect.so";
+          CHECK_REDIRECTS = "/etc/resolv.conf=${pkgs.writeText "resolv.conf" "nameserver 127.0.0.1\n"}";
+          SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+          installPhase = "HOME=$TMPDIR ${config.packages.agent-bridge}/bin/chat-whole-check ${lib.getExe pkgs.matrix-tuwunel} ${lib.getExe pkgs.opencode} ${config.packages.opencode-answering-config} ${lib.getExe config.packages.rehearsal} ${lib.getExe config.packages.agent-bridge} --then ${config.packages.chat-gateway}/bin/chat-rehearsal-server ${site.html} 8791 -- shell-e2e ${site.html} $out @http://127.0.0.1:8791/next";
         };
         checks.shell = config.kagamizo.leanCheck {
           name = "shell";

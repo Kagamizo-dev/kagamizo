@@ -4,15 +4,7 @@
 //! runs in the browser, has an address of its own, and reads as text.
 //!
 //!   shell-site DECLARED.json TARGET OUT_DIR
-#[path = "../../_shell/src/model.rs"]
-#[allow(dead_code)]
-mod model;
-
-mod a11y;
-mod html;
-mod pages;
-mod style;
-
+use kagamizo_site::{model, pages};
 use std::path::Path;
 use std::process::ExitCode;
 

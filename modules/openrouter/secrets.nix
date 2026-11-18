@@ -56,6 +56,20 @@ in
           required = false;
         };
     };
+    # The front agent's key (openrouter.keys.front), in the host's vault.
+    front = {
+      defaults.providers = [ "host" ];
+      OPENROUTER_API_KEY =
+        secret {
+          kind = "api-token";
+          issuer = "automation:openrouter";
+          description = "OpenRouter key for the front agent of the chat, minted by `openrouter apply`";
+          item = "openrouter-front-key";
+        }
+        // {
+          required = false;
+        };
+    };
     host.OPENROUTER_API_KEY =
       secret {
         kind = "api-token";

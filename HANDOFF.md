@@ -27,8 +27,206 @@ Then work the plan: in each track, the lowest unblocked item first; items waitin
 
 The only thing you ask me for is approving a sign-in or 2FA link. Ask before anything else that spends money or applies infrastructure, unless HANDOFF.md says I already approved it. Every tool or API gets fully mapped from the pinned thing itself before it's used: Rust for what we write, Nix for packaging, Cedar for authorization, Lean for the proofs, all in the one modules tree; every module keeps its performance record (modules/perf). The allowlist is exactly what modules/claude/_environment.nix declares (`nix build .#claude-allowed-domains`): never use or ask for a host outside it; a host a task needs is declared there with its reason and listed at the session's end. End the session with the full allowlist and the updated start message, ready to paste. (The 'Public' email account profile update is still a pending action item on my end.)
 
-This session starts where HANDOFF.md's "2026-11-09, early: Stripe's coverage verified, agents hold cards" ends: first the wallet's step 4 (the Wallet view in the shell, bank/wallet-view), then the bank-link choice once a provider's own-account use is confirmed.
+This session starts where HANDOFF.md's "2026-11-17: proof before a dollar" ends: work its order (the price catalog pinned from OpenRouter's API, the rehearsal provider and checks.chat-whole, Stage A's remainder, the typed tools, readiness). No SKILL.md or prose pointers for agents, ever; every fact pinned from its source and typed. Adding OpenRouter credit is the last step of all and, like minting a key or any apply, waits on my word.
 ```
+
+## 2026-11-17: proof before a dollar (the owner's rules; read this first)
+
+Three rules, all standing:
+
+1. **Credit is the very last step.** Before a dollar goes to OpenRouter,
+   everything is tested, checked, validated and shown to the owner.
+2. **No skills as prose.** No SKILL.md, no loose text files as pointers
+   for an agent. What an agent can do is a typed tool: stated in Lean,
+   wired in Rust, wrapped in Nix. This replaces Stage B's "skills".
+3. **Everything we need to know is pinned from its source of authority
+   and typed, without exception.** Prices, units, model names, providers
+   and routing options come from OpenRouter's own API, pinned with their
+   address and date; costs are proved from them, not estimated.
+
+How it is done (the plan approved the same day):
+
+- **A rehearsal provider** (`modules/agents/_rehearsal`): a stand-in for
+  the three OpenRouter calls we use, billing at the pinned prices, able
+  to misbehave on request. The real stack runs against it at no cost.
+  `agents.provider = "rehearsal" | "openrouter"` is the one switch.
+- **Typed tools** (`modules/agents/tools.nix`, `_tools`, Lean): each a
+  governance action with typed input and output, offered to the harness
+  over the Model Context Protocol; the harness's own tools stay denied.
+  First: `image`, `video`, `hand-off`.
+- **The price catalog** (`modules/openrouter/_json/prices.json`) and
+  Lean bounds: the worst cost of a turn and of a sheet proved within
+  their caps.
+- **Four gates**: (1) `checks.chat-whole`, the whole chain in one check;
+  (2) the host in rehearsal, checked headlessly; (3) the owner talks to
+  the rehearsal and reads the readiness page; (4) the switch, the key,
+  free probes, the smallest credit, three measured real calls. Gate 4
+  is the owner's word at each step. Lean holds the provider to
+  `rehearsal` until gates 1 to 3 are recorded as passed.
+
+Order: the PR for the branch; the price catalog; the rehearsal and
+`chat-whole`; Stage A's remainder; the typed tools, `picture --publish`
+and `motion`; readiness; merge and the gates.
+
+Done so far (PR #30, not merged, CI pending):
+
+- `media-prices` and `modules/agents/_json/media-prices.json`: image
+  prices per provider with their unit, video price codes; Lean bounds
+  the image sheets (one, billed by token, is in the unbounded baseline).
+  Text prices were already pinned (`modules/openrouter/_spend/prices.json`).
+- `rehearsal` and `agents.provider` (default `"rehearsal"`); on the host
+  the harness holds no key and calls the stand-in.
+- `checks.chat-whole`: the real homeserver, rooms, bridge, `opencode
+  serve` and the stand-in together. It passes.
+- Found by it and fixed: the harness's own cost figure is not what the
+  provider bills, so a turn is charged its reported tokens at the
+  dearest pinned price; the first message in an empty room was never
+  answered; the harness retries a failing provider without end, so a
+  turn has a deadline (180 s) after which it is stopped and reported.
+
+Since then (PR #30, CI green at `384b220`, later commits pending CI):
+`checks.shell-e2e` now runs inside the whole chain (the browser's
+message in the front room is answered by the front agent on the page),
+and `chat-whole` proves the cap refusal through the real stack. The
+faults `no-cost` and `dear` do not concern a text turn, which is
+charged by tokens at the pinned price, not by the provider's figure;
+they are for `picture` and `motion`.
+
+Not yet built: the front room as the chat's first page, progress lines
+and Stop; the typed tools (`hand-off`, `image`, `video`), `picture
+--publish`, `motion` and video sheets, `/images` and `/videos` in the
+rehearsal; the Lean bound on a text turn's worst cost; the daily price
+re-read on the host; the readiness gate, its Lean and its page; the
+check holding `opencode-serve.json` to the pinned server.
+
+This session's disk (about 5 GB free) cannot hold the browser check's
+closure at once: build `agent-bridge`, `rehearsal`, `chat-gateway`,
+`kagamizo-e2e`, `kagamizo-site-html` one at a time with `-o` roots,
+collect garbage, then build `checks.shell-e2e`.
+
+## 2026-11-16: one chat for everything (the owner's direction)
+
+Every workflow runs through one chat on our own domain: a front agent
+answers there, uses skills (image and video among them) and hands work
+to the teams. Decided: the harness is OpenCode run headless
+(`opencode serve`), with a harness per team as a declaration; the front
+agent has its own key at $20 a month; our chat replaces Open WebUI at
+`agents.jingzo.org`; one front room that routes, each team keeping its
+own. The plan is in three stages.
+
+**Stage A, built, not on the host, nothing funded:**
+
+- `governance.agents.front` with its room and its key `front`
+  (`modules/agents/teams.nix`, `modules/openrouter`). Not minted.
+- `agent-bridge` (`modules/agents/_bridge`, `bridge.nix`): only the
+  owner starts a turn; the answer is said in the same room as its agent;
+  an agent stops at its month's cap and says so; nothing is answered
+  twice. It polls the answering rooms every two seconds.
+- One `opencode serve` per answering agent on the host
+  (`modules/hetzner/_bridge.nix`), every tool denied, started only once
+  its key is on the host. The bridge's calls are held to the pinned
+  server's own API (`modules/agents/_json/opencode-serve.json`).
+- Not done in Stage A: progress lines while a turn runs, a Stop
+  control, the front room as the chat's first page, handing a brief to a
+  team, a check that runs a whole turn through `opencode serve` against
+  a stub model, and a check that the catalog still matches the pinned
+  server.
+
+**Stage B** (skills are replaced by typed tools, 2026-11-17, above):
+`picture --publish` to `files.jingzo.org`; `motion` for OpenRouter's `/videos`
+(read its schema and model list first); the chat page showing an image.
+
+**Stage C:** the chat at `agents.jingzo.org`, Open WebUI removed (an
+infrastructure apply, on the owner's word).
+
+Waiting on the owner: minting the `front` key (`openrouter apply`) and
+OpenRouter credit; the PR for this branch.
+
+## 2026-11-15: tokens, not sign-ins (the owner's rule)
+
+No account integration may redirect to a separate sign-in. Every account
+is reached by scoped API tokens; Proton Pass stays the root; stored
+session state is the exception to remove. Decided the same day:
+
+1. Chat is our own page on `os.jingzo.org`, Access the only sign-in;
+   behind it a gateway speaks to the homeserver with the application
+   service's token. WhatsApp is out (official groups need an Official
+   Business Account; unofficial libraries are a stored session).
+2. OpenTofu state moves to R2 with the existing encryption; `statestore`
+   goes. The migration and any apply wait on the owner's word.
+3. A cloud session keeps the one Proton Pass approval link.
+4. Order: chat, then the token rule typed in `modules/accounts` and
+   `Boundary.lean` (13 stored sessions today, a count that only falls),
+   then the state.
+
+Stage 1 is built and not yet on the host: `chat-gateway`
+(`modules/agents/_chat`) serves the teams and each room at
+`os.jingzo.org/next/chat/`, only for the address Access vouches for, with
+a plain form and no script; `checks.shell-e2e` serves the site and the
+chat pages together and sends a message by keyboard. Not verified
+anywhere real yet: the gateway believing a real Access assertion, nginx
+passing `/next/chat` to it, and the rooms on the host's homeserver. Left
+in Stage 1: the audience of the assertion is not held to (the team, the
+signature, the expiry and the owner's address are); live updates wait on
+the island (the page has a "Check for new messages" link); the Lean
+statement that the gateway serves exactly the declared rooms.
+
+## 2026-11-10 to 11-14: one surface at os.jingzo.org
+
+Merged into `ccr-a3dc11d9-lh43d5` as #27, #28 and #29.
+
+- **Logistics** (`modules/logistics/sla.nix`): no unbounded step; every
+  path within the 14-day target; goods cross a border only through a
+  step that clears it; unbacked assumptions counted, the count only falls.
+- **Access**: `os.jingzo.org`, `files.jingzo.org` and `status` are applied
+  on Cloudflare behind Access. Every team's service token is in Pass
+  (`host/<TEAM>_ACCESS_SERVICE_TOKEN`); the security team audits os, files
+  and status headlessly.
+- **The static shell** (`modules/shell/_site`): one HTML file per screen
+  (catalog, settings, wallet, a page per module) and one stylesheet,
+  generated in Rust, audited at build for structure and contrast, served
+  at `os.jingzo.org/next/` beside the egui shell at `/`.
+- **`checks.shell-e2e`** (`modules/shell/_e2e`): every page in the pinned
+  Chromium at three widths, by pointer and keyboard, against the
+  browser's accessibility tree. The pages hold links only; every control
+  added later goes through it. It needs CI: the pinned Chromium does not
+  fit a session's disk, and a local Chromium measures text differently.
+- **Mailbox cards** (`modules/mailbox/cards.nix`): `receipts@jingzo.org`
+  for `accounting-jingzo`, read and draft only. `mailbox read` has not
+  run against a real mailbox; it belongs on the host.
+- **Rooms** (`modules/agents/rooms.nix`): one room per team, the owner and
+  that team in it, and a homeserver account per team. Declared only.
+
+The owner's decisions in these sessions: static HTML plus one small wasm
+island for the web shell; chat is our own view over Matrix, no redirects;
+models run through OpenRouter, never on our own hardware; mailbox cards
+start as read and draft; the order is static shell, chat, card minting,
+then an Android spike.
+
+Next, in order:
+
+1. Done, not yet on the host: `matrix-rooms` (`modules/agents/_rooms`)
+   is the homeserver's one application service. Its token, made each
+   boot and kept only in `/run/matrix`, is the only credential: no
+   account has a password, registration is closed, `matrix-seed` is gone
+   (the owner's rule of 2026-11-15, plan in "Tokens, not sign-ins"
+   below). `checks.matrix-rooms` proves it against the pinned homeserver.
+2. The bridge: a room message becomes a unit of work, its reply and
+   artifacts come back to the room.
+3. The runner fixed and switched on (waits on the owner: OpenRouter
+   credit and a go-ahead).
+4. The chat view as the island, and a page of rooms and roles.
+5. Pixel comparison of the photographs `shell-e2e` already keeps; `/`
+   moved from the egui shell to the static site.
+6. Minting and attaching a card at run time; a sandbox that keeps Bridge
+   out of an agent's reach (the mailbox card's scope depends on it).
+
+Waiting on the owner: what in the visuals looks off; the fate of the
+`builders` and `twin` teams; the first real image through `picture`.
+
+Sessions have about 6 GB of disk: collect garbage between builds, pass
+`--accept-flake-config` to use the cache, and leave the full flake check
+to CI.
 
 ## 2026-11-09, early: Stripe's coverage verified, agents hold cards (read this first)
 
@@ -627,6 +825,13 @@ nine swarm agent tokens (legal, accounting and governance per identity) in the
 root vault.
 
 ## The owner's standing decisions
+
+- Credit is the very last step: nothing is funded until everything is
+  tested, validated and shown (2026-11-17).
+- No SKILL.md or other prose pointers for agents: an agent's abilities
+  are typed tools, Lean, Rust and Nix (2026-11-17).
+- Every fact is pinned from its source of authority and typed, prices
+  included, without exception (2026-11-17).
 
 - The owner's only manual step is approving 2FA or a sign-in link. Never
   hand them a form, a click-path, a value to copy or a command. The

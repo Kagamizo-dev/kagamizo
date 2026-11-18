@@ -62,11 +62,9 @@ let
       inherit (cfg.agents) zone;
       elementPort = svc.port;
       matrixPort = (lib.head svc.paths).port;
-      inherit (top.agents.chat) owner;
-      teams = lib.attrNames top.agents.rooms;
-      passCli = config.packages.pass-cli;
-      tokenFile = "/var/lib/kagamizo/host-token";
-      stateVault = top.proton.infraVaults.hostState;
+      roomsTool = config.packages.matrix-rooms;
+      gateway = config.packages.chat-gateway;
+      inherit (top.agents) chat;
     }
   );
 
@@ -76,6 +74,7 @@ let
     import ../shell/_web-host.nix {
       web = config.packages.kagamizo-shell-web;
       site = config.packages.kagamizo-site-html;
+      inherit (top.agents) chat;
       inherit
         (lib.findFirst (s: s.name == "os") (throw "hetzner.host.agents: no os service") cfg.agents.services)
         port
@@ -183,6 +182,7 @@ let
       opencodeConfig = config.packages.opencode-config;
       tokenFile = "/var/lib/kagamizo/host-token";
       dshAgentTeams = top.cloudflare.accessTeams;
+      inherit (top.agents) answering;
       # The Android SDK's packages (../android), unfree in nixpkgs.
       alsoUnfree = top.android.unfreeNames;
     }
@@ -255,6 +255,24 @@ let
       ) top.trading.paper.dryRun.strategies;
       launcher = lib.getExe' config.packages.weather-backtest "trading-host";
       passCli = config.packages.pass-cli;
+    }
+  );
+
+  # The answering agents and the bridge (../agents/bridge.nix, ./_bridge.nix).
+  agentBridge = withSystem "x86_64-linux" (
+    { config, ... }:
+    import ./_bridge.nix {
+      inherit (top.agents) answering;
+      bridge = config.packages.agent-bridge;
+      opencodeConfig = config.packages.opencode-answering-config;
+      inherit (top.agents) provider rehearsalPort;
+      inherit (config.packages) rehearsal;
+      matrixPort =
+        (lib.head
+          (lib.findFirst (
+            s: s.name == "chat"
+          ) (throw "hetzner.host.agents: no chat service") cfg.agents.services).paths
+        ).port;
     }
   );
 
@@ -333,6 +351,7 @@ let
         shellWeb
         unitFiles
         agentRunnerHost
+        agentBridge
         tradingPaperHost
         media
         androidTwin

@@ -112,6 +112,14 @@ in
         # The agents' daily dry run on jingzo-host (the owner, 2026-11-08:
         # test the whole strategy on cheap models, pennies a day): its own
         # small cap, so a runaway dry run cannot touch the research budget.
+        # The front agent of the chat (the owner, 2026-11-16: one chat for
+        # everything, $20 a month): its own key, so what it spends on
+        # answers, images and video cannot touch a team's share.
+        front = {
+          profile = "front";
+          limitUsd = 20;
+          why = "the front agent of the chat (governance.agents.front)";
+        };
         research-host = {
           profile = "research-host";
           limitUsd = 5;

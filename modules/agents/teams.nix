@@ -138,6 +138,22 @@ in
         "the browser team: Rust browser flows for what no API covers, each typed and approved"
         "chat-and-code"
         "deepseek/deepseek-v4.1-flash";
+    # The front agent (the owner, 2026-11-16): the one the owner talks to
+    # in the chat's front room. It answers, uses its typed tools, and hands a
+    # brief to a team in that team's own room. It runs in OpenCode
+    # (opencode serve, on the loopback) and proposes no change itself.
+    front = {
+      serves = "kagamizo";
+      purpose = "the front agent: answers the owner in the chat, uses its typed tools, and hands work to the teams";
+      personas = [ "project-management/project-manager-senior" ];
+      tools = [
+        "matrix"
+        "files"
+      ];
+      key = "front";
+      budgetUsdPerMonth = 20;
+      harness = "opencode";
+    };
     upkeep =
       team
         [

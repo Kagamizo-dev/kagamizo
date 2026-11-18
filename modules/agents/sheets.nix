@@ -18,6 +18,14 @@
 #     status;      declared, probed or live
 #   }
 #
+#   packages.media-prices  pins what OpenRouter charges for images and
+#                       video from its own lists (./_prices, Rust):
+#                       `media-prices pin OUT DATE` writes
+#                       ./_json/media-prices.json, `media-prices check`
+#                       fails if the pin is stale. No key, no spend. A
+#                       sheet's model must be in the pin, and Lean proves
+#                       the dearest pinned price within the sheet's cap
+#                       wherever the unit bounds a call.
 #   packages.picture    the harness for image and drawing models
 #                       (./_picture, Rust): `picture SHEET --prompt-file F
 #                       --out DIR [--ref IMAGE]...` makes the one call,
@@ -74,12 +82,20 @@ let
       account = mkOption { type = types.enum (lib.attrNames config.accounts.held); };
       host = mkOption { type = types.strMatching "([a-z0-9-]+\\.)+[a-z]{2,}"; };
       endpoint = mkOption { type = types.strMatching "/[A-Za-z0-9/_-]*"; };
-      model = mkOption { type = types.str; };
+      model = mkOption {
+        type = types.enum (lib.attrNames pinned.images);
+        description = "A model OpenRouter prices (./_json/media-prices.json, pinned from its own list).";
+      };
       perf = {
         maxSeconds = mkOption { type = types.ints.positive; };
         maxCents = mkOption {
           type = types.ints.positive;
           description = "For one image; a run of several may cost that many times it.";
+        };
+        maxTenthsMegapixels = mkOption {
+          type = types.ints.positive;
+          default = 10;
+          description = "The most one image asks for, in tenths of a megapixel; what a price by the megapixel is bounded at.";
         };
         record = mkOption {
           type = types.nullOr (
@@ -112,6 +128,14 @@ let
 
   reachable = s: lib.elem s.host allowedHosts;
 
+  # What OpenRouter charges, pinned from its own lists by `media-prices`
+  # (./_prices): every provider's price for each model a sheet names, with
+  # its unit, and every video model's durations and price codes.
+  pinned = lib.importJSON ./_json/media-prices.json;
+  # The sheets whose price alone does not bound a call (billed by output
+  # token). It may only fall.
+  unboundedBaseline = 1;
+
   # What the harness is built with: the one call each sheet allows.
   rendered = lib.mapAttrs (_: s: {
     inherit (s)
@@ -133,7 +157,16 @@ let
           n: s:
           "{ name := ${q n}, inputs := [${
             lib.concatMapStringsSep ", " (i: ".${i}") s.inputs
-          }], output := .${s.output}, commercial := ${lib.boolToString s.licence.commercialUse}, reachable := ${lib.boolToString (reachable s)}, maxSeconds := ${toString s.perf.maxSeconds}, maxCents := ${toString s.perf.maxCents}, record := ${
+          }], output := .${s.output}, commercial := ${lib.boolToString s.licence.commercialUse}, reachable := ${lib.boolToString (reachable s)}, maxSeconds := ${toString s.perf.maxSeconds}, maxCents := ${toString s.perf.maxCents}, prices := [${
+            lib.concatStringsSep ", " (
+              lib.concatMap (
+                e:
+                builtins.map (
+                  p: "{ provider := ${q e.provider}, unit := .${p.unit}, microUsd := ${toString p.microUsd} }"
+                ) e.prices
+              ) pinned.images.${s.model}
+            )
+          }], tenthsMegapixels := ${toString s.perf.maxTenthsMegapixels}, record := ${
             if s.perf.record == null then
               "none"
             else
@@ -143,7 +176,7 @@ let
       )
     }]
 
-    theorem sheets_sound : sound sheets = true := by
+    theorem sheets_sound : sound sheets ${toString unboundedBaseline} = true := by
       decide +kernel
 
     end Kagamizo.Agents.Sheets
@@ -179,7 +212,7 @@ in
           maxCents = 10;
         };
         quality = "The owner picks one of the views; nothing is chosen for them";
-        why = "Concept views from the owner's words and reference photos; priced by tokens, about 4 to 7 cents an image by our own estimate";
+        why = "Concept views from the owner's words and reference photos; billed by output token (pinned), so its price alone does not bound an image: the one sheet in the unbounded baseline";
       };
       consistent-view = openrouter "black-forest-labs/flux.2-pro" // {
         inputs = [
@@ -192,7 +225,7 @@ in
           maxCents = 5;
         };
         quality = "Front, back and open views agree on every pocket and mount before a shape is made from them";
-        why = "The same design from other sides, from the chosen view as its reference; 3 cents a megapixel";
+        why = "The same design from other sides, from the chosen view as its reference; billed by the megapixel (pinned), bounded at one megapixel";
       };
       line-art = openrouter "recraft/recraft-v4-vector" // {
         inputs = [ "text" ];
@@ -202,7 +235,7 @@ in
           maxCents = 10;
         };
         quality = "The drawing reads as the part it names";
-        why = "Line art for patterns and labels as SVG; 8 cents an image";
+        why = "Line art for patterns and labels as SVG; billed by the image (pinned)";
       };
     };
 
@@ -216,6 +249,20 @@ in
     perSystem =
       { pkgs, config, ... }:
       {
+        packages.media-prices = pkgs.rustPlatform.buildRustPackage {
+          pname = "media-prices";
+          version = "0.1.0";
+          src = ./_prices;
+          cargoLock.lockFile = ./_prices/Cargo.lock;
+          MEDIA_MODELS = pkgs.writeText "media-models.json" (
+            builtins.toJSON (
+              lib.unique (
+                lib.mapAttrsToList (_: s: s.model) (lib.filterAttrs (_: s: s.endpoint == "/api/v1/images") cfg)
+              )
+            )
+          );
+          meta.mainProgram = "media-prices";
+        };
         packages.picture = pkgs.rustPlatform.buildRustPackage {
           pname = "picture";
           version = "0.1.0";

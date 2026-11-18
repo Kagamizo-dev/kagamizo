@@ -5,23 +5,33 @@
 # at /_matrix, so the Access session covers the client's calls. Federation
 # is off: the server speaks to no other.
 #
-#   matrix-token   once a boot, before the server: a registration token the
-#                  seed alone knows (/run/matrix, never printed)
-#   matrix-seed    after the server: registers the owner, the agents' bot
-#                  and every team if their logins are not in the host's state vault
-#                  yet, generating each password on the host and storing
-#                  it as a Proton Pass login item (Kagamizo-Host-State,
-#                  which the host may write). The owner signs in to Element
-#                  with Proton Pass; nothing is typed by hand.
+#   matrix-token   once a boot, before the server: the application
+#                  service's two tokens, made here and kept only in
+#                  /run/matrix (never printed, never stored), and its
+#                  registration, whose namespace is exactly the declared
+#                  accounts and room aliases (modules/agents/_rooms)
+#   matrix-rooms   after the server: every declared room exists, with its
+#                  topic, holding the owner and its team. It fails,
+#                  changing nothing more, if a room holds someone not
+#                  declared.
+#
+#   chat-gateway   the chat pages, on the loopback: the shell's site
+#                  (modules/shell/_web-host.nix) passes ${chat.prefix}/ to
+#                  it. It serves only the owner, as Access vouches for
+#                  them, and holds the application service's token.
+#
+# There is no password and no sign-in on this homeserver (the owner's
+# rule, 2026-11-15): registration is closed, every account is reached
+# through the application service's token, and the owner talks through
+# the shell's own page behind Access. Element is served but has nothing
+# to sign in with.
 {
   zone,
   elementPort,
   matrixPort,
-  owner, # the owner's Matrix localpart, from their address
-  teams, # every team: each its own login (modules/agents/rooms.nix)
-  passCli,
-  tokenFile,
-  stateVault,
+  roomsTool, # matrix-rooms, with the declared rooms compiled in
+  gateway, # chat-gateway: the chat pages (modules/agents/_chat)
+  chat, # agents.chat: the owner's address, the Access team, the port, the prefix
 }:
 { pkgs, config, ... }:
 let
@@ -43,11 +53,6 @@ let
   };
   tuwunel = config.services.matrix-tuwunel;
   tokenDir = "/run/matrix";
-  users = [
-    owner
-    "agents"
-  ]
-  ++ teams;
 in
 {
   services.matrix-tuwunel = {
@@ -58,8 +63,8 @@ in
       port = [ matrixPort ];
       allow_federation = false;
       trusted_servers = [ ];
-      allow_registration = true;
-      registration_token_file = "${tokenDir}/registration-token";
+      allow_registration = false;
+      appservice_dir = "${tokenDir}/appservices";
       allow_guest_registration = false;
       url_preview_domain_contains_allowlist = [ ];
       allow_public_room_directory_over_federation = false;
@@ -86,11 +91,14 @@ in
 
   systemd.services = {
     matrix-token = {
-      description = "The Matrix registration token, for this boot";
+      description = "The Matrix application service's tokens and registration, for this boot";
       wantedBy = [ "multi-user.target" ];
       before = [ "matrix-tuwunel.service" ];
       requiredBy = [ "matrix-tuwunel.service" ];
-      path = [ pkgs.coreutils ];
+      path = [
+        pkgs.coreutils
+        roomsTool
+      ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
@@ -98,66 +106,47 @@ in
         RuntimeDirectoryMode = "0750";
       };
       script = ''
-        umask 027
-        head -c 32 /dev/urandom | base64 -w0 | tr -d '/+=' >${tokenDir}/registration-token
-        chgrp ${tuwunel.group} ${tokenDir} ${tokenDir}/registration-token
+        umask 077
+        for t in as-token hs-token; do
+          head -c 32 /dev/urandom | base64 -w0 | tr -d '/+=' >${tokenDir}/$t
+        done
+        mkdir -p ${tokenDir}/appservices
+        matrix-rooms registration ${tokenDir}/appservices/kagamizo.yaml ${tokenDir}/as-token ${tokenDir}/hs-token
+        chgrp -R ${tuwunel.group} ${tokenDir}/appservices
+        chgrp ${tuwunel.group} ${tokenDir}
+        chmod 0750 ${tokenDir}/appservices
+        chmod 0640 ${tokenDir}/appservices/kagamizo.yaml
       '';
     };
 
-    matrix-seed = {
-      description = "The owner's and the agents' Matrix logins, into the host's state vault";
+    chat-gateway = {
+      description = "The chat pages: the owner talks to a team on the shell's own site";
       wantedBy = [ "multi-user.target" ];
       after = [
-        "matrix-tuwunel.service"
-        "agents-secrets.service"
+        "matrix-rooms.service"
+        "network-online.target"
       ];
+      wants = [ "network-online.target" ];
       requires = [ "matrix-tuwunel.service" ];
-      path = [
-        passCli
-        pkgs.curl
-        pkgs.jq
-        pkgs.coreutils
-      ];
+      serviceConfig = {
+        ExecStart = "${gateway}/bin/chat-gateway ${toString chat.port} ${chat.prefix} http://127.0.0.1:${toString matrixPort} ${tokenDir}/as-token ${chat.address} ${chat.accessTeam}";
+        Restart = "always";
+        RestartSec = 5;
+      };
+    };
+
+    matrix-rooms = {
+      description = "The teams' rooms, as declared";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "matrix-tuwunel.service" ];
+      requires = [ "matrix-tuwunel.service" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
         Restart = "on-failure";
         RestartSec = 30;
+        ExecStart = "${roomsTool}/bin/matrix-rooms apply http://127.0.0.1:${toString matrixPort} ${tokenDir}/as-token";
       };
-      script = ''
-        set -euo pipefail
-        export PROTON_PASS_KEY_PROVIDER=fs HOME=/root
-        export PROTON_PASS_AGENT_REASON="jingzo-host: the Matrix logins"
-        pass-cli info >/dev/null 2>&1 || pass-cli login --pat "$(cat ${tokenFile})" >/dev/null
-        base=http://127.0.0.1:${toString matrixPort}
-        for _ in $(seq 1 30); do curl -fsS "$base/_matrix/client/versions" >/dev/null 2>&1 && break; sleep 2; done
-        have=$(pass-cli item list --vault-name ${stateVault} --output json | jq -c '[.items[].title]')
-        for user in ${toString users}; do
-          title="matrix-$user"
-          jq -e --arg t "$title" 'index($t)' <<<"$have" >/dev/null && continue
-          # The password is made here and goes two places only: the
-          # homeserver and the vault. It is never printed.
-          pw=$(head -c 24 /dev/urandom | base64 -w0 | tr -d '/+=')
-          token=$(cat ${tokenDir}/registration-token)
-          session=$(jq -n --arg u "$user" --arg p "$pw" '{username: $u, password: $p, auth: {type: "m.login.registration_token", token: "x"}, initial_device_display_name: "seed"}' |
-            jq --arg t "$token" '.auth.token = $t' |
-            curl -fsS -X POST "$base/_matrix/client/v3/register" -H 'Content-Type: application/json' -d @- 2>/dev/null |
-            jq -r '.session // empty') || true
-          # A first call without the flow's session id starts the flow; the
-          # second completes it. tuwunel accepts the one-shot form above
-          # when the token is right; when it answered with a session, finish.
-          if [ -n "$session" ]; then
-            jq -n --arg u "$user" --arg p "$pw" --arg t "$token" --arg s "$session" \
-              '{username: $u, password: $p, auth: {type: "m.login.registration_token", token: $t, session: $s}}' |
-              curl -fsS -X POST "$base/_matrix/client/v3/register" -H 'Content-Type: application/json' -d @- >/dev/null
-          fi
-          jq -n --arg t "$title" --arg u "$user" --arg p "$pw" --arg o "${origin}" --arg s "@$user:${serverName}" \
-            '{title: $t, username: $u, email: null, password: $p, totp_uri: null, urls: [$o], note: ("Matrix login " + $s + ", made by jingzo-host (modules/hetzner/_chat.nix). Sign in to Element at " + $o + " with it.")}' |
-            pass-cli item create login --vault-name ${stateVault} --from-template - >/dev/null
-          unset pw
-          echo "matrix-seed: registered $user, login stored as ${stateVault}/$title"
-        done
-      '';
     };
   };
 }

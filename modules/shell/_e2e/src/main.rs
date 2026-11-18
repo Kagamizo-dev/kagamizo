@@ -3,22 +3,34 @@
 //! What ../_site/src/a11y.rs decides from a document's structure is decided
 //! there; this is what only a browser can say.
 //!
-//!   shell-e2e SITE_DIR OUT_DIR
+//!   shell-e2e SITE_DIR OUT_DIR [SERVER]
+//!
+//! With SERVER (chat-check-server, ../../agents/_chat) the site is served
+//! over HTTP with the chat pages beside it, and those are checked too.
+//! With `@ADDRESS` in SERVER's place the site is already served there, by
+//! the whole chain (../../agents/_bridge: the real homeserver, bridge and
+//! harness). Then the room talked in is the front agent's, and after a
+//! message is sent the agent's answer must appear as the latest thing
+//! said, found with the page's own "Check for new messages" link.
 //!
 //! On every page, at every width:
 //!   * nothing scrolls sideways;
-//!   * every link is a target at least 44 by 44 CSS pixels (the skip link is
-//!     measured when it shows, on focus);
+//!   * every link, box and button is a target at least 44 by 44 CSS pixels
+//!     (the skip link is measured when it shows, on focus);
 //!   * the browser's own accessibility tree has one main landmark, a name on
-//!     every link and heading, and as many links as the document has.
+//!     every link, heading, box and button, and as many links as the
+//!     document has.
 //! With the keyboard alone, at the phone's and the desktop's width:
 //!   * the first Tab shows the skip link, and Enter on it goes to the content;
-//!   * Tab reaches every link, in the document's order, each one scrolled
-//!     into view with a focus ring a person can see.
+//!   * Tab reaches every link, box and button, in the document's order,
+//!     each one scrolled into view with a focus ring a person can see.
 //! With the pointer, at the desktop's width:
 //!   * every kind of link on the page is clicked (each navigation link, the
 //!     first card, the first module of the index) and lands on a page of the
 //!     site with one top heading.
+//! In a room, with the keyboard, at the phone's and the desktop's width:
+//!   * a message typed in the box and sent with Enter on the button is the
+//!     latest thing said when the page comes back, and the page is at it.
 //! A sample of pages is photographed at each width into OUT_DIR.
 //!
 //! The browser is the pinned Chromium (E2E_CHROMIUM); E2E_NO_SANDBOX is set
@@ -45,9 +57,9 @@ const PHOTOGRAPHED: [&str; 4] = ["index.html", "wallet/index.html", "settings/in
 
 /// What the page says of itself, measured in the browser.
 const MEASURE: &str = r#"(() => {
-  const links = [...document.querySelectorAll('a')].map(a => {
+  const links = [...document.querySelectorAll('a, button, textarea, input, select')].map(a => {
     const r = a.getBoundingClientRect();
-    return { text: a.innerText.trim().replace(/\s+/g, ' ').slice(0, 60), href: a.getAttribute('href') || '', skip: a.classList.contains('skip'), w: r.width, h: r.height };
+    return { tag: a.tagName.toLowerCase(), text: (a.innerText || a.getAttribute('name') || '').trim().replace(/\s+/g, ' ').slice(0, 60), href: a.getAttribute('href') || '', skip: a.classList.contains('skip'), w: r.width, h: r.height };
   });
   const el = document.documentElement;
   return JSON.stringify({ sideways: el.scrollWidth > el.clientWidth, headings: document.querySelectorAll('h1').length, links });
@@ -57,19 +69,20 @@ const MEASURE: &str = r#"(() => {
 /// and the ring drawn around it.
 const FOCUSED: &str = r#"(() => {
   const a = document.activeElement;
-  const all = [...document.querySelectorAll('a')];
+  const all = [...document.querySelectorAll('a, button, textarea, input, select')];
   const r = a.getBoundingClientRect();
   const s = getComputedStyle(a);
   return JSON.stringify({
     index: all.indexOf(a),
     inView: r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth && r.width > 0 && r.height > 0,
     ring: s.outlineStyle === 'none' ? 0 : parseFloat(s.outlineWidth) || 0,
-    w: r.width, h: r.height, hash: location.hash
+    w: r.width, h: r.height, hash: location.hash, tag: a.tagName.toLowerCase()
   });
 })()"#;
 
 #[derive(Deserialize)]
 struct Link {
+    tag: String,
     text: String,
     href: String,
     skip: bool,
@@ -93,6 +106,7 @@ struct Focused {
     w: f64,
     h: f64,
     hash: String,
+    tag: String,
 }
 
 async fn eval<T: for<'de> Deserialize<'de>>(page: &Page, script: &str) -> Result<T> {
@@ -147,7 +161,7 @@ async fn tree(page: &Page, links: usize, at: &str, found: &mut Vec<String>) -> R
                     found.push(format!("{at}: the browser gives a link no name"));
                 }
             }
-            "heading" if name.trim().is_empty() => found.push(format!("{at}: the browser gives a heading no name")),
+            "heading" | "textbox" | "button" if name.trim().is_empty() => found.push(format!("{at}: the browser gives a {role} no name")),
             _ => {}
         }
     }
@@ -238,6 +252,67 @@ async fn clicks(page: &Page, url: &str, site: &str, at: &str, found: &mut Vec<St
     Ok(())
 }
 
+/// After a message is sent to an answering agent: its answer becomes the
+/// latest thing said, reached with the page's own link for new messages.
+async fn answered(page: &Page, said: &str, at: &str, found: &mut Vec<String>) -> Result<()> {
+    let want = format!("Rehearsal: you said: {said}");
+    let mut latest = String::new();
+    for _ in 0..40 {
+        tokio::time::sleep(std::time::Duration::from_millis(1500)).await;
+        let Ok(again) = page.find_element("a.again").await else {
+            found.push(format!("{at}: the room has no link to check for new messages"));
+            return Ok(());
+        };
+        again.click().await?;
+        if let Ok((_, _)) = settled(page).await {
+            if let Ok((l, _)) = eval::<(String, String)>(page, "JSON.stringify([document.querySelector('#latest p')?.innerText || '', location.hash])").await {
+                latest = l;
+                if latest == want {
+                    return Ok(());
+                }
+            }
+        }
+    }
+    found.push(format!("{at}: the agent's answer did not appear (the latest thing said reads \"{latest}\")"));
+    Ok(())
+}
+
+/// A room, with the keyboard: type in the box, Tab to the button, Enter.
+async fn talk(page: &Page, at: &str, agent: bool, found: &mut Vec<String>) -> Result<()> {
+    let said = format!("Said by the check, {at}");
+    let Ok(area) = page.find_element("form.say textarea").await else {
+        return Ok(());
+    };
+    area.click().await?;
+    area.type_str(&said).await?;
+    key(page, "Tab", 9).await?;
+    let f: Focused = eval(page, FOCUSED).await?;
+    if f.tag != "button" {
+        found.push(format!("{at}: Tab from the message box lands on a {}, not on Send", f.tag));
+        return Ok(());
+    }
+    page.find_element("form.say button").await?.press_key("Enter").await?;
+    let mut latest = String::new();
+    let mut hash = String::new();
+    for _ in 0..50 {
+        tokio::time::sleep(std::time::Duration::from_millis(40)).await;
+        if let Ok((l, h)) = eval::<(String, String)>(page, "JSON.stringify([document.querySelector('#latest p')?.innerText || '', location.hash])").await {
+            (latest, hash) = (l, h);
+            if latest == said {
+                break;
+            }
+        }
+    }
+    if latest != said {
+        found.push(format!("{at}: what was sent is not the latest thing said (it reads \"{latest}\")"));
+    } else if hash != "#latest" {
+        found.push(format!("{at}: after sending, the page is at \"{hash}\", not at the latest message"));
+    } else if agent {
+        answered(page, &said, at, found).await?;
+    }
+    Ok(())
+}
+
 fn pages(dir: &Path, under: &Path, out: &mut Vec<String>) -> Result<()> {
     let mut entries: Vec<PathBuf> = std::fs::read_dir(dir)?.map(|e| e.map(|e| e.path())).collect::<std::io::Result<_>>()?;
     entries.sort();
@@ -251,14 +326,33 @@ fn pages(dir: &Path, under: &Path, out: &mut Vec<String>) -> Result<()> {
     Ok(())
 }
 
-async fn run(site: &Path, out: &Path) -> Result<(usize, Vec<String>)> {
+/// The port the check's own server listens on.
+const PORT: u16 = 8791;
+
+async fn run(site: &Path, out: &Path, server: Option<&str>) -> Result<(usize, Vec<String>)> {
     let site = site.canonicalize().context("SITE_DIR")?;
-    let root = format!("file://{}", site.display());
+    let mut serving = None;
+    // An agent answers only where the whole chain serves the pages.
+    let agent = server.is_some_and(|s| s.starts_with('@'));
+    let root = match server {
+        None => format!("file://{}", site.display()),
+        Some(address) if agent => address.trim_start_matches('@').trim_end_matches('/').to_owned(),
+        Some(binary) => {
+            serving = Some(tokio::process::Command::new(binary).arg(&site).arg(PORT.to_string()).kill_on_drop(true).spawn().with_context(|| binary.to_owned())?);
+            format!("http://127.0.0.1:{PORT}/next")
+        }
+    };
     std::fs::create_dir_all(out)?;
     let mut all = Vec::new();
     pages(&site, &site, &mut all)?;
     if all.is_empty() {
         bail!("no page under {}", site.display());
+    }
+    let chat = server.is_some();
+    if chat {
+        // The chat's pages: the teams, and the first team's room (found on
+        // the teams page once the browser is up, below).
+        all.push("chat/".into());
     }
     let chromium = std::env::var("E2E_CHROMIUM").context("E2E_CHROMIUM: the browser to drive")?;
     let mut config = BrowserConfig::builder().chrome_executable(chromium).arg("--headless=new").arg("--disable-component-update").arg("--hide-scrollbars");
@@ -269,6 +363,21 @@ async fn run(site: &Path, out: &Path) -> Result<(usize, Vec<String>)> {
     let events = tokio::spawn(async move { while handler.next().await.is_some() {} });
     let page = browser.new_page("about:blank").await?;
     let mut found = Vec::new();
+    if chat {
+        for _ in 0..100 {
+            if page.goto(format!("{root}/chat/")).await.is_ok() {
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+        }
+        // With an agent answering, the room talked in is the front one.
+        let pick = if agent { "document.querySelector('.index a[href=\"front/\"]')?.getAttribute('href') || ''" } else { "document.querySelector('.index a')?.getAttribute('href') || ''" };
+        let first: String = page.evaluate(pick).await?.into_value()?;
+        if first.is_empty() {
+            bail!("the chat's teams page lists no room");
+        }
+        all.push(format!("chat/{first}"));
+    }
     for path in &all {
         let url = format!("{root}/{path}");
         for (name, width, height) in WIDTHS {
@@ -280,18 +389,20 @@ async fn run(site: &Path, out: &Path) -> Result<(usize, Vec<String>)> {
             }
             for l in m.links.iter().filter(|l| !l.skip) {
                 if l.w < TARGET || l.h < TARGET {
-                    found.push(format!("{at}: the link \"{}\" ({}) is {:.0} by {:.0}, under {TARGET:.0}", l.text, l.href, l.w, l.h));
+                    found.push(format!("{at}: the {} \"{}\" ({}) is {:.0} by {:.0}, under {TARGET:.0}", l.tag, l.text, l.href, l.w, l.h));
                 }
             }
-            tree(&page, m.links.len(), &at, &mut found).await.context("tree")?;
-            if PHOTOGRAPHED.contains(&path.as_str()) {
+            tree(&page, m.links.iter().filter(|l| l.tag == "a").count(), &at, &mut found).await.context("tree")?;
+            if PHOTOGRAPHED.contains(&path.as_str()) || path.starts_with("chat/") {
                 let shot = ScreenshotParams::builder().format(CaptureScreenshotFormat::Png).full_page(true).build();
-                page.save_screenshot(shot, out.join(format!("{}-{name}.png", path.trim_end_matches("/index.html").trim_end_matches(".html").replace('/', "-")))).await?;
+                page.save_screenshot(shot, out.join(format!("{}-{name}.png", path.trim_end_matches("/index.html").trim_end_matches(".html").trim_end_matches('/').replace('/', "-")))).await?;
             }
             if name != "tablet" {
                 keyboard(&page, m.links.len(), &at, &mut found).await.context("keyboard")?;
                 open(&page, &url, width, height).await?;
                 skip(&page, &at, &mut found).await.context("skip")?;
+                open(&page, &url, width, height).await?;
+                talk(&page, &at, agent, &mut found).await.context("talk")?;
             }
             if name == "desktop" {
                 clicks(&page, &url, &root, &at, &mut found).await.context("clicks")?;
@@ -300,17 +411,22 @@ async fn run(site: &Path, out: &Path) -> Result<(usize, Vec<String>)> {
     }
     browser.close().await.ok();
     events.abort();
+    drop(serving);
     Ok((all.len(), found))
 }
 
 #[tokio::main]
 async fn main() -> std::process::ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let [site, out] = args.as_slice() else {
-        eprintln!("usage: shell-e2e SITE_DIR OUT_DIR");
-        return std::process::ExitCode::from(2);
+    let (site, out, server) = match args.as_slice() {
+        [site, out] => (site, out, None),
+        [site, out, server] => (site, out, Some(server.as_str())),
+        _ => {
+            eprintln!("usage: shell-e2e SITE_DIR OUT_DIR [SERVER]");
+            return std::process::ExitCode::from(2);
+        }
     };
-    match run(Path::new(site), Path::new(out)).await {
+    match run(Path::new(site), Path::new(out), server).await {
         Ok((pages, found)) if found.is_empty() => {
             println!("shell-e2e: {pages} pages at {} widths, by pointer and by keyboard: nothing found", WIDTHS.len());
             std::process::ExitCode::SUCCESS

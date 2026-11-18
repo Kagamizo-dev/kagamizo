@@ -32,6 +32,7 @@
   opencodeConfig,
   tokenFile,
   dshAgentTeams, # cloudflare.accessTeams: the teams holding an Access token
+  answering, # agents.answering: each answering agent and its key's profile
   alsoUnfree ? [ ], # further unfree packages admitted by name (../android)
 }:
 { lib, pkgs, ... }:
@@ -90,6 +91,19 @@ in
         # placeholder, not a secret).
         printf 'OPENAI_API_KEY=%s\nOPENROUTER_API_KEY=%s\nOPENAI_API_KEYS=%s;local\n' "$key" "$key" "$key" >/run/agents/openrouter.env
         unset key
+        # Each answering agent's own key (modules/agents/bridge.nix). One
+        # not minted yet is skipped, and its harness does not start.
+        ${lib.concatStringsSep "\n" (
+          builtins.map (agent: ''
+            key=$(secretspec get OPENROUTER_API_KEY --file ${secretspecToml} --profile ${agent.profile} --reason "agents-secrets: the ${agent.name} agent's key" 2>/dev/null || true)
+            if [ -n "$key" ]; then
+              printf 'OPENROUTER_API_KEY=%s\n' "$key" >/run/agents/${agent.name}.openrouter.env
+            else
+              echo "agents-secrets: no key for the ${agent.name} agent yet (openrouter apply)" >&2
+            fi
+            unset key
+          '') answering
+        )}
         get TUNNEL_TOKEN >/run/agents/tunnel-token
         [ -s /run/agents/tunnel-token ] || { echo "agents-secrets: no tunnel token yet (infra-tunnel-token)" >&2; exit 1; }
         # Each dsh team's Access service token: JSON {client_id, client_secret}

@@ -157,6 +157,22 @@ pub fn problems(root: &Node) -> Vec<String> {
                     out.push("a list holds something that is not an item".into());
                 }
             }
+            "textarea" | "input" | "select" => {
+                let labelled = attr(n, "id").is_some_and(|id| all.iter().any(|l| name(l) == "label" && attr(l, "for") == Some(id) && !spoken(l).is_empty()));
+                if !labelled && attr(n, "aria-label").is_none_or(str::is_empty) && attr(n, "type") != Some("hidden") {
+                    out.push(format!("a {} has no label", name(n)));
+                }
+            }
+            "button" => {
+                if spoken(n).is_empty() && attr(n, "aria-label").is_none_or(str::is_empty) {
+                    out.push("a button has no name".into());
+                }
+            }
+            "form" => {
+                if attr(n, "aria-label").is_none() && attr(n, "aria-labelledby").is_none() {
+                    out.push("a form has no name".into());
+                }
+            }
             "img" => {
                 if attr(n, "alt").is_none() {
                     out.push("an image has no alternative text".into());
@@ -232,6 +248,10 @@ mod tests {
         caught(vec![el("section").attr("aria-labelledby", "missing")], "not on the page");
         caught(vec![el("ul").child(el("p"))], "not an item");
         caught(vec![el("img")], "no alternative text");
+        caught(vec![el("textarea").attr("id", "t")], "a textarea has no label");
+        caught(vec![el("label").attr("for", "other").text("Say"), el("input").attr("id", "t")], "input has no label");
+        caught(vec![el("button")], "a button has no name");
+        caught(vec![el("form")], "a form has no name");
         caught(vec![el("div").attr("role", "button")], "plays a control");
         caught(vec![el("p").attr("tabindex", "3")], "tabindex");
         caught(vec![el("h2")], "an empty h2");
