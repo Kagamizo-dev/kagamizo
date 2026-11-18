@@ -7,6 +7,11 @@
 //!
 //! With SERVER (chat-check-server, ../../agents/_chat) the site is served
 //! over HTTP with the chat pages beside it, and those are checked too.
+//! With `@ADDRESS` in SERVER's place the site is already served there, by
+//! the whole chain (../../agents/_bridge: the real homeserver, bridge and
+//! harness). Then the room talked in is the front agent's, and after a
+//! message is sent the agent's answer must appear as the latest thing
+//! said, found with the page's own "Check for new messages" link.
 //!
 //! On every page, at every width:
 //!   * nothing scrolls sideways;
@@ -247,8 +252,33 @@ async fn clicks(page: &Page, url: &str, site: &str, at: &str, found: &mut Vec<St
     Ok(())
 }
 
+/// After a message is sent to an answering agent: its answer becomes the
+/// latest thing said, reached with the page's own link for new messages.
+async fn answered(page: &Page, said: &str, at: &str, found: &mut Vec<String>) -> Result<()> {
+    let want = format!("Rehearsal: you said: {said}");
+    let mut latest = String::new();
+    for _ in 0..40 {
+        tokio::time::sleep(std::time::Duration::from_millis(1500)).await;
+        let Ok(again) = page.find_element("a.again").await else {
+            found.push(format!("{at}: the room has no link to check for new messages"));
+            return Ok(());
+        };
+        again.click().await?;
+        if let Ok((_, _)) = settled(page).await {
+            if let Ok((l, _)) = eval::<(String, String)>(page, "JSON.stringify([document.querySelector('#latest p')?.innerText || '', location.hash])").await {
+                latest = l;
+                if latest == want {
+                    return Ok(());
+                }
+            }
+        }
+    }
+    found.push(format!("{at}: the agent's answer did not appear (the latest thing said reads \"{latest}\")"));
+    Ok(())
+}
+
 /// A room, with the keyboard: type in the box, Tab to the button, Enter.
-async fn talk(page: &Page, at: &str, found: &mut Vec<String>) -> Result<()> {
+async fn talk(page: &Page, at: &str, agent: bool, found: &mut Vec<String>) -> Result<()> {
     let said = format!("Said by the check, {at}");
     let Ok(area) = page.find_element("form.say textarea").await else {
         return Ok(());
@@ -277,6 +307,8 @@ async fn talk(page: &Page, at: &str, found: &mut Vec<String>) -> Result<()> {
         found.push(format!("{at}: what was sent is not the latest thing said (it reads \"{latest}\")"));
     } else if hash != "#latest" {
         found.push(format!("{at}: after sending, the page is at \"{hash}\", not at the latest message"));
+    } else if agent {
+        answered(page, &said, at, found).await?;
     }
     Ok(())
 }
@@ -300,8 +332,11 @@ const PORT: u16 = 8791;
 async fn run(site: &Path, out: &Path, server: Option<&str>) -> Result<(usize, Vec<String>)> {
     let site = site.canonicalize().context("SITE_DIR")?;
     let mut serving = None;
+    // An agent answers only where the whole chain serves the pages.
+    let agent = server.is_some_and(|s| s.starts_with('@'));
     let root = match server {
         None => format!("file://{}", site.display()),
+        Some(address) if agent => address.trim_start_matches('@').trim_end_matches('/').to_owned(),
         Some(binary) => {
             serving = Some(tokio::process::Command::new(binary).arg(&site).arg(PORT.to_string()).kill_on_drop(true).spawn().with_context(|| binary.to_owned())?);
             format!("http://127.0.0.1:{PORT}/next")
@@ -313,7 +348,8 @@ async fn run(site: &Path, out: &Path, server: Option<&str>) -> Result<(usize, Ve
     if all.is_empty() {
         bail!("no page under {}", site.display());
     }
-    if serving.is_some() {
+    let chat = server.is_some();
+    if chat {
         // The chat's pages: the teams, and the first team's room (found on
         // the teams page once the browser is up, below).
         all.push("chat/".into());
@@ -327,14 +363,16 @@ async fn run(site: &Path, out: &Path, server: Option<&str>) -> Result<(usize, Ve
     let events = tokio::spawn(async move { while handler.next().await.is_some() {} });
     let page = browser.new_page("about:blank").await?;
     let mut found = Vec::new();
-    if serving.is_some() {
+    if chat {
         for _ in 0..100 {
             if page.goto(format!("{root}/chat/")).await.is_ok() {
                 break;
             }
             tokio::time::sleep(std::time::Duration::from_millis(100)).await;
         }
-        let first: String = page.evaluate("document.querySelector('.index a')?.getAttribute('href') || ''").await?.into_value()?;
+        // With an agent answering, the room talked in is the front one.
+        let pick = if agent { "document.querySelector('.index a[href=\"front/\"]')?.getAttribute('href') || ''" } else { "document.querySelector('.index a')?.getAttribute('href') || ''" };
+        let first: String = page.evaluate(pick).await?.into_value()?;
         if first.is_empty() {
             bail!("the chat's teams page lists no room");
         }
@@ -364,7 +402,7 @@ async fn run(site: &Path, out: &Path, server: Option<&str>) -> Result<(usize, Ve
                 open(&page, &url, width, height).await?;
                 skip(&page, &at, &mut found).await.context("skip")?;
                 open(&page, &url, width, height).await?;
-                talk(&page, &at, &mut found).await.context("talk")?;
+                talk(&page, &at, agent, &mut found).await.context("talk")?;
             }
             if name == "desktop" {
                 clicks(&page, &url, &root, &at, &mut found).await.context("clicks")?;

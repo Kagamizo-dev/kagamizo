@@ -1,6 +1,13 @@
 //! chat-whole-check: the whole chain on the loopback, with nothing billed.
 //!
 //!   chat-whole-check HOMESERVER OPENCODE OPENCODE_CONFIG REHEARSAL BRIDGE
+//!                    [--then GATEWAY SITE_DIR PORT -- COMMAND…]
+//!
+//! With `--then`, once its own points 1 to 5 hold and while everything is
+//! still running, it serves the site and the chat pages over this same
+//! homeserver (GATEWAY, the chat's check server) and runs COMMAND, which
+//! is the browser check: what the browser sends is answered by the real
+//! bridge and harness. COMMAND failing fails this check.
 //!
 //! It starts the pinned homeserver with the application service's
 //! registration, the stand-in for OpenRouter, `opencode serve` with the
@@ -67,8 +74,18 @@ fn awaited(http: &mut Http, by: &str, id: &str, from: &str) -> Result<String, St
 }
 
 fn check(args: &[String]) -> Result<(), String> {
-    let [homeserver, opencode, config, rehearsal, bridge] = args else {
-        return Err("usage: chat-whole-check HOMESERVER OPENCODE OPENCODE_CONFIG REHEARSAL BRIDGE".into());
+    let usage = "usage: chat-whole-check HOMESERVER OPENCODE OPENCODE_CONFIG REHEARSAL BRIDGE [--then GATEWAY SITE_DIR PORT -- COMMAND…]";
+    let (first, then) = match args.iter().position(|a| a == "--then") {
+        Some(at) => (&args[..at], Some(&args[at + 1..])),
+        None => (args, None),
+    };
+    let [homeserver, opencode, config, rehearsal, bridge] = first else {
+        return Err(usage.into());
+    };
+    let then = match then {
+        None => None,
+        Some([gateway, site, port, dashes, command @ ..]) if dashes == "--" && !command.is_empty() => Some((gateway, site, port, command)),
+        Some(_) => return Err(usage.into()),
     };
     let declared = Declared::compiled()?;
     let agents: Vec<Agent> = serde_json::from_str(include_str!(env!("BRIDGE_AGENTS"))).map_err(|e| e.to_string())?;
@@ -189,6 +206,17 @@ fn check(args: &[String]) -> Result<(), String> {
         if said(&mut http, &owner, &front_room)?.len() != 3 {
             return Err("the bridge, started again, answered something twice".into());
         }
+        // The browser, against all of it, while it runs.
+        if let Some((gateway, site, port, command)) = then {
+            let mut pages = Command::new(gateway).arg(site).arg(port).arg(&hs).arg(&token_file).spawn().map_err(|e| format!("{gateway}: {e}"))?;
+            let outcome = up(&format!("http://127.0.0.1:{port}/next/chat/"), "the chat pages").and_then(|()| Command::new(&command[0]).args(&command[1..]).status().map_err(|e| format!("{}: {e}", command[0])));
+            let _ = pages.kill();
+            let _ = pages.wait();
+            if !outcome?.success() {
+                return Err("the browser check failed against the whole chain".into());
+            }
+        }
+        let spent = read_state()?.spent.get(&front.name).copied().unwrap_or(0.0);
         // 6. When the provider fails, the agent says so and nothing is charged.
         let _ = stand_in.kill();
         let _ = stand_in.wait();
