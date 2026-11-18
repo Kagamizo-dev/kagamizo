@@ -84,12 +84,25 @@ Done so far (PR #30, not merged, CI pending):
   answered; the harness retries a failing provider without end, so a
   turn has a deadline (180 s) after which it is stopped and reported.
 
-Not yet in `chat-whole`: the gateway and the browser (it speaks to the
-homeserver as the gateway does, but not through it), the cap refusal
-(unit-tested only), images and video, the faults `no-cost` and `dear`.
-Not yet built: the typed tools, `picture --publish`, `motion`, the
-readiness gate and its Lean, the Lean bound on a text turn's worst
-cost, the daily price re-read on the host, video sheets.
+Since then (PR #30, CI green at `384b220`, later commits pending CI):
+`checks.shell-e2e` now runs inside the whole chain (the browser's
+message in the front room is answered by the front agent on the page),
+and `chat-whole` proves the cap refusal through the real stack. The
+faults `no-cost` and `dear` do not concern a text turn, which is
+charged by tokens at the pinned price, not by the provider's figure;
+they are for `picture` and `motion`.
+
+Not yet built: the front room as the chat's first page, progress lines
+and Stop; the typed tools (`hand-off`, `image`, `video`), `picture
+--publish`, `motion` and video sheets, `/images` and `/videos` in the
+rehearsal; the Lean bound on a text turn's worst cost; the daily price
+re-read on the host; the readiness gate, its Lean and its page; the
+check holding `opencode-serve.json` to the pinned server.
+
+This session's disk (about 5 GB free) cannot hold the browser check's
+closure at once: build `agent-bridge`, `rehearsal`, `chat-gateway`,
+`kagamizo-e2e`, `kagamizo-site-html` one at a time with `-o` roots,
+collect garbage, then build `checks.shell-e2e`.
 
 ## 2026-11-16: one chat for everything (the owner's direction)
 

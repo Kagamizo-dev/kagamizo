@@ -22,7 +22,8 @@
 //!      the reported tokens at the pinned price;
 //!   5. a bridge started again answers nothing twice;
 //!   6. when the provider fails, the turn is stopped at its deadline, the
-//!      agent says it could not answer, and nothing is charged for it.
+//!      agent says it could not answer, and nothing is charged for it;
+//!   7. at its month's cap the agent answers nothing and says so.
 use agent_bridge::{Agent, State};
 use matrix_rooms::http::{registration, Http};
 use matrix_rooms::{reconcile, Declared, Server, Talk};
@@ -216,6 +217,30 @@ fn check(args: &[String]) -> Result<(), String> {
                 return Err("the browser check failed against the whole chain".into());
             }
         }
+        // 7. At its month's cap the agent answers nothing and says so: the
+        // bridge is started on a state in which the cap is already spent.
+        let _ = bridge_process.kill();
+        let _ = bridge_process.wait();
+        let kept = read_state()?;
+        let mut capped = kept.clone();
+        capped.spent.insert(front.name.clone(), front.cap_usd);
+        let write_state = |state: &State| std::fs::write(&state_file, serde_json::to_string(state).map_err(|e| e.to_string())?).map_err(|e| e.to_string());
+        write_state(&capped)?;
+        bridge_process = spawn_bridge()?;
+        http.say(&owner, &front_room, "One more?")?;
+        let notice = awaited(&mut http, &owner, &front_room, &agent)?;
+        let _ = bridge_process.kill();
+        let _ = bridge_process.wait();
+        if !notice.contains("this month's cap") {
+            return Err(format!("at its cap, the agent said {notice:?}"));
+        }
+        // Back to what was really spent, with the cap's exchange handled.
+        let mut resumed = read_state()?;
+        resumed.spent = kept.spent.clone();
+        resumed.told.clear();
+        write_state(&resumed)?;
+        bridge_process = spawn_bridge()?;
+        std::thread::sleep(Duration::from_secs(4));
         let spent = read_state()?.spent.get(&front.name).copied().unwrap_or(0.0);
         // 6. When the provider fails, the agent says so and nothing is charged.
         let _ = stand_in.kill();
@@ -233,7 +258,7 @@ fn check(args: &[String]) -> Result<(), String> {
         if (after - spent).abs() > 1e-12 {
             return Err(format!("a failed turn was charged: {spent} became {after}"));
         }
-        println!("chat-whole-check: the owner was answered in the front room by the front agent through the real homeserver, bridge and harness; a room with no agent and the agent's own words started nothing; the turn was charged ${spent:.8} at the pinned price; a restart answered nothing twice; a failing provider ended in a refusal that was said and not charged. Nothing was billed.");
+        println!("chat-whole-check: the owner was answered in the front room by the front agent through the real homeserver, bridge and harness; a room with no agent and the agent's own words started nothing; the turn was charged ${spent:.8} at the pinned price; a restart answered nothing twice; at its month's cap the agent refused and said so; a failing provider ended in a refusal that was said and not charged. Nothing was billed.");
         Ok(())
     })();
     let _ = stand_in.kill();
